@@ -235,6 +235,7 @@ class Redis_Test extends TestSuite {
        that PhpRedis handles all combination of arguments correctly. */
     public function testBitcount() {
         /* key */
+        print "testBitcount !!!!!!!!!!!!!!";
         $this->redis->set('bitcountkey', hex2bin('bd906b854ca76cae'));
         $this->assertEquals(33, $this->redis->bitcount('bitcountkey'));
 
