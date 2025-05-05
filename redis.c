@@ -27,6 +27,7 @@
 #include "redis_cluster.h"
 #include "redis_commands.h"
 #include "redis_sentinel.h"
+#include "redis_glide.h"
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
 #include <ext/standard/info.h>
@@ -201,6 +202,13 @@ void free_redis_object(zend_object *object)
         redis_sock_disconnect(redis->sock, 0, 1);
         redis_free_socket(redis->sock);
     }
+
+    /* Free the Valkey Glide client if it exists */
+    if (redis->glide_client)
+    {
+        close_client(redis->glide_client);
+        redis->glide_client = NULL;
+    }
 }
 
 zend_object *
@@ -211,6 +219,7 @@ create_redis_object(zend_class_entry *ce)
     redis_object *redis = ecalloc(1, sizeof(redis_object) + zend_object_properties_size(ce));
 
     redis->sock = NULL;
+    redis->glide_client = NULL; /* Initialize Valkey Glide client pointer to NULL */
 
     zend_object_std_init(&redis->std, ce);
     object_properties_init(&redis->std, ce);
@@ -226,7 +235,6 @@ create_redis_object(zend_class_entry *ce)
 static zend_always_inline RedisSock *
 redis_sock_get_instance(zval *id, int no_throw)
 {
-
     printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
     redis_object *redis;
@@ -237,6 +245,16 @@ redis_sock_get_instance(zval *id, int no_throw)
         redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, id);
         if (redis->sock)
         {
+            /* Initialize the Valkey Glide client if it doesn't exist */
+            if (redis->sock->status >= REDIS_SOCK_STATUS_CONNECTED && !redis->glide_client)
+            {
+                /* Create a Valkey Glide client using the socket information */
+                redis->glide_client = create_glide_client(
+                    ZSTR_VAL(redis->sock->host),
+                    redis->sock->port,
+                    redis->sock->user ? ZSTR_VAL(redis->sock->user) : NULL,
+                    redis->sock->pass ? ZSTR_VAL(redis->sock->pass) : NULL);
+            }
             return redis->sock;
         }
     }
@@ -665,6 +683,10 @@ redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
     redis->sock = redis_sock_create(host, host_len, port, timeout, read_timeout, persistent,
                                     persistent_id, retry_interval);
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
+    /* Initialize the Valkey Glide client */
+    /* We don't initialize the Glide client here, it will be initialized in redis_sock_get_instance */
 
     if (context)
     {
@@ -678,6 +700,13 @@ redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
         if ((ele = REDIS_HASH_STR_FIND_STATIC(Z_ARRVAL_P(context), "auth")))
         {
             redis_sock_set_auth_zval(redis->sock, ele);
+
+            /* If we have auth credentials and a Glide client, update the Glide client */
+            if (redis->glide_client && redis->sock->pass)
+            {
+                /* In a real implementation, we would update the Glide client with the auth credentials */
+                /* For now, we'll just leave it as is */
+            }
         }
     }
 
@@ -707,9 +736,44 @@ PHP_METHOD(Redis, bitop)
  */
 PHP_METHOD(Redis, bitcount)
 {
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long start = 0, end = -1;
+    zend_bool bybit = 0;
 
-    REDIS_PROCESS_CMD(bitcount, redis_long_response);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|llb",
+                                     &object, redis_ce, &key, &key_len,
+                                     &start, &end, &bybit) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the BITCOUNT command using the Glide client */
+        long result = execute_bitcount_command(redis->glide_client, key, key_len, start, end, bybit);
+
+        /* If the result is -1, there was an error */
+        if (result == -1)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Return the result */
+        RETURN_LONG(result);
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_CMD(bitcount, redis_long_response);
+    }
 }
 /* }}} */
 
