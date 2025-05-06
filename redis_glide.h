@@ -20,11 +20,14 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include "include/glide_bindings.h"
+#include "include/glide/connection_request.pb-c.h"
 
 /* Forward declarations for types defined in glide_bindings.h */
 typedef struct CommandResponse CommandResponse;
 typedef struct CommandResult CommandResult;
 typedef struct CommandError CommandError;
+typedef struct ConnectionResponse ConnectionResponse;
 
 enum ReadFrom
 {
@@ -91,5 +94,8 @@ extern void free_command_result(CommandResult *command_result_ptr);
 /* Helper functions for Valkey Glide integration */
 extern const void *create_glide_client(ClientConfig *config);
 extern long execute_bitcount_command(const void *glide_client, const char *key, size_t key_len, long start, long end, int bybit);
+
+/* Function to close a Valkey Glide client */
+extern void close_glide_client(const void *glide_client);
 
 #endif /* REDIS_GLIDE_H */
