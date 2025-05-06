@@ -392,7 +392,7 @@ typedef struct
 typedef struct
 {
     RedisSock *sock;
-    void *glide_client; /* Valkey Glide client pointer */
+    const void *glide_client; /* Valkey Glide client pointer */
     zend_object std;
 } redis_object;
 

@@ -16,6 +16,7 @@
 
 #include "php_redis.h"
 #include "redis_glide.h"
+#include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -28,7 +29,7 @@ static uint8_t *create_connection_request(const char *host, int port, const char
 }
 
 /* Create a Valkey Glide client */
-void *create_glide_client(const char *host, int port, const char *user, const char *pass)
+const void *create_glide_client(const char *host, int port, const char *user, const char *pass)
 {
     /* Check if host is provided */
     if (!host)
@@ -51,7 +52,7 @@ void *create_glide_client(const char *host, int port, const char *user, const ch
     printf("Creating Valkey Glide client for %s:%d\n", host, port);
 
     /* Call the FFI function to create a client */
-    ConnectionResponse *response = create_client(request_bytes, request_len, &client_type, NULL);
+    const ConnectionResponse *response = create_client(request_bytes, request_len, &client_type, NULL);
 
     /* Free the request bytes */
     free(request_bytes);
@@ -66,15 +67,15 @@ void *create_glide_client(const char *host, int port, const char *user, const ch
     if (response->connection_error_message)
     {
         printf("Error creating Valkey Glide client: %s\n", response->connection_error_message);
-        free_connection_response(response);
+        free_connection_response((struct ConnectionResponse *)response);
         return NULL;
     }
 
     /* Get the client pointer */
-    void *client = response->conn_ptr;
+    const void *client = response->conn_ptr;
 
     /* Free the response */
-    free_connection_response(response);
+    free_connection_response((struct ConnectionResponse *)response);
 
     return client;
 }
@@ -94,7 +95,7 @@ static char *long_to_string(long value, size_t *len)
 }
 
 /* Execute a BITCOUNT command using the Valkey Glide client */
-long execute_bitcount_command(void *glide_client, const char *key, size_t key_len, long start, long end, int bybit)
+long execute_bitcount_command(const void *glide_client, const char *key, size_t key_len, long start, long end, int bybit)
 {
     /* Check if client and key are valid */
     if (!glide_client || !key)
