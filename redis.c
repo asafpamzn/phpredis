@@ -206,7 +206,7 @@ void free_redis_object(zend_object *object)
     /* Free the Valkey Glide client if it exists */
     if (redis->glide_client)
     {
-        close_client(redis->glide_client);
+        close_client_ffi(redis->glide_client);
         redis->glide_client = NULL;
     }
 }

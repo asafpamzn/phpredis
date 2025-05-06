@@ -7,7 +7,6 @@
 *.libs
 *.o
 *.lo
-Makefile*
 configure*
 ac*.m4
 config.*
