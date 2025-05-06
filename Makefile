@@ -227,7 +227,7 @@ GEN_C_FINAL := $(GEN_SRC_DIR)/connection_request.pb-c.c
 
 $(GEN_HEADER) $(GEN_C_TMP): $(PROTO_PATH)
 	@mkdir -p $(GEN_INCLUDE_DIR)
-	$(PROTOC) --plugin=protoc-gen-c=$(PROTOC_C_PLUGIN) --c_out=$(GEN_INCLUDE_DIR) -I $(PROTO_SRC_DIR) $(PROTO_PATH)
+	$(PROTOC) --c_out=$(GEN_INCLUDE_DIR) -I $(PROTO_SRC_DIR) $(PROTO_PATH)
 
 $(GEN_C_FINAL): $(GEN_C_TMP)
 	@mkdir -p $(GEN_SRC_DIR)
