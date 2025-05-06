@@ -249,11 +249,11 @@ redis_sock_get_instance(zval *id, int no_throw)
             if (redis->sock->status >= REDIS_SOCK_STATUS_CONNECTED && !redis->glide_client)
             {
                 /* Create a Valkey Glide client using the socket information */
-                redis->glide_client = create_glide_client(
-                    ZSTR_VAL(redis->sock->host),
-                    redis->sock->port,
-                    redis->sock->user ? ZSTR_VAL(redis->sock->user) : NULL,
-                    redis->sock->pass ? ZSTR_VAL(redis->sock->pass) : NULL);
+                //  redis->glide_client = create_glide_client(
+                //    ZSTR_VAL(redis->sock->host),
+                //   redis->sock->port,
+                //  redis->sock->user ? ZSTR_VAL(redis->sock->user) : NULL,
+                // redis->sock->pass ? ZSTR_VAL(redis->sock->pass) : NULL);
             }
             return redis->sock;
         }

@@ -89,7 +89,7 @@ extern void free_command_response(CommandResponse *command_response_ptr);
 extern void free_command_result(CommandResult *command_result_ptr);
 
 /* Helper functions for Valkey Glide integration */
-extern const void *create_glide_client(const char *host, int port, const char *user, const char *pass);
+extern const void *create_glide_client(ClientConfig *config);
 extern long execute_bitcount_command(const void *glide_client, const char *key, size_t key_len, long start, long end, int bybit);
 
 #endif /* REDIS_GLIDE_H */

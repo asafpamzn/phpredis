@@ -29,55 +29,10 @@ static uint8_t *create_connection_request(const char *host, int port, const char
 }
 
 /* Create a Valkey Glide client */
-const void *create_glide_client(const char *host, int port, const char *user, const char *pass)
+const void *create_glide_client(ClientConfig *config)
 {
-    /* Check if host is provided */
-    if (!host)
-    {
-        return NULL;
-    }
 
-    /* Create a synchronous client type */
-    ClientType client_type;
-    client_type.tag = SyncClient; /* SyncClient */
-
-    /* Create a connection request with host, port, user, and pass */
-    size_t request_len;
-    uint8_t *request_bytes = create_connection_request(host, port, user, pass, &request_len);
-    if (!request_bytes)
-    {
-        return NULL;
-    }
-
-    printf("Creating Valkey Glide client for %s:%d\n", host, port);
-
-    /* Call the FFI function to create a client */
-    const ConnectionResponse *response = create_client(request_bytes, request_len, &client_type, NULL);
-
-    /* Free the request bytes */
-    free(request_bytes);
-
-    /* Check if the connection was successful */
-    if (!response)
-    {
-        return NULL;
-    }
-
-    /* Check if there was an error */
-    if (response->connection_error_message)
-    {
-        printf("Error creating Valkey Glide client: %s\n", response->connection_error_message);
-        free_connection_response((struct ConnectionResponse *)response);
-        return NULL;
-    }
-
-    /* Get the client pointer */
-    const void *client = response->conn_ptr;
-
-    /* Free the response */
-    free_connection_response((struct ConnectionResponse *)response);
-
-    return client;
+    return NULL;
 }
 
 /* Convert a long value to a string */
