@@ -10,7 +10,7 @@ SHLIB_SUFFIX_NAME = dylib
 SHLIB_DL_SUFFIX_NAME = so
 AWK = awk
 REDIS_SHARED_LIBADD =
-shared_objects_redis = redis.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo redis_sentinel.lo sentinel_library.lo backoff.lo redis_glide.lo src/connection_request_wrapper.lo src/connection_request.pb-c.lo src/connection_request.pb.lo
+shared_objects_redis = redis.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo redis_sentinel.lo sentinel_library.lo backoff.lo redis_glide.lo src/connection_request_wrapper.lo src/connection_request.pb-c.lo src/connection_request.pb.lo src/command_request.pb-c.lo src/command_request.pb.lo src/response.pb-c.lo src/response.pb.lo
 PHP_PECL_EXTENSION = redis
 PHP_MODULES = $(phplibdir)/redis.la
 PHP_ZEND_EX =
@@ -216,32 +216,35 @@ PROTO_SRC_DIR := ../glide-core/src/protobuf
 GEN_INCLUDE_DIR := include/glide
 GEN_SRC_DIR := src
 
-# Proto file
-PROTO_FILE := connection_request.proto
-PROTO_PATH := $(PROTO_SRC_DIR)/$(PROTO_FILE)
-GEN_HEADER := $(GEN_INCLUDE_DIR)/connection_request.pb-c.h
-GEN_C_TMP := $(GEN_INCLUDE_DIR)/connection_request.pb-c.c
-GEN_C_FINAL := $(GEN_SRC_DIR)/connection_request.pb-c.c
+# Proto files
+PROTO_FILES := connection_request.proto command_request.proto response.proto
 
-# Default target
-
-$(GEN_HEADER) $(GEN_C_TMP): $(PROTO_PATH)
+# Generate rules for each proto file
+define proto_rule
+$(GEN_INCLUDE_DIR)/$(basename $(1)).pb-c.h $(GEN_INCLUDE_DIR)/$(basename $(1)).pb-c.c: $(PROTO_SRC_DIR)/$(1)
 	@mkdir -p $(GEN_INCLUDE_DIR)
-	$(PROTOC) --c_out=$(GEN_INCLUDE_DIR) -I $(PROTO_SRC_DIR) $(PROTO_PATH)
+	$(PROTOC) --c_out=$(GEN_INCLUDE_DIR) -I $(PROTO_SRC_DIR) $(PROTO_SRC_DIR)/$(1)
 
-$(GEN_C_FINAL): $(GEN_C_TMP)
+$(GEN_SRC_DIR)/$(basename $(1)).pb-c.c: $(GEN_INCLUDE_DIR)/$(basename $(1)).pb-c.c
 	@mkdir -p $(GEN_SRC_DIR)
-	mv $(GEN_C_TMP) $(GEN_C_FINAL)
-	sed -i.bak 's|"connection_request.pb-c.h"|<glide/connection_request.pb-c.h>|' $(GEN_C_FINAL)
-	rm -f $(GEN_C_FINAL).bak
+	mv $(GEN_INCLUDE_DIR)/$(basename $(1)).pb-c.c $(GEN_SRC_DIR)/$(basename $(1)).pb-c.c
+	sed -i.bak 's|"$(basename $(1)).pb-c.h"|<glide/$(basename $(1)).pb-c.h>|' $(GEN_SRC_DIR)/$(basename $(1)).pb-c.c
+	rm -f $(GEN_SRC_DIR)/$(basename $(1)).pb-c.c.bak
+endef
 
-generate-proto: $(GEN_HEADER) $(GEN_C_FINAL)
+# Apply the rule to each proto file
+$(foreach proto,$(PROTO_FILES),$(eval $(call proto_rule,$(proto))))
+
+# Headers and source files for all proto files
+PROTO_HEADERS := $(foreach proto,$(PROTO_FILES),$(GEN_INCLUDE_DIR)/$(basename $(proto)).pb-c.h)
+PROTO_SOURCES := $(foreach proto,$(PROTO_FILES),$(GEN_SRC_DIR)/$(basename $(proto)).pb-c.c)
+
+generate-proto: $(PROTO_HEADERS) $(PROTO_SOURCES)
 	@echo "Generated C protobuf bindings."
 
-
 clean-proto:
-	rm -f $(GEN_INCLUDE_DIR)/connection_request.pb-c.h
-	rm -f $(GEN_C_FINAL)
+	rm -f $(PROTO_HEADERS)
+	rm -f $(PROTO_SOURCES)
 
 
 .PHONY: all clean generate-proto all clean install distclean test prof-gen prof-clean prof-use
@@ -291,6 +294,18 @@ src/connection_request.pb-c.lo: /Users/asafp/work/valkey-glide-php/phpredis/src/
 -include src/connection_request.pb.dep
 src/connection_request.pb.lo: /Users/asafp/work/valkey-glide-php/phpredis/src/connection_request.pb.cc
 	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/src/connection_request.pb.cc -o src/connection_request.pb.lo  -MMD -MF src/connection_request.pb.dep -MT src/connection_request.pb.lo
+-include src/command_request.pb-c.dep
+src/command_request.pb-c.lo: /Users/asafp/work/valkey-glide-php/phpredis/src/command_request.pb-c.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/src/command_request.pb-c.c -o src/command_request.pb-c.lo  -MMD -MF src/command_request.pb-c.dep -MT src/command_request.pb-c.lo
+-include src/command_request.pb.dep
+src/command_request.pb.lo: /Users/asafp/work/valkey-glide-php/phpredis/src/command_request.pb.cc
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/src/command_request.pb.cc -o src/command_request.pb.lo  -MMD -MF src/command_request.pb.dep -MT src/command_request.pb.lo
+-include src/response.pb-c.dep
+src/response.pb-c.lo: /Users/asafp/work/valkey-glide-php/phpredis/src/response.pb-c.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/src/response.pb-c.c -o src/response.pb-c.lo  -MMD -MF src/response.pb-c.dep -MT src/response.pb-c.lo
+-include src/response.pb.dep
+src/response.pb.lo: /Users/asafp/work/valkey-glide-php/phpredis/src/response.pb.cc
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/src/response.pb.cc -o src/response.pb.lo  -MMD -MF src/response.pb.dep -MT src/response.pb.lo
 $(phplibdir)/redis.la: ./redis.la
 	$(LIBTOOL) --tag=CC --mode=install cp ./redis.la $(phplibdir)
 ./redis.la: $(shared_objects_redis) $(REDIS_SHARED_DEPENDENCIES)
