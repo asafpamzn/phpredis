@@ -24,6 +24,7 @@
 /* Create a connection request in protobuf format */
 static uint8_t *create_connection_request(const char *host, int port, const char *user, const char *pass, size_t *len)
 {
+    printf("file=%s, line = %d\n", __FILE__, __LINE__);
     /* Create a connection request */
     ConnectionRequest__ConnectionRequest conn_req = CONNECTION_REQUEST__CONNECTION_REQUEST__INIT;
 
@@ -69,6 +70,7 @@ static uint8_t *create_connection_request(const char *host, int port, const char
     }
 
     /* Serialize the message */
+    printf("file=%s, line = %d\n", __FILE__, __LINE__);
     connection_request__connection_request__pack(&conn_req, buffer);
 
     return buffer;
@@ -77,7 +79,7 @@ static uint8_t *create_connection_request(const char *host, int port, const char
 /* Create a Valkey Glide client */
 const void *create_glide_client(ClientConfig *config)
 {
-    printf("create glide client!!!!!!!!!!!!\n");
+    printf("file=%s, line = %d create glide client!!!!!!!!!!!!\n", __FILE__, __LINE__);
     /* Create a connection request */
     size_t len;
     uint8_t *request_bytes = create_connection_request(
@@ -86,6 +88,7 @@ const void *create_glide_client(ClientConfig *config)
         NULL,        /* No username by default */
         NULL,        /* No password by default */
         &len);
+    printf("file=%s, line = %d\n", __FILE__, __LINE__);
 
     if (!request_bytes)
     {
@@ -96,7 +99,9 @@ const void *create_glide_client(ClientConfig *config)
     ClientType client_type;
     client_type.tag = SyncClient;
 
+    printf("file=%s, line = %d\n", __FILE__, __LINE__);
     /* Create the client */
+    printf("file=%s, line = %d\n", __FILE__, __LINE__);
     const ConnectionResponse *conn_resp = create_client(
         request_bytes,
         len,
@@ -105,6 +110,7 @@ const void *create_glide_client(ClientConfig *config)
     );
 
     /* Free the request bytes as they're no longer needed */
+    printf("file=%s, line = %d\n", __FILE__, __LINE__);
     free(request_bytes);
 
     /* Check if there was an error */
@@ -118,6 +124,7 @@ const void *create_glide_client(ClientConfig *config)
     /* Get the client pointer */
     const void *client = conn_resp->conn_ptr;
 
+    printf("file=%s, line = %d\n", __FILE__, __LINE__);
     /* Free the connection response (but not the client) */
     free_connection_response((ConnectionResponse *)conn_resp);
 
