@@ -1,7 +1,7 @@
-srcdir = /Users/asafp/work/valkey-glide/phpredis
-builddir = /Users/asafp/work/valkey-glide/phpredis
-top_srcdir = /Users/asafp/work/valkey-glide/phpredis
-top_builddir = /Users/asafp/work/valkey-glide/phpredis
+srcdir = /Users/asafp/work/valkey-glide-php/phpredis
+builddir = /Users/asafp/work/valkey-glide-php/phpredis
+top_srcdir = /Users/asafp/work/valkey-glide-php/phpredis
+top_builddir = /Users/asafp/work/valkey-glide-php/phpredis
 EGREP = /usr/bin/grep -E
 SED = /usr/bin/sed
 CONFIGURE_COMMAND = './configure'
@@ -9,18 +9,18 @@ CONFIGURE_OPTIONS =
 SHLIB_SUFFIX_NAME = dylib
 SHLIB_DL_SUFFIX_NAME = so
 AWK = awk
-REDIS_SHARED_LIBADD = -L$(top_srcdir)/../ffi/target/release -lglide_ffi -L$(top_srcdir)/../glide-core/target/release -lprotobuf-c
-shared_objects_redis = redis.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo redis_sentinel.lo sentinel_library.lo backoff.lo redis_glide.lo redis_bitcount_commands.lo
+REDIS_SHARED_LIBADD =
+shared_objects_redis = redis.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo redis_sentinel.lo sentinel_library.lo backoff.lo
 PHP_PECL_EXTENSION = redis
 PHP_MODULES = $(phplibdir)/redis.la
 PHP_ZEND_EX =
-all_targets = $(PHP_MODULES) $(PHP_ZEND_EX) 
+all_targets = $(PHP_MODULES) $(PHP_ZEND_EX)
 install_targets = install-modules install-headers
 prefix = /opt/homebrew/Cellar/php@8.2/8.2.28_1
 exec_prefix = $(prefix)
 libdir = ${exec_prefix}/lib
 prefix = /opt/homebrew/Cellar/php@8.2/8.2.28_1
-phplibdir = /Users/asafp/work/valkey-glide/phpredis/modules
+phplibdir = /Users/asafp/work/valkey-glide-php/phpredis/modules
 phpincludedir = /opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php
 CC = cc
 CFLAGS = -g -O2
@@ -32,9 +32,9 @@ CXXFLAGS =
 CXXFLAGS_CLEAN = $(CXXFLAGS)
 EXTENSION_DIR = /opt/homebrew/Cellar/php@8.2/8.2.28_1/pecl/20220829
 PHP_EXECUTABLE = /opt/homebrew/Cellar/php@8.2/8.2.28_1/bin/php
-EXTRA_LDFLAGS = 
+EXTRA_LDFLAGS =
 EXTRA_LIBS =
-INCLUDES = -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php/main -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php/TSRM -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php/Zend -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php/ext -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php/ext/date/lib -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php/ext -I/Users/asafp/work/valkey-glide/ffi/src -I/opt/homebrew/include
+INCLUDES = -I  /opt/homebrew/include/ -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php/main -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php/TSRM -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php/Zend -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php/ext -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php/ext/date/lib -I/opt/homebrew/Cellar/php@8.2/8.2.28_1/include/php/ext
 LFLAGS =
 LDFLAGS =
 SHARED_LIBTOOL =
@@ -244,48 +244,43 @@ clean-proto:
 	rm -f $(GEN_C_FINAL)
 
 
-.PHONY: all clean generate-proto install distclean test prof-gen prof-clean prof-use
+.PHONY: all clean generate-proto all clean install distclean test prof-gen prof-clean prof-use
 .NOEXPORT:
 -include redis.dep
-redis.lo: /Users/asafp/work/valkey-glide/phpredis/redis.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/redis.c -o redis.lo  -MMD -MF redis.dep -MT redis.lo
+redis.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis.c -o redis.lo  -MMD -MF redis.dep -MT redis.lo
 -include redis_commands.dep
-redis_commands.lo: /Users/asafp/work/valkey-glide/phpredis/redis_commands.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/redis_commands.c -o redis_commands.lo  -MMD -MF redis_commands.dep -MT redis_commands.lo
+redis_commands.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_commands.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_commands.c -o redis_commands.lo  -MMD -MF redis_commands.dep -MT redis_commands.lo
 -include library.dep
-library.lo: /Users/asafp/work/valkey-glide/phpredis/library.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/library.c -o library.lo  -MMD -MF library.dep -MT library.lo
+library.lo: /Users/asafp/work/valkey-glide-php/phpredis/library.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/library.c -o library.lo  -MMD -MF library.dep -MT library.lo
 -include redis_session.dep
-redis_session.lo: /Users/asafp/work/valkey-glide/phpredis/redis_session.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/redis_session.c -o redis_session.lo  -MMD -MF redis_session.dep -MT redis_session.lo
+redis_session.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_session.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_session.c -o redis_session.lo  -MMD -MF redis_session.dep -MT redis_session.lo
 -include redis_array.dep
-redis_array.lo: /Users/asafp/work/valkey-glide/phpredis/redis_array.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/redis_array.c -o redis_array.lo  -MMD -MF redis_array.dep -MT redis_array.lo
+redis_array.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_array.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_array.c -o redis_array.lo  -MMD -MF redis_array.dep -MT redis_array.lo
 -include redis_array_impl.dep
-redis_array_impl.lo: /Users/asafp/work/valkey-glide/phpredis/redis_array_impl.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/redis_array_impl.c -o redis_array_impl.lo  -MMD -MF redis_array_impl.dep -MT redis_array_impl.lo
+redis_array_impl.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_array_impl.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_array_impl.c -o redis_array_impl.lo  -MMD -MF redis_array_impl.dep -MT redis_array_impl.lo
 -include redis_cluster.dep
-redis_cluster.lo: /Users/asafp/work/valkey-glide/phpredis/redis_cluster.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/redis_cluster.c -o redis_cluster.lo  -MMD -MF redis_cluster.dep -MT redis_cluster.lo
+redis_cluster.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_cluster.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_cluster.c -o redis_cluster.lo  -MMD -MF redis_cluster.dep -MT redis_cluster.lo
 -include cluster_library.dep
-cluster_library.lo: /Users/asafp/work/valkey-glide/phpredis/cluster_library.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/cluster_library.c -o cluster_library.lo  -MMD -MF cluster_library.dep -MT cluster_library.lo
+cluster_library.lo: /Users/asafp/work/valkey-glide-php/phpredis/cluster_library.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/cluster_library.c -o cluster_library.lo  -MMD -MF cluster_library.dep -MT cluster_library.lo
 -include redis_sentinel.dep
-redis_sentinel.lo: /Users/asafp/work/valkey-glide/phpredis/redis_sentinel.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/redis_sentinel.c -o redis_sentinel.lo  -MMD -MF redis_sentinel.dep -MT redis_sentinel.lo
+redis_sentinel.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_sentinel.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_sentinel.c -o redis_sentinel.lo  -MMD -MF redis_sentinel.dep -MT redis_sentinel.lo
 -include sentinel_library.dep
-sentinel_library.lo: /Users/asafp/work/valkey-glide/phpredis/sentinel_library.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/sentinel_library.c -o sentinel_library.lo  -MMD -MF sentinel_library.dep -MT sentinel_library.lo
+sentinel_library.lo: /Users/asafp/work/valkey-glide-php/phpredis/sentinel_library.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/sentinel_library.c -o sentinel_library.lo  -MMD -MF sentinel_library.dep -MT sentinel_library.lo
 -include backoff.dep
-backoff.lo: /Users/asafp/work/valkey-glide/phpredis/backoff.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/backoff.c -o backoff.lo  -MMD -MF backoff.dep -MT backoff.lo
--include redis_glide.dep
-redis_glide.lo: /Users/asafp/work/valkey-glide/phpredis/redis_glide.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/redis_glide.c -o redis_glide.lo  -MMD -MF redis_glide.dep -MT redis_glide.lo
--include redis_bitcount_commands.dep
-redis_bitcount_commands.lo: /Users/asafp/work/valkey-glide/phpredis/redis_bitcount_commands.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide/phpredis/redis_bitcount_commands.c -o redis_bitcount_commands.lo  -MMD -MF redis_bitcount_commands.dep -MT redis_bitcount_commands.lo
+backoff.lo: /Users/asafp/work/valkey-glide-php/phpredis/backoff.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/backoff.c -o backoff.lo  -MMD -MF backoff.dep -MT backoff.lo
 $(phplibdir)/redis.la: ./redis.la
 	$(LIBTOOL) --tag=CC --mode=install cp ./redis.la $(phplibdir)
+
 ./redis.la: $(shared_objects_redis) $(REDIS_SHARED_DEPENDENCIES)
 	$(LIBTOOL) --tag=CC --mode=link $(CC) -shared $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS)  -o $@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_redis) $(REDIS_SHARED_LIBADD)
