@@ -10,7 +10,7 @@ SHLIB_SUFFIX_NAME = dylib
 SHLIB_DL_SUFFIX_NAME = so
 AWK = awk
 REDIS_SHARED_LIBADD =
-shared_objects_redis = redis.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo redis_sentinel.lo sentinel_library.lo backoff.lo
+shared_objects_redis = redis.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo redis_sentinel.lo sentinel_library.lo backoff.lo redis_glide.lo
 PHP_PECL_EXTENSION = redis
 PHP_MODULES = $(phplibdir)/redis.la
 PHP_ZEND_EX =
@@ -279,8 +279,10 @@ sentinel_library.lo: /Users/asafp/work/valkey-glide-php/phpredis/sentinel_librar
 -include backoff.dep
 backoff.lo: /Users/asafp/work/valkey-glide-php/phpredis/backoff.c
 	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/backoff.c -o backoff.lo  -MMD -MF backoff.dep -MT backoff.lo
+-include redis_glide.dep
+redis_glide.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_glide.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_glide.c -o redis_glide.lo  -MMD -MF redis_glide.dep -MT redis_glide.lo
 $(phplibdir)/redis.la: ./redis.la
 	$(LIBTOOL) --tag=CC --mode=install cp ./redis.la $(phplibdir)
-
 ./redis.la: $(shared_objects_redis) $(REDIS_SHARED_DEPENDENCIES)
 	$(LIBTOOL) --tag=CC --mode=link $(CC) -shared $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS)  -o $@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_redis) $(REDIS_SHARED_LIBADD)

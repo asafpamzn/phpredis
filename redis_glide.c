@@ -77,6 +77,7 @@ static uint8_t *create_connection_request(const char *host, int port, const char
 /* Create a Valkey Glide client */
 const void *create_glide_client(ClientConfig *config)
 {
+    printf("create glide client!!!!!!!!!!!!\n");
     /* Create a connection request */
     size_t len;
     uint8_t *request_bytes = create_connection_request(
