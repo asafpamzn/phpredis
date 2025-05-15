@@ -126,4 +126,9 @@ extern long execute_incr_command(const void *glide_client, const char *key, size
 extern long execute_incrby_command(const void *glide_client, const char *key, size_t key_len, long value);
 extern int execute_incrbyfloat_command(const void *glide_client, const char *key, size_t key_len, double value, double *result);
 
+/* Additional operations */
+extern long execute_getbit_command(const void *glide_client, const char *key, size_t key_len, long offset);
+extern long execute_setbit_command(const void *glide_client, const char *key, size_t key_len, long offset, int value);
+extern long execute_del_command(const void *glide_client, zval *keys, int keys_count);
+
 #endif /* REDIS_GLIDE_H */

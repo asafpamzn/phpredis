@@ -961,3 +961,231 @@ int execute_randomkey_command(const void *glide_client, char **result, size_t *r
 
     return ret_val;
 }
+
+/* Execute a GETBIT command using the Valkey Glide client */
+long execute_getbit_command(const void *glide_client, const char *key, size_t key_len, long offset)
+{
+    /* Check if client and key are valid */
+    if (!glide_client || !key)
+    {
+        return -1;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 2;
+    uintptr_t args[2];
+    unsigned long args_len[2];
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Second argument: offset */
+    size_t offset_len;
+    char *offset_str = long_to_string(offset, &offset_len);
+    if (!offset_str)
+    {
+        return -1;
+    }
+    args[1] = (uintptr_t)offset_str;
+    args_len[1] = offset_len;
+
+    /* Execute the command */
+    CommandResult *result = command(
+        glide_client,
+        0,         /* channel */
+        GetBit,    /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len,  /* argument lengths */
+        NULL,      /* route bytes */
+        0          /* route bytes length */
+    );
+
+    /* Free the argument strings */
+    free(offset_str);
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return -1;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        printf("Error executing GETBIT command: %s\n", result->command_error->command_error_message);
+        free_command_result(result);
+        return -1;
+    }
+
+    /* Get the result value */
+    long value = -1;
+    if (result->response && result->response->response_type == Int)
+    {
+        value = result->response->int_value;
+    }
+
+    /* Free the result */
+    free_command_result(result);
+
+    return value;
+}
+
+/* Execute a SETBIT command using the Valkey Glide client */
+long execute_setbit_command(const void *glide_client, const char *key, size_t key_len, long offset, int value)
+{
+    /* Check if client and key are valid */
+    if (!glide_client || !key)
+    {
+        return -1;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 3;
+    uintptr_t args[3];
+    unsigned long args_len[3];
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Second argument: offset */
+    size_t offset_len;
+    char *offset_str = long_to_string(offset, &offset_len);
+    if (!offset_str)
+    {
+        return -1;
+    }
+    args[1] = (uintptr_t)offset_str;
+    args_len[1] = offset_len;
+
+    /* Third argument: value (0 or 1) */
+    char value_str[2] = {'0', '\0'};
+    if (value)
+        value_str[0] = '1';
+    args[2] = (uintptr_t)value_str;
+    args_len[2] = 1;
+
+    /* Execute the command */
+    CommandResult *result = command(
+        glide_client,
+        0,         /* channel */
+        SetBit,    /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len,  /* argument lengths */
+        NULL,      /* route bytes */
+        0          /* route bytes length */
+    );
+
+    /* Free the argument strings */
+    free(offset_str);
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return -1;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        printf("Error executing SETBIT command: %s\n", result->command_error->command_error_message);
+        free_command_result(result);
+        return -1;
+    }
+
+    /* Get the result value */
+    long value_result = -1;
+    if (result->response && result->response->response_type == Int)
+    {
+        value_result = result->response->int_value;
+    }
+
+    /* Free the result */
+    free_command_result(result);
+
+    return value_result;
+}
+
+/* Execute a DEL command using the Valkey Glide client */
+long execute_del_command(const void *glide_client, zval *keys, int keys_count)
+{
+    /* Check if client and keys are valid */
+    if (!glide_client || !keys || keys_count <= 0)
+    {
+        return -1;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = keys_count;
+    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+
+    if (!args || !args_len)
+    {
+        if (args)
+            free(args);
+        if (args_len)
+            free(args_len);
+        return -1;
+    }
+
+    /* Add keys as arguments */
+    int i;
+    for (i = 0; i < keys_count; i++)
+    {
+        zval *key = &keys[i];
+        if (Z_TYPE_P(key) != IS_STRING)
+        {
+            free(args);
+            free(args_len);
+            return -1;
+        }
+        args[i] = (uintptr_t)Z_STRVAL_P(key);
+        args_len[i] = Z_STRLEN_P(key);
+    }
+
+    /* Execute the command */
+    CommandResult *result = command(
+        glide_client,
+        0,         /* channel */
+        Del,       /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len,  /* argument lengths */
+        NULL,      /* route bytes */
+        0          /* route bytes length */
+    );
+
+    /* Free the argument arrays */
+    free(args);
+    free(args_len);
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return -1;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        printf("Error executing DEL command: %s\n", result->command_error->command_error_message);
+        free_command_result(result);
+        return -1;
+    }
+
+    /* Get the result value */
+    long value = -1;
+    if (result->response && result->response->response_type == Int)
+    {
+        value = result->response->int_value;
+    }
+
+    /* Free the result */
+    free_command_result(result);
+
+    return value;
+}

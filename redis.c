@@ -971,15 +971,6 @@ PHP_METHOD(Redis, touch)
     REDIS_PROCESS_KW_CMD("TOUCH", redis_varkey_cmd, redis_long_response);
 }
 
-/* }}} */
-/* {{{ proto boolean Redis::del(string key)
- */
-PHP_METHOD(Redis, del)
-{
-    REDIS_PROCESS_KW_CMD("DEL", redis_varkey_cmd, redis_long_response);
-}
-/* }}} */
-
 /* {{{ proto long Redis::unlink(string $key1, string $key2 [, string $key3...]) }}}
  * {{{ proto long Redis::unlink(array $keys) */
 PHP_METHOD(Redis, unlink)
@@ -1077,20 +1068,6 @@ PHP_METHOD(Redis, setRange)
 {
     REDIS_PROCESS_KW_CMD("SETRANGE", redis_key_long_str_cmd,
                          redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto long Redis::getbit(string key, long idx) */
-PHP_METHOD(Redis, getBit)
-{
-    REDIS_PROCESS_KW_CMD("GETBIT", redis_key_long_cmd, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto long Redis::setbit(string key, long idx, bool|int value) */
-PHP_METHOD(Redis, setBit)
-{
-    REDIS_PROCESS_CMD(setbit, redis_long_response);
 }
 /* }}} */
 
