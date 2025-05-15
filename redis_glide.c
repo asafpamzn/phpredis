@@ -1496,6 +1496,7 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
     }
 
     /* Process the result based on the response type */
+    printf("cmd_result->response->response_type: %d\n", cmd_result->response->response_type);
     if (cmd_result->response)
     {
         switch (cmd_result->response->response_type)
@@ -1512,14 +1513,110 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
             free_command_result(cmd_result);
             return 1;
 
-        case Array:
-            /* If IDX option was specified, LCS returns an array with match positions */
+        case Map:
+            /* If IDX option was specified, LCS returns a map structure */
+            /* According to the Rust code, this should be a map with keys like "matches" and "len" */
+            /* In PHP, we represent this as an array with alternating keys and values */
             array_init(result);
 
-            /* For now, just return a simple array with the LCS command result */
-            /* In a real implementation, we would need to parse the complex array structure */
-            /* But this requires more knowledge of the exact structure returned by the Glide client */
-            add_assoc_string(result, "matches", "LCS matches found");
+            /* Process the map response */
+            if (cmd_result->response->map_key && cmd_result->response->map_value)
+            {
+                /* Iterate through the map entries */
+                for (int i = 0; i < cmd_result->response->array_value_len; i++)
+                {
+                    /* Get the key and value */
+                    struct CommandResponse *key = &cmd_result->response->map_key[i];
+                    struct CommandResponse *value = &cmd_result->response->map_value[i];
+
+                    /* Process based on key type */
+                    if (key->response_type == String && strcmp(key->string_value, "matches") == 0)
+                    {
+                        /* Add 'matches' key */
+                        add_next_index_string(result, "matches");
+
+                        /* Process matches array */
+                        if (value->response_type == Array)
+                        {
+                            /* Create matches array */
+                            zval matches_array;
+                            array_init(&matches_array);
+
+                            /* Add matches to array */
+                            for (int j = 0; j < value->array_value_len; j++)
+                            {
+                                /* Process each match */
+                                struct CommandResponse *match = &value->array_value[j];
+                                if (match->response_type == Array)
+                                {
+                                    /* Create match array */
+                                    zval match_array;
+                                    array_init(&match_array);
+
+                                    /* Add positions to match array */
+                                    for (int k = 0; k < match->array_value_len; k++)
+                                    {
+                                        /* Process each position pair */
+                                        struct CommandResponse *pos_pair = &match->array_value[k];
+                                        if (pos_pair->response_type == Array && pos_pair->array_value_len == 2)
+                                        {
+                                            /* Create position array */
+                                            zval pos_array;
+                                            array_init(&pos_array);
+
+                                            /* Add start and end positions */
+                                            add_next_index_long(&pos_array, pos_pair->array_value[0].int_value);
+                                            add_next_index_long(&pos_array, pos_pair->array_value[1].int_value);
+
+                                            /* Add position array to match array */
+                                            add_next_index_zval(&match_array, &pos_array);
+                                        }
+                                    }
+
+                                    /* Add match array to matches array */
+                                    add_next_index_zval(&matches_array, &match_array);
+                                }
+                            }
+
+                            /* Add matches array to result */
+                            add_next_index_zval(result, &matches_array);
+                        }
+                        else
+                        {
+                            /* If not an array, add an empty array */
+                            zval empty_array;
+                            array_init(&empty_array);
+                            add_next_index_zval(result, &empty_array);
+                        }
+                    }
+                    else if (key->response_type == String && strcmp(key->string_value, "len") == 0)
+                    {
+                        /* Add 'len' key */
+                        add_next_index_string(result, "len");
+
+                        /* Add length value */
+                        if (value->response_type == Int)
+                        {
+                            add_next_index_long(result, value->int_value);
+                        }
+                        else
+                        {
+                            /* Default length if not available */
+                            add_next_index_long(result, 0);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                /* If map is not available, create a default structure */
+                add_next_index_string(result, "matches");
+                zval empty_array;
+                array_init(&empty_array);
+                add_next_index_zval(result, &empty_array);
+                add_next_index_string(result, "len");
+                add_next_index_long(result, 0);
+            }
 
             free_command_result(cmd_result);
             return 1;
