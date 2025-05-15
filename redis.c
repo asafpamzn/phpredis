@@ -876,28 +876,183 @@ PHP_METHOD(Redis, close)
  *                              [array opt) */
 PHP_METHOD(Redis, set)
 {
-    REDIS_PROCESS_CMD(set, redis_set_response);
+    zval *object, *z_value, *z_opts = NULL;
+    redis_object *redis;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+    zend_long expire = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osz|la",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_value, &expire, &z_opts) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Convert value to string if needed */
+        val = Z_STRVAL_P(z_value);
+        val_len = Z_STRLEN_P(z_value);
+
+        /* Execute the SET command using the Glide client */
+        int result = execute_set_command(redis->glide_client, key, key_len, val, val_len, expire, z_opts);
+
+        /* Process the result */
+        switch (result)
+        {
+        case 1: /* Success */
+            RETURN_TRUE;
+        case 0: /* Not set (NX/XX condition not met) */
+            RETURN_FALSE;
+        case 2: /* GET option returned a value */
+            /* This case is not fully handled yet, would need to return the value */
+            RETURN_TRUE;
+        default: /* Error */
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_CMD(set, redis_set_response);
+    }
 }
 
 /* {{{ proto boolean Redis::setex(string key, long expire, string value)
  */
 PHP_METHOD(Redis, setex)
 {
-    REDIS_PROCESS_KW_CMD("SETEX", redis_key_long_val_cmd, redis_boolean_response);
+    zval *object;
+    redis_object *redis;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+    zend_long expire;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osls",
+                                     &object, redis_ce, &key, &key_len,
+                                     &expire, &val, &val_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the SETEX command using the Glide client */
+        int result = execute_setex_command(redis->glide_client, key, key_len, expire, val, val_len);
+
+        /* Return TRUE if successful, FALSE otherwise */
+        if (result == 1)
+        {
+            RETURN_TRUE;
+        }
+        else
+        {
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("SETEX", redis_key_long_val_cmd, redis_boolean_response);
+    }
 }
 
 /* {{{ proto boolean Redis::psetex(string key, long expire, string value)
  */
 PHP_METHOD(Redis, psetex)
 {
-    REDIS_PROCESS_KW_CMD("PSETEX", redis_key_long_val_cmd, redis_boolean_response);
+    zval *object;
+    redis_object *redis;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+    zend_long expire;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osls",
+                                     &object, redis_ce, &key, &key_len,
+                                     &expire, &val, &val_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the PSETEX command using the Glide client */
+        int result = execute_psetex_command(redis->glide_client, key, key_len, expire, val, val_len);
+
+        /* Return TRUE if successful, FALSE otherwise */
+        if (result == 1)
+        {
+            RETURN_TRUE;
+        }
+        else
+        {
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("PSETEX", redis_key_long_val_cmd, redis_boolean_response);
+    }
 }
 
 /* {{{ proto boolean Redis::setnx(string key, string value)
  */
 PHP_METHOD(Redis, setnx)
 {
-    REDIS_PROCESS_KW_CMD("SETNX", redis_kv_cmd, redis_1_response);
+    zval *object;
+    redis_object *redis;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &val, &val_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the SETNX command using the Glide client */
+        int result = execute_setnx_command(redis->glide_client, key, key_len, val, val_len);
+
+        /* Return TRUE if key was set (result == 1), FALSE otherwise */
+        if (result == 1)
+        {
+            RETURN_TRUE;
+        }
+        else
+        {
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("SETNX", redis_kv_cmd, redis_1_response);
+    }
 }
 
 /* }}} */
