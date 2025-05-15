@@ -10,7 +10,7 @@ SHLIB_SUFFIX_NAME = dylib
 SHLIB_DL_SUFFIX_NAME = so
 AWK = awk
 REDIS_SHARED_LIBADD = ../ffi/target/release/libglide_ffi.a -lresolv -lSystem
-shared_objects_redis = redis.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo redis_sentinel.lo sentinel_library.lo backoff.lo redis_glide.lo  src/connection_request.pb-c.lo  src/command_request.pb-c.lo src/response.pb-c.lo 
+shared_objects_redis = redis.lo redis_new.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo redis_sentinel.lo sentinel_library.lo backoff.lo redis_glide.lo  src/connection_request.pb-c.lo  src/command_request.pb-c.lo src/response.pb-c.lo 
 PHP_PECL_EXTENSION = redis
 PHP_MODULES = $(phplibdir)/redis.la
 PHP_ZEND_EX =
@@ -252,6 +252,9 @@ clean-proto:
 -include redis.dep
 redis.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis.c
 	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis.c -o redis.lo  -MMD -MF redis.dep -MT redis.lo
+-include redis_commands.dep
+redis_new.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_new.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_new.c -o redis_new.lo  -MMD -MF redis_new.dep -MT redis_new.lo
 -include redis_commands.dep
 redis_commands.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_commands.c
 	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_commands.c -o redis_commands.lo  -MMD -MF redis_commands.dep -MT redis_commands.lo
