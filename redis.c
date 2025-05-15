@@ -1162,11 +1162,6 @@ PHP_METHOD(Redis, randomKey)
             RETURN_FALSE;
         }
     }
-    else
-    {
-        /* Fall back to the original implementation */
-        REDIS_PROCESS_KW_CMD("RANDOMKEY", redis_empty_cmd, redis_ping_response);
-    }
 }
 /* }}} */
 
@@ -1311,20 +1306,23 @@ PHP_METHOD(Redis, ping)
         /* Return the response */
         if (response)
         {
+            if (strncmp(response, "PONG", 4) == 0)
+            {
+                free(response);
+                RETURN_TRUE;
+            }
+
+            /* Return the response */
             RETVAL_STRINGL(response, response_len);
             free(response);
             return;
         }
         else
         {
-            RETURN_STRING("PONG");
+            RETURN_TRUE;
         }
     }
-    else
-    {
-        /* Fall back to the original implementation */
-        REDIS_PROCESS_KW_CMD("PING", redis_opt_str_cmd, redis_read_variant_reply);
-    }
+    RETURN_FALSE;
 }
 /* }}} */
 

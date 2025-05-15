@@ -168,11 +168,11 @@ class Redis_Test extends TestSuite {
 
     public function testPing() {
         /* Reply literal off */
-        print "testPing !!!!!!!!!!!!!!";
+  
         $this->assertTrue($this->redis->ping());
-       // $this->assertTrue($this->redis->ping(NULL));
+      //TODO  $this->assertTrue($this->redis->ping(NULL));
         $this->assertEquals('BEEP', $this->redis->ping('BEEP'));
-        print "testPing !!!!!!!!!!!!!!";
+
         return; //TODO
         /* Make sure we're good in MULTI mode */
         if ($this->haveMulti()) {
@@ -237,7 +237,6 @@ class Redis_Test extends TestSuite {
        that PhpRedis handles all combination of arguments correctly. */
     public function testBitcount() {
         /* key */
-        print "testBitcount !!!!!!!!!!!!!!";
         $this->redis->set('bitcountkey', hex2bin('bd906b854ca76cae'));
         $this->assertEquals(33, $this->redis->bitcount('bitcountkey'));
 
@@ -261,11 +260,10 @@ class Redis_Test extends TestSuite {
     }
 
     public function testBitop() {
-        print "testBitop !!!!!!!!!!!!!!";
 
         if ( ! $this->minVersionCheck('2.6.0'))
             $this->markTestSkipped();
-            print "testBitop2 !!!!!!!!!!!!!!";
+        
         $this->redis->set('{key}1', 'foobar');
         $this->redis->set('{key}2', 'abcdef');
 
