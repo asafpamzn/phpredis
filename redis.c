@@ -3185,6 +3185,7 @@ PHP_METHOD(Redis, _unpack)
 /* {{{ proto Redis::getLastError() */
 PHP_METHOD(Redis, getLastError)
 {
+#if 0
     zval *object;
     RedisSock *redis_sock;
 
@@ -3206,6 +3207,7 @@ PHP_METHOD(Redis, getLastError)
     {
         RETURN_STRINGL(ZSTR_VAL(redis_sock->err), ZSTR_LEN(redis_sock->err));
     }
+#endif
     RETURN_NULL();
 }
 
