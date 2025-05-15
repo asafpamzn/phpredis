@@ -824,14 +824,6 @@ PHP_METHOD(Redis, reset)
 }
 /* }}} */
 
-/* {{{ proto string Redis::get(string key)
- */
-PHP_METHOD(Redis, get)
-{
-    REDIS_PROCESS_KW_CMD("GET", redis_key_cmd, redis_string_response);
-}
-/* }}} */
-
 /* {{{ proto Redis|array|false Redis::getWithMeta(string key)
  */
 PHP_METHOD(Redis, getWithMeta)
@@ -1053,28 +1045,6 @@ PHP_METHOD(Redis, getRange)
 {
     REDIS_PROCESS_KW_CMD("GETRANGE", redis_key_long_long_cmd,
                          redis_string_response);
-}
-/* }}} */
-
-/* {{{ proto mixed Redis::lcs(string $key1, string $key2, ?array $options = NULL); */
-PHP_METHOD(Redis, lcs)
-{
-    REDIS_PROCESS_CMD(lcs, redis_read_variant_reply);
-}
-/* }}} */
-
-/* {{{ proto string Redis::setRange(string key, long start, string value) */
-PHP_METHOD(Redis, setRange)
-{
-    REDIS_PROCESS_KW_CMD("SETRANGE", redis_key_long_str_cmd,
-                         redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto long Redis::strlen(string key) */
-PHP_METHOD(Redis, strlen)
-{
-    REDIS_PROCESS_KW_CMD("STRLEN", redis_key_cmd, redis_long_response);
 }
 /* }}} */
 

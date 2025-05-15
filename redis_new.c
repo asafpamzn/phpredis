@@ -516,6 +516,59 @@ PHP_METHOD(Redis, getset)
 }
 /* }}} */
 
+/* {{{ proto string Redis::get(string key) */
+PHP_METHOD(Redis, get)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    char *response = NULL;
+    size_t response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the GET command using the Glide client */
+        int result = execute_get_command(redis->glide_client, key, key_len, &response, &response_len);
+
+        /* Process the result */
+        if (result == 1 && response != NULL)
+        {
+            /* Return the value */
+            RETVAL_STRINGL(response, response_len);
+            free(response);
+            return;
+        }
+        else if (result == 0)
+        {
+            /* Key didn't exist */
+            RETURN_NULL();
+        }
+        else
+        {
+            /* Error */
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("GET", redis_key_cmd, redis_string_response);
+    }
+}
+/* }}} */
+
 /* {{{ proto string Redis::randomKey()
  */
 PHP_METHOD(Redis, randomKey)
@@ -559,5 +612,135 @@ PHP_METHOD(Redis, randomKey)
             /* Error */
             RETURN_FALSE;
         }
+    }
+}
+
+/* {{{ proto mixed Redis::lcs(string $key1, string $key2, ?array $options = NULL); */
+PHP_METHOD(Redis, lcs)
+{
+    zval *object;
+    redis_object *redis;
+    char *key1 = NULL, *key2 = NULL;
+    size_t key1_len, key2_len;
+    zval *options = NULL;
+    zval result;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss|a",
+                                     &object, redis_ce, &key1, &key1_len,
+                                     &key2, &key2_len, &options) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize result zval */
+        ZVAL_NULL(&result);
+
+        /* Execute the LCS command using the Glide client */
+        int ret = execute_lcs_command(redis->glide_client, key1, key1_len, key2, key2_len, options, &result);
+
+        /* If the result is -1, there was an error */
+        if (ret == -1)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Return the result */
+        RETURN_ZVAL(&result, 0, 1);
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_CMD(lcs, redis_read_variant_reply);
+    }
+}
+/* }}} */
+
+/* {{{ proto string Redis::setRange(string key, long start, string value) */
+PHP_METHOD(Redis, setRange)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+    zend_long offset;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osls",
+                                     &object, redis_ce, &key, &key_len,
+                                     &offset, &val, &val_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the SETRANGE command using the Glide client */
+        long result = execute_setrange_command(redis->glide_client, key, key_len, offset, val, val_len);
+
+        /* If the result is -1, there was an error */
+        if (result == -1)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Return the result */
+        RETURN_LONG(result);
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("SETRANGE", redis_key_long_str_cmd, redis_long_response);
+    }
+}
+/* }}} */
+
+/* {{{ proto long Redis::strlen(string key) */
+PHP_METHOD(Redis, strlen)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the STRLEN command using the Glide client */
+        long result = execute_strlen_command(redis->glide_client, key, key_len);
+
+        /* If the result is -1, there was an error */
+        if (result == -1)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Return the result */
+        RETURN_LONG(result);
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("STRLEN", redis_key_cmd, redis_long_response);
     }
 }
