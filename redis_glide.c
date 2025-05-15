@@ -24,7 +24,6 @@
 /* Create a connection request in protobuf format */
 static uint8_t *create_connection_request(const char *host, int port, const char *user, const char *pass, size_t *len)
 {
-    printf("file=%s, line = %d\n", __FILE__, __LINE__);
     /* Create a connection request */
     ConnectionRequest__ConnectionRequest conn_req = CONNECTION_REQUEST__CONNECTION_REQUEST__INIT;
 
@@ -70,7 +69,6 @@ static uint8_t *create_connection_request(const char *host, int port, const char
     }
 
     /* Serialize the message */
-    printf("file=%s, line = %d\n", __FILE__, __LINE__);
     connection_request__connection_request__pack(&conn_req, buffer);
 
     return buffer;
@@ -79,7 +77,6 @@ static uint8_t *create_connection_request(const char *host, int port, const char
 /* Create a Valkey Glide client */
 const void *create_glide_client(ClientConfig *config)
 {
-    printf("file=%s, line = %d create glide client!!!!!!!!!!!!\n", __FILE__, __LINE__);
     /* Create a connection request */
     size_t len;
     uint8_t *request_bytes = create_connection_request(
@@ -88,7 +85,6 @@ const void *create_glide_client(ClientConfig *config)
         NULL,        /* No username by default */
         NULL,        /* No password by default */
         &len);
-    printf("file=%s, line = %d\n", __FILE__, __LINE__);
 
     if (!request_bytes)
     {
@@ -99,9 +95,7 @@ const void *create_glide_client(ClientConfig *config)
     ClientType client_type;
     client_type.tag = SyncClient;
 
-    printf("file=%s, line = %d\n", __FILE__, __LINE__);
     /* Create the client */
-    printf("file=%s, line = %d\n", __FILE__, __LINE__);
     const ConnectionResponse *conn_resp = create_client(
         request_bytes,
         len,
@@ -110,7 +104,6 @@ const void *create_glide_client(ClientConfig *config)
     );
 
     /* Free the request bytes as they're no longer needed */
-    printf("file=%s, line = %d\n", __FILE__, __LINE__);
     free(request_bytes);
 
     /* Check if there was an error */
@@ -124,7 +117,6 @@ const void *create_glide_client(ClientConfig *config)
     /* Get the client pointer */
     const void *client = conn_resp->conn_ptr;
 
-    printf("file=%s, line = %d\n", __FILE__, __LINE__);
     /* Free the connection response (but not the client) */
     free_connection_response((ConnectionResponse *)conn_resp);
 
@@ -656,178 +648,63 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
 /* Execute a SETEX command using the Valkey Glide client */
 int execute_setex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len)
 {
-    /* Check if client, key, and value are valid */
-    if (!glide_client || !key || !val || expire <= 0)
-    {
-        return -1;
-    }
-
-    /* Prepare command arguments */
-    unsigned long arg_count = 3;
-    uintptr_t args[3];
-    unsigned long args_len[3];
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Second argument: expire time in seconds */
-    size_t expire_len;
-    char *expire_str = long_to_string(expire, &expire_len);
-    if (!expire_str)
-    {
-        return -1;
-    }
-    args[1] = (uintptr_t)expire_str;
-    args_len[1] = expire_len;
-
-    /* Third argument: value */
-    args[2] = (uintptr_t)val;
-    args_len[2] = val_len;
-
-    /* Execute the command */
-    CommandResult *result = command(
-        glide_client,
-        0,         /* channel */
-        SetEx,     /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
-    );
-
-    /* Free the expire string */
-    free(expire_str);
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing SETEX command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return -1;
-    }
-
-    /* Process the result */
-    int ret_val = -1;
-    if (result->response && result->response->response_type == Ok)
-    {
-        ret_val = 1; /* Success */
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    printf("Deprectaed\n");
+    return -1;
 }
 
 /* Execute a PSETEX command using the Valkey Glide client */
 int execute_psetex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len)
 {
-    /* Check if client, key, and value are valid */
-    if (!glide_client || !key || !val || expire <= 0)
-    {
-        return -1;
-    }
-
-    /* Prepare command arguments */
-    unsigned long arg_count = 3;
-    uintptr_t args[3];
-    unsigned long args_len[3];
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Second argument: expire time in milliseconds */
-    size_t expire_len;
-    char *expire_str = long_to_string(expire, &expire_len);
-    if (!expire_str)
-    {
-        return -1;
-    }
-    args[1] = (uintptr_t)expire_str;
-    args_len[1] = expire_len;
-
-    /* Third argument: value */
-    args[2] = (uintptr_t)val;
-    args_len[2] = val_len;
-
-    /* Execute the command */
-    CommandResult *result = command(
-        glide_client,
-        0,         /* channel */
-        PSetEx,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
-    );
-
-    /* Free the expire string */
-    free(expire_str);
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing PSETEX command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return -1;
-    }
-
-    /* Process the result */
-    int ret_val = -1;
-    if (result->response && result->response->response_type == Ok)
-    {
-        ret_val = 1; /* Success */
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    printf("Deprectaed\n");
+    return -1;
 }
 
 /* Execute a SETNX command using the Valkey Glide client */
 int execute_setnx_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len)
 {
-    /* Check if client, key, and value are valid */
-    if (!glide_client || !key || !val)
+    printf("Deprectaed\n");
+    return -1;
+}
+
+/* Function to close a Valkey Glide client */
+void close_glide_client(const void *glide_client)
+{
+    /* Check if client is valid */
+    if (!glide_client)
+    {
+        return;
+    }
+
+    /* Close the client using the close_client function from glide_bindings.h */
+    close_client(glide_client);
+}
+
+/* Execute a PING command using the Valkey Glide client */
+int execute_ping_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len)
+{
+    /* Check if client is valid */
+    if (!glide_client)
     {
         return -1;
     }
 
     /* Prepare command arguments */
-    unsigned long arg_count = 2;
-    uintptr_t args[2];
-    unsigned long args_len[2];
+    unsigned long arg_count = msg ? 1 : 0;
+    uintptr_t args[1];
+    unsigned long args_len[1];
 
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Second argument: value */
-    args[1] = (uintptr_t)val;
-    args_len[1] = val_len;
+    /* Add message argument if provided */
+    if (msg)
+    {
+        args[0] = (uintptr_t)msg;
+        args_len[0] = msg_len;
+    }
 
     /* Execute the command */
-    CommandResult *result = command(
+    CommandResult *cmd_result = command(
         glide_client,
         0,         /* channel */
-        SetNX,     /* command type */
+        Ping,      /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
         args_len,  /* argument lengths */
@@ -836,28 +713,45 @@ int execute_setnx_command(const void *glide_client, const char *key, size_t key_
     );
 
     /* Check if the command was successful */
-    if (!result)
+    if (!cmd_result)
     {
         return -1;
     }
 
     /* Check if there was an error */
-    if (result->command_error)
+    if (cmd_result->command_error)
     {
-        printf("Error executing SETNX command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
+        printf("Error executing PING command: %s\n", cmd_result->command_error->command_error_message);
+        free_command_result(cmd_result);
         return -1;
     }
 
     /* Process the result */
     int ret_val = -1;
-    if (result->response && result->response->response_type == Int)
+    if (cmd_result->response)
     {
-        ret_val = result->response->int_value; /* 1 if set, 0 if not set */
+        switch (cmd_result->response->response_type)
+        {
+        case Ok:
+            /* PONG response with no message */
+            *result = strdup("PONG");
+            *result_len = 4;
+            ret_val = 1;
+            break;
+        case String:
+            /* PING with message returns the message */
+            *result = strdup(cmd_result->response->string_value);
+            *result_len = cmd_result->response->string_value_len;
+            ret_val = 1;
+            break;
+        default:
+            ret_val = -1;
+            break;
+        }
     }
 
     /* Free the result */
-    free_command_result(result);
+    free_command_result(cmd_result);
 
     return ret_val;
 }

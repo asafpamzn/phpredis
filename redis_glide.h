@@ -86,8 +86,8 @@ typedef struct
 /* Forward declaration for ClientAdapter */
 typedef struct ClientAdapter ClientAdapter;
 
-/* Function declarations for Valkey Glide FFI */
-extern void close_client_ffi(const void *client_adapter_ptr);
+/* Function to close a Valkey Glide client */
+extern void close_glide_client(const void *glide_client);
 extern void free_command_response(CommandResponse *command_response_ptr);
 extern void free_command_result(CommandResult *command_result_ptr);
 
@@ -124,8 +124,5 @@ extern int execute_reset_command(const void *glide_client);
 extern long execute_incr_command(const void *glide_client, const char *key, size_t key_len);
 extern long execute_incrby_command(const void *glide_client, const char *key, size_t key_len, long value);
 extern int execute_incrbyfloat_command(const void *glide_client, const char *key, size_t key_len, double value, double *result);
-
-/* Function to close a Valkey Glide client */
-extern void close_glide_client(const void *glide_client);
 
 #endif /* REDIS_GLIDE_H */

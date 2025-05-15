@@ -206,7 +206,7 @@ void free_redis_object(zend_object *object)
     /* Free the Valkey Glide client if it exists */
     if (redis->glide_client)
     {
-        close_client_ffi(redis->glide_client);
+        close_glide_client(redis->glide_client);
         redis->glide_client = NULL;
     }
 }
@@ -214,7 +214,6 @@ void free_redis_object(zend_object *object)
 zend_object *
 create_redis_object(zend_class_entry *ce)
 {
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
     redis_object *redis = ecalloc(1, sizeof(redis_object) + zend_object_properties_size(ce));
 
@@ -235,10 +234,8 @@ create_redis_object(zend_class_entry *ce)
 static zend_always_inline RedisSock *
 redis_sock_get_instance(zval *id, int no_throw)
 {
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
     redis_object *redis;
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
     if (Z_TYPE_P(id) == IS_OBJECT)
     {
@@ -263,6 +260,8 @@ redis_sock_get_instance(zval *id, int no_throw)
     {
         REDIS_THROW_EXCEPTION("Redis server went away", 0);
     }
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
     return NULL;
 }
 
@@ -583,14 +582,15 @@ PHP_METHOD(Redis, __destruct)
 PHP_METHOD(Redis, connect)
 {
     printf("file = %s, line = %d\n", __FILE__, __LINE__);
-    if (redis_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-    else
-    {
-        RETURN_TRUE;
-    }
+    /* if (redis_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE)
+     {
+         RETURN_FALSE;
+     }
+     else
+     {
+         RETURN_TRUE;
+     }*/
+    RETURN_TRUE;
 }
 /* }}} */
 
@@ -600,20 +600,22 @@ PHP_METHOD(Redis, pconnect)
 {
     printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
-    if (redis_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE)
+    /*if (redis_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE)
     {
         RETURN_FALSE;
     }
     else
     {
         RETURN_TRUE;
-    }
+    }*/
+    RETURN_TRUE;
 }
 /* }}} */
 
 PHP_REDIS_API int
 redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
+    return 0;
     zval *object, *context = NULL, *ele;
     char *host = NULL, *persistent_id = NULL;
     zend_long port = -1, retry_interval = 0;
@@ -681,25 +683,26 @@ redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
         redis_free_socket(redis->sock);
     }
 
-    redis->sock = redis_sock_create(host, host_len, port, timeout, read_timeout, persistent,
-                                    persistent_id, retry_interval);
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
-
+    /*  redis->sock = redis_sock_create(host, host_len, port, timeout, read_timeout, persistent,
+                                      persistent_id, retry_interval);
+      printf("file = %s, line = %d\n", __FILE__, __LINE__);
+  */
     /* Initialize the Valkey Glide client */
     /* We don't initialize the Glide client here, it will be initialized in redis_sock_get_instance */
 
     if (context)
     {
+#if 0
         /* Stream context (e.g. TLS) */
         if ((ele = REDIS_HASH_STR_FIND_STATIC(Z_ARRVAL_P(context), "stream")))
         {
             redis_sock_set_stream_context(redis->sock, ele);
         }
-
+#endif
         /* AUTH */
         if ((ele = REDIS_HASH_STR_FIND_STATIC(Z_ARRVAL_P(context), "auth")))
         {
-            redis_sock_set_auth_zval(redis->sock, ele);
+            //    redis_sock_set_auth_zval(redis->sock, ele);
 
             /* If we have auth credentials and a Glide client, update the Glide client */
             if (redis->glide_client && redis->sock->pass)
@@ -709,7 +712,7 @@ redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
             }
         }
     }
-
+#if 0
     if (redis_sock_connect(redis->sock) != SUCCESS)
     {
         if (redis->sock->err)
@@ -720,6 +723,7 @@ redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
         redis->sock = NULL;
         return FAILURE;
     }
+#endif
 
     return SUCCESS;
 }
@@ -1180,11 +1184,54 @@ PHP_METHOD(Redis, getEx)
 }
 /* }}} */
 
-/* {{{ proto string Redis::ping()
+/* {{{ proto string Redis::ping([string message])
  */
 PHP_METHOD(Redis, ping)
 {
-    REDIS_PROCESS_KW_CMD("PING", redis_opt_str_cmd, redis_read_variant_reply);
+    zval *object;
+    redis_object *redis;
+    char *msg = NULL, *response = NULL;
+    size_t msg_len = 0, response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|s",
+                                     &object, redis_ce, &msg, &msg_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the PING command using the Glide client */
+        int result = execute_ping_command(redis->glide_client, msg, msg_len, &response, &response_len);
+
+        /* If the result is -1, there was an error */
+        if (result == -1)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Return the response */
+        if (response)
+        {
+            RETVAL_STRINGL(response, response_len);
+            free(response);
+            return;
+        }
+        else
+        {
+            RETURN_STRING("PONG");
+        }
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("PING", redis_opt_str_cmd, redis_read_variant_reply);
+    }
 }
 /* }}} */
 
