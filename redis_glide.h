@@ -93,7 +93,37 @@ extern void free_command_result(CommandResult *command_result_ptr);
 
 /* Helper functions for Valkey Glide integration */
 extern const void *create_glide_client(ClientConfig *config);
+
+/* Bit operations */
 extern long execute_bitcount_command(const void *glide_client, const char *key, size_t key_len, long start, long end, int bybit);
+extern long execute_bitop_command(const void *glide_client, const char *op, size_t op_len, const char *dst, size_t dst_len, zval *keys, int keys_count);
+extern long execute_bitpos_command(const void *glide_client, const char *key, size_t key_len, long bit, long start, long end, int bybit);
+
+/* String operations */
+extern int execute_set_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, long expire, zval *opts);
+extern int execute_setex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len);
+extern int execute_psetex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len);
+extern int execute_setnx_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len);
+extern int execute_getset_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, char **result, size_t *result_len);
+extern int execute_get_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);
+extern int execute_getwithmeta_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);
+extern int execute_getdel_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);
+extern int execute_getex_command(const void *glide_client, const char *key, size_t key_len, zval *opts, char **result, size_t *result_len);
+
+/* Key operations */
+extern int execute_randomkey_command(const void *glide_client, char **result, size_t *result_len);
+extern int execute_rename_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len);
+extern int execute_renamenx_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len);
+
+/* Server operations */
+extern int execute_echo_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len);
+extern int execute_ping_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len);
+extern int execute_reset_command(const void *glide_client);
+
+/* Increment operations */
+extern long execute_incr_command(const void *glide_client, const char *key, size_t key_len);
+extern long execute_incrby_command(const void *glide_client, const char *key, size_t key_len, long value);
+extern int execute_incrbyfloat_command(const void *glide_client, const char *key, size_t key_len, double value, double *result);
 
 /* Function to close a Valkey Glide client */
 extern void close_glide_client(const void *glide_client);

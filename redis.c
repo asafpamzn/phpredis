@@ -727,7 +727,44 @@ redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 /* {{{ proto long Redis::bitop(string op, string key, ...) */
 PHP_METHOD(Redis, bitop)
 {
-    REDIS_PROCESS_CMD(bitop, redis_long_response);
+    zval *object;
+    redis_object *redis;
+    char *op = NULL, *key = NULL;
+    size_t op_len, key_len;
+    zval *keys = NULL;
+    int keys_count = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss*",
+                                     &object, redis_ce, &op, &op_len,
+                                     &key, &key_len, &keys, &keys_count) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the BITOP command using the Glide client */
+        long result = execute_bitop_command(redis->glide_client, op, op_len, key, key_len, keys, keys_count);
+
+        /* If the result is -1, there was an error */
+        if (result == -1)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Return the result */
+        RETURN_LONG(result);
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_CMD(bitop, redis_long_response);
+    }
 }
 
 /* }}} */
@@ -780,7 +817,44 @@ PHP_METHOD(Redis, bitcount)
 /* {{{ proto integer Redis::bitpos(string key, int bit, [int start, int end]) */
 PHP_METHOD(Redis, bitpos)
 {
-    REDIS_PROCESS_CMD(bitpos, redis_long_response);
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long bit, start = 0, end = -1;
+    zend_bool bybit = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osl|llb",
+                                     &object, redis_ce, &key, &key_len, &bit,
+                                     &start, &end, &bybit) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the BITPOS command using the Glide client */
+        long result = execute_bitpos_command(redis->glide_client, key, key_len, bit, start, end, bybit);
+
+        /* If the result is -1, there was an error */
+        if (result == -1)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Return the result */
+        RETURN_LONG(result);
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_CMD(bitpos, redis_long_response);
+    }
 }
 /* }}} */
 
