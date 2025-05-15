@@ -119,6 +119,7 @@ extern int execute_renamenx_command(const void *glide_client, const char *src, s
 extern int execute_echo_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len);
 extern int execute_ping_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len);
 extern int execute_reset_command(const void *glide_client);
+extern int execute_info_command(const void *glide_client, const char *section, size_t section_len, char **result, size_t *result_len);
 
 /* Increment operations */
 extern long execute_incr_command(const void *glide_client, const char *key, size_t key_len);

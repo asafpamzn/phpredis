@@ -234,7 +234,7 @@ create_redis_object(zend_class_entry *ce)
 static zend_always_inline RedisSock *
 redis_sock_get_instance(zval *id, int no_throw)
 {
-
+#if 0
     redis_object *redis;
 
     if (Z_TYPE_P(id) == IS_OBJECT)
@@ -260,7 +260,7 @@ redis_sock_get_instance(zval *id, int no_throw)
     {
         REDIS_THROW_EXCEPTION("Redis server went away", 0);
     }
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+#endif
 
     return NULL;
 }
@@ -539,11 +539,13 @@ PHP_METHOD(Redis, __construct)
     ZEND_PARSE_PARAMETERS_END_EX(RETURN_THROWS());
 
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, getThis());
-    redis->sock = redis_sock_create(ZEND_STRL("127.0.0.1"), 6379, 0, 0, 0, NULL, 0);
+#if 0
+   redis->sock = redis_sock_create(ZEND_STRL("127.0.0.1"), 6379, 0, 0, 0, NULL, 0);
     if (opts != NULL && redis_sock_configure(redis->sock, opts) != SUCCESS)
     {
         RETURN_THROWS();
     }
+#endif
 }
 /* }}} */
 
@@ -1065,7 +1067,54 @@ PHP_METHOD(Redis, setnx)
  */
 PHP_METHOD(Redis, getset)
 {
-    REDIS_PROCESS_KW_CMD("GETSET", redis_kv_cmd, redis_string_response);
+    zval *object, *z_value;
+    redis_object *redis;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+    char *response = NULL;
+    size_t response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &val, &val_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the GETSET command using the Glide client */
+        int result = execute_getset_command(redis->glide_client, key, key_len, val, val_len, &response, &response_len);
+
+        /* Process the result */
+        if (result == 1 && response != NULL)
+        {
+            /* Return the old value */
+            RETVAL_STRINGL(response, response_len);
+            free(response);
+            return;
+        }
+        else if (result == 0)
+        {
+            /* Key didn't exist */
+            RETURN_NULL();
+        }
+        else
+        {
+            /* Error */
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("GETSET", redis_kv_cmd, redis_string_response);
+    }
 }
 /* }}} */
 
@@ -1073,7 +1122,51 @@ PHP_METHOD(Redis, getset)
  */
 PHP_METHOD(Redis, randomKey)
 {
-    REDIS_PROCESS_KW_CMD("RANDOMKEY", redis_empty_cmd, redis_ping_response);
+    zval *object;
+    redis_object *redis;
+    char *response = NULL;
+    size_t response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the RANDOMKEY command using the Glide client */
+        int result = execute_randomkey_command(redis->glide_client, &response, &response_len);
+
+        /* Process the result */
+        if (result == 1 && response != NULL)
+        {
+            /* Return the random key */
+            RETVAL_STRINGL(response, response_len);
+            free(response);
+            return;
+        }
+        else if (result == 0)
+        {
+            /* No keys in the database */
+            RETURN_NULL();
+        }
+        else
+        {
+            /* Error */
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("RANDOMKEY", redis_empty_cmd, redis_ping_response);
+    }
 }
 /* }}} */
 
@@ -1975,7 +2068,54 @@ PHP_METHOD(Redis, pttl)
 /* {{{ proto array Redis::info() */
 PHP_METHOD(Redis, info)
 {
-    REDIS_PROCESS_CMD(info, redis_info_response);
+    zval *object;
+    redis_object *redis;
+    char *section = NULL, *response = NULL;
+    size_t section_len = 0, response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|s",
+                                     &object, redis_ce, &section, &section_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the INFO command using the Glide client */
+        int result = execute_info_command(redis->glide_client, section, section_len, &response, &response_len);
+
+        /* Process the result */
+        if (result == 1 && response != NULL)
+        {
+            zval z_ret;
+            ZVAL_UNDEF(&z_ret);
+
+            /* Parse the INFO response into a zval array */
+            redis_parse_info_response(response, &z_ret);
+
+            /* Free the response string */
+            free(response);
+
+            /* Return the parsed array */
+            RETVAL_ZVAL(&z_ret, 0, 1);
+            return;
+        }
+        else
+        {
+            /* Error or empty response */
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_CMD(info, redis_info_response);
+    }
 }
 /* }}} */
 

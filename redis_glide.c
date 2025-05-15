@@ -755,3 +755,209 @@ int execute_ping_command(const void *glide_client, const char *msg, size_t msg_l
 
     return ret_val;
 }
+
+/* Execute an INFO command using the Valkey Glide client */
+int execute_info_command(const void *glide_client, const char *section, size_t section_len, char **result, size_t *result_len)
+{
+    /* Check if client is valid */
+    if (!glide_client)
+    {
+        return -1;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = section ? 1 : 0;
+    uintptr_t args[1];
+    unsigned long args_len[1];
+
+    /* Add section argument if provided */
+    if (section)
+    {
+        args[0] = (uintptr_t)section;
+        args_len[0] = section_len;
+    }
+
+    /* Execute the command */
+    CommandResult *cmd_result = command(
+        glide_client,
+        0,         /* channel */
+        Info,      /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len,  /* argument lengths */
+        NULL,      /* route bytes */
+        0          /* route bytes length */
+    );
+
+    /* Check if the command was successful */
+    if (!cmd_result)
+    {
+        return -1;
+    }
+
+    /* Check if there was an error */
+    if (cmd_result->command_error)
+    {
+        printf("Error executing INFO command: %s\n", cmd_result->command_error->command_error_message);
+        free_command_result(cmd_result);
+        return -1;
+    }
+
+    /* Process the result */
+    int ret_val = -1;
+    if (cmd_result->response && cmd_result->response->response_type == String)
+    {
+        /* INFO returns a string with the server information */
+        *result = strdup(cmd_result->response->string_value);
+        *result_len = cmd_result->response->string_value_len;
+        ret_val = 1;
+    }
+
+    /* Free the result */
+    free_command_result(cmd_result);
+
+    return ret_val;
+}
+
+/* Execute a GETSET command using the Valkey Glide client */
+int execute_getset_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, char **result, size_t *result_len)
+{
+    /* Check if client, key, and value are valid */
+    if (!glide_client || !key || !val)
+    {
+        return -1;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 2; /* key + value */
+    uintptr_t args[2];
+    unsigned long args_len[2];
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Second argument: value */
+    args[1] = (uintptr_t)val;
+    args_len[1] = val_len;
+
+    /* Execute the command */
+    CommandResult *cmd_result = command(
+        glide_client,
+        0,         /* channel */
+        GetSet,    /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len,  /* argument lengths */
+        NULL,      /* route bytes */
+        0          /* route bytes length */
+    );
+
+    /* Check if the command was successful */
+    if (!cmd_result)
+    {
+        return -1;
+    }
+
+    /* Check if there was an error */
+    if (cmd_result->command_error)
+    {
+        printf("Error executing GETSET command: %s\n", cmd_result->command_error->command_error_message);
+        free_command_result(cmd_result);
+        return -1;
+    }
+
+    /* Process the result */
+    int ret_val = -1;
+    if (cmd_result->response)
+    {
+        switch (cmd_result->response->response_type)
+        {
+        case String:
+            /* GETSET returns the old value */
+            *result = strdup(cmd_result->response->string_value);
+            *result_len = cmd_result->response->string_value_len;
+            ret_val = 1;
+            break;
+        case Null:
+            /* Key didn't exist, return NULL */
+            *result = NULL;
+            *result_len = 0;
+            ret_val = 0;
+            break;
+        default:
+            ret_val = -1;
+            break;
+        }
+    }
+
+    /* Free the result */
+    free_command_result(cmd_result);
+
+    return ret_val;
+}
+
+/* Execute a RANDOMKEY command using the Valkey Glide client */
+int execute_randomkey_command(const void *glide_client, char **result, size_t *result_len)
+{
+    /* Check if client is valid */
+    if (!glide_client)
+    {
+        return -1;
+    }
+
+    /* Execute the command (no arguments needed) */
+    CommandResult *cmd_result = command(
+        glide_client,
+        0,         /* channel */
+        RandomKey, /* command type */
+        0,         /* number of arguments */
+        NULL,      /* arguments */
+        NULL,      /* argument lengths */
+        NULL,      /* route bytes */
+        0          /* route bytes length */
+    );
+
+    /* Check if the command was successful */
+    if (!cmd_result)
+    {
+        return -1;
+    }
+
+    /* Check if there was an error */
+    if (cmd_result->command_error)
+    {
+        printf("Error executing RANDOMKEY command: %s\n", cmd_result->command_error->command_error_message);
+        free_command_result(cmd_result);
+        return -1;
+    }
+
+    /* Process the result */
+    int ret_val = -1;
+    if (cmd_result->response)
+    {
+        switch (cmd_result->response->response_type)
+        {
+        case String:
+            /* RANDOMKEY returns a random key */
+            *result = strdup(cmd_result->response->string_value);
+            *result_len = cmd_result->response->string_value_len;
+            ret_val = 1;
+            break;
+        case Null:
+            /* No keys in the database */
+            *result = NULL;
+            *result_len = 0;
+            ret_val = 0;
+            break;
+        default:
+            ret_val = -1;
+            break;
+        }
+    }
+
+    /* Free the result */
+    free_command_result(cmd_result);
+
+    return ret_val;
+}
