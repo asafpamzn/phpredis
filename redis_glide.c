@@ -1632,3 +1632,337 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
     free_command_result(cmd_result);
     return -1;
 }
+
+/* Execute an MPOP command (LMPOP, BLMPOP, ZMPOP, BZMPOP) using the Valkey Glide client */
+int execute_mpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result)
+{
+    /* Check if client, keys, and from are valid */
+    if (!glide_client || !keys || !from)
+    {
+        return -1;
+    }
+
+    /* Get the number of keys */
+    int keys_count = 0;
+    if (Z_TYPE_P(keys) == IS_ARRAY)
+    {
+        keys_count = zend_hash_num_elements(Z_ARRVAL_P(keys));
+    }
+    else
+    {
+        return -1; /* Keys must be an array */
+    }
+
+    /* Check if we have at least one key */
+    if (keys_count <= 0)
+    {
+        return -1;
+    }
+
+    /* Determine if this is a blocking command */
+    int is_blocking = (strncmp(cmd, "B", 1) == 0);
+
+    /* Calculate the number of arguments */
+    unsigned long arg_count = keys_count + 3; /* keys + numkeys + from + count */
+    if (is_blocking)
+    {
+        arg_count++; /* Add timeout for blocking commands */
+    }
+
+    /* Allocate memory for arguments */
+    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+
+    if (!args || !args_len)
+    {
+        if (args)
+            free(args);
+        if (args_len)
+            free(args_len);
+        return -1;
+    }
+
+    /* Current argument index */
+    int arg_idx = 0;
+
+    /* Add timeout for blocking commands */
+    if (is_blocking)
+    {
+        /* Convert timeout to string */
+        size_t timeout_len;
+        char *timeout_str = double_to_string(timeout, &timeout_len);
+        if (!timeout_str)
+        {
+            free(args);
+            free(args_len);
+            return -1;
+        }
+        args[arg_idx] = (uintptr_t)timeout_str;
+        args_len[arg_idx] = timeout_len;
+        arg_idx++;
+    }
+
+    /* Add keys */
+    HashTable *ht = Z_ARRVAL_P(keys);
+    zval *z_key;
+    ZEND_HASH_FOREACH_VAL(ht, z_key)
+    {
+        if (Z_TYPE_P(z_key) != IS_STRING)
+        {
+            free(args);
+            free(args_len);
+            if (is_blocking)
+            {
+                free((void *)args[0]); /* Free the timeout string */
+            }
+            return -1;
+        }
+        args[arg_idx] = (uintptr_t)Z_STRVAL_P(z_key);
+        args_len[arg_idx] = Z_STRLEN_P(z_key);
+        arg_idx++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    /* Add numkeys */
+    size_t numkeys_len;
+    char *numkeys_str = long_to_string(keys_count, &numkeys_len);
+    if (!numkeys_str)
+    {
+        free(args);
+        free(args_len);
+        if (is_blocking)
+        {
+            free((void *)args[0]); /* Free the timeout string */
+        }
+        return -1;
+    }
+    args[arg_idx] = (uintptr_t)numkeys_str;
+    args_len[arg_idx] = numkeys_len;
+    arg_idx++;
+
+    /* Add FROM direction */
+    args[arg_idx] = (uintptr_t)"FROM";
+    args_len[arg_idx] = 4;
+    arg_idx++;
+
+    /* Add direction (LEFT or RIGHT) */
+    args[arg_idx] = (uintptr_t)from;
+    args_len[arg_idx] = from_len;
+    arg_idx++;
+
+    /* Add COUNT if count > 1 */
+    if (count > 1)
+    {
+        /* Increase arg_count for COUNT and its value */
+        arg_count += 2;
+
+        /* Reallocate args and args_len arrays */
+        uintptr_t *new_args = (uintptr_t *)realloc(args, arg_count * sizeof(uintptr_t));
+        unsigned long *new_args_len = (unsigned long *)realloc(args_len, arg_count * sizeof(unsigned long));
+
+        if (!new_args || !new_args_len)
+        {
+            free(args);
+            free(args_len);
+            free(numkeys_str);
+            if (is_blocking)
+            {
+                free((void *)args[0]); /* Free the timeout string */
+            }
+            return -1;
+        }
+
+        args = new_args;
+        args_len = new_args_len;
+
+        /* Add COUNT keyword */
+        args[arg_idx] = (uintptr_t)"COUNT";
+        args_len[arg_idx] = 5;
+        arg_idx++;
+
+        /* Add count value */
+        size_t count_len;
+        char *count_str = long_to_string(count, &count_len);
+        if (!count_str)
+        {
+            free(args);
+            free(args_len);
+            free(numkeys_str);
+            if (is_blocking)
+            {
+                free((void *)args[0]); /* Free the timeout string */
+            }
+            return -1;
+        }
+        args[arg_idx] = (uintptr_t)count_str;
+        args_len[arg_idx] = count_len;
+        arg_idx++;
+    }
+
+    /* Determine the command type */
+    enum RequestType cmd_type;
+    if (strcmp(cmd, "LMPOP") == 0)
+    {
+        cmd_type = LMPop;
+    }
+    else if (strcmp(cmd, "BLMPOP") == 0)
+    {
+        cmd_type = BLMPop;
+    }
+    else if (strcmp(cmd, "ZMPOP") == 0)
+    {
+        cmd_type = ZMPop;
+    }
+    else if (strcmp(cmd, "BZMPOP") == 0)
+    {
+        cmd_type = BZMPop;
+    }
+    else
+    {
+        /* Unknown command */
+        free(args);
+        free(args_len);
+        free(numkeys_str);
+        if (is_blocking)
+        {
+            free((void *)args[0]); /* Free the timeout string */
+        }
+        if (count > 1)
+        {
+            free((void *)args[arg_idx - 1]); /* Free the count string */
+        }
+        return -1;
+    }
+
+    /* Execute the command */
+    CommandResult *cmd_result = command(
+        glide_client,
+        0,         /* channel */
+        cmd_type,  /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len,  /* argument lengths */
+        NULL,      /* route bytes */
+        0          /* route bytes length */
+    );
+
+    /* Free the argument strings */
+    free(numkeys_str);
+    if (is_blocking)
+    {
+        free((void *)args[0]); /* Free the timeout string */
+    }
+    if (count > 1)
+    {
+        free((void *)args[arg_idx - 1]); /* Free the count string */
+    }
+    free(args);
+    free(args_len);
+
+    /* Check if the command was successful */
+    if (!cmd_result)
+    {
+        return -1;
+    }
+
+    /* Check if there was an error */
+    if (cmd_result->command_error)
+    {
+        printf("Error executing %s command: %s\n", cmd, cmd_result->command_error->command_error_message);
+        free_command_result(cmd_result);
+        return -1;
+    }
+
+    /* Process the result */
+    int ret_val = -1;
+    if (cmd_result->response)
+    {
+        switch (cmd_result->response->response_type)
+        {
+        case Null:
+            /* No elements popped */
+            ZVAL_NULL(result);
+            ret_val = 0;
+            break;
+        case Array:
+            /* Elements popped */
+            array_init(result);
+
+            /* Process the array response */
+            if (cmd_result->response->array_value_len >= 2)
+            {
+                /* First element is the key */
+                struct CommandResponse *key_resp = &cmd_result->response->array_value[0];
+                if (key_resp->response_type == String)
+                {
+                    /* Add key to result array */
+                    add_next_index_stringl(result, key_resp->string_value, key_resp->string_value_len);
+
+                    /* Second element is the array of popped elements */
+                    struct CommandResponse *elements_resp = &cmd_result->response->array_value[1];
+                    if (elements_resp->response_type == Array)
+                    {
+                        /* Create array for elements */
+                        zval elements_array;
+                        array_init(&elements_array);
+
+                        /* Process elements based on command type */
+                        if (strncmp(cmd, "Z", 1) == 0 || strncmp(cmd, "BZ", 2) == 0)
+                        {
+                            /* For sorted sets, elements are pairs of member and score */
+                            for (int i = 0; i < elements_resp->array_value_len; i += 2)
+                            {
+                                if (i + 1 < elements_resp->array_value_len)
+                                {
+                                    struct CommandResponse *member = &elements_resp->array_value[i];
+                                    struct CommandResponse *score = &elements_resp->array_value[i + 1];
+
+                                    if (member->response_type == String && score->response_type == String)
+                                    {
+                                        /* Convert score string to double */
+                                        double score_val = atof(score->string_value);
+
+                                        /* Add member => score pair to elements array */
+                                        add_assoc_double_ex(&elements_array,
+                                                            member->string_value,
+                                                            member->string_value_len,
+                                                            score_val);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            /* For lists, elements are just values */
+                            for (int i = 0; i < elements_resp->array_value_len; i++)
+                            {
+                                struct CommandResponse *element = &elements_resp->array_value[i];
+                                if (element->response_type == String)
+                                {
+                                    add_next_index_stringl(&elements_array,
+                                                           element->string_value,
+                                                           element->string_value_len);
+                                }
+                            }
+                        }
+
+                        /* Add elements array to result */
+                        add_next_index_zval(result, &elements_array);
+                    }
+                }
+            }
+            ret_val = 1;
+            break;
+        default:
+            /* Unexpected response type */
+            ZVAL_NULL(result);
+            ret_val = -1;
+            break;
+        }
+    }
+
+    /* Free the result */
+    free_command_result(cmd_result);
+
+    return ret_val;
+}

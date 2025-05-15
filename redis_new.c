@@ -744,3 +744,145 @@ PHP_METHOD(Redis, strlen)
         REDIS_PROCESS_KW_CMD("STRLEN", redis_key_cmd, redis_long_response);
     }
 }
+
+/* {{{ proto Redis|array|false Redis::lmpop(array $keys, string $from, int $count = 1) */
+PHP_METHOD(Redis, lmpop)
+{
+    zval *object;
+    redis_object *redis;
+    zval *keys = NULL;
+    char *from = NULL;
+    size_t from_len;
+    zend_long count = 1;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oas|l",
+                                     &object, redis_ce, &keys, &from, &from_len,
+                                     &count) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the LMPOP command using the Glide client */
+        zval result;
+        ZVAL_NULL(&result);
+
+        int ret = execute_mpop_command(redis->glide_client, "LMPOP", 0.0, keys, from, from_len, count, &result);
+
+        /* If the result is -1, there was an error */
+        if (ret == -1)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Return the result */
+        RETURN_ZVAL(&result, 0, 1);
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("LMPOP", redis_mpop_cmd, redis_mpop_response);
+    }
+}
+/* }}} */
+
+/* {{{ proto Redis|array|false Redis::blmpop(double $timeout, array $keys, string $from, int $count = 1) */
+PHP_METHOD(Redis, blmpop)
+{
+    zval *object;
+    redis_object *redis;
+    zval *keys = NULL;
+    char *from = NULL;
+    size_t from_len;
+    double timeout;
+    zend_long count = 1;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Odas|l",
+                                     &object, redis_ce, &timeout, &keys, &from, &from_len,
+                                     &count) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the BLMPOP command using the Glide client */
+        zval result;
+        ZVAL_NULL(&result);
+
+        int ret = execute_mpop_command(redis->glide_client, "BLMPOP", timeout, keys, from, from_len, count, &result);
+
+        /* If the result is -1, there was an error */
+        if (ret == -1)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Return the result */
+        RETURN_ZVAL(&result, 0, 1);
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("BLMPOP", redis_mpop_cmd, redis_mpop_response);
+    }
+}
+/* }}} */
+
+/* {{{ proto Redis|array|false Redis::zmpop(array $keys, string $from, int $count = 1) */
+PHP_METHOD(Redis, zmpop)
+{
+    zval *object;
+    redis_object *redis;
+    zval *keys = NULL;
+    char *from = NULL;
+    size_t from_len;
+    zend_long count = 1;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oas|l",
+                                     &object, redis_ce, &keys, &from, &from_len,
+                                     &count) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the ZMPOP command using the Glide client */
+        zval result;
+        ZVAL_NULL(&result);
+
+        int ret = execute_mpop_command(redis->glide_client, "ZMPOP", 0.0, keys, from, from_len, count, &result);
+
+        /* If the result is -1, there was an error */
+        if (ret == -1)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Return the result */
+        RETURN_ZVAL(&result, 0, 1);
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("ZMPOP", redis_mpop_cmd, redis_mpop_response);
+    }
+}
+/* }}} */
