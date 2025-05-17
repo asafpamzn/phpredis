@@ -127,12 +127,12 @@ const void *create_glide_client(ClientConfig *config)
 /* These functions are now defined in command_response.c */
 
 /* Execute a BITCOUNT command using the Valkey Glide client */
-long execute_bitcount_command(const void *glide_client, const char *key, size_t key_len, long start, long end, int bybit)
+int execute_bitcount_command(const void *glide_client, const char *key, size_t key_len, long start, long end, int bybit, long *output_value)
 {
     /* Check if client and key are valid */
     if (!glide_client || !key)
     {
-        return -1;
+        return 0;
     }
 
     /* Prepare command arguments */
@@ -149,7 +149,7 @@ long execute_bitcount_command(const void *glide_client, const char *key, size_t 
     char *start_str = long_to_string(start, &start_len);
     if (!start_str)
     {
-        return -1;
+        return 0;
     }
     args[1] = (uintptr_t)start_str;
     args_len[1] = start_len;
@@ -160,7 +160,7 @@ long execute_bitcount_command(const void *glide_client, const char *key, size_t 
     if (!end_str)
     {
         free(start_str);
-        return -1;
+        return 0;
     }
     args[2] = (uintptr_t)end_str;
     args_len[2] = end_len;
@@ -186,26 +186,16 @@ long execute_bitcount_command(const void *glide_client, const char *key, size_t 
     free(end_str);
 
     /* Use the generic handler to process the result */
-    long output_value = -1;
-    if (handle_int_response(result, &output_value))
-    {
-        /* Command succeeded */
-        return output_value;
-    }
-    else
-    {
-        /* Command failed */
-        return -1;
-    }
+    return handle_int_response(result, output_value);
 }
 
 /* Execute a BITOP command using the Valkey Glide client */
-long execute_bitop_command(const void *glide_client, const char *op, size_t op_len, const char *dst, size_t dst_len, zval *keys, int keys_count)
+int execute_bitop_command(const void *glide_client, const char *op, size_t op_len, const char *dst, size_t dst_len, zval *keys, int keys_count, long *output_value)
 {
     /* Check if client, op, dst, and keys are valid */
     if (!glide_client || !op || !dst || !keys || keys_count <= 0)
     {
-        return -1;
+        return 0;
     }
 
     /* Prepare command arguments */
@@ -219,7 +209,7 @@ long execute_bitop_command(const void *glide_client, const char *op, size_t op_l
             free(args);
         if (args_len)
             free(args_len);
-        return -1;
+        return 0;
     }
 
     /* First argument: operation (AND, OR, XOR, NOT) */
@@ -239,7 +229,7 @@ long execute_bitop_command(const void *glide_client, const char *op, size_t op_l
         {
             free(args);
             free(args_len);
-            return -1;
+            return 0;
         }
         args[2 + i] = (uintptr_t)Z_STRVAL_P(key);
         args_len[2 + i] = Z_STRLEN_P(key);
@@ -259,17 +249,7 @@ long execute_bitop_command(const void *glide_client, const char *op, size_t op_l
     free(args_len);
 
     /* Use the generic handler to process the result */
-    long output_value = -1;
-    if (handle_int_response(result, &output_value))
-    {
-        /* Command succeeded */
-        return output_value;
-    }
-    else
-    {
-        /* Command failed */
-        return -1;
-    }
+    return handle_int_response(result, output_value);
 }
 
 /* Execute a BITPOS command using the Valkey Glide client */
@@ -354,7 +334,7 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
     /* Check if client, key, and value are valid */
     if (!glide_client || !key || !val)
     {
-        return -1;
+        return 0;
     }
 
     /* Count the number of arguments */
@@ -433,7 +413,7 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
             free(args);
         if (args_len)
             free(args_len);
-        return -1;
+        return 0;
     }
 
     /* First argument: key */
@@ -462,7 +442,7 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
         {
             free(args);
             free(args_len);
-            return -1;
+            return 0;
         }
         args[arg_idx] = (uintptr_t)expire_str;
         args_len[arg_idx] = expire_len;
@@ -524,7 +504,7 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
     /* Check if the command was successful */
     if (!result)
     {
-        return -1;
+        return 0;
     }
 
     /* Check if there was an error */
@@ -532,11 +512,11 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
     {
         printf("Error executing SET command: %s\n", result->command_error->command_error_message);
         free_command_result(result);
-        return -1;
+        return 0;
     }
 
     /* Process the result */
-    int ret_val = -1;
+    int ret_val = 0;
     if (result->response)
     {
         switch (result->response->response_type)
@@ -551,7 +531,7 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
             ret_val = 2; /* GET option returned a value */
             break;
         default:
-            ret_val = -1; /* Error */
+            ret_val = 0; /* Error */
             break;
         }
     }
@@ -566,21 +546,21 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
 int execute_setex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len)
 {
     printf("Deprectaed\n");
-    return -1;
+    return 0;
 }
 
 /* Execute a PSETEX command using the Valkey Glide client */
 int execute_psetex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len)
 {
     printf("Deprectaed\n");
-    return -1;
+    return 0;
 }
 
 /* Execute a SETNX command using the Valkey Glide client */
 int execute_setnx_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len)
 {
     printf("Deprectaed\n");
-    return -1;
+    return 0;
 }
 
 /* Function to close a Valkey Glide client */
@@ -596,13 +576,44 @@ void close_glide_client(const void *glide_client)
     close_client(glide_client);
 }
 
+/* Execute an ECHO command using the Valkey Glide client */
+int execute_echo_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len)
+{
+    /* Check if client is valid */
+    if (!glide_client || !msg)
+    {
+        return -1;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 1;
+    uintptr_t args[1];
+    unsigned long args_len[1];
+
+    /* First argument: message */
+    args[0] = (uintptr_t)msg;
+    args_len[0] = msg_len;
+
+    /* Execute the command */
+    CommandResult *cmd_result = execute_command(
+        glide_client,
+        Echo,      /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Use the generic handler to process the result */
+    return handle_string_response(cmd_result, result, result_len);
+}
+
 /* Execute a PING command using the Valkey Glide client */
 int execute_ping_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len)
 {
     /* Check if client is valid */
     if (!glide_client)
     {
-        return -1;
+        return 0;
     }
 
     /* Prepare command arguments */
@@ -648,7 +659,7 @@ int execute_info_command(const void *glide_client, const char *section, size_t s
     /* Check if client is valid */
     if (!glide_client)
     {
-        return -1;
+        return 0;
     }
 
     /* Prepare command arguments */
@@ -765,12 +776,12 @@ int execute_randomkey_command(const void *glide_client, char **result, size_t *r
 }
 
 /* Execute a GETBIT command using the Valkey Glide client */
-long execute_getbit_command(const void *glide_client, const char *key, size_t key_len, long offset)
+int execute_getbit_command(const void *glide_client, const char *key, size_t key_len, long offset, long *output_value)
 {
     /* Check if client and key are valid */
     if (!glide_client || !key)
     {
-        return -1;
+        return 0;
     }
 
     /* Prepare command arguments */
@@ -787,7 +798,7 @@ long execute_getbit_command(const void *glide_client, const char *key, size_t ke
     char *offset_str = long_to_string(offset, &offset_len);
     if (!offset_str)
     {
-        return -1;
+        return 0;
     }
     args[1] = (uintptr_t)offset_str;
     args_len[1] = offset_len;
@@ -805,26 +816,16 @@ long execute_getbit_command(const void *glide_client, const char *key, size_t ke
     free(offset_str);
 
     /* Use the generic handler to process the result */
-    long output_value = -1;
-    if (handle_int_response(result, &output_value))
-    {
-        /* Command succeeded */
-        return output_value;
-    }
-    else
-    {
-        /* Command failed */
-        return -1;
-    }
+    return handle_int_response(result, output_value);
 }
 
 /* Execute a SETBIT command using the Valkey Glide client */
-long execute_setbit_command(const void *glide_client, const char *key, size_t key_len, long offset, int value)
+int execute_setbit_command(const void *glide_client, const char *key, size_t key_len, long offset, int value, long *output_value)
 {
     /* Check if client and key are valid */
     if (!glide_client || !key)
     {
-        return -1;
+        return 0;
     }
 
     /* Prepare command arguments */
@@ -841,7 +842,7 @@ long execute_setbit_command(const void *glide_client, const char *key, size_t ke
     char *offset_str = long_to_string(offset, &offset_len);
     if (!offset_str)
     {
-        return -1;
+        return 0;
     }
     args[1] = (uintptr_t)offset_str;
     args_len[1] = offset_len;
@@ -866,26 +867,16 @@ long execute_setbit_command(const void *glide_client, const char *key, size_t ke
     free(offset_str);
 
     /* Use the generic handler to process the result */
-    long output_value = -1;
-    if (handle_int_response(result, &output_value))
-    {
-        /* Command succeeded */
-        return output_value;
-    }
-    else
-    {
-        /* Command failed */
-        return -1;
-    }
+    return handle_int_response(result, output_value);
 }
 
 /* Execute a DEL command using the Valkey Glide client */
-long execute_del_command(const void *glide_client, zval *keys, int keys_count)
+int execute_del_command(const void *glide_client, zval *keys, int keys_count, long *output_value)
 {
     /* Check if client and keys are valid */
     if (!glide_client || !keys || keys_count <= 0)
     {
-        return -1;
+        return 0;
     }
 
     /* Prepare command arguments */
@@ -899,7 +890,7 @@ long execute_del_command(const void *glide_client, zval *keys, int keys_count)
             free(args);
         if (args_len)
             free(args_len);
-        return -1;
+        return 0;
     }
 
     /* Add keys as arguments */
@@ -911,7 +902,7 @@ long execute_del_command(const void *glide_client, zval *keys, int keys_count)
         {
             free(args);
             free(args_len);
-            return -1;
+            return 0;
         }
         args[i] = (uintptr_t)Z_STRVAL_P(key);
         args_len[i] = Z_STRLEN_P(key);
@@ -931,26 +922,16 @@ long execute_del_command(const void *glide_client, zval *keys, int keys_count)
     free(args_len);
 
     /* Use the generic handler to process the result */
-    long output_value = -1;
-    if (handle_int_response(result, &output_value))
-    {
-        /* Command succeeded */
-        return output_value;
-    }
-    else
-    {
-        /* Command failed */
-        return -1;
-    }
+    return handle_int_response(result, output_value);
 }
 
 /* Execute a STRLEN command using the Valkey Glide client */
-long execute_strlen_command(const void *glide_client, const char *key, size_t key_len)
+int execute_strlen_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
 {
     /* Check if client and key are valid */
     if (!glide_client || !key)
     {
-        return -1;
+        return 0;
     }
 
     /* Prepare command arguments */
@@ -972,26 +953,16 @@ long execute_strlen_command(const void *glide_client, const char *key, size_t ke
     );
 
     /* Use the generic handler to process the result */
-    long output_value = -1;
-    if (handle_int_response(result, &output_value))
-    {
-        /* Command succeeded */
-        return output_value;
-    }
-    else
-    {
-        /* Command failed */
-        return -1;
-    }
+    return handle_int_response(result, output_value);
 }
 
 /* Execute a SETRANGE command using the Valkey Glide client */
-long execute_setrange_command(const void *glide_client, const char *key, size_t key_len, long offset, const char *value, size_t value_len)
+int execute_setrange_command(const void *glide_client, const char *key, size_t key_len, long offset, const char *value, size_t value_len, long *output_value)
 {
     /* Check if client, key, and value are valid */
     if (!glide_client || !key || !value)
     {
-        return -1;
+        return 0;
     }
 
     /* Prepare command arguments */
@@ -1008,7 +979,7 @@ long execute_setrange_command(const void *glide_client, const char *key, size_t 
     char *offset_str = long_to_string(offset, &offset_len);
     if (!offset_str)
     {
-        return -1;
+        return 0;
     }
     args[1] = (uintptr_t)offset_str;
     args_len[1] = offset_len;
@@ -1030,17 +1001,7 @@ long execute_setrange_command(const void *glide_client, const char *key, size_t 
     free(offset_str);
 
     /* Use the generic handler to process the result */
-    long output_value = -1;
-    if (handle_int_response(result, &output_value))
-    {
-        /* Command succeeded */
-        return output_value;
-    }
-    else
-    {
-        /* Command failed */
-        return -1;
-    }
+    return handle_int_response(result, output_value);
 }
 
 /* Helper function to prepare arguments for MPOP commands */
@@ -1067,13 +1028,13 @@ static int prepare_mpop_arguments(
     }
     else
     {
-        return -1; /* Keys must be an array */
+        return 0; /* Keys must be an array */
     }
 
     /* Check if we have at least one key */
     if (keys_count <= 0)
     {
-        return -1;
+        return 0;
     }
 
     /* Calculate the number of arguments */
@@ -1093,7 +1054,7 @@ static int prepare_mpop_arguments(
             free(args);
         if (args_len)
             free(args_len);
-        return -1;
+        return 0;
     }
 
     /* Current argument index */
@@ -1109,7 +1070,7 @@ static int prepare_mpop_arguments(
         {
             free(args);
             free(args_len);
-            return -1;
+            return 0;
         }
         args[arg_idx] = (uintptr_t)timeout_str;
         args_len[arg_idx] = timeout_len;
@@ -1129,7 +1090,7 @@ static int prepare_mpop_arguments(
             free(*timeout_str_ptr);
             *timeout_str_ptr = NULL;
         }
-        return -1;
+        return 0;
     }
     /* Debug output to see the value being passed */
     printf("LMPOP numkeys value: %s (keys_count: %d)\n", numkeys_str, keys_count);
@@ -1155,7 +1116,7 @@ static int prepare_mpop_arguments(
                 free(*timeout_str_ptr);
                 *timeout_str_ptr = NULL;
             }
-            return -1;
+            return 0;
         }
         args[arg_idx] = (uintptr_t)Z_STRVAL_P(z_key);
         args_len[arg_idx] = Z_STRLEN_P(z_key);
@@ -1189,7 +1150,7 @@ static int prepare_mpop_arguments(
                 free(*timeout_str_ptr);
                 *timeout_str_ptr = NULL;
             }
-            return -1;
+            return 0;
         }
 
         args = new_args;
@@ -1214,7 +1175,7 @@ static int prepare_mpop_arguments(
                 free(*timeout_str_ptr);
                 *timeout_str_ptr = NULL;
             }
-            return -1;
+            return 0;
         }
         args[arg_idx] = (uintptr_t)count_str;
         args_len[arg_idx] = count_len;
@@ -1279,7 +1240,7 @@ int execute_lmpop_command(const void *glide_client, const char *cmd, double time
     /* Check if client, keys, and from are valid */
     if (!glide_client || !keys || !from)
     {
-        return -1;
+        return 0;
     }
 
     /* Determine if this is a blocking command */
@@ -1301,7 +1262,7 @@ int execute_lmpop_command(const void *glide_client, const char *cmd, double time
 
     if (keys_count < 0)
     {
-        return -1;
+        return 0;
     }
 
     /* Determine the command type */
@@ -1332,7 +1293,7 @@ int execute_lmpop_command(const void *glide_client, const char *cmd, double time
     /* Check if the command was successful */
     if (!cmd_result)
     {
-        return -1;
+        return 0;
     }
 
     /* Check if there was an error */
@@ -1340,11 +1301,11 @@ int execute_lmpop_command(const void *glide_client, const char *cmd, double time
     {
         printf("Error executing %s command: %s\n", cmd, cmd_result->command_error->command_error_message);
         free_command_result(cmd_result);
-        return -1;
+        return 0;
     }
 
     /* Process the result */
-    int ret_val = -1;
+    int ret_val = 0;
     if (cmd_result->response)
     {
         printf("Response type: %d\n", cmd_result->response->response_type);
@@ -1366,7 +1327,7 @@ int execute_lmpop_command(const void *glide_client, const char *cmd, double time
                 if (cmd_result->response->map_key == NULL)
                 {
                     ZVAL_NULL(result);
-                    ret_val = -1;
+                    ret_val = 0;
                     break;
                 }
                 /* First element is the key */
@@ -1403,7 +1364,7 @@ int execute_lmpop_command(const void *glide_client, const char *cmd, double time
         default:
             /* Unexpected response type */
             ZVAL_NULL(result);
-            ret_val = -1;
+            ret_val = 0;
             break;
         }
     }
@@ -1420,7 +1381,7 @@ int execute_zmpop_command(const void *glide_client, const char *cmd, double time
     /* Check if client, keys, and from are valid */
     if (!glide_client || !keys || !from)
     {
-        return -1;
+        return 0;
     }
 
     /* Determine if this is a blocking command */
@@ -1442,7 +1403,7 @@ int execute_zmpop_command(const void *glide_client, const char *cmd, double time
 
     if (keys_count < 0)
     {
-        return -1;
+        return 0;
     }
 
     /* Determine the command type */
@@ -1473,7 +1434,7 @@ int execute_zmpop_command(const void *glide_client, const char *cmd, double time
     /* Check if the command was successful */
     if (!cmd_result)
     {
-        return -1;
+        return 0;
     }
 
     /* Check if there was an error */
@@ -1481,11 +1442,11 @@ int execute_zmpop_command(const void *glide_client, const char *cmd, double time
     {
         printf("Error executing %s command: %s\n", cmd, cmd_result->command_error->command_error_message);
         free_command_result(cmd_result);
-        return -1;
+        return 0;
     }
 
     /* Process the result */
-    int ret_val = -1;
+    int ret_val = 0;
     if (cmd_result->response)
     {
         switch (cmd_result->response->response_type)
@@ -1530,7 +1491,7 @@ int execute_zmpop_command(const void *glide_client, const char *cmd, double time
         default:
             /* Unexpected response type */
             ZVAL_NULL(result);
-            ret_val = -1;
+            ret_val = 0;
             break;
         }
     }
@@ -1547,7 +1508,7 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
     /* Check if client is valid */
     if (!glide_client)
     {
-        return -1;
+        return 0;
     }
 
     /* Check for list-based commands (LMPOP, BLMPOP) */
@@ -1563,6 +1524,6 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
     /* Unknown command type */
     else
     {
-        return -1;
+        return 0;
     }
 }

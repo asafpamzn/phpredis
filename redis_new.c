@@ -92,16 +92,17 @@ PHP_METHOD(Redis, bitop)
     if (redis->glide_client)
     {
         /* Execute the BITOP command using the Glide client */
-        long result = execute_bitop_command(redis->glide_client, op, op_len, key, key_len, keys, keys_count);
-
-        /* If the result is -1, there was an error */
-        if (result == -1)
+        long result_value;
+        if (execute_bitop_command(redis->glide_client, op, op_len, key, key_len, keys, keys_count, &result_value))
         {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
             RETURN_FALSE;
         }
-
-        /* Return the result */
-        RETURN_LONG(result);
     }
 }
 
@@ -131,16 +132,17 @@ PHP_METHOD(Redis, getBit)
     if (redis->glide_client)
     {
         /* Execute the GETBIT command using the Glide client */
-        long result = execute_getbit_command(redis->glide_client, key, key_len, offset);
-
-        /* If the result is -1, there was an error */
-        if (result == -1)
+        long result_value;
+        if (execute_getbit_command(redis->glide_client, key, key_len, offset, &result_value))
         {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
             RETURN_FALSE;
         }
-
-        /* Return the result */
-        RETURN_LONG(result);
     }
 }
 /* }}} */
@@ -170,16 +172,17 @@ PHP_METHOD(Redis, setBit)
     if (redis->glide_client)
     {
         /* Execute the SETBIT command using the Glide client */
-        long result = execute_setbit_command(redis->glide_client, key, key_len, offset, value ? 1 : 0);
-
-        /* If the result is -1, there was an error */
-        if (result == -1)
+        long result_value;
+        if (execute_setbit_command(redis->glide_client, key, key_len, offset, value ? 1 : 0, &result_value))
         {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
             RETURN_FALSE;
         }
-
-        /* Return the result */
-        RETURN_LONG(result);
     }
 }
 /* }}} */
@@ -206,16 +209,17 @@ PHP_METHOD(Redis, del)
     if (redis->glide_client)
     {
         /* Execute the DEL command using the Glide client */
-        long result = execute_del_command(redis->glide_client, keys, keys_count);
-
-        /* If the result is -1, there was an error */
-        if (result == -1)
+        long result_value;
+        if (execute_del_command(redis->glide_client, keys, keys_count, &result_value))
         {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
             RETURN_FALSE;
         }
-
-        /* Return the result */
-        RETURN_LONG(result);
     }
 }
 /* }}} */
@@ -246,16 +250,17 @@ PHP_METHOD(Redis, bitcount)
     if (redis->glide_client)
     {
         /* Execute the BITCOUNT command using the Glide client */
-        long result = execute_bitcount_command(redis->glide_client, key, key_len, start, end, bybit);
-
-        /* If the result is -1, there was an error */
-        if (result == -1)
+        long result_value;
+        if (execute_bitcount_command(redis->glide_client, key, key_len, start, end, bybit, &result_value))
         {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
             RETURN_FALSE;
         }
-
-        /* Return the result */
-        RETURN_LONG(result);
     }
 }
 /* }}} */
@@ -565,11 +570,6 @@ PHP_METHOD(Redis, get)
             RETURN_FALSE;
         }
     }
-    else
-    {
-        /* Fall back to the original implementation */
-        REDIS_PROCESS_KW_CMD("GET", redis_key_cmd, redis_string_response);
-    }
 }
 /* }}} */
 
@@ -650,18 +650,13 @@ PHP_METHOD(Redis, lcs)
         int ret = execute_lcs_command(redis->glide_client, key1, key1_len, key2, key2_len, options, &result);
 
         /* If the result is -1, there was an error */
-        if (ret == -1)
+        if (ret == 0)
         {
             RETURN_FALSE;
         }
 
         /* Return the result */
         RETURN_ZVAL(&result, 0, 1);
-    }
-    else
-    {
-        /* Fall back to the original implementation */
-        REDIS_PROCESS_CMD(lcs, redis_read_variant_reply);
     }
 }
 /* }}} */
@@ -690,21 +685,17 @@ PHP_METHOD(Redis, setRange)
     if (redis->glide_client)
     {
         /* Execute the SETRANGE command using the Glide client */
-        long result = execute_setrange_command(redis->glide_client, key, key_len, offset, val, val_len);
-
-        /* If the result is -1, there was an error */
-        if (result == -1)
+        long result_value;
+        if (execute_setrange_command(redis->glide_client, key, key_len, offset, val, val_len, &result_value))
         {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
             RETURN_FALSE;
         }
-
-        /* Return the result */
-        RETURN_LONG(result);
-    }
-    else
-    {
-        /* Fall back to the original implementation */
-        REDIS_PROCESS_KW_CMD("SETRANGE", redis_key_long_str_cmd, redis_long_response);
     }
 }
 /* }}} */
@@ -731,21 +722,17 @@ PHP_METHOD(Redis, strlen)
     if (redis->glide_client)
     {
         /* Execute the STRLEN command using the Glide client */
-        long result = execute_strlen_command(redis->glide_client, key, key_len);
-
-        /* If the result is -1, there was an error */
-        if (result == -1)
+        long result_value;
+        if (execute_strlen_command(redis->glide_client, key, key_len, &result_value))
         {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
             RETURN_FALSE;
         }
-
-        /* Return the result */
-        RETURN_LONG(result);
-    }
-    else
-    {
-        /* Fall back to the original implementation */
-        REDIS_PROCESS_KW_CMD("STRLEN", redis_key_cmd, redis_long_response);
     }
 }
 
@@ -780,18 +767,13 @@ PHP_METHOD(Redis, lmpop)
         int ret = execute_mpop_command(redis->glide_client, "LMPOP", 0.0, keys, from, from_len, count, &result);
 
         /* If the result is -1, there was an error */
-        if (ret == -1)
+        if (ret == 0)
         {
             RETURN_FALSE;
         }
 
         /* Return the result */
         RETURN_ZVAL(&result, 0, 1);
-    }
-    else
-    {
-        /* Fall back to the original implementation */
-        REDIS_PROCESS_KW_CMD("LMPOP", redis_mpop_cmd, redis_mpop_response);
     }
 }
 /* }}} */
@@ -828,18 +810,13 @@ PHP_METHOD(Redis, blmpop)
         int ret = execute_mpop_command(redis->glide_client, "BLMPOP", timeout, keys, from, from_len, count, &result);
 
         /* If the result is -1, there was an error */
-        if (ret == -1)
+        if (ret == 0)
         {
             RETURN_FALSE;
         }
 
         /* Return the result */
         RETURN_ZVAL(&result, 0, 1);
-    }
-    else
-    {
-        /* Fall back to the original implementation */
-        REDIS_PROCESS_KW_CMD("BLMPOP", redis_mpop_cmd, redis_mpop_response);
     }
 }
 /* }}} */
@@ -875,18 +852,13 @@ PHP_METHOD(Redis, zmpop)
         int ret = execute_mpop_command(redis->glide_client, "ZMPOP", 0.0, keys, from, from_len, count, &result);
 
         /* If the result is -1, there was an error */
-        if (ret == -1)
+        if (ret == 0)
         {
             RETURN_FALSE;
         }
 
         /* Return the result */
         RETURN_ZVAL(&result, 0, 1);
-    }
-    else
-    {
-        /* Fall back to the original implementation */
-        REDIS_PROCESS_KW_CMD("ZMPOP", redis_mpop_cmd, redis_mpop_response);
     }
 }
 /* }}} */
@@ -920,7 +892,7 @@ PHP_METHOD(Redis, rPush)
         long result = execute_rpush_command(redis->glide_client, key, key_len, z_args, argc);
 
         /* If the result is -1, there was an error */
-        if (result == -1)
+        if (result == 0)
         {
             RETURN_FALSE;
         }
