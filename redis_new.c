@@ -899,11 +899,12 @@ PHP_METHOD(Redis, rPush)
     int argc;
 
     /* Parse parameters */
-    ZEND_PARSE_PARAMETERS_START(2, -1)
-    Z_PARAM_OBJECT_OF_CLASS(object, redis_ce)
-    Z_PARAM_STRING(key, key_len)
-    Z_PARAM_VARIADIC('+', z_args, argc)
-    ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &argc) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
