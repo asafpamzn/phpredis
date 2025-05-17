@@ -1276,11 +1276,13 @@ int execute_lmpop_command(const void *glide_client, const char *cmd, double time
         switch (cmd_result->response->response_type)
         {
         case Null:
+            printf("Null\n");
             /* No elements popped */
             ZVAL_NULL(result);
             ret_val = 0;
             break;
         case Array:
+            printf("Array\n");
             /* Elements popped */
             array_init(result);
 
@@ -1313,6 +1315,7 @@ int execute_lmpop_command(const void *glide_client, const char *cmd, double time
             ret_val = 1;
             break;
         default:
+            printf("Default\n");
             /* Unexpected response type */
             ZVAL_NULL(result);
             ret_val = -1;
