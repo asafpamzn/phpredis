@@ -185,7 +185,7 @@ int execute_bitcount_command(const void *glide_client, const char *key, size_t k
     free(start_str);
     free(end_str);
 
-    /* Use the generic handler to process the result */
+    /* Use the generic handler to process the result using the new signature */
     return handle_int_response(result, output_value);
 }
 

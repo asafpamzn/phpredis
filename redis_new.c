@@ -28,6 +28,7 @@
 #include "redis_commands.h"
 #include "redis_sentinel.h"
 #include "redis_glide.h"
+#include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
 #include <ext/standard/info.h>
@@ -401,6 +402,24 @@ PHP_METHOD(Redis, set)
             /* Convert float to string */
             val = double_to_string(Z_DVAL_P(z_value), &val_len);
             free_val = 1; // We'll need to free this
+            break;
+        case IS_TRUE:
+            /* Convert boolean TRUE to "1" */
+            val = strdup("1");
+            val_len = 1;
+            free_val = 1;
+            break;
+        case IS_FALSE:
+            /* Convert boolean FALSE to "0" */
+            val = strdup("0");
+            val_len = 1;
+            free_val = 1;
+            break;
+        case IS_NULL:
+            /* Convert NULL to empty string */
+            val = strdup("");
+            val_len = 0;
+            free_val = 1;
             break;
         default:
             /* Unsupported type */

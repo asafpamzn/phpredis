@@ -487,7 +487,7 @@ class Redis_Test extends TestSuite {
         $this->assertKeyEquals('-ERR', 'x');
     }
 
-    public function testSet1111() {
+    public function testSet() {
         $this->assertTrue($this->redis->set('key', 'nil'));
         $this->assertKeyEquals('nil', 'key');
 
@@ -511,51 +511,51 @@ class Redis_Test extends TestSuite {
         $this->redis->del('key');
         $this->redis->del('key2');
 
-        printf("line = %d\n", __LINE__);
+        
         $this->redis->set('key', $value2);
         $this->assertKeyEquals($value2, 'key');
         $this->redis->del('key');
         $this->assertKeyMissing('key');
 
 
-        printf("line = %d\n", __LINE__);
+        
         $data = gzcompress('42');
         $this->assertTrue($this->redis->set('key', $data));
         $this->assertEquals('42', gzuncompress($this->redis->get('key')));
 
 
-        printf("line = %d\n", __LINE__);
+        
         $this->redis->del('key');
         $data = gzcompress('value1');
         $this->assertTrue($this->redis->set('key', $data));
         $this->assertEquals('value1', gzuncompress($this->redis->get('key')));
 
-        printf("line = %d\n", __LINE__);
+        
         $this->redis->del('key');
 
-        printf("line = %d\n", __LINE__);
+        
         $this->assertTrue($this->redis->set('key', 0));
 
-        printf("line = %d\n", __LINE__);
+        
         $this->assertKeyEquals('0', 'key');
         $this->assertTrue($this->redis->set('key', 1));
         $this->assertKeyEquals('1', 'key');
         $this->assertTrue($this->redis->set('key', 0.1));
         $this->assertKeyEquals('0.1', 'key');
 
-        printf("line = %d\n", __LINE__);
+        
         $this->assertTrue($this->redis->set('key', '0.1'));
         $this->assertKeyEquals('0.1', 'key');
         $this->assertTrue($this->redis->set('key', true));
         $this->assertKeyEquals('1', 'key');
 
-        printf("line = %d\n", __LINE__);
+        
         $this->assertTrue($this->redis->set('key', ''));
         $this->assertKeyEquals('', 'key');
         $this->assertTrue($this->redis->set('key', NULL));
         $this->assertKeyEquals('', 'key');
 
-        printf("line = %d\n", __LINE__);
+        
         $this->assertTrue($this->redis->set('key', gzcompress('42')));
         $this->assertEquals('42', gzuncompress($this->redis->get('key')));
         
