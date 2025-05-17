@@ -39,10 +39,11 @@ CommandResult *execute_command(
 
 /*
  * Handle an integer response
- * Returns the integer value or -1 on error
+ * Returns 0 on error, 1 on success
+ * The output_value parameter is set to the integer value on success
  * This function frees the CommandResult
  */
-long handle_int_response(CommandResult *result);
+long handle_int_response(CommandResult *result, long *output_value);
 
 /*
  * Handle a string response

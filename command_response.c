@@ -48,12 +48,12 @@ CommandResult *execute_command(
 }
 
 /* Handle an integer response */
-long handle_int_response(CommandResult *result)
+long handle_int_response(CommandResult *result, long *output_value)
 {
     /* Check if the command was successful */
     if (!result)
     {
-        return -1;
+        return 0; /* False - failure */
     }
 
     /* Check if there was an error */
@@ -61,20 +61,22 @@ long handle_int_response(CommandResult *result)
     {
         printf("Error executing command: %s\n", result->command_error->command_error_message);
         free_command_result(result);
-        return -1;
+        return 0; /* False - failure */
     }
 
     /* Get the result value */
-    long value = -1;
     if (result->response && result->response->response_type == Int)
     {
-        value = result->response->int_value;
+        *output_value = result->response->int_value;
+
+        /* Free the result */
+        free_command_result(result);
+        return 1; /* True - success */
     }
 
-    /* Free the result */
+    /* Unexpected response type */
     free_command_result(result);
-
-    return value;
+    return 0; /* False - failure */
 }
 
 /* Handle a string response */

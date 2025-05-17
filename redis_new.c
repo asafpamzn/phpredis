@@ -269,6 +269,7 @@ PHP_METHOD(Redis, bitpos)
     size_t key_len;
     zend_long bit, start = 0, end = -1;
     zend_bool bybit = 0;
+    long result_value;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osl|llb",
@@ -284,18 +285,21 @@ PHP_METHOD(Redis, bitpos)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the BITPOS command using the Glide client */
-        long result = execute_bitpos_command(redis->glide_client, key, key_len, bit, start, end, bybit);
-
-        /* If the result is -1, there was an error */
-        if (result == -1)
+        /* Execute the BITPOS command using the Glide client with new output parameter pattern */
+        if (execute_bitpos_command(redis->glide_client, key, key_len, bit, start, end, bybit, &result_value))
         {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
             RETURN_FALSE;
         }
-
-        /* Return the result */
-        RETURN_LONG(result);
     }
+
+    /* If no Glide client, pass through to original implementation */
+    REDIS_PROCESS_CMD(bitpos, redis_long_response);
 }
 /* }}} */
 

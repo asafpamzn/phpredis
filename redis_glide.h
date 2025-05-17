@@ -97,7 +97,7 @@ extern const void *create_glide_client(ClientConfig *config);
 /* Bit operations */
 extern long execute_bitcount_command(const void *glide_client, const char *key, size_t key_len, long start, long end, int bybit);
 extern long execute_bitop_command(const void *glide_client, const char *op, size_t op_len, const char *dst, size_t dst_len, zval *keys, int keys_count);
-extern long execute_bitpos_command(const void *glide_client, const char *key, size_t key_len, long bit, long start, long end, int bybit);
+extern int execute_bitpos_command(const void *glide_client, const char *key, size_t key_len, long bit, long start, long end, int bybit, long *output_value);
 
 /* String operations */
 extern int execute_set_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, long expire, zval *opts);
