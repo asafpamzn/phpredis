@@ -1202,6 +1202,7 @@ static void process_sorted_set_elements(struct CommandResponse *elements_resp, z
 /* Execute an LMPOP or BLMPOP command (for list operations) using the Valkey Glide client */
 int execute_lmpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result)
 {
+    printf("Exectute lmpop command\n");
     /* Check if client, keys, and from are valid */
     if (!glide_client || !keys || !from)
     {
@@ -1273,39 +1274,51 @@ int execute_lmpop_command(const void *glide_client, const char *cmd, double time
     int ret_val = -1;
     if (cmd_result->response)
     {
+        printf("Response type: %d\n", cmd_result->response->response_type);
         switch (cmd_result->response->response_type)
         {
         case Null:
-            printf("Null\n");
             /* No elements popped */
             ZVAL_NULL(result);
             ret_val = 0;
             break;
-        case Array:
-            printf("Array\n");
+        case Map:
             /* Elements popped */
             array_init(result);
 
-            /* Process the array response */
-            if (cmd_result->response->array_value_len >= 2)
+            /* Process the map response - we need to format it as a specific array structure */
+            if (cmd_result->response->array_value_len >= 1)
             {
+                printf("cmd_result->response->map_key = %p\n", cmd_result->response->map_key);
+                if (cmd_result->response->map_key == NULL)
+                {
+                    ZVAL_NULL(result);
+                    ret_val = -1;
+                    break;
+                }
                 /* First element is the key */
-                struct CommandResponse *key_resp = &cmd_result->response->array_value[0];
+                struct CommandResponse *key_resp = &cmd_result->response->map_key[0];
                 if (key_resp->response_type == String)
                 {
-                    /* Add key to result array */
+                    /* Add key to result array as first element */
                     add_next_index_stringl(result, key_resp->string_value, key_resp->string_value_len);
 
                     /* Second element is the array of popped elements */
-                    struct CommandResponse *elements_resp = &cmd_result->response->array_value[1];
+                    struct CommandResponse *elements_resp = &cmd_result->response->map_value[0];
                     if (elements_resp->response_type == Array)
                     {
                         /* Create array for elements */
                         zval elements_array;
                         array_init(&elements_array);
 
-                        /* Process list elements */
-                        process_list_elements(elements_resp, &elements_array);
+                        /* Use command_response_to_zval to process each list element */
+                        for (int i = 0; i < elements_resp->array_value_len; i++)
+                        {
+                            zval element;
+                            struct CommandResponse *elem_resp = &elements_resp->array_value[i];
+                            command_response_to_zval(elem_resp, &element);
+                            add_next_index_zval(&elements_array, &element);
+                        }
 
                         /* Add elements array to result */
                         add_next_index_zval(result, &elements_array);
@@ -1315,7 +1328,6 @@ int execute_lmpop_command(const void *glide_client, const char *cmd, double time
             ret_val = 1;
             break;
         default:
-            printf("Default\n");
             /* Unexpected response type */
             ZVAL_NULL(result);
             ret_val = -1;
