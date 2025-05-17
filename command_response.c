@@ -103,18 +103,36 @@ int handle_string_response(CommandResult *result, char **output, size_t *output_
         switch (result->response->response_type)
         {
         case String:
-            /* Command returns a string */
+            /* Command returns a string/binary data */
             if (result->response->string_value_len == 0)
             {
-                *output = strdup("");
+                *output = malloc(1); // Allocate at least one byte
+                if (*output)
+                {
+                    (*output)[0] = '\0'; // Empty string is still null-terminated
+                }
                 *output_len = 0;
             }
             else
             {
-                *output = strdup(result->response->string_value);
+                // Allocate exact size needed for binary data
+                *output = malloc(result->response->string_value_len);
+                if (*output)
+                {
+                    // Copy binary data without assuming null-termination
+                    memcpy(*output, result->response->string_value, result->response->string_value_len);
+                }
                 *output_len = result->response->string_value_len;
             }
-            ret_val = 1;
+            // Check if allocation failed
+            if (!*output)
+            {
+                ret_val = -1; // Memory allocation failed
+            }
+            else
+            {
+                ret_val = 1; // Success
+            }
             break;
         case Null:
             /* Key didn't exist, return NULL */
@@ -218,10 +236,36 @@ int handle_null_or_string_response(CommandResult *result, char **output, size_t 
         switch (result->response->response_type)
         {
         case String:
-            /* Command returns a string */
-            *output = strdup(result->response->string_value);
-            *output_len = result->response->string_value_len;
-            ret_val = 1;
+            /* Command returns a string/binary data */
+            if (result->response->string_value_len == 0)
+            {
+                *output = malloc(1); // Allocate at least one byte
+                if (*output)
+                {
+                    (*output)[0] = '\0'; // Empty string is still null-terminated
+                }
+                *output_len = 0;
+            }
+            else
+            {
+                // Allocate exact size needed for binary data
+                *output = malloc(result->response->string_value_len);
+                if (*output)
+                {
+                    // Copy binary data without assuming null-termination
+                    memcpy(*output, result->response->string_value, result->response->string_value_len);
+                }
+                *output_len = result->response->string_value_len;
+            }
+            // Check if allocation failed
+            if (!*output)
+            {
+                ret_val = -1; // Memory allocation failed
+            }
+            else
+            {
+                ret_val = 1; // Success
+            }
             break;
         case Null:
             /* Key didn't exist, return NULL */

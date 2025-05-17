@@ -45,6 +45,9 @@
 
 #include "library.h"
 
+/* Import the long_to_string function from command_response.c */
+extern char *long_to_string(long value, size_t *len);
+
 #ifdef HAVE_REDIS_ZSTD
 #include <zstd.h>
 #endif
@@ -376,12 +379,42 @@ PHP_METHOD(Redis, set)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Convert value to string if needed */
-        val = Z_STRVAL_P(z_value);
-        val_len = Z_STRLEN_P(z_value);
+        char *val = NULL;
+        size_t val_len = 0;
+        int free_val = 0; // Flag to track if we need to free val
+
+        /* Convert value based on its type */
+        switch (Z_TYPE_P(z_value))
+        {
+        case IS_STRING:
+            /* It's already a string, use directly */
+            val = Z_STRVAL_P(z_value);
+            val_len = Z_STRLEN_P(z_value);
+            break;
+        case IS_LONG:
+            /* Convert integer to string */
+            val = long_to_string(Z_LVAL_P(z_value), &val_len);
+            free_val = 1; // We'll need to free this
+            break;
+        default:
+            /* Unsupported type */
+            RETURN_FALSE;
+        }
+
+        /* Check if conversion succeeded for integer case */
+        if (!val)
+        {
+            RETURN_FALSE;
+        }
 
         /* Execute the SET command using the Glide client */
         int result = execute_set_command(redis->glide_client, key, key_len, val, val_len, expire, z_opts);
+
+        /* Free the allocated string if needed */
+        if (free_val)
+        {
+            free(val);
+        }
 
         /* Process the result */
         switch (result)
