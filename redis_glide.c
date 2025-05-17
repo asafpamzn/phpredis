@@ -198,46 +198,20 @@ long execute_bitcount_command(const void *glide_client, const char *key, size_t 
     }
 
     /* Execute the command */
-    CommandResult *result = command(
+    CommandResult *result = execute_command(
         glide_client,
-        0,         /* channel */
         BitCount,  /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
     /* Free the argument strings */
     free(start_str);
     free(end_str);
 
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing BITCOUNT command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return -1;
-    }
-
-    /* Get the result value */
-    long value = -1;
-    if (result->response && result->response->response_type == Int)
-    {
-        value = result->response->int_value;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return value;
+    /* Use the generic handler to process the result */
+    return handle_int_response(result);
 }
 
 /* Execute a BITOP command using the Valkey Glide client */
@@ -287,46 +261,20 @@ long execute_bitop_command(const void *glide_client, const char *op, size_t op_l
     }
 
     /* Execute the command */
-    CommandResult *result = command(
+    CommandResult *result = execute_command(
         glide_client,
-        0,         /* channel */
         BitOp,     /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
     /* Free the argument arrays */
     free(args);
     free(args_len);
 
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing BITOP command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return -1;
-    }
-
-    /* Get the result value */
-    long value = -1;
-    if (result->response && result->response->response_type == Int)
-    {
-        value = result->response->int_value;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return value;
+    /* Use the generic handler to process the result */
+    return handle_int_response(result);
 }
 
 /* Execute a BITPOS command using the Valkey Glide client */
@@ -388,15 +336,12 @@ long execute_bitpos_command(const void *glide_client, const char *key, size_t ke
     }
 
     /* Execute the command */
-    CommandResult *result = command(
+    CommandResult *result = execute_command(
         glide_client,
-        0,         /* channel */
         BitPos,    /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
     /* Free the argument strings */
@@ -404,31 +349,8 @@ long execute_bitpos_command(const void *glide_client, const char *key, size_t ke
     free(start_str);
     free(end_str);
 
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing BITPOS command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return -1;
-    }
-
-    /* Get the result value */
-    long value = -1;
-    if (result->response && result->response->response_type == Int)
-    {
-        value = result->response->int_value;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return value;
+    /* Use the generic handler to process the result */
+    return handle_int_response(result);
 }
 
 /* Execute a SET command using the Valkey Glide client */
@@ -701,59 +623,28 @@ int execute_ping_command(const void *glide_client, const char *msg, size_t msg_l
     }
 
     /* Execute the command */
-    CommandResult *cmd_result = command(
+    CommandResult *cmd_result = execute_command(
         glide_client,
-        0,         /* channel */
         Ping,      /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
-    /* Check if the command was successful */
-    if (!cmd_result)
+    /* Special handling for PING command */
+    if (cmd_result && cmd_result->response && cmd_result->response->response_type == Ok)
     {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (cmd_result->command_error)
-    {
-        printf("Error executing PING command: %s\n", cmd_result->command_error->command_error_message);
+        /* PONG response with no message */
+        *result = strdup("PONG");
+        *result_len = 4;
         free_command_result(cmd_result);
-        return -1;
+        return 1;
     }
-
-    /* Process the result */
-    int ret_val = -1;
-    if (cmd_result->response)
+    else
     {
-        switch (cmd_result->response->response_type)
-        {
-        case Ok:
-            /* PONG response with no message */
-            *result = strdup("PONG");
-            *result_len = 4;
-            ret_val = 1;
-            break;
-        case String:
-            /* PING with message returns the message */
-            *result = strdup(cmd_result->response->string_value);
-            *result_len = cmd_result->response->string_value_len;
-            ret_val = 1;
-            break;
-        default:
-            ret_val = -1;
-            break;
-        }
+        /* Use the generic handler for string responses */
+        return handle_string_response(cmd_result, result, result_len);
     }
-
-    /* Free the result */
-    free_command_result(cmd_result);
-
-    return ret_val;
 }
 
 /* Execute an INFO command using the Valkey Glide client */
@@ -778,45 +669,16 @@ int execute_info_command(const void *glide_client, const char *section, size_t s
     }
 
     /* Execute the command */
-    CommandResult *cmd_result = command(
+    CommandResult *cmd_result = execute_command(
         glide_client,
-        0,         /* channel */
         Info,      /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
-    /* Check if the command was successful */
-    if (!cmd_result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (cmd_result->command_error)
-    {
-        printf("Error executing INFO command: %s\n", cmd_result->command_error->command_error_message);
-        free_command_result(cmd_result);
-        return -1;
-    }
-
-    /* Process the result */
-    int ret_val = -1;
-    if (cmd_result->response && cmd_result->response->response_type == String)
-    {
-        /* INFO returns a string with the server information */
-        *result = strdup(cmd_result->response->string_value);
-        *result_len = cmd_result->response->string_value_len;
-        ret_val = 1;
-    }
-
-    /* Free the result */
-    free_command_result(cmd_result);
-
-    return ret_val;
+    /* Use the generic handler to process the result */
+    return handle_string_response(cmd_result, result, result_len);
 }
 
 /* Execute a GETSET command using the Valkey Glide client */
@@ -842,59 +704,16 @@ int execute_getset_command(const void *glide_client, const char *key, size_t key
     args_len[1] = val_len;
 
     /* Execute the command */
-    CommandResult *cmd_result = command(
+    CommandResult *cmd_result = execute_command(
         glide_client,
-        0,         /* channel */
         GetSet,    /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
-    /* Check if the command was successful */
-    if (!cmd_result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (cmd_result->command_error)
-    {
-        printf("Error executing GETSET command: %s\n", cmd_result->command_error->command_error_message);
-        free_command_result(cmd_result);
-        return -1;
-    }
-
-    /* Process the result */
-    int ret_val = -1;
-    if (cmd_result->response)
-    {
-        switch (cmd_result->response->response_type)
-        {
-        case String:
-            /* GETSET returns the old value */
-            *result = strdup(cmd_result->response->string_value);
-            *result_len = cmd_result->response->string_value_len;
-            ret_val = 1;
-            break;
-        case Null:
-            /* Key didn't exist, return NULL */
-            *result = NULL;
-            *result_len = 0;
-            ret_val = 0;
-            break;
-        default:
-            ret_val = -1;
-            break;
-        }
-    }
-
-    /* Free the result */
-    free_command_result(cmd_result);
-
-    return ret_val;
+    /* Use the generic handler to process the result */
+    return handle_string_response(cmd_result, result, result_len);
 }
 
 /* Execute a GET command using the Valkey Glide client */
@@ -916,59 +735,16 @@ int execute_get_command(const void *glide_client, const char *key, size_t key_le
     args_len[0] = key_len;
 
     /* Execute the command */
-    CommandResult *cmd_result = command(
+    CommandResult *cmd_result = execute_command(
         glide_client,
-        0,         /* channel */
         Get,       /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
-    /* Check if the command was successful */
-    if (!cmd_result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (cmd_result->command_error)
-    {
-        printf("Error executing GET command: %s\n", cmd_result->command_error->command_error_message);
-        free_command_result(cmd_result);
-        return -1;
-    }
-
-    /* Process the result */
-    int ret_val = -1;
-    if (cmd_result->response)
-    {
-        switch (cmd_result->response->response_type)
-        {
-        case String:
-            /* GET returns the value */
-            *result = strdup(cmd_result->response->string_value);
-            *result_len = cmd_result->response->string_value_len;
-            ret_val = 1;
-            break;
-        case Null:
-            /* Key didn't exist, return NULL */
-            *result = NULL;
-            *result_len = 0;
-            ret_val = 0;
-            break;
-        default:
-            ret_val = -1;
-            break;
-        }
-    }
-
-    /* Free the result */
-    free_command_result(cmd_result);
-
-    return ret_val;
+    /* Use the generic handler to process the result */
+    return handle_string_response(cmd_result, result, result_len);
 }
 
 /* Execute a RANDOMKEY command using the Valkey Glide client */
@@ -981,59 +757,16 @@ int execute_randomkey_command(const void *glide_client, char **result, size_t *r
     }
 
     /* Execute the command (no arguments needed) */
-    CommandResult *cmd_result = command(
+    CommandResult *cmd_result = execute_command(
         glide_client,
-        0,         /* channel */
         RandomKey, /* command type */
         0,         /* number of arguments */
         NULL,      /* arguments */
-        NULL,      /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        NULL       /* argument lengths */
     );
 
-    /* Check if the command was successful */
-    if (!cmd_result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (cmd_result->command_error)
-    {
-        printf("Error executing RANDOMKEY command: %s\n", cmd_result->command_error->command_error_message);
-        free_command_result(cmd_result);
-        return -1;
-    }
-
-    /* Process the result */
-    int ret_val = -1;
-    if (cmd_result->response)
-    {
-        switch (cmd_result->response->response_type)
-        {
-        case String:
-            /* RANDOMKEY returns a random key */
-            *result = strdup(cmd_result->response->string_value);
-            *result_len = cmd_result->response->string_value_len;
-            ret_val = 1;
-            break;
-        case Null:
-            /* No keys in the database */
-            *result = NULL;
-            *result_len = 0;
-            ret_val = 0;
-            break;
-        default:
-            ret_val = -1;
-            break;
-        }
-    }
-
-    /* Free the result */
-    free_command_result(cmd_result);
-
-    return ret_val;
+    /* Use the generic handler to process the result */
+    return handle_string_response(cmd_result, result, result_len);
 }
 
 /* Execute a GETBIT command using the Valkey Glide client */
@@ -1065,45 +798,19 @@ long execute_getbit_command(const void *glide_client, const char *key, size_t ke
     args_len[1] = offset_len;
 
     /* Execute the command */
-    CommandResult *result = command(
+    CommandResult *result = execute_command(
         glide_client,
-        0,         /* channel */
         GetBit,    /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
     /* Free the argument strings */
     free(offset_str);
 
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing GETBIT command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return -1;
-    }
-
-    /* Get the result value */
-    long value = -1;
-    if (result->response && result->response->response_type == Int)
-    {
-        value = result->response->int_value;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return value;
+    /* Use the generic handler to process the result */
+    return handle_int_response(result);
 }
 
 /* Execute a SETBIT command using the Valkey Glide client */
@@ -1142,45 +849,19 @@ long execute_setbit_command(const void *glide_client, const char *key, size_t ke
     args_len[2] = 1;
 
     /* Execute the command */
-    CommandResult *result = command(
+    CommandResult *result = execute_command(
         glide_client,
-        0,         /* channel */
         SetBit,    /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
     /* Free the argument strings */
     free(offset_str);
 
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing SETBIT command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return -1;
-    }
-
-    /* Get the result value */
-    long value_result = -1;
-    if (result->response && result->response->response_type == Int)
-    {
-        value_result = result->response->int_value;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return value_result;
+    /* Use the generic handler to process the result */
+    return handle_int_response(result);
 }
 
 /* Execute a DEL command using the Valkey Glide client */
@@ -1222,46 +903,20 @@ long execute_del_command(const void *glide_client, zval *keys, int keys_count)
     }
 
     /* Execute the command */
-    CommandResult *result = command(
+    CommandResult *result = execute_command(
         glide_client,
-        0,         /* channel */
         Del,       /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
     /* Free the argument arrays */
     free(args);
     free(args_len);
 
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing DEL command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return -1;
-    }
-
-    /* Get the result value */
-    long value = -1;
-    if (result->response && result->response->response_type == Int)
-    {
-        value = result->response->int_value;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return value;
+    /* Use the generic handler to process the result */
+    return handle_int_response(result);
 }
 
 /* Execute a STRLEN command using the Valkey Glide client */
@@ -1283,42 +938,16 @@ long execute_strlen_command(const void *glide_client, const char *key, size_t ke
     args_len[0] = key_len;
 
     /* Execute the command */
-    CommandResult *result = command(
+    CommandResult *result = execute_command(
         glide_client,
-        0,         /* channel */
         Strlen,    /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing STRLEN command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return -1;
-    }
-
-    /* Get the result value */
-    long value = -1;
-    if (result->response && result->response->response_type == Int)
-    {
-        value = result->response->int_value;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return value;
+    /* Use the generic handler to process the result */
+    return handle_int_response(result);
 }
 
 /* Execute a SETRANGE command using the Valkey Glide client */
@@ -1354,45 +983,19 @@ long execute_setrange_command(const void *glide_client, const char *key, size_t 
     args_len[2] = value_len;
 
     /* Execute the command */
-    CommandResult *result = command(
+    CommandResult *result = execute_command(
         glide_client,
-        0,         /* channel */
         SetRange,  /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
     /* Free the argument strings */
     free(offset_str);
 
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing SETRANGE command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return -1;
-    }
-
-    /* Get the result value */
-    long value_result = -1;
-    if (result->response && result->response->response_type == Int)
-    {
-        value_result = result->response->int_value;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return value_result;
+    /* Use the generic handler to process the result */
+    return handle_int_response(result);
 }
 
 /* Execute an LCS command using the Valkey Glide client */

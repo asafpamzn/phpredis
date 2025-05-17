@@ -135,4 +135,7 @@ extern long execute_setrange_command(const void *glide_client, const char *key, 
 extern int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_len, const char *key2, size_t key2_len, zval *options, zval *result);
 extern int execute_mpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
 
+/* Include command_response.h after all declarations to avoid circular dependencies */
+#include "command_response.h"
+
 #endif /* REDIS_GLIDE_H */
