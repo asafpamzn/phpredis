@@ -1048,15 +1048,12 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
     }
 
     /* Execute the command */
-    CommandResult *cmd_result = command(
+    CommandResult *cmd_result = execute_command(
         glide_client,
-        0,         /* channel */
         LCS,       /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
+        args_len   /* argument lengths */
     );
 
     /* Check if the command was successful */
@@ -1065,150 +1062,40 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
         return -1;
     }
 
-    /* Check if there was an error */
-    if (cmd_result->command_error)
-    {
-        printf("Error executing LCS command: %s\n", cmd_result->command_error->command_error_message);
-        free_command_result(cmd_result);
-        return -1;
-    }
-
     /* Process the result based on the response type */
-    printf("cmd_result->response->response_type: %d\n", cmd_result->response->response_type);
+    int ret_val = -1;
     if (cmd_result->response)
     {
         switch (cmd_result->response->response_type)
         {
         case String:
             /* If no options were specified, LCS returns the longest common substring as a string */
-            ZVAL_STRINGL(result, cmd_result->response->string_value, cmd_result->response->string_value_len);
-            free_command_result(cmd_result);
-            return 1;
+            command_response_to_zval(cmd_result->response, result);
+            ret_val = 1;
+            break;
 
         case Int:
             /* If LEN option was specified, LCS returns the length as an integer */
             ZVAL_LONG(result, cmd_result->response->int_value);
-            free_command_result(cmd_result);
-            return 1;
+            ret_val = 1;
+            break;
 
         case Map:
             /* If IDX option was specified, LCS returns a map structure */
-            /* According to the Rust code, this should be a map with keys like "matches" and "len" */
-            /* In PHP, we represent this as an array with alternating keys and values */
-            array_init(result);
-
-            /* Process the map response */
-            if (cmd_result->response->map_key && cmd_result->response->map_value)
-            {
-                /* Iterate through the map entries */
-                for (int i = 0; i < cmd_result->response->array_value_len; i++)
-                {
-                    /* Get the key and value */
-                    struct CommandResponse *key = &cmd_result->response->map_key[i];
-                    struct CommandResponse *value = &cmd_result->response->map_value[i];
-
-                    /* Process based on key type */
-                    if (key->response_type == String && strcmp(key->string_value, "matches") == 0)
-                    {
-                        /* Add 'matches' key */
-                        add_next_index_string(result, "matches");
-
-                        /* Process matches array */
-                        if (value->response_type == Array)
-                        {
-                            /* Create matches array */
-                            zval matches_array;
-                            array_init(&matches_array);
-
-                            /* Add matches to array */
-                            for (int j = 0; j < value->array_value_len; j++)
-                            {
-                                /* Process each match */
-                                struct CommandResponse *match = &value->array_value[j];
-                                if (match->response_type == Array)
-                                {
-                                    /* Create match array */
-                                    zval match_array;
-                                    array_init(&match_array);
-
-                                    /* Add positions to match array */
-                                    for (int k = 0; k < match->array_value_len; k++)
-                                    {
-                                        /* Process each position pair */
-                                        struct CommandResponse *pos_pair = &match->array_value[k];
-                                        if (pos_pair->response_type == Array && pos_pair->array_value_len == 2)
-                                        {
-                                            /* Create position array */
-                                            zval pos_array;
-                                            array_init(&pos_array);
-
-                                            /* Add start and end positions */
-                                            add_next_index_long(&pos_array, pos_pair->array_value[0].int_value);
-                                            add_next_index_long(&pos_array, pos_pair->array_value[1].int_value);
-
-                                            /* Add position array to match array */
-                                            add_next_index_zval(&match_array, &pos_array);
-                                        }
-                                    }
-
-                                    /* Add match array to matches array */
-                                    add_next_index_zval(&matches_array, &match_array);
-                                }
-                            }
-
-                            /* Add matches array to result */
-                            add_next_index_zval(result, &matches_array);
-                        }
-                        else
-                        {
-                            /* If not an array, add an empty array */
-                            zval empty_array;
-                            array_init(&empty_array);
-                            add_next_index_zval(result, &empty_array);
-                        }
-                    }
-                    else if (key->response_type == String && strcmp(key->string_value, "len") == 0)
-                    {
-                        /* Add 'len' key */
-                        add_next_index_string(result, "len");
-
-                        /* Add length value */
-                        if (value->response_type == Int)
-                        {
-                            add_next_index_long(result, value->int_value);
-                        }
-                        else
-                        {
-                            /* Default length if not available */
-                            add_next_index_long(result, 0);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                /* If map is not available, create a default structure */
-                add_next_index_string(result, "matches");
-                zval empty_array;
-                array_init(&empty_array);
-                add_next_index_zval(result, &empty_array);
-                add_next_index_string(result, "len");
-                add_next_index_long(result, 0);
-            }
-
-            free_command_result(cmd_result);
-            return 1;
+            ret_val = handle_map_response(cmd_result, result);
+            return ret_val; /* handle_map_response already frees cmd_result */
 
         default:
             /* Unsupported response type */
-            free_command_result(cmd_result);
-            return -1;
+            ret_val = -1;
+            break;
         }
     }
 
-    /* If we get here, something went wrong */
+    /* Free the result */
     free_command_result(cmd_result);
-    return -1;
+
+    return ret_val;
 }
 
 /* Execute an MPOP command (LMPOP, BLMPOP, ZMPOP, BZMPOP) using the Valkey Glide client */
