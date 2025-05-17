@@ -973,15 +973,22 @@ long execute_setrange_command(const void *glide_client, const char *key, size_t 
     return handle_int_response(result);
 }
 
-/* Execute an MPOP command (LMPOP, BLMPOP, ZMPOP, BZMPOP) using the Valkey Glide client */
-int execute_mpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result)
+/* Helper function to prepare arguments for MPOP commands */
+static int prepare_mpop_arguments(
+    const void *glide_client,
+    int is_blocking,
+    double timeout,
+    zval *keys,
+    const char *from,
+    size_t from_len,
+    long count,
+    unsigned long *arg_count_ptr,
+    uintptr_t **args_ptr,
+    unsigned long **args_len_ptr,
+    char **numkeys_str_ptr,
+    char **timeout_str_ptr,
+    char **count_str_ptr)
 {
-    /* Check if client, keys, and from are valid */
-    if (!glide_client || !keys || !from)
-    {
-        return -1;
-    }
-
     /* Get the number of keys */
     int keys_count = 0;
     if (Z_TYPE_P(keys) == IS_ARRAY)
@@ -999,11 +1006,8 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
         return -1;
     }
 
-    /* Determine if this is a blocking command */
-    int is_blocking = (strncmp(cmd, "B", 1) == 0);
-
     /* Calculate the number of arguments */
-    unsigned long arg_count = keys_count + 3; /* keys + numkeys + from + count */
+    unsigned long arg_count = keys_count + 2; /* numkeys + keys + direction */
     if (is_blocking)
     {
         arg_count++; /* Add timeout for blocking commands */
@@ -1039,8 +1043,28 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
         }
         args[arg_idx] = (uintptr_t)timeout_str;
         args_len[arg_idx] = timeout_len;
+        *timeout_str_ptr = timeout_str;
         arg_idx++;
     }
+
+    /* Add numkeys first (this should be the first argument after timeout for blocking commands) */
+    size_t numkeys_len;
+    char *numkeys_str = long_to_string(keys_count, &numkeys_len);
+    if (!numkeys_str)
+    {
+        free(args);
+        free(args_len);
+        if (is_blocking)
+        {
+            free(*timeout_str_ptr);
+            *timeout_str_ptr = NULL;
+        }
+        return -1;
+    }
+    args[arg_idx] = (uintptr_t)numkeys_str;
+    args_len[arg_idx] = numkeys_len;
+    *numkeys_str_ptr = numkeys_str;
+    arg_idx++;
 
     /* Add keys */
     HashTable *ht = Z_ARRVAL_P(keys);
@@ -1051,9 +1075,12 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
         {
             free(args);
             free(args_len);
+            free(numkeys_str);
+            *numkeys_str_ptr = NULL;
             if (is_blocking)
             {
-                free((void *)args[0]); /* Free the timeout string */
+                free(*timeout_str_ptr);
+                *timeout_str_ptr = NULL;
             }
             return -1;
         }
@@ -1063,29 +1090,7 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
     }
     ZEND_HASH_FOREACH_END();
 
-    /* Add numkeys */
-    size_t numkeys_len;
-    char *numkeys_str = long_to_string(keys_count, &numkeys_len);
-    if (!numkeys_str)
-    {
-        free(args);
-        free(args_len);
-        if (is_blocking)
-        {
-            free((void *)args[0]); /* Free the timeout string */
-        }
-        return -1;
-    }
-    args[arg_idx] = (uintptr_t)numkeys_str;
-    args_len[arg_idx] = numkeys_len;
-    arg_idx++;
-
-    /* Add FROM direction */
-    args[arg_idx] = (uintptr_t)"FROM";
-    args_len[arg_idx] = 4;
-    arg_idx++;
-
-    /* Add direction (LEFT or RIGHT) */
+    /* Add direction (LEFT or RIGHT) directly */
     args[arg_idx] = (uintptr_t)from;
     args_len[arg_idx] = from_len;
     arg_idx++;
@@ -1105,9 +1110,11 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
             free(args);
             free(args_len);
             free(numkeys_str);
+            *numkeys_str_ptr = NULL;
             if (is_blocking)
             {
-                free((void *)args[0]); /* Free the timeout string */
+                free(*timeout_str_ptr);
+                *timeout_str_ptr = NULL;
             }
             return -1;
         }
@@ -1128,51 +1135,103 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
             free(args);
             free(args_len);
             free(numkeys_str);
+            *numkeys_str_ptr = NULL;
             if (is_blocking)
             {
-                free((void *)args[0]); /* Free the timeout string */
+                free(*timeout_str_ptr);
+                *timeout_str_ptr = NULL;
             }
             return -1;
         }
         args[arg_idx] = (uintptr_t)count_str;
         args_len[arg_idx] = count_len;
+        *count_str_ptr = count_str;
         arg_idx++;
     }
 
-    /* Determine the command type */
-    enum RequestType cmd_type;
-    if (strcmp(cmd, "LMPOP") == 0)
+    /* Set output parameters */
+    *arg_count_ptr = arg_count;
+    *args_ptr = args;
+    *args_len_ptr = args_len;
+
+    return keys_count;
+}
+
+/* Process list elements from LMPOP/BLMPOP response */
+static void process_list_elements(struct CommandResponse *elements_resp, zval *elements_array)
+{
+    /* For lists, elements are just values */
+    for (int i = 0; i < elements_resp->array_value_len; i++)
     {
-        cmd_type = LMPop;
-    }
-    else if (strcmp(cmd, "BLMPOP") == 0)
-    {
-        cmd_type = BLMPop;
-    }
-    else if (strcmp(cmd, "ZMPOP") == 0)
-    {
-        cmd_type = ZMPop;
-    }
-    else if (strcmp(cmd, "BZMPOP") == 0)
-    {
-        cmd_type = BZMPop;
-    }
-    else
-    {
-        /* Unknown command */
-        free(args);
-        free(args_len);
-        free(numkeys_str);
-        if (is_blocking)
+        struct CommandResponse *element = &elements_resp->array_value[i];
+        if (element->response_type == String)
         {
-            free((void *)args[0]); /* Free the timeout string */
+            add_next_index_stringl(elements_array,
+                                   element->string_value,
+                                   element->string_value_len);
         }
-        if (count > 1)
+    }
+}
+
+/* Process sorted set elements from ZMPOP/BZMPOP response */
+static void process_sorted_set_elements(struct CommandResponse *elements_resp, zval *elements_array)
+{
+    /* For sorted sets, elements are pairs of member and score */
+    for (int i = 0; i < elements_resp->array_value_len; i += 2)
+    {
+        if (i + 1 < elements_resp->array_value_len)
         {
-            free((void *)args[arg_idx - 1]); /* Free the count string */
+            struct CommandResponse *member = &elements_resp->array_value[i];
+            struct CommandResponse *score = &elements_resp->array_value[i + 1];
+
+            if (member->response_type == String && score->response_type == String)
+            {
+                /* Convert score string to double */
+                double score_val = atof(score->string_value);
+
+                /* Add member => score pair to elements array */
+                add_assoc_double_ex(elements_array,
+                                    member->string_value,
+                                    member->string_value_len,
+                                    score_val);
+            }
         }
+    }
+}
+
+/* Execute an LMPOP or BLMPOP command (for list operations) using the Valkey Glide client */
+int execute_lmpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result)
+{
+    /* Check if client, keys, and from are valid */
+    if (!glide_client || !keys || !from)
+    {
         return -1;
     }
+
+    /* Determine if this is a blocking command */
+    int is_blocking = (strncmp(cmd, "B", 1) == 0);
+
+    /* Prepare for argument construction */
+    unsigned long arg_count = 0;
+    uintptr_t *args = NULL;
+    unsigned long *args_len = NULL;
+    char *numkeys_str = NULL;
+    char *timeout_str = NULL;
+    char *count_str = NULL;
+
+    /* Prepare the arguments */
+    int keys_count = prepare_mpop_arguments(
+        glide_client, is_blocking, timeout, keys, from, from_len, count,
+        &arg_count, &args, &args_len,
+        &numkeys_str, &timeout_str, &count_str);
+
+    if (keys_count < 0)
+    {
+        return -1;
+    }
+
+    /* Determine the command type */
+    enum RequestType cmd_type = is_blocking ? BLMPop : LMPop;
 
     /* Execute the command */
     CommandResult *cmd_result = command(
@@ -1187,15 +1246,12 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
     );
 
     /* Free the argument strings */
-    free(numkeys_str);
-    if (is_blocking)
-    {
-        free((void *)args[0]); /* Free the timeout string */
-    }
-    if (count > 1)
-    {
-        free((void *)args[arg_idx - 1]); /* Free the count string */
-    }
+    if (numkeys_str)
+        free(numkeys_str);
+    if (timeout_str)
+        free(timeout_str);
+    if (count_str)
+        free(count_str);
     free(args);
     free(args_len);
 
@@ -1246,45 +1302,8 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
                         zval elements_array;
                         array_init(&elements_array);
 
-                        /* Process elements based on command type */
-                        if (strncmp(cmd, "Z", 1) == 0 || strncmp(cmd, "BZ", 2) == 0)
-                        {
-                            /* For sorted sets, elements are pairs of member and score */
-                            for (int i = 0; i < elements_resp->array_value_len; i += 2)
-                            {
-                                if (i + 1 < elements_resp->array_value_len)
-                                {
-                                    struct CommandResponse *member = &elements_resp->array_value[i];
-                                    struct CommandResponse *score = &elements_resp->array_value[i + 1];
-
-                                    if (member->response_type == String && score->response_type == String)
-                                    {
-                                        /* Convert score string to double */
-                                        double score_val = atof(score->string_value);
-
-                                        /* Add member => score pair to elements array */
-                                        add_assoc_double_ex(&elements_array,
-                                                            member->string_value,
-                                                            member->string_value_len,
-                                                            score_val);
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            /* For lists, elements are just values */
-                            for (int i = 0; i < elements_resp->array_value_len; i++)
-                            {
-                                struct CommandResponse *element = &elements_resp->array_value[i];
-                                if (element->response_type == String)
-                                {
-                                    add_next_index_stringl(&elements_array,
-                                                           element->string_value,
-                                                           element->string_value_len);
-                                }
-                            }
-                        }
+                        /* Process list elements */
+                        process_list_elements(elements_resp, &elements_array);
 
                         /* Add elements array to result */
                         add_next_index_zval(result, &elements_array);
@@ -1305,4 +1324,157 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
     free_command_result(cmd_result);
 
     return ret_val;
+}
+
+/* Execute a ZMPOP or BZMPOP command (for sorted set operations) using the Valkey Glide client */
+int execute_zmpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result)
+{
+    /* Check if client, keys, and from are valid */
+    if (!glide_client || !keys || !from)
+    {
+        return -1;
+    }
+
+    /* Determine if this is a blocking command */
+    int is_blocking = (strncmp(cmd, "B", 1) == 0);
+
+    /* Prepare for argument construction */
+    unsigned long arg_count = 0;
+    uintptr_t *args = NULL;
+    unsigned long *args_len = NULL;
+    char *numkeys_str = NULL;
+    char *timeout_str = NULL;
+    char *count_str = NULL;
+
+    /* Prepare the arguments */
+    int keys_count = prepare_mpop_arguments(
+        glide_client, is_blocking, timeout, keys, from, from_len, count,
+        &arg_count, &args, &args_len,
+        &numkeys_str, &timeout_str, &count_str);
+
+    if (keys_count < 0)
+    {
+        return -1;
+    }
+
+    /* Determine the command type */
+    enum RequestType cmd_type = is_blocking ? BZMPop : ZMPop;
+
+    /* Execute the command */
+    CommandResult *cmd_result = command(
+        glide_client,
+        0,         /* channel */
+        cmd_type,  /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len,  /* argument lengths */
+        NULL,      /* route bytes */
+        0          /* route bytes length */
+    );
+
+    /* Free the argument strings */
+    if (numkeys_str)
+        free(numkeys_str);
+    if (timeout_str)
+        free(timeout_str);
+    if (count_str)
+        free(count_str);
+    free(args);
+    free(args_len);
+
+    /* Check if the command was successful */
+    if (!cmd_result)
+    {
+        return -1;
+    }
+
+    /* Check if there was an error */
+    if (cmd_result->command_error)
+    {
+        printf("Error executing %s command: %s\n", cmd, cmd_result->command_error->command_error_message);
+        free_command_result(cmd_result);
+        return -1;
+    }
+
+    /* Process the result */
+    int ret_val = -1;
+    if (cmd_result->response)
+    {
+        switch (cmd_result->response->response_type)
+        {
+        case Null:
+            /* No elements popped */
+            ZVAL_NULL(result);
+            ret_val = 0;
+            break;
+        case Array:
+            /* Elements popped */
+            array_init(result);
+
+            /* Process the array response */
+            if (cmd_result->response->array_value_len >= 2)
+            {
+                /* First element is the key */
+                struct CommandResponse *key_resp = &cmd_result->response->array_value[0];
+                if (key_resp->response_type == String)
+                {
+                    /* Add key to result array */
+                    add_next_index_stringl(result, key_resp->string_value, key_resp->string_value_len);
+
+                    /* Second element is the array of popped elements */
+                    struct CommandResponse *elements_resp = &cmd_result->response->array_value[1];
+                    if (elements_resp->response_type == Array)
+                    {
+                        /* Create array for elements */
+                        zval elements_array;
+                        array_init(&elements_array);
+
+                        /* Process sorted set elements */
+                        process_sorted_set_elements(elements_resp, &elements_array);
+
+                        /* Add elements array to result */
+                        add_next_index_zval(result, &elements_array);
+                    }
+                }
+            }
+            ret_val = 1;
+            break;
+        default:
+            /* Unexpected response type */
+            ZVAL_NULL(result);
+            ret_val = -1;
+            break;
+        }
+    }
+
+    /* Free the result */
+    free_command_result(cmd_result);
+
+    return ret_val;
+}
+
+/* Execute an MPOP command (LMPOP, BLMPOP, ZMPOP, BZMPOP) using the Valkey Glide client */
+int execute_mpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result)
+{
+    /* Check if client is valid */
+    if (!glide_client)
+    {
+        return -1;
+    }
+
+    /* Check for list-based commands (LMPOP, BLMPOP) */
+    if (strcmp(cmd, "LMPOP") == 0 || strcmp(cmd, "BLMPOP") == 0)
+    {
+        return execute_lmpop_command(glide_client, cmd, timeout, keys, from, from_len, count, result);
+    }
+    /* Check for sorted set-based commands (ZMPOP, BZMPOP) */
+    else if (strcmp(cmd, "ZMPOP") == 0 || strcmp(cmd, "BZMPOP") == 0)
+    {
+        return execute_zmpop_command(glide_client, cmd, timeout, keys, from, from_len, count, result);
+    }
+    /* Unknown command type */
+    else
+    {
+        return -1;
+    }
 }

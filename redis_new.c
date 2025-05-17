@@ -924,10 +924,5 @@ PHP_METHOD(Redis, rPush)
         /* Return the result */
         RETURN_LONG(result);
     }
-    else
-    {
-        /* Fall back to the original implementation */
-        REDIS_PROCESS_KW_CMD("RPUSH", redis_key_varval_cmd, redis_long_response);
-    }
 }
 /* }}} */
