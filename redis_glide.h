@@ -132,6 +132,7 @@ extern long execute_setbit_command(const void *glide_client, const char *key, si
 extern long execute_del_command(const void *glide_client, zval *keys, int keys_count);
 extern long execute_strlen_command(const void *glide_client, const char *key, size_t key_len);
 extern long execute_setrange_command(const void *glide_client, const char *key, size_t key_len, long offset, const char *value, size_t value_len);
+extern long execute_rpush_command(const void *glide_client, const char *key, size_t key_len, zval *values, int values_count);
 extern int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_len, const char *key2, size_t key2_len, zval *options, zval *result);
 extern int execute_mpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
 

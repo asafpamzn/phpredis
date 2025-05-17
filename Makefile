@@ -10,7 +10,7 @@ SHLIB_SUFFIX_NAME = dylib
 SHLIB_DL_SUFFIX_NAME = so
 AWK = awk
 REDIS_SHARED_LIBADD = ../ffi/target/release/libglide_ffi.a -lresolv -lSystem
-shared_objects_redis = redis.lo redis_new.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo redis_sentinel.lo sentinel_library.lo backoff.lo redis_glide.lo lcs_command.lo command_response.lo  src/connection_request.pb-c.lo  src/command_request.pb-c.lo src/response.pb-c.lo
+shared_objects_redis = redis.lo redis_new.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo redis_sentinel.lo sentinel_library.lo backoff.lo redis_glide.lo lcs_command.lo rpush_command.lo command_response.lo  src/connection_request.pb-c.lo  src/command_request.pb-c.lo src/response.pb-c.lo
 PHP_PECL_EXTENSION = redis
 PHP_MODULES = $(phplibdir)/redis.la
 PHP_ZEND_EX =
@@ -291,6 +291,9 @@ redis_glide.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_glide.c
 -include lcs_command.dep
 lcs_command.lo: /Users/asafp/work/valkey-glide-php/phpredis/lcs_command.c
 	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/lcs_command.c -o lcs_command.lo  -MMD -MF lcs_command.dep -MT lcs_command.lo
+-include rpush_command.dep
+rpush_command.lo: /Users/asafp/work/valkey-glide-php/phpredis/rpush_command.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/rpush_command.c -o rpush_command.lo  -MMD -MF rpush_command.dep -MT rpush_command.lo
 -include command_response.dep
 command_response.lo: /Users/asafp/work/valkey-glide-php/phpredis/command_response.c
 	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/command_response.c -o command_response.lo  -MMD -MF command_response.dep -MT command_response.lo

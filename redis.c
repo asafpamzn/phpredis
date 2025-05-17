@@ -1056,14 +1056,6 @@ PHP_METHOD(Redis, lPush)
 }
 /* }}} */
 
-/* {{{ proto boolean Redis::rPush(string key , string value)
- */
-PHP_METHOD(Redis, rPush)
-{
-    REDIS_PROCESS_KW_CMD("RPUSH", redis_key_varval_cmd, redis_long_response);
-}
-/* }}} */
-
 PHP_METHOD(Redis, lInsert)
 {
     REDIS_PROCESS_CMD(linsert, redis_long_response);

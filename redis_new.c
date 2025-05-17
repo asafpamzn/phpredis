@@ -886,3 +886,47 @@ PHP_METHOD(Redis, zmpop)
     }
 }
 /* }}} */
+
+/* {{{ proto boolean Redis::rPush(string key, string value)
+ */
+PHP_METHOD(Redis, rPush)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *z_args;
+    int argc;
+
+    /* Parse parameters */
+    ZEND_PARSE_PARAMETERS_START(2, -1)
+    Z_PARAM_OBJECT_OF_CLASS(object, redis_ce)
+    Z_PARAM_STRING(key, key_len)
+    Z_PARAM_VARIADIC('+', z_args, argc)
+    ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the RPUSH command using the Glide client */
+        long result = execute_rpush_command(redis->glide_client, key, key_len, z_args, argc);
+
+        /* If the result is -1, there was an error */
+        if (result == -1)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Return the result */
+        RETURN_LONG(result);
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_KW_CMD("RPUSH", redis_key_varval_cmd, redis_long_response);
+    }
+}
+/* }}} */
