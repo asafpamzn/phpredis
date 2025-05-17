@@ -749,14 +749,6 @@ redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 /* }}} */
 
-/* {{{ proto string Redis::echo(string msg)
- */
-PHP_METHOD(Redis, echo)
-{
-    REDIS_PROCESS_KW_CMD("ECHO", redis_str_cmd, redis_string_response);
-}
-/* }}} */
-
 /* {{{ proto string Redis::rename(string key_src, string key_dst)
  */
 PHP_METHOD(Redis, rename)

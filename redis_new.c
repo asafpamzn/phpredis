@@ -68,6 +68,48 @@ extern zend_class_entry *redis_exception_ce;
 #include "redis_arginfo.h"
 #endif
 
+/* {{{ proto string Redis::echo(string msg) */
+PHP_METHOD(Redis, echo)
+{
+    zval *object;
+    redis_object *redis;
+    char *msg = NULL;
+    size_t msg_len;
+    char *response = NULL;
+    size_t response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
+                                     &object, redis_ce, &msg, &msg_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the ECHO command using the Glide client */
+        int result = execute_echo_command(redis->glide_client, msg, msg_len, &response, &response_len);
+        /* Process the result */
+        if (result == 1 && response != NULL)
+        {
+            /* Return the echoed message */
+            RETVAL_STRINGL(response, response_len);
+            free(response);
+            return;
+        }
+        else
+        {
+            /* Error */
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
 PHP_METHOD(Redis, bitop)
 {
     zval *object;

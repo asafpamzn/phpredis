@@ -104,8 +104,16 @@ int handle_string_response(CommandResult *result, char **output, size_t *output_
         {
         case String:
             /* Command returns a string */
-            *output = strdup(result->response->string_value);
-            *output_len = result->response->string_value_len;
+            if (result->response->string_value_len == 0)
+            {
+                *output = strdup("");
+                *output_len = 0;
+            }
+            else
+            {
+                *output = strdup(result->response->string_value);
+                *output_len = result->response->string_value_len;
+            }
             ret_val = 1;
             break;
         case Null:
