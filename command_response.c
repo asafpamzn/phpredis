@@ -15,6 +15,7 @@
 */
 
 #include "php_redis.h"
+#include "redis_glide.h"
 #include "command_response.h"
 
 /* Execute a command and handle common error checking */

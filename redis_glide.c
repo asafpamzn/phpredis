@@ -16,6 +16,7 @@
 
 #include "php_redis.h"
 #include "redis_glide.h"
+#include "command_response.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>
@@ -123,33 +124,7 @@ const void *create_glide_client(ClientConfig *config)
     return client;
 }
 
-/* Convert a long value to a string */
-static char *long_to_string(long value, size_t *len)
-{
-    char buffer[32];
-    *len = snprintf(buffer, sizeof(buffer), "%ld", value);
-    char *str = (char *)malloc(*len + 1);
-    if (str)
-    {
-        memcpy(str, buffer, *len);
-        str[*len] = '\0';
-    }
-    return str;
-}
-
-/* Convert a double value to a string */
-static char *double_to_string(double value, size_t *len)
-{
-    char buffer[64];
-    *len = snprintf(buffer, sizeof(buffer), "%.17g", value);
-    char *str = (char *)malloc(*len + 1);
-    if (str)
-    {
-        memcpy(str, buffer, *len);
-        str[*len] = '\0';
-    }
-    return str;
-}
+/* These functions are now defined in command_response.c */
 
 /* Execute a BITCOUNT command using the Valkey Glide client */
 long execute_bitcount_command(const void *glide_client, const char *key, size_t key_len, long start, long end, int bybit)

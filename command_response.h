@@ -17,16 +17,13 @@
 #ifndef COMMAND_RESPONSE_H
 #define COMMAND_RESPONSE_H
 
+#include "php_redis.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
-/* Forward declarations for PHP types */
-typedef struct _zval zval;
-
-/* Forward declarations */
-typedef struct ClientConfig ClientConfig;
+/* No need to forward declare zval or ClientConfig as they are already defined in php.h and redis_glide.h */
 
 /*
  * Execute a command and handle common error checking
