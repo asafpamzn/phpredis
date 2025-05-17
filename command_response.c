@@ -297,21 +297,36 @@ int command_response_to_zval(CommandResponse *response, zval *output)
             add_next_index_zval(output, &value);
         }
         return 1;
+#if 1
     case Map:
+        printf("Map response\n");
         array_init(output);
+        printf("Map response array_value_len=%ld\n", response->array_value_len);
         for (int i = 0; i < response->array_value_len; i++)
         {
             zval value;
+            if (NULL == response->map_key)
+
+            {
+
+                continue;
+            }
+            printf("map_key =%p\n", response->map_key);
             CommandResponse *key = &response->map_key[i];
             CommandResponse *val = &response->map_value[i];
 
             if (key->response_type == String)
             {
+                printf("file = %s, line = %d\n", __FILE__, __LINE__);
                 command_response_to_zval(val, &value);
+                printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
                 add_assoc_zval_ex(output, key->string_value, key->string_value_len, &value);
+                printf("file = %s, line = %d\n", __FILE__, __LINE__);
             }
         }
         return 1;
+#endif
     case Sets:
         array_init(output);
         for (int i = 0; i < response->sets_value_len; i++)
