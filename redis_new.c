@@ -45,8 +45,9 @@
 
 #include "library.h"
 
-/* Import the long_to_string function from command_response.c */
+/* Import the string conversion functions from command_response.c */
 extern char *long_to_string(long value, size_t *len);
+extern char *double_to_string(double value, size_t *len);
 
 #ifdef HAVE_REDIS_ZSTD
 #include <zstd.h>
@@ -394,6 +395,11 @@ PHP_METHOD(Redis, set)
         case IS_LONG:
             /* Convert integer to string */
             val = long_to_string(Z_LVAL_P(z_value), &val_len);
+            free_val = 1; // We'll need to free this
+            break;
+        case IS_DOUBLE:
+            /* Convert float to string */
+            val = double_to_string(Z_DVAL_P(z_value), &val_len);
             free_val = 1; // We'll need to free this
             break;
         default:
