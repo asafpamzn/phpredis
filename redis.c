@@ -2994,56 +2994,6 @@ PHP_METHOD(Redis, pfmerge)
  * Geo commands
  */
 
-PHP_METHOD(Redis, geoadd)
-{
-    REDIS_PROCESS_CMD(geoadd, redis_long_response);
-}
-
-PHP_METHOD(Redis, geohash)
-{
-    REDIS_PROCESS_KW_CMD("GEOHASH", redis_key_varval_cmd, redis_mbulk_reply_raw);
-}
-
-PHP_METHOD(Redis, geopos)
-{
-    REDIS_PROCESS_KW_CMD("GEOPOS", redis_key_varval_cmd, redis_read_variant_reply);
-}
-
-PHP_METHOD(Redis, geodist)
-{
-    REDIS_PROCESS_CMD(geodist, redis_bulk_double_response);
-}
-
-PHP_METHOD(Redis, georadius)
-{
-    REDIS_PROCESS_KW_CMD("GEORADIUS", redis_georadius_cmd, redis_read_variant_reply);
-}
-
-PHP_METHOD(Redis, georadius_ro)
-{
-    REDIS_PROCESS_KW_CMD("GEORADIUS_RO", redis_georadius_cmd, redis_read_variant_reply);
-}
-
-PHP_METHOD(Redis, georadiusbymember)
-{
-    REDIS_PROCESS_KW_CMD("GEORADIUSBYMEMBER", redis_georadiusbymember_cmd, redis_read_variant_reply);
-}
-
-PHP_METHOD(Redis, georadiusbymember_ro)
-{
-    REDIS_PROCESS_KW_CMD("GEORADIUSBYMEMBER_RO", redis_georadiusbymember_cmd, redis_read_variant_reply);
-}
-
-PHP_METHOD(Redis, geosearch)
-{
-    REDIS_PROCESS_CMD(geosearch, redis_geosearch_response);
-}
-
-PHP_METHOD(Redis, geosearchstore)
-{
-    REDIS_PROCESS_CMD(geosearchstore, redis_long_response);
-}
-
 /*
  * Streams
  */

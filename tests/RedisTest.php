@@ -3220,6 +3220,7 @@ class Redis_Test extends TestSuite {
 
     public function testHashes() {
         printf("Testing hashes\n");
+        
         $this->redis->del('h', 'key');
         printf("Testing hashes hlen\n");
         $this->assertEquals(0, $this->redis->hLen('h'));
@@ -3230,18 +3231,20 @@ class Redis_Test extends TestSuite {
 
         $this->assertEquals('a-value', $this->redis->hGet('h', 'a'));  // simple get
         $this->assertEquals('b-value', $this->redis->hGet('h', 'b'));  // simple get
-
+        
         $this->assertEquals(0, $this->redis->hSet('h', 'a', 'another-value')); // replacement
         $this->assertEquals('another-value', $this->redis->hGet('h', 'a'));    // get the new value
-
+        
         $this->assertEquals('b-value', $this->redis->hGet('h', 'b'));  // simple get
+   
         $this->assertFalse($this->redis->hGet('h', 'c'));  // unknown hash member
+       
         $this->assertFalse($this->redis->hGet('key', 'c'));    // unknownkey
 
         // hDel
         $this->assertEquals(1, $this->redis->hDel('h', 'a')); // 1 on success
         $this->assertEquals(0, $this->redis->hDel('h', 'a')); // 0 on failure
-
+        
         $this->redis->del('h');
         $this->redis->hSet('h', 'x', 'a');
         $this->redis->hSet('h', 'y', 'b');
