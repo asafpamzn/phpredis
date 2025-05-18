@@ -163,7 +163,7 @@ int execute_hsetnx_command(const void *glide_client, const char *key, size_t key
     /* Execute the command */
     CommandResult *result = execute_command(
         glide_client,
-        HSetNx,    /* command type */
+        HSetNX,    /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
         args_len   /* argument lengths */
@@ -186,9 +186,9 @@ int execute_hsetnx_command(const void *glide_client, const char *key, size_t key
     int ret_val = 0;
     if (result->response)
     {
-        if (result->response->response_type == Integer)
+        if (result->response->response_type == Int)
         {
-            *output_value = result->response->integer_value;
+            *output_value = result->response->int_value;
             ret_val = 1;
         }
     }
@@ -673,8 +673,8 @@ int execute_hmset_command(const void *glide_client, const char *key, size_t key_
     int ret_val = 0;
     if (result->response)
     {
-        if (result->response->response_type == Status &&
-            strcmp(result->response->status_value, "OK") == 0)
+        if (result->response->response_type == SimpleString &&
+            strcmp(result->response->simple_string_value, "OK") == 0)
         {
             ret_val = 1;
         }
@@ -860,7 +860,7 @@ int execute_hstrlen_command(const void *glide_client, const char *key, size_t ke
     /* Execute the command */
     CommandResult *result = execute_command(
         glide_client,
-        HStrLen,   /* command type */
+        HStrlen,   /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
         args_len   /* argument lengths */
@@ -1099,9 +1099,9 @@ int execute_hexists_command(const void *glide_client, const char *key, size_t ke
     int ret_val = 0;
     if (result->response)
     {
-        if (result->response->response_type == Integer)
+        if (result->response->response_type == Int)
         {
-            *output_value = result->response->integer_value;
+            *output_value = result->response->int_value;
             ret_val = 1;
         }
     }

@@ -3219,7 +3219,9 @@ class Redis_Test extends TestSuite {
     }
 
     public function testHashes() {
+        printf("Testing hashes\n");
         $this->redis->del('h', 'key');
+        printf("Testing hashes hlen\n");
         $this->assertEquals(0, $this->redis->hLen('h'));
         $this->assertEquals(1, $this->redis->hSet('h', 'a', 'a-value'));
         $this->assertEquals(1, $this->redis->hLen('h'));
