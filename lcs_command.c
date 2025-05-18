@@ -181,6 +181,8 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
     if (cmd_result->response)
     {
 
+        /* Force Map handling if IDX option was requested, regardless of the response type */
+
         {
             switch (cmd_result->response->response_type)
             {

@@ -765,57 +765,6 @@ PHP_METHOD(Redis, renameNx)
 }
 /* }}} */
 
-/** {{{ proto bool Redis::reset()
- */
-PHP_METHOD(Redis, reset)
-{
-    char *response;
-    int response_len;
-    RedisSock *redis_sock;
-    smart_string cmd = {0};
-    zend_bool ret = 0;
-
-    if ((redis_sock = redis_sock_get(getThis(), 0)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-
-    if (IS_PIPELINE(redis_sock))
-    {
-        php_error_docref(NULL, E_ERROR, "Reset isn't allowed in pipeline mode!");
-        RETURN_FALSE;
-    }
-
-    redis_cmd_init_sstr(&cmd, 0, "RESET", 5);
-
-    REDIS_PROCESS_REQUEST(redis_sock, cmd.c, cmd.len);
-
-    if ((response = redis_sock_read(redis_sock, &response_len)) != NULL)
-    {
-        ret = REDIS_STRCMP_STATIC(response, response_len, "+RESET");
-        efree(response);
-    }
-
-    if (!ret)
-    {
-        if (IS_ATOMIC(redis_sock))
-        {
-            RETURN_FALSE;
-        }
-        REDIS_THROW_EXCEPTION("Reset failed in multi mode!", 0);
-        RETURN_ZVAL(getThis(), 1, 0);
-    }
-
-    redis_free_reply_callbacks(redis_sock);
-    redis_sock->status = REDIS_SOCK_STATUS_CONNECTED;
-    redis_sock->mode = ATOMIC;
-    redis_sock->dbNumber = 0;
-    redis_sock->watching = 0;
-
-    RETURN_TRUE;
-}
-/* }}} */
-
 /* {{{ proto Redis|array|false Redis::getWithMeta(string key)
  */
 PHP_METHOD(Redis, getWithMeta)
@@ -837,60 +786,6 @@ PHP_METHOD(Redis, getDel)
 PHP_METHOD(Redis, getEx)
 {
     REDIS_PROCESS_CMD(getex, redis_string_response);
-}
-/* }}} */
-
-/* {{{ proto string Redis::ping([string message])
- */
-PHP_METHOD(Redis, ping)
-{
-    zval *object;
-    redis_object *redis;
-    char *msg = NULL, *response = NULL;
-    size_t msg_len = 0, response_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|s",
-                                     &object, redis_ce, &msg, &msg_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the PING command using the Glide client */
-        int result = execute_ping_command(redis->glide_client, msg, msg_len, &response, &response_len);
-
-        /* If the result is -1, there was an error */
-        if (result == -1)
-        {
-            RETURN_FALSE;
-        }
-
-        /* Return the response */
-        if (response)
-        {
-            if (strncmp(response, "PONG", 4) == 0)
-            {
-                free(response);
-                RETURN_TRUE;
-            }
-
-            /* Return the response */
-            RETVAL_STRINGL(response, response_len);
-            free(response);
-            return;
-        }
-        else
-        {
-            RETURN_TRUE;
-        }
-    }
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -1561,60 +1456,6 @@ PHP_METHOD(Redis, auth)
 PHP_METHOD(Redis, persist)
 {
     REDIS_PROCESS_KW_CMD("PERSIST", redis_key_cmd, redis_1_response);
-}
-/* }}} */
-
-/* {{{ proto array Redis::info() */
-PHP_METHOD(Redis, info)
-{
-    zval *object;
-    redis_object *redis;
-    char *section = NULL, *response = NULL;
-    size_t section_len = 0, response_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|s",
-                                     &object, redis_ce, &section, &section_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the INFO command using the Glide client */
-        int result = execute_info_command(redis->glide_client, section, section_len, &response, &response_len);
-
-        /* Process the result */
-        if (result == 1 && response != NULL)
-        {
-            zval z_ret;
-            ZVAL_UNDEF(&z_ret);
-
-            /* Parse the INFO response into a zval array */
-            redis_parse_info_response(response, &z_ret);
-
-            /* Free the response string */
-            free(response);
-
-            /* Return the parsed array */
-            RETVAL_ZVAL(&z_ret, 0, 1);
-            return;
-        }
-        else
-        {
-            /* Error or empty response */
-            RETURN_FALSE;
-        }
-    }
-    else
-    {
-        /* Fall back to the original implementation */
-        REDIS_PROCESS_CMD(info, redis_info_response);
-    }
 }
 /* }}} */
 

@@ -963,6 +963,60 @@ PHP_METHOD(Redis, zmpop)
 }
 /* }}} */
 
+/* {{{ proto array Redis::info() */
+PHP_METHOD(Redis, info)
+{
+    zval *object;
+    redis_object *redis;
+    char *section = NULL, *response = NULL;
+    size_t section_len = 0, response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|s",
+                                     &object, redis_ce, &section, &section_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the INFO command using the Glide client */
+        int result = execute_info_command(redis->glide_client, section, section_len, &response, &response_len);
+
+        /* Process the result */
+        if (result == 1 && response != NULL)
+        {
+            zval z_ret;
+            ZVAL_UNDEF(&z_ret);
+
+            /* Parse the INFO response into a zval array */
+            redis_parse_info_response(response, &z_ret);
+
+            /* Free the response string */
+            free(response);
+
+            /* Return the parsed array */
+            RETVAL_ZVAL(&z_ret, 0, 1);
+            return;
+        }
+        else
+        {
+            /* Error or empty response */
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Fall back to the original implementation */
+        REDIS_PROCESS_CMD(info, redis_info_response);
+    }
+}
+/* }}} */
+
 /* {{{ proto long Redis::ttl(string key) */
 PHP_METHOD(Redis, ttl)
 {
