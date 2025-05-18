@@ -181,56 +181,7 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
     if (cmd_result->response)
     {
 
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
-        /* Force Map handling if IDX option was requested, regardless of the response type */
-        if (has_idx && cmd_result->response->response_type == String)
         {
-            printf("file = %s, line = %d\n", __FILE__, __LINE__);
-
-            /* Create a map response manually */
-            array_init(result);
-
-            /* Add the "len" key with the length of the LCS */
-            add_assoc_long(result, "len", cmd_result->response->string_value_len);
-
-            /* Create the "matches" array */
-            zval matches_array;
-            array_init(&matches_array);
-
-            printf("file = %s, line = %d\n", __FILE__, __LINE__);
-            /* Add a match entry if we have a non-empty string */
-            if (cmd_result->response->string_value_len > 0)
-            {
-
-                printf("file = %s, line = %d\n", __FILE__, __LINE__);
-                zval match_entry;
-                array_init(&match_entry);
-
-                /* Add position pair for the first string */
-                zval pos_pair1;
-                array_init(&pos_pair1);
-                add_next_index_long(&pos_pair1, 2);                                          /* Starting at index 2 in first string */
-                add_next_index_long(&pos_pair1, 2 + cmd_result->response->string_value_len); /* End position */
-                add_next_index_zval(&match_entry, &pos_pair1);
-
-                /* Add position pair for the second string */
-                zval pos_pair2;
-                array_init(&pos_pair2);
-                add_next_index_long(&pos_pair2, 6);                                          /* Starting at index 6 in second string */
-                add_next_index_long(&pos_pair2, 6 + cmd_result->response->string_value_len); /* End position */
-                add_next_index_zval(&match_entry, &pos_pair2);
-
-                add_next_index_zval(&matches_array, &match_entry);
-            }
-
-            /* Add the matches array to the result */
-            add_assoc_zval(result, "matches", &matches_array);
-
-            ret_val = 1;
-        }
-        else
-        {
-            printf("file = %s, line = %d\n", __FILE__, __LINE__);
             switch (cmd_result->response->response_type)
             {
             case String:
