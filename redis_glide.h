@@ -145,6 +145,17 @@ extern int execute_pttl_command(const void *glide_client, const char *key, size_
 /* Sorted set operations */
 extern int execute_zadd_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, int flags, long *output_value);
 
+/* Hash operations */
+extern int execute_hset_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, long *output_value);
+extern int execute_hsetnx_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, char *value, size_t value_len, int *output_value);
+extern int execute_hget_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, char **result, size_t *result_len);
+extern int execute_hlen_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
+extern int execute_hdel_command(const void *glide_client, const char *key, size_t key_len, zval *fields, int fields_count, long *output_value);
+extern int execute_hexists_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, int *output_value);
+extern int execute_hkeys_command(const void *glide_client, const char *key, size_t key_len, zval *return_value);
+extern int execute_hvals_command(const void *glide_client, const char *key, size_t key_len, zval *return_value);
+extern int execute_hgetall_command(const void *glide_client, const char *key, size_t key_len, zval *return_value);
+
 /* Don't include command_response.h here to avoid circular dependencies */
 
 #endif /* REDIS_GLIDE_H */

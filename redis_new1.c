@@ -177,3 +177,370 @@ PHP_METHOD(Redis, reset)
     RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto long Redis::hSet(string key, string field, string value) */
+PHP_METHOD(Redis, hSet)
+{
+    zval *object, *z_args;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    int argc;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &argc) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the HSET command using the Glide client */
+        long result_value;
+        if (execute_hset_command(redis->glide_client, key, key_len, z_args, argc, &result_value))
+        {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto bool Redis::hSetNx(string key, string field, string value) */
+PHP_METHOD(Redis, hSetNx)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL, *field = NULL, *val = NULL;
+    size_t key_len, field_len, val_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &field, &field_len, &val, &val_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the HSETNX command using the Glide client */
+        int result;
+        if (execute_hsetnx_command(redis->glide_client, key, key_len, field, field_len, val, val_len, &result))
+        {
+            /* Command succeeded, return the value */
+            if (result == 1)
+            {
+                RETURN_TRUE;
+            }
+            else
+            {
+                RETURN_FALSE;
+            }
+        }
+        else
+        {
+            /* Command failed */
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto string Redis::hGet(string key, string field) */
+PHP_METHOD(Redis, hGet)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL, *field = NULL, *response = NULL;
+    size_t key_len, field_len, response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &field, &field_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the HGET command using the Glide client */
+        int result = execute_hget_command(redis->glide_client, key, key_len, field, field_len, &response, &response_len);
+
+        /* Process the result */
+        if (result == 1 && response != NULL)
+        {
+            /* Return the value */
+            RETVAL_STRINGL(response, response_len);
+            free(response);
+            return;
+        }
+        else if (result == 0)
+        {
+            /* Key didn't exist */
+            RETURN_NULL();
+        }
+        else
+        {
+            /* Error */
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto long Redis::hLen(string key) */
+PHP_METHOD(Redis, hLen)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the HLEN command using the Glide client */
+        long result_value;
+        if (execute_hlen_command(redis->glide_client, key, key_len, &result_value))
+        {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto long Redis::hDel(string key, string field1, ... fieldN) */
+PHP_METHOD(Redis, hDel)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *fields = NULL;
+    int fields_count = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
+                                     &object, redis_ce, &key, &key_len,
+                                     &fields, &fields_count) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the HDEL command using the Glide client */
+        long result_value;
+        if (execute_hdel_command(redis->glide_client, key, key_len, fields, fields_count, &result_value))
+        {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto bool Redis::hExists(string key, string field) */
+PHP_METHOD(Redis, hExists)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL, *field = NULL;
+    size_t key_len, field_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &field, &field_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the HEXISTS command using the Glide client */
+        int result;
+        if (execute_hexists_command(redis->glide_client, key, key_len, field, field_len, &result))
+        {
+            /* Command succeeded, return the value */
+            if (result == 1)
+            {
+                RETURN_TRUE;
+            }
+            else
+            {
+                RETURN_FALSE;
+            }
+        }
+        else
+        {
+            /* Command failed */
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto array Redis::hKeys(string key) */
+PHP_METHOD(Redis, hKeys)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the HKEYS command using the Glide client */
+        array_init(return_value);
+        if (execute_hkeys_command(redis->glide_client, key, key_len, return_value))
+        {
+            /* Command succeeded, return_value is already set */
+            return;
+        }
+        else
+        {
+            /* Command failed */
+            zval_dtor(return_value);
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto array Redis::hVals(string key) */
+PHP_METHOD(Redis, hVals)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the HVALS command using the Glide client */
+        array_init(return_value);
+        if (execute_hvals_command(redis->glide_client, key, key_len, return_value))
+        {
+            /* Command succeeded, return_value is already set */
+            return;
+        }
+        else
+        {
+            /* Command failed */
+            zval_dtor(return_value);
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto array Redis::hGetAll(string key) */
+PHP_METHOD(Redis, hGetAll)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the HGETALL command using the Glide client */
+        array_init(return_value);
+        if (execute_hgetall_command(redis->glide_client, key, key_len, return_value))
+        {
+            /* Command succeeded, return_value is already set */
+            return;
+        }
+        else
+        {
+            /* Command failed */
+            zval_dtor(return_value);
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */

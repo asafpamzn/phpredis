@@ -1756,68 +1756,6 @@ PHP_METHOD(Redis, bzmpop)
 /* }}} */
 /* hashes */
 
-/* {{{ proto long Redis::hset(string key, string mem, string val) */
-PHP_METHOD(Redis, hSet)
-{
-    REDIS_PROCESS_CMD(hset, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto bool Redis::hSetNx(string key, string mem, string val) */
-PHP_METHOD(Redis, hSetNx)
-{
-    REDIS_PROCESS_CMD(hsetnx, redis_1_response);
-}
-/* }}} */
-
-/* {{{ proto string Redis::hget(string key, string mem) */
-PHP_METHOD(Redis, hGet)
-{
-    REDIS_PROCESS_KW_CMD("HGET", redis_key_str_cmd, redis_string_response);
-}
-/* }}} */
-
-/* {{{ proto long Redis::hLen(string key) */
-PHP_METHOD(Redis, hLen)
-{
-    REDIS_PROCESS_KW_CMD("HLEN", redis_key_cmd, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto long Redis::hDel(string key, string mem1, ... memN) */
-PHP_METHOD(Redis, hDel)
-{
-    REDIS_PROCESS_CMD(hdel, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto bool Redis::hExists(string key, string mem) */
-PHP_METHOD(Redis, hExists)
-{
-    REDIS_PROCESS_KW_CMD("HEXISTS", redis_key_str_cmd, redis_1_response);
-}
-
-/* {{{ proto array Redis::hkeys(string key) */
-PHP_METHOD(Redis, hKeys)
-{
-    REDIS_PROCESS_KW_CMD("HKEYS", redis_key_cmd, redis_mbulk_reply_raw);
-}
-/* }}} */
-
-/* {{{ proto array Redis::hvals(string key) */
-PHP_METHOD(Redis, hVals)
-{
-    REDIS_PROCESS_KW_CMD("HVALS", redis_key_cmd,
-                         redis_sock_read_multibulk_reply);
-}
-
-/* {{{ proto array Redis::hgetall(string key) */
-PHP_METHOD(Redis, hGetAll)
-{
-    REDIS_PROCESS_KW_CMD("HGETALL", redis_key_cmd, redis_mbulk_reply_zipped_vals);
-}
-/* }}} */
-
 /* {{{ proto double Redis::hIncrByFloat(string k, string me, double v) */
 PHP_METHOD(Redis, hIncrByFloat)
 {
