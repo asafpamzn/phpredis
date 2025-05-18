@@ -138,6 +138,13 @@ extern int execute_mpop_command(const void *glide_client, const char *cmd, doubl
 extern int execute_zmpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
 extern int execute_lmpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
 
+/* Time to live operations */
+extern int execute_ttl_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
+extern int execute_pttl_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
+
+/* Sorted set operations */
+extern int execute_zadd_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, int flags, long *output_value);
+
 /* Don't include command_response.h here to avoid circular dependencies */
 
 #endif /* REDIS_GLIDE_H */

@@ -1071,3 +1071,172 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
         return 0;
     }
 }
+
+/* Execute a TTL command using the Valkey Glide client */
+int execute_ttl_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
+{
+    /* Check if client and key are valid */
+    if (!glide_client || !key)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 1;
+    uintptr_t args[1];
+    unsigned long args_len[1];
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        TTL,       /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Use the generic handler to process the result */
+    return handle_int_response(result, output_value);
+}
+
+/* Execute a PTTL command using the Valkey Glide client */
+int execute_pttl_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
+{
+    /* Check if client and key are valid */
+    if (!glide_client || !key)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 1;
+    uintptr_t args[1];
+    unsigned long args_len[1];
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        PTTL,      /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Use the generic handler to process the result */
+    return handle_int_response(result, output_value);
+}
+
+/* Execute a ZADD command using the Valkey Glide client */
+int execute_zadd_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, int flags, long *output_value)
+{
+    /* Check if client, key, and args are valid */
+    if (!glide_client || !key || !z_args || argc < 2 || argc % 2 != 0)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 1 + argc; /* key + (score, member) pairs */
+    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+
+    if (!args || !args_len)
+    {
+        if (args)
+            free(args);
+        if (args_len)
+            free(args_len);
+        return 0;
+    }
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Add score/member pairs */
+    int i;
+    size_t score_len;
+    char *score_str = NULL;
+    int arg_idx = 1;
+
+    for (i = 0; i < argc; i += 2)
+    {
+        /* Score */
+        zval *score = &z_args[i];
+        if (Z_TYPE_P(score) == IS_DOUBLE)
+        {
+            score_str = double_to_string(Z_DVAL_P(score), &score_len);
+        }
+        else if (Z_TYPE_P(score) == IS_LONG)
+        {
+            score_str = long_to_string(Z_LVAL_P(score), &score_len);
+        }
+        else if (Z_TYPE_P(score) == IS_STRING)
+        {
+            score_str = Z_STRVAL_P(score);
+            score_len = Z_STRLEN_P(score);
+        }
+        else
+        {
+            /* Unsupported type for score */
+            free(args);
+            free(args_len);
+            return 0;
+        }
+
+        args[arg_idx] = (uintptr_t)score_str;
+        args_len[arg_idx] = score_len;
+        arg_idx++;
+
+        /* Member */
+        zval *member = &z_args[i + 1];
+        if (Z_TYPE_P(member) != IS_STRING)
+        {
+            /* Free score string if we allocated it */
+            if (Z_TYPE_P(score) == IS_DOUBLE || Z_TYPE_P(score) == IS_LONG)
+            {
+                free((void *)score_str);
+            }
+            free(args);
+            free(args_len);
+            return 0;
+        }
+        args[arg_idx] = (uintptr_t)Z_STRVAL_P(member);
+        args_len[arg_idx] = Z_STRLEN_P(member);
+        arg_idx++;
+    }
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZAdd,      /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Free any allocated score strings */
+    for (i = 0; i < argc; i += 2)
+    {
+        zval *score = &z_args[i];
+        if (Z_TYPE_P(score) == IS_DOUBLE || Z_TYPE_P(score) == IS_LONG)
+        {
+            free((void *)args[1 + i]);
+        }
+    }
+
+    /* Free the argument arrays */
+    free(args);
+    free(args_len);
+
+    /* Use the generic handler to process the result */
+    return handle_int_response(result, output_value);
+}

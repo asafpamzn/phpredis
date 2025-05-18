@@ -963,6 +963,80 @@ PHP_METHOD(Redis, zmpop)
 }
 /* }}} */
 
+/* {{{ proto long Redis::ttl(string key) */
+PHP_METHOD(Redis, ttl)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the TTL command using the Glide client */
+        long result_value;
+        if (execute_ttl_command(redis->glide_client, key, key_len, &result_value))
+        {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto long Redis::pttl(string key) */
+PHP_METHOD(Redis, pttl)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the PTTL command using the Glide client */
+        long result_value;
+        if (execute_pttl_command(redis->glide_client, key, key_len, &result_value))
+        {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
 /* {{{ proto boolean Redis::rPush(string key, string value)
  */
 PHP_METHOD(Redis, rPush)
@@ -999,6 +1073,47 @@ PHP_METHOD(Redis, rPush)
 
         /* Return the result */
         RETURN_LONG(result);
+    }
+}
+/* }}} */
+
+/* {{{ proto long Redis::zadd(string key, double score, string member, ...) */
+PHP_METHOD(Redis, zAdd)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *z_args;
+    int argc;
+    int flags = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &argc) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the ZADD command using the Glide client */
+        long result_value;
+        if (execute_zadd_command(redis->glide_client, key, key_len, z_args, argc, flags, &result_value))
+        {
+            /* Command succeeded, return the value */
+            RETURN_LONG(result_value);
+        }
+        else
+        {
+            /* Command failed */
+            RETURN_FALSE;
+        }
     }
 }
 /* }}} */

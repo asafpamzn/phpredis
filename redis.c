@@ -1564,20 +1564,6 @@ PHP_METHOD(Redis, persist)
 }
 /* }}} */
 
-/* {{{ proto long Redis::ttl(string key) */
-PHP_METHOD(Redis, ttl)
-{
-    REDIS_PROCESS_KW_CMD("TTL", redis_key_cmd, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto long Redis::pttl(string key) */
-PHP_METHOD(Redis, pttl)
-{
-    REDIS_PROCESS_KW_CMD("PTTL", redis_key_cmd, redis_long_response);
-}
-/* }}} */
-
 /* {{{ proto array Redis::info() */
 PHP_METHOD(Redis, info)
 {
@@ -1677,13 +1663,6 @@ PHP_METHOD(Redis, rpoplpush)
 PHP_METHOD(Redis, brpoplpush)
 {
     REDIS_PROCESS_CMD(brpoplpush, redis_string_response);
-}
-/* }}} */
-
-/* {{{ proto long Redis::zAdd(string key, int score, string value) */
-PHP_METHOD(Redis, zAdd)
-{
-    REDIS_PROCESS_CMD(zadd, redis_zadd_response);
 }
 /* }}} */
 
