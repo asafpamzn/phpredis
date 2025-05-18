@@ -155,6 +155,12 @@ extern int execute_hexists_command(const void *glide_client, const char *key, si
 extern int execute_hkeys_command(const void *glide_client, const char *key, size_t key_len, zval *return_value);
 extern int execute_hvals_command(const void *glide_client, const char *key, size_t key_len, zval *return_value);
 extern int execute_hgetall_command(const void *glide_client, const char *key, size_t key_len, zval *return_value);
+extern int execute_hincrby_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, long increment, long *output_value);
+extern int execute_hincrbyfloat_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, double increment, double *output_value);
+extern int execute_hmget_command(const void *glide_client, const char *key, size_t key_len, zval *fields, int fields_count, zval *return_value);
+extern int execute_hmset_command(const void *glide_client, const char *key, size_t key_len, zval *keyvals, int keyvals_count);
+extern int execute_hrandfield_command(const void *glide_client, const char *key, size_t key_len, long count, int withvalues, zval *return_value);
+extern int execute_hstrlen_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, long *output_value);
 
 /* Don't include command_response.h here to avoid circular dependencies */
 

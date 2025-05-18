@@ -1756,48 +1756,6 @@ PHP_METHOD(Redis, bzmpop)
 /* }}} */
 /* hashes */
 
-/* {{{ proto double Redis::hIncrByFloat(string k, string me, double v) */
-PHP_METHOD(Redis, hIncrByFloat)
-{
-    REDIS_PROCESS_CMD(hincrbyfloat, redis_bulk_double_response);
-}
-/* }}} */
-
-/* {{{ proto long Redis::hincrby(string key, string mem, long byval) */
-PHP_METHOD(Redis, hIncrBy)
-{
-    REDIS_PROCESS_CMD(hincrby, redis_long_response);
-}
-/* }}} */
-
-/* {{{ array Redis::hMget(string hash, array keys) */
-PHP_METHOD(Redis, hMget)
-{
-    REDIS_PROCESS_CMD(hmget, redis_mbulk_reply_assoc);
-}
-/* }}} */
-
-/* {{{ proto bool Redis::hmset(string key, array keyvals) */
-PHP_METHOD(Redis, hMset)
-{
-    REDIS_PROCESS_CMD(hmset, redis_boolean_response);
-}
-/* }}} */
-
-/* {{{ proto bool Redis::hRandField(string key, [array $options]) */
-PHP_METHOD(Redis, hRandField)
-{
-    REDIS_PROCESS_CMD(hrandfield, redis_hrandfield_response);
-}
-/* }}} */
-
-/* {{{ proto long Redis::hstrlen(string key, string field) */
-PHP_METHOD(Redis, hStrLen)
-{
-    REDIS_PROCESS_CMD(hstrlen, redis_long_response);
-}
-/* }}} */
-
 /* flag : get, set {ATOMIC, MULTI, PIPELINE} */
 
 PHP_METHOD(Redis, multi)

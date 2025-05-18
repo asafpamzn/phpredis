@@ -199,6 +199,677 @@ int execute_hsetnx_command(const void *glide_client, const char *key, size_t key
     return ret_val;
 }
 
+/* Execute an HINCRBY command using the Valkey Glide client */
+int execute_hincrby_command(const void *glide_client, const char *key, size_t key_len,
+                            char *field, size_t field_len,
+                            long increment, long *output_value)
+{
+    /* Check if client and key are valid */
+    if (!glide_client || !key || !field)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 3;
+    uintptr_t args[3];
+    unsigned long args_len[3];
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Second argument: field */
+    args[1] = (uintptr_t)field;
+    args_len[1] = field_len;
+
+    /* Third argument: increment */
+    char increment_str[32];
+    int increment_len = snprintf(increment_str, sizeof(increment_str), "%ld", increment);
+    args[2] = (uintptr_t)increment_str;
+    args_len[2] = increment_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        HIncrBy,   /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Use the generic handler to process the result */
+    return handle_int_response(result, output_value);
+}
+
+/* Execute an HINCRBYFLOAT command using the Valkey Glide client */
+int execute_hincrbyfloat_command(const void *glide_client, const char *key, size_t key_len,
+                                 char *field, size_t field_len,
+                                 double increment, double *output_value)
+{
+    /* Check if client and key are valid */
+    if (!glide_client || !key || !field)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 3;
+    uintptr_t args[3];
+    unsigned long args_len[3];
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Second argument: field */
+    args[1] = (uintptr_t)field;
+    args_len[1] = field_len;
+
+    /* Third argument: increment */
+    char increment_str[64];
+    int increment_len = snprintf(increment_str, sizeof(increment_str), "%.17g", increment);
+    args[2] = (uintptr_t)increment_str;
+    args_len[2] = increment_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        HIncrByFloat, /* command type */
+        arg_count,    /* number of arguments */
+        args,         /* arguments */
+        args_len      /* argument lengths */
+    );
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result (a string representing a double) */
+    int ret_val = 0;
+    if (result->response)
+    {
+        if (result->response->response_type == String)
+        {
+            *output_value = atof(result->response->string_value);
+            ret_val = 1;
+        }
+    }
+
+    /* Free the result */
+    free_command_result(result);
+
+    return ret_val;
+}
+
+/* Execute an HMGET command using the Valkey Glide client */
+int execute_hmget_command(const void *glide_client, const char *key, size_t key_len,
+                          zval *fields, int fields_count, zval *return_value)
+{
+    /* Check if client and key are valid */
+    if (!glide_client || !key || !fields || fields_count <= 0)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 1 + fields_count; /* key + fields */
+    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+
+    if (!args || !args_len)
+    {
+        if (args)
+            free(args);
+        if (args_len)
+            free(args_len);
+        return 0;
+    }
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Add fields as arguments */
+    int i;
+    for (i = 0; i < fields_count; i++)
+    {
+        zval *field = &fields[i];
+
+        if (Z_TYPE_P(field) == IS_STRING)
+        {
+            args[i + 1] = (uintptr_t)Z_STRVAL_P(field);
+            args_len[i + 1] = Z_STRLEN_P(field);
+        }
+        else
+        {
+            /* Convert non-string values to string */
+            char *str_val = NULL;
+            size_t str_len = 0;
+
+            if (Z_TYPE_P(field) == IS_LONG)
+            {
+                str_val = long_to_string(Z_LVAL_P(field), &str_len);
+            }
+            else if (Z_TYPE_P(field) == IS_DOUBLE)
+            {
+                str_val = double_to_string(Z_DVAL_P(field), &str_len);
+            }
+            else if (Z_TYPE_P(field) == IS_TRUE)
+            {
+                str_val = strdup("1");
+                str_len = 1;
+            }
+            else if (Z_TYPE_P(field) == IS_FALSE)
+            {
+                str_val = strdup("0");
+                str_len = 1;
+            }
+            else
+            {
+                /* Handle other types or error */
+                free(args);
+                free(args_len);
+                return 0;
+            }
+
+            if (str_val)
+            {
+                args[i + 1] = (uintptr_t)str_val;
+                args_len[i + 1] = str_len;
+            }
+            else
+            {
+                free(args);
+                free(args_len);
+                return 0;
+            }
+        }
+    }
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        HMGet,     /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Free allocated strings for non-string arguments */
+    for (i = 0; i < fields_count; i++)
+    {
+        zval *field = &fields[i];
+        if (Z_TYPE_P(field) != IS_STRING)
+        {
+            free((void *)args[i + 1]);
+        }
+    }
+
+    /* Free the argument arrays */
+    free(args);
+    free(args_len);
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result (array of values for each field) */
+    int ret_val = 0;
+    if (result->response && result->response->response_type == Array)
+    {
+        size_t i;
+        for (i = 0; i < fields_count && i < result->response->array_value_len; i++)
+        {
+            zval *field = &fields[i];
+            zval field_value;
+            char *field_str = NULL;
+            size_t field_len = 0;
+
+            /* Convert field to string for associative array key */
+            if (Z_TYPE_P(field) == IS_STRING)
+            {
+                field_str = Z_STRVAL_P(field);
+                field_len = Z_STRLEN_P(field);
+            }
+            else
+            {
+                /* Convert other types to string */
+                if (Z_TYPE_P(field) == IS_LONG)
+                {
+                    field_str = long_to_string(Z_LVAL_P(field), &field_len);
+                }
+                else if (Z_TYPE_P(field) == IS_DOUBLE)
+                {
+                    field_str = double_to_string(Z_DVAL_P(field), &field_len);
+                }
+                else if (Z_TYPE_P(field) == IS_TRUE)
+                {
+                    field_str = strdup("1");
+                    field_len = 1;
+                }
+                else if (Z_TYPE_P(field) == IS_FALSE)
+                {
+                    field_str = strdup("0");
+                    field_len = 1;
+                }
+            }
+
+            /* Set value in result array */
+            struct CommandResponse *element = &result->response->array_value[i];
+            if (element->response_type == String)
+            {
+                ZVAL_STRINGL(&field_value, element->string_value, element->string_value_len);
+            }
+            else if (element->response_type == NullValue)
+            {
+                ZVAL_NULL(&field_value);
+            }
+            else
+            {
+                ZVAL_NULL(&field_value);
+            }
+
+            if (field_str)
+            {
+                add_assoc_zval_ex(return_value, field_str, field_len, &field_value);
+
+                /* Free the field string if we allocated it */
+                if (Z_TYPE_P(field) != IS_STRING)
+                {
+                    free(field_str);
+                }
+            }
+            else
+            {
+                add_next_index_zval(return_value, &field_value);
+            }
+        }
+        ret_val = 1;
+    }
+
+    /* Free the result */
+    free_command_result(result);
+
+    return ret_val;
+}
+
+/* Execute an HMSET command using the Valkey Glide client */
+int execute_hmset_command(const void *glide_client, const char *key, size_t key_len,
+                          zval *keyvals, int keyvals_count)
+{
+    /* Check if client, key, and keyvals are valid */
+    if (!glide_client || !key || !keyvals || keyvals_count <= 0)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments */
+    HashTable *keyvals_hash = Z_ARRVAL_P(keyvals);
+    int pairs_count = zend_hash_num_elements(keyvals_hash);
+    unsigned long arg_count = 1 + (pairs_count * 2); /* key + (field, value) pairs */
+
+    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    char **allocated_strings = (char **)malloc((pairs_count * 2) * sizeof(char *));
+    int allocated_count = 0;
+
+    if (!args || !args_len || !allocated_strings)
+    {
+        if (args)
+            free(args);
+        if (args_len)
+            free(args_len);
+        if (allocated_strings)
+            free(allocated_strings);
+        return 0;
+    }
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Add field-value pairs as arguments */
+    zval *data;
+    zend_string *hash_key;
+    zend_ulong num_idx;
+    int arg_idx = 1;
+
+    ZEND_HASH_FOREACH_KEY_VAL(keyvals_hash, num_idx, hash_key, data)
+    {
+        /* Add field */
+        if (hash_key)
+        {
+            /* Associative array: key is the field */
+            args[arg_idx] = (uintptr_t)ZSTR_VAL(hash_key);
+            args_len[arg_idx] = ZSTR_LEN(hash_key);
+        }
+        else
+        {
+            /* Numeric index - this shouldn't happen for HMSET, but handle it anyway */
+            char *field_str = long_to_string(num_idx, &args_len[arg_idx]);
+            args[arg_idx] = (uintptr_t)field_str;
+            allocated_strings[allocated_count++] = field_str;
+        }
+        arg_idx++;
+
+        /* Add value */
+        if (Z_TYPE_P(data) == IS_STRING)
+        {
+            args[arg_idx] = (uintptr_t)Z_STRVAL_P(data);
+            args_len[arg_idx] = Z_STRLEN_P(data);
+        }
+        else
+        {
+            /* Convert non-string values to string */
+            char *str_val = NULL;
+            size_t str_len = 0;
+
+            if (Z_TYPE_P(data) == IS_LONG)
+            {
+                str_val = long_to_string(Z_LVAL_P(data), &str_len);
+            }
+            else if (Z_TYPE_P(data) == IS_DOUBLE)
+            {
+                str_val = double_to_string(Z_DVAL_P(data), &str_len);
+            }
+            else if (Z_TYPE_P(data) == IS_TRUE)
+            {
+                str_val = strdup("1");
+                str_len = 1;
+            }
+            else if (Z_TYPE_P(data) == IS_FALSE)
+            {
+                str_val = strdup("0");
+                str_len = 1;
+            }
+            else if (Z_TYPE_P(data) == IS_NULL)
+            {
+                str_val = strdup("");
+                str_len = 0;
+            }
+            else
+            {
+                /* Handle other types as empty string */
+                str_val = strdup("");
+                str_len = 0;
+            }
+
+            if (str_val)
+            {
+                args[arg_idx] = (uintptr_t)str_val;
+                args_len[arg_idx] = str_len;
+                allocated_strings[allocated_count++] = str_val;
+            }
+            else
+            {
+                /* Free already allocated strings */
+                int i;
+                for (i = 0; i < allocated_count; i++)
+                {
+                    free(allocated_strings[i]);
+                }
+                free(allocated_strings);
+                free(args);
+                free(args_len);
+                return 0;
+            }
+        }
+        arg_idx++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        HMSet,     /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Free allocated strings */
+    int i;
+    for (i = 0; i < allocated_count; i++)
+    {
+        free(allocated_strings[i]);
+    }
+    free(allocated_strings);
+    free(args);
+    free(args_len);
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Check for OK response */
+    int ret_val = 0;
+    if (result->response)
+    {
+        if (result->response->response_type == Status &&
+            strcmp(result->response->status_value, "OK") == 0)
+        {
+            ret_val = 1;
+        }
+    }
+
+    /* Free the result */
+    free_command_result(result);
+
+    return ret_val;
+}
+
+/* Execute an HRANDFIELD command using the Valkey Glide client */
+int execute_hrandfield_command(const void *glide_client, const char *key, size_t key_len,
+                               long count, int withvalues, zval *return_value)
+{
+    /* Check if client and key are valid */
+    if (!glide_client || !key)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 1;
+    char count_str[32];
+    int count_str_len = 0;
+
+    if (count != 1)
+    {
+        arg_count = 2;
+        count_str_len = snprintf(count_str, sizeof(count_str), "%ld", count);
+    }
+
+    if (withvalues && count != 1)
+    {
+        arg_count = 3;
+    }
+
+    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+
+    if (!args || !args_len)
+    {
+        if (args)
+            free(args);
+        if (args_len)
+            free(args_len);
+        return 0;
+    }
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Second argument (optional): count */
+    if (count != 1)
+    {
+        args[1] = (uintptr_t)count_str;
+        args_len[1] = count_str_len;
+    }
+
+    /* Third argument (optional): WITHVALUES */
+    if (withvalues && count != 1)
+    {
+        const char *withvalues_str = "WITHVALUES";
+        args[2] = (uintptr_t)withvalues_str;
+        args_len[2] = strlen(withvalues_str);
+    }
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        HRandField, /* command type */
+        arg_count,  /* number of arguments */
+        args,       /* arguments */
+        args_len    /* argument lengths */
+    );
+
+    /* Free the argument arrays */
+    free(args);
+    free(args_len);
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
+    int ret_val = 0;
+    if (result->response)
+    {
+        /* Single field case */
+        if (count == 1 && !withvalues)
+        {
+            if (result->response->response_type == String)
+            {
+                add_next_index_stringl(return_value, result->response->string_value, result->response->string_value_len);
+                ret_val = 1;
+            }
+            else if (result->response->response_type == NullValue)
+            {
+                add_next_index_null(return_value);
+                ret_val = 1;
+            }
+        }
+        /* Multiple fields without values */
+        else if (count != 1 && !withvalues && result->response->response_type == Array)
+        {
+            size_t i;
+            for (i = 0; i < result->response->array_value_len; i++)
+            {
+                struct CommandResponse *element = &result->response->array_value[i];
+                if (element->response_type == String)
+                {
+                    add_next_index_stringl(return_value, element->string_value, element->string_value_len);
+                }
+                else if (element->response_type == NullValue)
+                {
+                    add_next_index_null(return_value);
+                }
+            }
+            ret_val = 1;
+        }
+        /* Multiple fields with values (field-value pairs) */
+        else if (count != 1 && withvalues && result->response->response_type == Array)
+        {
+            size_t i;
+            for (i = 0; i + 1 < result->response->array_value_len; i += 2)
+            {
+                struct CommandResponse *field = &result->response->array_value[i];
+                struct CommandResponse *value = &result->response->array_value[i + 1];
+
+                if (field->response_type == String && value->response_type == String)
+                {
+                    add_assoc_stringl_ex(return_value, field->string_value, field->string_value_len,
+                                         value->string_value, value->string_value_len);
+                }
+                else if (field->response_type == String && value->response_type == NullValue)
+                {
+                    add_assoc_null_ex(return_value, field->string_value, field->string_value_len);
+                }
+            }
+            ret_val = 1;
+        }
+    }
+
+    /* Free the result */
+    free_command_result(result);
+
+    return ret_val;
+}
+
+/* Execute an HSTRLEN command using the Valkey Glide client */
+int execute_hstrlen_command(const void *glide_client, const char *key, size_t key_len,
+                            char *field, size_t field_len, long *output_value)
+{
+    /* Check if client and key are valid */
+    if (!glide_client || !key || !field)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 2;
+    uintptr_t args[2];
+    unsigned long args_len[2];
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Second argument: field */
+    args[1] = (uintptr_t)field;
+    args_len[1] = field_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        HStrLen,   /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Use the generic handler to process the result */
+    return handle_int_response(result, output_value);
+}
+
 /* Execute an HGET command using the Valkey Glide client */
 int execute_hget_command(const void *glide_client, const char *key, size_t key_len,
                          char *field, size_t field_len,
