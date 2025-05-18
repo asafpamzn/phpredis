@@ -240,7 +240,24 @@ PHP_METHOD(Redis, geohash)
     }
 
     /* If we don't have a Glide client, use the standard implementation */
-    REDIS_PROCESS_CMD(geohash, redis_mbulk_reply_raw);
+    RedisSock *redis_sock = redis->sock;
+    char *cmd = NULL;
+    int cmd_len = 0;
+    void *ctx = NULL;
+
+    /* Prepare command and execute it */
+    if (redis_geohash_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock,
+                          &cmd, &cmd_len, NULL, &ctx) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    REDIS_PROCESS_REQUEST(redis_sock, cmd, cmd_len);
+    if (IS_ATOMIC(redis_sock))
+    {
+        redis_mbulk_reply_raw(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, NULL, ctx);
+    }
+    REDIS_PROCESS_RESPONSE(redis_sock);
 }
 /* }}} */
 
@@ -293,7 +310,24 @@ PHP_METHOD(Redis, geopos)
     }
 
     /* If we don't have a Glide client, use the standard implementation */
-    REDIS_PROCESS_CMD(geopos, redis_read_variant_reply);
+    RedisSock *redis_sock = redis->sock;
+    char *cmd = NULL;
+    int cmd_len = 0;
+    void *ctx = NULL;
+
+    /* Prepare command and execute it */
+    if (redis_geopos_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock,
+                         &cmd, &cmd_len, NULL, &ctx) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    REDIS_PROCESS_REQUEST(redis_sock, cmd, cmd_len);
+    if (IS_ATOMIC(redis_sock))
+    {
+        redis_read_variant_reply(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, NULL, ctx);
+    }
+    REDIS_PROCESS_RESPONSE(redis_sock);
 }
 /* }}} */
 
@@ -342,7 +376,25 @@ PHP_METHOD(Redis, georadius)
     }
 
     /* If we don't have a Glide client, use the standard implementation */
-    REDIS_PROCESS_CMD(georadius, redis_read_variant_reply);
+    RedisSock *redis_sock = redis->sock;
+    char *cmd = NULL;
+    int cmd_len = 0;
+    short slot = 0;
+    void *ctx = NULL;
+
+    /* Prepare command and execute it */
+    if (redis_georadius_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, "GEORADIUS",
+                            &cmd, &cmd_len, &slot, &ctx) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    REDIS_PROCESS_REQUEST(redis_sock, cmd, cmd_len);
+    if (IS_ATOMIC(redis_sock))
+    {
+        redis_read_variant_reply(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, NULL, ctx);
+    }
+    REDIS_PROCESS_RESPONSE(redis_sock);
 }
 /* }}} */
 
@@ -393,7 +445,25 @@ PHP_METHOD(Redis, georadius_ro)
     }
 
     /* If we don't have a Glide client, use the standard implementation */
-    REDIS_PROCESS_CMD(georadius_ro, redis_read_variant_reply);
+    RedisSock *redis_sock = redis->sock;
+    char *cmd = NULL;
+    int cmd_len = 0;
+    short slot = 0;
+    void *ctx = NULL;
+
+    /* Prepare command and execute it */
+    if (redis_georadius_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, "GEORADIUS_RO",
+                            &cmd, &cmd_len, &slot, &ctx) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    REDIS_PROCESS_REQUEST(redis_sock, cmd, cmd_len);
+    if (IS_ATOMIC(redis_sock))
+    {
+        redis_read_variant_reply(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, NULL, ctx);
+    }
+    REDIS_PROCESS_RESPONSE(redis_sock);
 }
 /* }}} */
 
@@ -402,7 +472,37 @@ PHP_METHOD(Redis, georadiusbymember)
 {
     /* For now, we'll leave this to the standard implementation since it's not
        directly implemented in the redis_geo_glide.c file */
-    REDIS_PROCESS_KW_CMD("GEORADIUSBYMEMBER", redis_read_variant_reply, 0);
+    zval *object;
+    redis_object *redis;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    RedisSock *redis_sock = redis->sock;
+    char *cmd = NULL;
+    int cmd_len = 0;
+    short slot = 0;
+    void *ctx = NULL;
+
+    /* Prepare command and execute it */
+    if (redis_georadiusbymember_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, "GEORADIUSBYMEMBER",
+                                    &cmd, &cmd_len, &slot, &ctx) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    REDIS_PROCESS_REQUEST(redis_sock, cmd, cmd_len);
+    if (IS_ATOMIC(redis_sock))
+    {
+        redis_read_variant_reply(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, NULL, ctx);
+    }
+    REDIS_PROCESS_RESPONSE(redis_sock);
 }
 /* }}} */
 
@@ -411,7 +511,37 @@ PHP_METHOD(Redis, georadiusbymember_ro)
 {
     /* For now, we'll leave this to the standard implementation since it's not
        directly implemented in the redis_geo_glide.c file */
-    REDIS_PROCESS_KW_CMD("GEORADIUSBYMEMBER_RO", redis_read_variant_reply, 0);
+    zval *object;
+    redis_object *redis;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    RedisSock *redis_sock = redis->sock;
+    char *cmd = NULL;
+    int cmd_len = 0;
+    short slot = 0;
+    void *ctx = NULL;
+
+    /* Prepare command and execute it */
+    if (redis_georadiusbymember_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, "GEORADIUSBYMEMBER_RO",
+                                    &cmd, &cmd_len, &slot, &ctx) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    REDIS_PROCESS_REQUEST(redis_sock, cmd, cmd_len);
+    if (IS_ATOMIC(redis_sock))
+    {
+        redis_read_variant_reply(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, NULL, ctx);
+    }
+    REDIS_PROCESS_RESPONSE(redis_sock);
 }
 /* }}} */
 
@@ -420,7 +550,37 @@ PHP_METHOD(Redis, geosearch)
 {
     /* For now, we'll leave this to the standard implementation since it's not
        directly implemented in the redis_geo_glide.c file */
-    REDIS_PROCESS_KW_CMD("GEOSEARCH", redis_read_variant_reply_strings, 0);
+    zval *object;
+    redis_object *redis;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    RedisSock *redis_sock = redis->sock;
+    char *cmd = NULL;
+    int cmd_len = 0;
+    short slot = 0;
+    void *ctx = NULL;
+
+    /* Prepare command and execute it */
+    if (redis_geosearch_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock,
+                            &cmd, &cmd_len, &slot, &ctx) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    REDIS_PROCESS_REQUEST(redis_sock, cmd, cmd_len);
+    if (IS_ATOMIC(redis_sock))
+    {
+        redis_read_variant_reply_strings(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, NULL, ctx);
+    }
+    REDIS_PROCESS_RESPONSE(redis_sock);
 }
 /* }}} */
 
@@ -429,6 +589,36 @@ PHP_METHOD(Redis, geosearchstore)
 {
     /* For now, we'll leave this to the standard implementation since it's not
        directly implemented in the redis_geo_glide.c file */
-    REDIS_PROCESS_KW_CMD("GEOSEARCHSTORE", redis_long_response, 0);
+    zval *object;
+    redis_object *redis;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    RedisSock *redis_sock = redis->sock;
+    char *cmd = NULL;
+    int cmd_len = 0;
+    short slot = 0;
+    void *ctx = NULL;
+
+    /* Prepare command and execute it */
+    if (redis_geosearchstore_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock,
+                                 &cmd, &cmd_len, &slot, &ctx) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    REDIS_PROCESS_REQUEST(redis_sock, cmd, cmd_len);
+    if (IS_ATOMIC(redis_sock))
+    {
+        redis_long_response(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, NULL, ctx);
+    }
+    REDIS_PROCESS_RESPONSE(redis_sock);
 }
 /* }}} */
