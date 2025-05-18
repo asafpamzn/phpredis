@@ -41,11 +41,10 @@ static int array_has_string_value(HashTable *ht, const char *value, size_t value
 /* Execute an LCS command using the Valkey Glide client */
 int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_len, const char *key2, size_t key2_len, zval *options, zval *result)
 {
-    printf("execute_lcs_command file = %s, line = %d\n", __FILE__, __LINE__);
     /* Check if client and keys are valid */
     if (!glide_client || !key1 || !key2)
     {
-        return -1;
+        return 0;
     }
 
     /* Prepare command arguments */
@@ -71,31 +70,26 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
     /* Add options if provided */
     if (options && Z_TYPE_P(options) == IS_ARRAY)
     {
-        printf("Options provided\n");
         /* Get option values from associative array */
         zval *z_len = zend_hash_str_find(Z_ARRVAL_P(options), "len", sizeof("len") - 1);
         zval *z_idx = zend_hash_str_find(Z_ARRVAL_P(options), "idx", sizeof("idx") - 1);
         zval *z_minmatchlen = zend_hash_str_find(Z_ARRVAL_P(options), "minmatchlen", sizeof("minmatchlen") - 1);
         zval *z_withmatchlen = zend_hash_str_find(Z_ARRVAL_P(options), "withmatchlen", sizeof("withmatchlen") - 1);
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         /* Check associative array values */
         if (z_len && Z_TYPE_P(z_len) == IS_TRUE)
         {
-            printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
             has_len = 1;
         }
 
         if (z_idx && Z_TYPE_P(z_idx) == IS_TRUE)
         {
-            printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
             has_idx = 1;
         }
 
         if (z_minmatchlen && Z_TYPE_P(z_minmatchlen) == IS_LONG)
         {
-            printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
             has_minmatchlen = 1;
             minmatchlen_value = Z_LVAL_P(z_minmatchlen);
@@ -103,7 +97,6 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
 
         if (z_withmatchlen && Z_TYPE_P(z_withmatchlen) == IS_TRUE)
         {
-            printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
             has_withmatchlen = 1;
         }
@@ -124,7 +117,6 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
             has_withmatchlen = 1;
         }
     }
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
     /* Add LEN option if specified */
     if (has_len)
@@ -154,7 +146,7 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
         char *minmatchlen_str = long_to_string(minmatchlen_value, &minmatchlen_len);
         if (!minmatchlen_str)
         {
-            return -1;
+            return 0;
         }
         args[arg_count] = (uintptr_t)minmatchlen_str;
         args_len[arg_count] = minmatchlen_len;
@@ -168,7 +160,6 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
         args_len[arg_count] = 12;
         arg_count++;
     }
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
     /* Execute the command */
     CommandResult *cmd_result = execute_command(
@@ -182,16 +173,15 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
     /* Check if the command was successful */
     if (!cmd_result)
     {
-        return -1;
+        return 0;
     }
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
     /* Process the result based on the response type */
-    int ret_val = -1;
+    int ret_val = 0;
     if (cmd_result->response)
     {
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         /* Force Map handling if IDX option was requested, regardless of the response type */
         if (has_idx && cmd_result->response->response_type == String)
         {
@@ -207,9 +197,12 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
             zval matches_array;
             array_init(&matches_array);
 
+            printf("file = %s, line = %d\n", __FILE__, __LINE__);
             /* Add a match entry if we have a non-empty string */
             if (cmd_result->response->string_value_len > 0)
             {
+
+                printf("file = %s, line = %d\n", __FILE__, __LINE__);
                 zval match_entry;
                 array_init(&match_entry);
 
@@ -238,11 +231,9 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
         else
         {
             printf("file = %s, line = %d\n", __FILE__, __LINE__);
-
             switch (cmd_result->response->response_type)
             {
             case String:
-                printf("string response\n");
                 /* If no options were specified, LCS returns the longest common substring as a string */
                 command_response_to_zval(cmd_result->response, result);
                 ret_val = 1;
@@ -250,14 +241,12 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
 
             case Int:
 
-                printf("int response\n");
                 /* If LEN option was specified, LCS returns the length as an integer */
                 ZVAL_LONG(result, cmd_result->response->int_value);
                 ret_val = 1;
                 break;
 
             case Map:
-                printf("map response\n");
                 /* If IDX option was specified, LCS returns a map structure */
                 ret_val = handle_map_response(cmd_result, result);
                 return ret_val; /* handle_map_response already frees cmd_result */
@@ -265,7 +254,7 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
             default:
                 printf("default response\n");
                 /* Unsupported response type */
-                ret_val = -1;
+                ret_val = 0;
                 break;
             }
         }

@@ -28,7 +28,7 @@ long execute_rpush_command(const void *glide_client, const char *key, size_t key
     /* Check if client and key are valid */
     if (!glide_client || !key || !values || values_count <= 0)
     {
-        return -1;
+        return 0;
     }
 
     /* Prepare command arguments */
@@ -42,7 +42,7 @@ long execute_rpush_command(const void *glide_client, const char *key, size_t key
             free(args);
         if (args_len)
             free(args_len);
-        return -1;
+        return 0;
     }
 
     /* First argument: key */
@@ -58,7 +58,7 @@ long execute_rpush_command(const void *glide_client, const char *key, size_t key
         {
             free(args);
             free(args_len);
-            return -1;
+            return 0;
         }
         args[1 + i] = (uintptr_t)Z_STRVAL_P(value);
         args_len[1 + i] = Z_STRLEN_P(value);
