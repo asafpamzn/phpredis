@@ -674,8 +674,7 @@ int execute_hmset_command(const void *glide_client, const char *key, size_t key_
     int ret_val = 0;
     if (result->response)
     {
-        if (result->response->response_type == SimpleString &&
-            strcmp(result->response->simple_string_value, "OK") == 0)
+        if (result->response->response_type == Ok)
         {
             ret_val = 1;
         }
