@@ -1,3 +1,4 @@
+
 /*
   +----------------------------------------------------------------------+
   | Redis Glide FFI integration for phpredis - Hash Commands             |
@@ -479,7 +480,7 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
             {
                 ZVAL_STRINGL(&field_value, element->string_value, element->string_value_len);
             }
-            else if (element->response_type == NullValue)
+            else if (element->response_type == Null)
             {
                 ZVAL_NULL(&field_value);
             }
@@ -781,7 +782,7 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
                 add_next_index_stringl(return_value, result->response->string_value, result->response->string_value_len);
                 ret_val = 1;
             }
-            else if (result->response->response_type == NullValue)
+            else if (result->response->response_type == Null)
             {
                 add_next_index_null(return_value);
                 ret_val = 1;
@@ -798,7 +799,7 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
                 {
                     add_next_index_stringl(return_value, element->string_value, element->string_value_len);
                 }
-                else if (element->response_type == NullValue)
+                else if (element->response_type == Null)
                 {
                     add_next_index_null(return_value);
                 }
@@ -819,7 +820,7 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
                     add_assoc_stringl_ex(return_value, field->string_value, field->string_value_len,
                                          value->string_value, value->string_value_len);
                 }
-                else if (field->response_type == String && value->response_type == NullValue)
+                else if (field->response_type == String && value->response_type == Null)
                 {
                     add_assoc_null_ex(return_value, field->string_value, field->string_value_len);
                 }
