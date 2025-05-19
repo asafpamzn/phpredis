@@ -697,7 +697,7 @@ PHP_METHOD(Redis, getset)
         else if (result == 0 || (result == 2 && response == NULL))
         {
             /* Key didn't exist */
-            RETURN_NULL();
+            RETURN_FALSE;
         }
         else
         {

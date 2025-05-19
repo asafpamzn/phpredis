@@ -720,7 +720,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(['val1', 'val0'], $this->redis->lRange('{key}2', 0, -1));
     }
 
-    public function testMultiple() {
+    public function testMultiple1() {
         $kvals = [
             'mget1' => 'v1',
             'mget2' => 'v2',
