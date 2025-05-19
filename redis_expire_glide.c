@@ -82,11 +82,9 @@ int execute_expire_command(const void *glide_client, const char *key, size_t key
     free(seconds_str);
     free(args);
     free(args_len);
-    printf("file: %s, line: %d\n", __FILE__, __LINE__);
     /* Check if the command was successful */
     if (!result)
     {
-        printf("file: %s, line: %d\n", __FILE__, __LINE__);
 
         return 0;
     }

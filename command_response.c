@@ -65,7 +65,6 @@ long handle_int_response(CommandResult *result, long *output_value)
     }
 
     /* Get the result value */
-    printf("result->response->response_type: %d\n", result->response->response_type);
     if (result->response && result->response->response_type == Int)
     {
         *output_value = result->response->int_value;
