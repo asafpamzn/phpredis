@@ -357,24 +357,48 @@ PHP_METHOD(Redis, bitpos)
 
 /* }}} */
 
-/* {{{ proto boolean Redis::set(string key, mixed val, long timeout,
+/* {{{ proto boolean Redis::set(string key, mixed val, double|int timeout,
  *                              [array opt) */
 PHP_METHOD(Redis, set)
 {
-    zval *object, *z_value, *z_opts = NULL;
+    zval *object, *z_value, *z_expire = NULL, *z_opts = NULL;
     redis_object *redis;
     char *key = NULL, *val = NULL;
     size_t key_len, val_len;
-    zend_long expire = 0;
+    double expire = 0;
+    zend_long expire_int = 0;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osz|la",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osz|za",
                                      &object, redis_ce, &key, &key_len,
-                                     &z_value, &expire, &z_opts) == FAILURE)
+                                     &z_value, &z_expire, &z_opts) == FAILURE)
     {
         RETURN_FALSE;
     }
 
+    /* Check if expire parameter was provided */
+    if (z_expire != NULL)
+    {
+        /* Check if expire is a double or long */
+        if (Z_TYPE_P(z_expire) != IS_DOUBLE && Z_TYPE_P(z_expire) != IS_LONG)
+        {
+            /* Not a numeric type - return false */
+            RETURN_FALSE;
+        }
+
+        /* Get the value based on the type */
+        if (Z_TYPE_P(z_expire) == IS_DOUBLE)
+        {
+            expire = Z_DVAL_P(z_expire);
+        }
+        else
+        {
+            expire = (double)Z_LVAL_P(z_expire);
+        }
+
+        /* Convert to integer */
+        expire_int = (zend_long)expire;
+    }
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
@@ -433,7 +457,7 @@ PHP_METHOD(Redis, set)
         }
 
         /* Execute the SET command using the Glide client */
-        int result = execute_set_command(redis->glide_client, key, key_len, val, val_len, expire, z_opts);
+        int result = execute_set_command(redis->glide_client, key, key_len, val, val_len, expire_int, z_opts);
 
         /* Free the allocated string if needed */
         if (free_val)

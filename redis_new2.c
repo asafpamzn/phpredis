@@ -342,7 +342,7 @@ PHP_METHOD(Redis, georadius)
     zval *z_opts = NULL;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osdds|a",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osddds|a",
                                      &object, redis_ce, &key, &key_len,
                                      &lng, &lat, &radius,
                                      &unit, &unit_len, &z_opts) == FAILURE)
@@ -409,7 +409,7 @@ PHP_METHOD(Redis, georadius_ro)
     zval *z_opts = NULL;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osdds|a",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osddds|a",
                                      &object, redis_ce, &key, &key_len,
                                      &lng, &lat, &radius,
                                      &unit, &unit_len, &z_opts) == FAILURE)
