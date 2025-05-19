@@ -414,6 +414,11 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
                         /* Reset other time options */
                         has_px = has_exat = has_pxat = 0;
                     }
+                    else
+                    {
+                        /* Invalid value type for EX option - should be numeric */
+                        return 0;
+                    }
                 }
                 else if (strcasecmp(opt, "PX") == 0)
                 {
@@ -425,6 +430,11 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
                         expire = zval_get_long(z_option);
                         /* Reset other time options */
                         has_ex = has_exat = has_pxat = 0;
+                    }
+                    else
+                    {
+                        /* Invalid value type for PX option - should be numeric */
+                        return 0;
                     }
                 }
                 else if (strcasecmp(opt, "EXAT") == 0)
@@ -438,6 +448,11 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
                         /* Reset other time options */
                         has_ex = has_px = has_pxat = 0;
                     }
+                    else
+                    {
+                        /* Invalid value type for EXAT option - should be numeric */
+                        return 0;
+                    }
                 }
                 else if (strcasecmp(opt, "PXAT") == 0)
                 {
@@ -449,6 +464,11 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
                         expire = zval_get_long(z_option);
                         /* Reset other time options */
                         has_ex = has_px = has_exat = 0;
+                    }
+                    else
+                    {
+                        /* Invalid value type for PXAT option - should be numeric */
+                        return 0;
                     }
                 }
                 /* IFEQ option */
