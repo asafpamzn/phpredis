@@ -126,6 +126,9 @@ extern long execute_incr_command(const void *glide_client, const char *key, size
 extern long execute_incrby_command(const void *glide_client, const char *key, size_t key_len, long value);
 extern int execute_incrbyfloat_command(const void *glide_client, const char *key, size_t key_len, double value, double *result);
 
+int execute_decr_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
+int execute_decrby_command(const void *glide_client, const char *key, size_t key_len, long decrement, long *output_value);
+
 /* Additional operations */
 extern int execute_getbit_command(const void *glide_client, const char *key, size_t key_len, long offset, long *output_value);
 extern int execute_setbit_command(const void *glide_client, const char *key, size_t key_len, long offset, int value, long *output_value);
@@ -161,6 +164,11 @@ extern int execute_hmget_command(const void *glide_client, const char *key, size
 extern int execute_hmset_command(const void *glide_client, const char *key, size_t key_len, zval *keyvals, int keyvals_count);
 extern int execute_hrandfield_command(const void *glide_client, const char *key, size_t key_len, long count, int withvalues, zval *return_value);
 extern int execute_hstrlen_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, long *output_value);
+
+int execute_mget_command(const void *glide_client, zval *keys, zval *return_value);
+int execute_exists_command(const void *glide_client, zval *keys, int keys_count, long *output_value);
+int execute_touch_command(const void *glide_client, zval *keys, int keys_count, long *output_value);
+int execute_unlink_command(const void *glide_client, zval *keys, int keys_count, long *output_value);
 
 /* Don't include command_response.h here to avoid circular dependencies */
 
