@@ -651,7 +651,7 @@ PHP_METHOD(Redis, setnx)
  */
 PHP_METHOD(Redis, getset)
 {
-    zval *object, *z_value;
+    zval *object;
     redis_object *redis;
     char *key = NULL, *val = NULL;
     size_t key_len, val_len;
@@ -672,18 +672,29 @@ PHP_METHOD(Redis, getset)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the GETSET command using the Glide client */
-        int result = execute_getset_command(redis->glide_client, key, key_len, val, val_len, &response, &response_len);
+        /* Create a zval array for the GET option */
+        zval z_opts;
+        array_init(&z_opts);
+        add_next_index_string(&z_opts, "GET");
+
+        /* Execute the SET command with GET option using the Glide client */
+        int result = execute_set_command(redis->glide_client, key, key_len, val, val_len,
+                                         0,       /* No expiry */
+                                         &z_opts, /* Use GET option */
+                                         &response, &response_len);
+
+        /* Free the zval array */
+        zval_dtor(&z_opts);
 
         /* Process the result */
-        if (result == 1 && response != NULL)
+        if ((result == 1 || result == 2) && response != NULL)
         {
             /* Return the old value */
             RETVAL_STRINGL(response, response_len);
             free(response);
             return;
         }
-        else if (result == 0)
+        else if (result == 0 || (result == 2 && response == NULL))
         {
             /* Key didn't exist */
             RETURN_NULL();
