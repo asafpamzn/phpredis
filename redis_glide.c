@@ -329,12 +329,22 @@ int execute_bitpos_command(const void *glide_client, const char *key, size_t key
 }
 
 /* Execute a SET command using the Valkey Glide client */
-int execute_set_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, long expire, zval *opts)
+int execute_set_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, long expire, zval *opts, char **old_val, size_t *old_val_len)
 {
     /* Check if client, key, and value are valid */
     if (!glide_client || !key || !val)
     {
         return 0;
+    }
+
+    /* Initialize output parameters */
+    if (old_val)
+    {
+        *old_val = NULL;
+    }
+    if (old_val_len)
+    {
+        *old_val_len = 0;
     }
 
     /* Count the number of arguments */
@@ -625,7 +635,20 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
             ret_val = 0; /* Not set (NX/XX condition not met) */
             break;
         case String:
+            /* GET option returned a value */
             ret_val = 2; /* GET option returned a value */
+
+            /* Extract the string value for the caller if requested */
+            if (has_get && old_val != NULL && old_val_len != NULL && result->response->string_value != NULL)
+            {
+                *old_val = malloc(result->response->string_value_len + 1);
+                if (*old_val)
+                {
+                    memcpy(*old_val, result->response->string_value, result->response->string_value_len);
+                    (*old_val)[result->response->string_value_len] = '\0'; /* Null-terminate for safety */
+                    *old_val_len = result->response->string_value_len;
+                }
+            }
             break;
         default:
             ret_val = 0; /* Error */

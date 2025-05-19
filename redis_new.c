@@ -370,8 +370,8 @@ PHP_METHOD(Redis, set)
     zval *z_set_opts = NULL; /* Will hold our options either from z_expire or z_opts */
     zval *z_ifeq_val = NULL; /* Special holder for IFEQ value */
     int has_get_opt = 0;     /* Flag to indicate if GET option is present */
-    char *response = NULL;   /* For storing GET response */
-    size_t response_len = 0;
+    char *old_val = NULL;    /* For storing GET response */
+    size_t old_val_len = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osz|za",
@@ -495,9 +495,9 @@ PHP_METHOD(Redis, set)
             ZEND_HASH_FOREACH_END();
         }
 
-        /* Execute the SET command using the Glide client */
+        /* Execute the SET command using the Glide client - pass variables to receive old value */
         int result = execute_set_command(redis->glide_client, key, key_len, val, val_len,
-                                         expire_int, z_set_opts);
+                                         expire_int, z_set_opts, &old_val, &old_val_len);
 
         /* Free the allocated string if needed */
         if (free_val)
@@ -513,19 +513,13 @@ PHP_METHOD(Redis, set)
         case 0: /* Not set (NX/XX/IFEQ condition not met) */
             RETURN_FALSE;
         case 2: /* GET option returned a value */
-            /* For GET option, we need to retrieve the old value using execute_get_command */
-            if (has_get_opt)
+            /* If GET option was used and old value was returned */
+            if (has_get_opt && old_val != NULL)
             {
-                /* Get the old value directly - we know it exists because result was 2 */
-                int get_result = execute_get_command(redis->glide_client, key, key_len, &response, &response_len);
-
-                if (get_result == 1 && response != NULL)
-                {
-                    /* Return the old value */
-                    RETVAL_STRINGL(response, response_len);
-                    free(response);
-                    return;
-                }
+                /* Return the old value */
+                RETVAL_STRINGL(old_val, old_val_len);
+                free(old_val); /* Free the allocated old value */
+                return;
             }
             /* Fallback to returning TRUE when GET is used but handling fails */
             RETURN_TRUE;
