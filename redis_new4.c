@@ -74,8 +74,6 @@ extern zend_class_entry *redis_exception_ce;
 #endif
 
 /* Function declarations for the execute_x_command functions in redis_expire_glide.c */
-extern int execute_expire_command(const void *glide_client, const char *key, size_t key_len,
-                                  long seconds, const char *mode, size_t mode_len, int *output_value);
 extern int execute_expireat_command(const void *glide_client, const char *key, size_t key_len,
                                     long timestamp, const char *mode, size_t mode_len, int *output_value);
 extern int execute_pexpire_command(const void *glide_client, const char *key, size_t key_len,
@@ -94,7 +92,6 @@ PHP_METHOD(Redis, expire)
     char *key = NULL, *mode = NULL;
     size_t key_len, mode_len = 0;
     zend_long seconds;
-    int output_value;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osl|s",
@@ -123,13 +120,14 @@ PHP_METHOD(Redis, expire)
         }
 
         /* Execute the EXPIRE command using the Glide client */
-        if (execute_expire_command(redis->glide_client, key, key_len, seconds, mode, mode_len, &output_value))
+        if (execute_expire_command(redis->glide_client, key, key_len, seconds, mode, mode_len))
         {
             /* Return TRUE if key was expired (output_value == 1), FALSE otherwise */
-            RETURN_BOOL(output_value);
+            RETURN_TRUE;
         }
         else
         {
+            printf("Command failed\n");
             /* Command failed */
             RETURN_FALSE;
         }

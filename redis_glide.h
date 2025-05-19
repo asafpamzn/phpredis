@@ -144,7 +144,7 @@ extern int execute_lmpop_command(const void *glide_client, const char *cmd, doub
 /* Time to live operations */
 extern int execute_ttl_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
 extern int execute_pttl_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
-extern int execute_expire_command(const void *glide_client, const char *key, size_t key_len, long seconds, const char *mode, size_t mode_len, int *output_value);
+extern int execute_expire_command(const void *glide_client, const char *key, size_t key_len, long seconds, const char *mode, size_t mode_len);
 extern int execute_expireat_command(const void *glide_client, const char *key, size_t key_len, long timestamp, const char *mode, size_t mode_len, int *output_value);
 extern int execute_pexpire_command(const void *glide_client, const char *key, size_t key_len, long milliseconds, const char *mode, size_t mode_len, int *output_value);
 extern int execute_pexpireat_command(const void *glide_client, const char *key, size_t key_len, long timestamp_ms, const char *mode, size_t mode_len, int *output_value);

@@ -24,10 +24,10 @@
 
 /* Execute an EXPIRE command using the Valkey Glide client */
 int execute_expire_command(const void *glide_client, const char *key, size_t key_len,
-                           long seconds, const char *mode, size_t mode_len, int *output_value)
+                           long seconds, const char *mode, size_t mode_len)
 {
     /* Check if client and key are valid */
-    if (!glide_client || !key || !output_value)
+    if (!glide_client || !key)
     {
         return 0;
     }
@@ -82,10 +82,12 @@ int execute_expire_command(const void *glide_client, const char *key, size_t key
     free(seconds_str);
     free(args);
     free(args_len);
-
+    printf("file: %s, line: %d\n", __FILE__, __LINE__);
     /* Check if the command was successful */
     if (!result)
     {
+        printf("file: %s, line: %d\n", __FILE__, __LINE__);
+
         return 0;
     }
 
@@ -98,17 +100,7 @@ int execute_expire_command(const void *glide_client, const char *key, size_t key
     }
 
     /* Get the result value */
-    int ret_val = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        *output_value = (int)result->response->int_value;
-        ret_val = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    return handle_bool_response(result);
 }
 
 /* Execute an EXPIREAT command using the Valkey Glide client */
