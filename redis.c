@@ -1220,24 +1220,10 @@ PHP_METHOD(Redis, sortDescAlpha)
 }
 /* }}} */
 
-/* {{{ proto array Redis::expire(string key, int timeout) */
-PHP_METHOD(Redis, expire)
-{
-    REDIS_PROCESS_KW_CMD("EXPIRE", redis_expire_cmd, redis_1_response);
-}
-/* }}} */
-
 /* {{{ proto bool Redis::pexpire(string key, long ms) */
 PHP_METHOD(Redis, pexpire)
 {
     REDIS_PROCESS_KW_CMD("PEXPIRE", redis_expire_cmd, redis_1_response);
-}
-/* }}} */
-
-/* {{{ proto array Redis::expireAt(string key, int timestamp) */
-PHP_METHOD(Redis, expireAt)
-{
-    REDIS_PROCESS_KW_CMD("EXPIREAT", redis_expire_cmd, redis_1_response);
 }
 /* }}} */
 
@@ -1337,13 +1323,6 @@ PHP_METHOD(Redis, dbSize)
 PHP_METHOD(Redis, auth)
 {
     REDIS_PROCESS_CMD(auth, redis_boolean_response);
-}
-/* }}} */
-
-/* {{{ proto long Redis::persist(string key) */
-PHP_METHOD(Redis, persist)
-{
-    REDIS_PROCESS_KW_CMD("PERSIST", redis_key_cmd, redis_1_response);
 }
 /* }}} */
 
