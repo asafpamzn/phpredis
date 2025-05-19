@@ -105,10 +105,10 @@ int execute_expire_command(const void *glide_client, const char *key, size_t key
 
 /* Execute an EXPIREAT command using the Valkey Glide client */
 int execute_expireat_command(const void *glide_client, const char *key, size_t key_len,
-                             long timestamp, const char *mode, size_t mode_len, int *output_value)
+                             long timestamp, const char *mode, size_t mode_len)
 {
     /* Check if client and key are valid */
-    if (!glide_client || !key || !output_value)
+    if (!glide_client || !key)
     {
         return 0;
     }
@@ -179,25 +179,15 @@ int execute_expireat_command(const void *glide_client, const char *key, size_t k
     }
 
     /* Get the result value */
-    int ret_val = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        *output_value = (int)result->response->int_value;
-        ret_val = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    return handle_bool_response(result);
 }
 
 /* Execute a PEXPIRE command using the Valkey Glide client */
 int execute_pexpire_command(const void *glide_client, const char *key, size_t key_len,
-                            long milliseconds, const char *mode, size_t mode_len, int *output_value)
+                            long milliseconds, const char *mode, size_t mode_len)
 {
     /* Check if client and key are valid */
-    if (!glide_client || !key || !output_value)
+    if (!glide_client || !key)
     {
         return 0;
     }
@@ -268,25 +258,15 @@ int execute_pexpire_command(const void *glide_client, const char *key, size_t ke
     }
 
     /* Get the result value */
-    int ret_val = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        *output_value = (int)result->response->int_value;
-        ret_val = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    return handle_bool_response(result);
 }
 
 /* Execute a PEXPIREAT command using the Valkey Glide client */
 int execute_pexpireat_command(const void *glide_client, const char *key, size_t key_len,
-                              long timestamp_ms, const char *mode, size_t mode_len, int *output_value)
+                              long timestamp_ms, const char *mode, size_t mode_len)
 {
     /* Check if client and key are valid */
-    if (!glide_client || !key || !output_value)
+    if (!glide_client || !key)
     {
         return 0;
     }
@@ -357,24 +337,14 @@ int execute_pexpireat_command(const void *glide_client, const char *key, size_t 
     }
 
     /* Get the result value */
-    int ret_val = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        *output_value = (int)result->response->int_value;
-        ret_val = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    return handle_bool_response(result);
 }
 
 /* Execute a PERSIST command using the Valkey Glide client */
-int execute_persist_command(const void *glide_client, const char *key, size_t key_len, int *output_value)
+int execute_persist_command(const void *glide_client, const char *key, size_t key_len)
 {
     /* Check if client and key are valid */
-    if (!glide_client || !key || !output_value)
+    if (!glide_client || !key)
     {
         return 0;
     }
@@ -412,17 +382,7 @@ int execute_persist_command(const void *glide_client, const char *key, size_t ke
     }
 
     /* Get the result value */
-    int ret_val = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        *output_value = (int)result->response->int_value;
-        ret_val = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    return handle_bool_response(result);
 }
 
 /* Execute an EXPIRETIME command using the Valkey Glide client */
@@ -467,20 +427,7 @@ int execute_expiretime_command(const void *glide_client, const char *key, size_t
     }
 
     /* Get the result value */
-    int ret_val = 0;
-    if (result->response)
-    {
-        if (result->response->response_type == Int)
-        {
-            *output_value = result->response->int_value;
-            ret_val = 1;
-        }
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    return handle_int_response(result, output_value);
 }
 
 /* Execute a PEXPIRETIME command using the Valkey Glide client */
@@ -525,18 +472,5 @@ int execute_pexpiretime_command(const void *glide_client, const char *key, size_
     }
 
     /* Get the result value */
-    int ret_val = 0;
-    if (result->response)
-    {
-        if (result->response->response_type == Int)
-        {
-            *output_value = result->response->int_value;
-            ret_val = 1;
-        }
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    return handle_int_response(result, output_value);
 }

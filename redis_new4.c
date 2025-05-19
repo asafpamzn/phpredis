@@ -73,17 +73,6 @@ extern zend_class_entry *redis_exception_ce;
 #include "redis_arginfo.h"
 #endif
 
-/* Function declarations for the execute_x_command functions in redis_expire_glide.c */
-extern int execute_expireat_command(const void *glide_client, const char *key, size_t key_len,
-                                    long timestamp, const char *mode, size_t mode_len, int *output_value);
-extern int execute_pexpire_command(const void *glide_client, const char *key, size_t key_len,
-                                   long milliseconds, const char *mode, size_t mode_len, int *output_value);
-extern int execute_pexpireat_command(const void *glide_client, const char *key, size_t key_len,
-                                     long timestamp_ms, const char *mode, size_t mode_len, int *output_value);
-extern int execute_persist_command(const void *glide_client, const char *key, size_t key_len, int *output_value);
-extern int execute_expiretime_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
-extern int execute_pexpiretime_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
-
 /* {{{ proto bool Redis::expire(string key, long seconds [, string mode]) */
 PHP_METHOD(Redis, expire)
 {
@@ -143,7 +132,6 @@ PHP_METHOD(Redis, expireAt)
     char *key = NULL, *mode = NULL;
     size_t key_len, mode_len = 0;
     zend_long timestamp;
-    int output_value;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osl|s",
@@ -172,10 +160,10 @@ PHP_METHOD(Redis, expireAt)
         }
 
         /* Execute the EXPIREAT command using the Glide client */
-        if (execute_expireat_command(redis->glide_client, key, key_len, timestamp, mode, mode_len, &output_value))
+        if (execute_expireat_command(redis->glide_client, key, key_len, timestamp, mode, mode_len))
         {
-            /* Return TRUE if key was expired (output_value == 1), FALSE otherwise */
-            RETURN_BOOL(output_value);
+            /* Return TRUE if key was expired */
+            RETURN_TRUE;
         }
         else
         {
@@ -194,7 +182,6 @@ PHP_METHOD(Redis, pExpire)
     char *key = NULL, *mode = NULL;
     size_t key_len, mode_len = 0;
     zend_long milliseconds;
-    int output_value;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osl|s",
@@ -223,10 +210,10 @@ PHP_METHOD(Redis, pExpire)
         }
 
         /* Execute the PEXPIRE command using the Glide client */
-        if (execute_pexpire_command(redis->glide_client, key, key_len, milliseconds, mode, mode_len, &output_value))
+        if (execute_pexpire_command(redis->glide_client, key, key_len, milliseconds, mode, mode_len))
         {
-            /* Return TRUE if key was expired (output_value == 1), FALSE otherwise */
-            RETURN_BOOL(output_value);
+            /* Return TRUE if key was expired */
+            RETURN_TRUE;
         }
         else
         {
@@ -245,7 +232,6 @@ PHP_METHOD(Redis, pExpireAt)
     char *key = NULL, *mode = NULL;
     size_t key_len, mode_len = 0;
     zend_long timestamp_ms;
-    int output_value;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osl|s",
@@ -274,10 +260,10 @@ PHP_METHOD(Redis, pExpireAt)
         }
 
         /* Execute the PEXPIREAT command using the Glide client */
-        if (execute_pexpireat_command(redis->glide_client, key, key_len, timestamp_ms, mode, mode_len, &output_value))
+        if (execute_pexpireat_command(redis->glide_client, key, key_len, timestamp_ms, mode, mode_len))
         {
-            /* Return TRUE if key was expired (output_value == 1), FALSE otherwise */
-            RETURN_BOOL(output_value);
+            /* Return TRUE if key was expired */
+            RETURN_TRUE;
         }
         else
         {
@@ -295,7 +281,6 @@ PHP_METHOD(Redis, persist)
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
-    int output_value;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
@@ -311,10 +296,10 @@ PHP_METHOD(Redis, persist)
     if (redis->glide_client)
     {
         /* Execute the PERSIST command using the Glide client */
-        if (execute_persist_command(redis->glide_client, key, key_len, &output_value))
+        if (execute_persist_command(redis->glide_client, key, key_len))
         {
-            /* Return TRUE if key was persisted (output_value == 1), FALSE otherwise */
-            RETURN_BOOL(output_value);
+            /* Return TRUE if key was persisted */
+            RETURN_TRUE;
         }
         else
         {
