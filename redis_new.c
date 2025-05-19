@@ -357,7 +357,7 @@ PHP_METHOD(Redis, bitpos)
 
 /* }}} */
 
-/* {{{ proto boolean Redis::set(string key, mixed val, double|int timeout,
+/* {{{ proto boolean Redis::set(string key, mixed val, double|int|array timeout,
  *                              [array opt) */
 PHP_METHOD(Redis, set)
 {
@@ -367,6 +367,11 @@ PHP_METHOD(Redis, set)
     size_t key_len, val_len;
     double expire = 0;
     zend_long expire_int = 0;
+    zval *z_set_opts = NULL; /* Will hold our options either from z_expire or z_opts */
+    zval *z_ifeq_val = NULL; /* Special holder for IFEQ value */
+    int has_get_opt = 0;     /* Flag to indicate if GET option is present */
+    char *response = NULL;   /* For storing GET response */
+    size_t response_len = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osz|za",
@@ -379,25 +384,35 @@ PHP_METHOD(Redis, set)
     /* Check if expire parameter was provided */
     if (z_expire != NULL)
     {
-        /* Check if expire is a double or long */
-        if (Z_TYPE_P(z_expire) != IS_DOUBLE && Z_TYPE_P(z_expire) != IS_LONG)
+        switch (Z_TYPE_P(z_expire))
         {
-            /* Not a numeric type - return false */
+        case IS_DOUBLE:
+            /* Double - use as timeout */
+            expire = Z_DVAL_P(z_expire);
+            expire_int = (zend_long)expire;
+            break;
+        case IS_LONG:
+            /* Long - use as timeout */
+            expire = (double)Z_LVAL_P(z_expire);
+            expire_int = Z_LVAL_P(z_expire);
+            break;
+        case IS_ARRAY:
+            /* Array - use as options */
+            z_set_opts = z_expire;
+            break;
+        case IS_NULL:
+            /* NULL - ignore */
+            break;
+        default:
+            /* Not a supported type - return false */
             RETURN_FALSE;
         }
+    }
 
-        /* Get the value based on the type */
-        if (Z_TYPE_P(z_expire) == IS_DOUBLE)
-        {
-            expire = Z_DVAL_P(z_expire);
-        }
-        else
-        {
-            expire = (double)Z_LVAL_P(z_expire);
-        }
-
-        /* Convert to integer */
-        expire_int = (zend_long)expire;
+    /* If options were passed in z_opts, use those instead */
+    if (z_opts != NULL && Z_TYPE_P(z_opts) == IS_ARRAY)
+    {
+        z_set_opts = z_opts;
     }
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
@@ -456,8 +471,33 @@ PHP_METHOD(Redis, set)
             RETURN_FALSE;
         }
 
+        /* Check if z_set_opts contains GET option for response handling */
+        if (z_set_opts != NULL && Z_TYPE_P(z_set_opts) == IS_ARRAY)
+        {
+            HashTable *options_ht = Z_ARRVAL_P(z_set_opts);
+            zval *z_option;
+            zend_string *option_key;
+            zend_ulong num_key;
+
+            /* Only scan for GET option to handle response */
+            ZEND_HASH_FOREACH_KEY_VAL(options_ht, num_key, option_key, z_option)
+            {
+                if (option_key == NULL && Z_TYPE_P(z_option) == IS_STRING)
+                {
+                    /* Check for GET flag (case insensitive) */
+                    if (strcasecmp(Z_STRVAL_P(z_option), "GET") == 0)
+                    {
+                        has_get_opt = 1;
+                        break;
+                    }
+                }
+            }
+            ZEND_HASH_FOREACH_END();
+        }
+
         /* Execute the SET command using the Glide client */
-        int result = execute_set_command(redis->glide_client, key, key_len, val, val_len, expire_int, z_opts);
+        int result = execute_set_command(redis->glide_client, key, key_len, val, val_len,
+                                         expire_int, z_set_opts);
 
         /* Free the allocated string if needed */
         if (free_val)
@@ -470,10 +510,24 @@ PHP_METHOD(Redis, set)
         {
         case 1: /* Success */
             RETURN_TRUE;
-        case 0: /* Not set (NX/XX condition not met) */
+        case 0: /* Not set (NX/XX/IFEQ condition not met) */
             RETURN_FALSE;
         case 2: /* GET option returned a value */
-            /* This case is not fully handled yet, would need to return the value */
+            /* For GET option, we need to retrieve the old value using execute_get_command */
+            if (has_get_opt)
+            {
+                /* Get the old value directly - we know it exists because result was 2 */
+                int get_result = execute_get_command(redis->glide_client, key, key_len, &response, &response_len);
+
+                if (get_result == 1 && response != NULL)
+                {
+                    /* Return the old value */
+                    RETVAL_STRINGL(response, response_len);
+                    free(response);
+                    return;
+                }
+            }
+            /* Fallback to returning TRUE when GET is used but handling fails */
             RETURN_TRUE;
         default: /* Error */
             RETURN_FALSE;

@@ -339,7 +339,10 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
 
     /* Count the number of arguments */
     unsigned long arg_count = 2; /* key + value */
-    int has_ex = 0, has_px = 0, has_nx = 0, has_xx = 0, has_get = 0, has_keepttl = 0;
+    int has_ex = 0, has_px = 0, has_exat = 0, has_pxat = 0;
+    int has_nx = 0, has_xx = 0, has_get = 0, has_keepttl = 0, has_ifeq = 0;
+    char *ifeq_value = NULL;
+    size_t ifeq_len = 0;
 
     /* Check if we have an expiry time */
     if (expire > 0)
@@ -351,56 +354,118 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
     /* Check if we have options */
     if (opts && Z_TYPE_P(opts) == IS_ARRAY)
     {
-        zval *z_nx = zend_hash_str_find(Z_ARRVAL_P(opts), "nx", sizeof("nx") - 1);
-        zval *z_xx = zend_hash_str_find(Z_ARRVAL_P(opts), "xx", sizeof("xx") - 1);
-        zval *z_get = zend_hash_str_find(Z_ARRVAL_P(opts), "get", sizeof("get") - 1);
-        zval *z_ex = zend_hash_str_find(Z_ARRVAL_P(opts), "ex", sizeof("ex") - 1);
-        zval *z_px = zend_hash_str_find(Z_ARRVAL_P(opts), "px", sizeof("px") - 1);
-        zval *z_keepttl = zend_hash_str_find(Z_ARRVAL_P(opts), "keepttl", sizeof("keepttl") - 1);
+        HashTable *options_ht = Z_ARRVAL_P(opts);
+        zval *z_option;
+        zend_string *option_key;
+        zend_ulong num_key;
 
-        /* NX option */
-        if (z_nx && Z_TYPE_P(z_nx) == IS_TRUE)
+        /* Iterate through all options */
+        ZEND_HASH_FOREACH_KEY_VAL(options_ht, num_key, option_key, z_option)
         {
-            arg_count++;
-            has_nx = 1;
-        }
+            if (option_key == NULL)
+            {
+                /* Handle numeric keys - these are option flags without values */
+                if (Z_TYPE_P(z_option) == IS_STRING)
+                {
+                    zend_string *opt_str = Z_STR_P(z_option);
+                    char *opt = ZSTR_VAL(opt_str);
+                    size_t opt_len = ZSTR_LEN(opt_str);
 
-        /* XX option */
-        if (z_xx && Z_TYPE_P(z_xx) == IS_TRUE)
-        {
-            arg_count++;
-            has_xx = 1;
-        }
+                    /* NX option */
+                    if (strcasecmp(opt, "NX") == 0)
+                    {
+                        arg_count++;
+                        has_nx = 1;
+                    }
+                    /* XX option */
+                    else if (strcasecmp(opt, "XX") == 0)
+                    {
+                        arg_count++;
+                        has_xx = 1;
+                    }
+                    /* GET option */
+                    else if (strcasecmp(opt, "GET") == 0)
+                    {
+                        arg_count++;
+                        has_get = 1;
+                    }
+                    /* KEEPTTL option */
+                    else if (strcasecmp(opt, "KEEPTTL") == 0)
+                    {
+                        arg_count++;
+                        has_keepttl = 1;
+                    }
+                }
+            }
+            else
+            {
+                /* Handle string keys - these are options with values */
+                char *opt = ZSTR_VAL(option_key);
 
-        /* GET option */
-        if (z_get && Z_TYPE_P(z_get) == IS_TRUE)
-        {
-            arg_count++;
-            has_get = 1;
+                /* Check for time-based options */
+                if (strcasecmp(opt, "EX") == 0)
+                {
+                    /* EX option - seconds */
+                    if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
+                    {
+                        arg_count += 2;
+                        has_ex = 1;
+                        expire = zval_get_long(z_option);
+                        /* Reset other time options */
+                        has_px = has_exat = has_pxat = 0;
+                    }
+                }
+                else if (strcasecmp(opt, "PX") == 0)
+                {
+                    /* PX option - milliseconds */
+                    if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
+                    {
+                        arg_count += 2;
+                        has_px = 1;
+                        expire = zval_get_long(z_option);
+                        /* Reset other time options */
+                        has_ex = has_exat = has_pxat = 0;
+                    }
+                }
+                else if (strcasecmp(opt, "EXAT") == 0)
+                {
+                    /* EXAT option - unix time in seconds */
+                    if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
+                    {
+                        arg_count += 2;
+                        has_exat = 1;
+                        expire = zval_get_long(z_option);
+                        /* Reset other time options */
+                        has_ex = has_px = has_pxat = 0;
+                    }
+                }
+                else if (strcasecmp(opt, "PXAT") == 0)
+                {
+                    /* PXAT option - unix time in milliseconds */
+                    if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
+                    {
+                        arg_count += 2;
+                        has_pxat = 1;
+                        expire = zval_get_long(z_option);
+                        /* Reset other time options */
+                        has_ex = has_px = has_exat = 0;
+                    }
+                }
+                /* IFEQ option */
+                else if (strcasecmp(opt, "IFEQ") == 0)
+                {
+                    /* IFEQ option - comparison value */
+                    if (Z_TYPE_P(z_option) == IS_STRING)
+                    {
+                        arg_count += 2;
+                        has_ifeq = 1;
+                        ifeq_value = Z_STRVAL_P(z_option);
+                        ifeq_len = Z_STRLEN_P(z_option);
+                    }
+                }
+            }
         }
-
-        /* EX option */
-        if (z_ex && Z_TYPE_P(z_ex) == IS_LONG)
-        {
-            arg_count += 2;
-            has_ex = 1;
-            expire = Z_LVAL_P(z_ex);
-        }
-
-        /* PX option */
-        if (z_px && Z_TYPE_P(z_px) == IS_LONG)
-        {
-            arg_count += 2;
-            has_px = 1;
-            expire = Z_LVAL_P(z_px);
-        }
-
-        /* KEEPTTL option */
-        if (z_keepttl && Z_TYPE_P(z_keepttl) == IS_TRUE)
-        {
-            arg_count++;
-            has_keepttl = 1;
-        }
+        ZEND_HASH_FOREACH_END();
     }
 
     /* Allocate memory for arguments */
@@ -478,6 +543,18 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
     {
         args[arg_idx] = (uintptr_t)"KEEPTTL";
         args_len[arg_idx] = 7;
+        arg_idx++;
+    }
+
+    /* Add IFEQ option and value */
+    if (has_ifeq)
+    {
+        args[arg_idx] = (uintptr_t)"IFEQ";
+        args_len[arg_idx] = 4;
+        arg_idx++;
+
+        args[arg_idx] = (uintptr_t)ifeq_value;
+        args_len[arg_idx] = ifeq_len;
         arg_idx++;
     }
 
