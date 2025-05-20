@@ -738,6 +738,62 @@ int execute_mget_command(const void *glide_client, zval *keys, zval *return_valu
             args[i] = (uintptr_t)Z_STRVAL_P(data);
             args_len[i] = Z_STRLEN_P(data);
         }
+        else if (Z_TYPE_P(data) == IS_LONG)
+        {
+            /* Convert integer to string */
+            size_t len;
+            char *str = long_to_string(Z_LVAL_P(data), &len);
+            if (str)
+            {
+                args[i] = (uintptr_t)str;
+                args_len[i] = len;
+                /* Flag to free this after command execution */
+                i++;
+                continue; /* Skip to next iteration */
+            }
+            else
+            {
+                /* Failed to convert integer to string */
+                int j;
+                /* Free any previously allocated strings */
+                for (j = 0; j < i; j++)
+                {
+                    if (args[j])
+                        free((void *)args[j]);
+                }
+                free(args);
+                free(args_len);
+                return 0;
+            }
+        }
+        else if (Z_TYPE_P(data) == IS_DOUBLE)
+        {
+            /* Convert double to string */
+            size_t len;
+            char *str = double_to_string(Z_DVAL_P(data), &len);
+            if (str)
+            {
+                args[i] = (uintptr_t)str;
+                args_len[i] = len;
+                /* Flag to free this after command execution */
+                i++;
+                continue; /* Skip to next iteration */
+            }
+            else
+            {
+                /* Failed to convert double to string */
+                int j;
+                /* Free any previously allocated strings */
+                for (j = 0; j < i; j++)
+                {
+                    if (args[j])
+                        free((void *)args[j]);
+                }
+                free(args);
+                free(args_len);
+                return 0;
+            }
+        }
         else if (key)
         {
             /* Use hash key if entry is not a string */
@@ -755,6 +811,24 @@ int execute_mget_command(const void *glide_client, zval *keys, zval *return_valu
     }
     ZEND_HASH_FOREACH_END();
 
+    /* Track which arguments need to be freed after execution */
+    char **allocated_strings = (char **)calloc(arg_count, sizeof(char *));
+    if (!allocated_strings)
+    {
+        /* Free previously allocated memory */
+        int j;
+        for (j = 0; j < i; j++)
+        {
+            if (Z_TYPE_P(&keys[j]) == IS_LONG || Z_TYPE_P(&keys[j]) == IS_DOUBLE)
+            {
+                free((void *)args[j]);
+            }
+        }
+        free(args);
+        free(args_len);
+        return 0;
+    }
+
     /* Execute the command */
     CommandResult *result = execute_command(
         glide_client,
@@ -763,6 +837,19 @@ int execute_mget_command(const void *glide_client, zval *keys, zval *return_valu
         args,      /* arguments */
         args_len   /* argument lengths */
     );
+
+    /* Free any allocated strings */
+    i = 0;
+    ZEND_HASH_FOREACH_KEY_VAL(keys_hash, idx, key, data)
+    {
+        if (Z_TYPE_P(data) == IS_LONG || Z_TYPE_P(data) == IS_DOUBLE)
+        {
+            free((void *)args[i]);
+        }
+        i++;
+    }
+    ZEND_HASH_FOREACH_END();
+    free(allocated_strings);
 
     /* Free the argument arrays */
     free(args);
