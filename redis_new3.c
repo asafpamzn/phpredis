@@ -295,20 +295,35 @@ PHP_METHOD(Redis, getEx)
 
 /* }}} */
 
-/* {{{ proto long Redis::incr(string key) */
+/* {{{ proto long Redis::incr(string key, [long value]) */
 PHP_METHOD(Redis, incr)
 {
     zval *object;
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
+    zend_long value = 1;
     long result_value;
+    int argc = ZEND_NUM_ARGS();
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    if (argc == 1)
     {
-        RETURN_FALSE;
+        /* Only key parameter provided */
+        if (zend_parse_method_parameters(argc, getThis(), "Os",
+                                         &object, redis_ce, &key, &key_len) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Both key and value parameters provided */
+        if (zend_parse_method_parameters(argc, getThis(), "Osl",
+                                         &object, redis_ce, &key, &key_len, &value) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
     }
 
     /* Get Redis object */
@@ -317,8 +332,16 @@ PHP_METHOD(Redis, incr)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the INCR command using the Glide client */
-        result_value = execute_incr_command(redis->glide_client, key, key_len);
+        if (argc == 1)
+        {
+            /* Standard INCR command if only key is provided */
+            result_value = execute_incr_command(redis->glide_client, key, key_len);
+        }
+        else
+        {
+            /* Use INCRBY if both key and value are provided */
+            result_value = execute_incrby_command(redis->glide_client, key, key_len, value);
+        }
 
         /* Return the result */
         RETURN_LONG(result_value);
