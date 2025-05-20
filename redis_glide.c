@@ -665,22 +665,49 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
 /* Execute a SETEX command using the Valkey Glide client */
 int execute_setex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len)
 {
-    printf("Deprectaed\n");
-    return 0;
+    /* Call execute_set_command with expire in seconds (EX) and no special options */
+    /* No need to pass options since execute_set_command uses EX by default when expire > 0 */
+    return execute_set_command(glide_client, key, key_len, val, val_len, expire, NULL, NULL, NULL);
 }
 
 /* Execute a PSETEX command using the Valkey Glide client */
 int execute_psetex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len)
 {
-    printf("Deprectaed\n");
-    return 0;
+    /* Create options array for PX option */
+    zval options;
+    array_init(&options);
+
+    /* Add PX option with expire value */
+    add_assoc_long_ex(&options, "PX", sizeof("PX") - 1, expire);
+
+    /* Call execute_set_command with the PX option */
+    int result = execute_set_command(glide_client, key, key_len, val, val_len, 0, &options, NULL, NULL);
+
+    /* Clean up options array */
+    zval_dtor(&options);
+
+    return result;
 }
 
 /* Execute a SETNX command using the Valkey Glide client */
 int execute_setnx_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len)
 {
-    printf("Deprectaed\n");
-    return 0;
+    /* Create options array for NX option */
+    zval options;
+    array_init(&options);
+
+    /* Add NX option as a numeric index */
+    zval nx_option;
+    ZVAL_STRING(&nx_option, "NX");
+    add_next_index_zval(&options, &nx_option);
+
+    /* Call execute_set_command with the NX option and no expiration */
+    int result = execute_set_command(glide_client, key, key_len, val, val_len, 0, &options, NULL, NULL);
+
+    /* Clean up options array */
+    zval_dtor(&options);
+
+    return result;
 }
 
 /* Function to close a Valkey Glide client */
