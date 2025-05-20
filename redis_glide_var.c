@@ -892,7 +892,7 @@ int execute_mget_command(const void *glide_client, zval *keys, zval *return_valu
                 /* Process each element based on its type */
                 if (element->response_type == Null)
                 {
-                    ZVAL_NULL(&value);
+                    ZVAL_BOOL(&value, 0); /* Return false for non-existent keys */
                 }
                 else if (element->response_type == String)
                 {
