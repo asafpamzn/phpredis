@@ -1319,34 +1319,6 @@ PHP_METHOD(Redis, move)
 }
 /* }}} */
 
-/* {{{ proto bool Redis::mset(array (key => value, ...)) */
-PHP_METHOD(Redis, mset)
-{
-    REDIS_PROCESS_KW_CMD("MSET", redis_mset_cmd, redis_boolean_response);
-}
-/* }}} */
-
-/* {{{ proto bool Redis::msetnx(array (key => value, ...)) */
-PHP_METHOD(Redis, msetnx)
-{
-    REDIS_PROCESS_KW_CMD("MSETNX", redis_mset_cmd, redis_1_response);
-}
-/* }}} */
-
-/* {{{ proto string Redis::rpoplpush(string srckey, string dstkey) */
-PHP_METHOD(Redis, rpoplpush)
-{
-    REDIS_PROCESS_KW_CMD("RPOPLPUSH", redis_key_key_cmd, redis_string_response);
-}
-/* }}} */
-
-/* {{{ proto string Redis::brpoplpush(string src, string dst, int timeout) */
-PHP_METHOD(Redis, brpoplpush)
-{
-    REDIS_PROCESS_CMD(brpoplpush, redis_string_response);
-}
-/* }}} */
-
 /* {{{ proto array Redis::zRandMember(string key, array options) */
 PHP_METHOD(Redis, zRandMember)
 {
@@ -2020,20 +1992,6 @@ PHP_METHOD(Redis, getOption)
     }
 
     redis_getoption_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, NULL);
-}
-/* }}} */
-
-/* {{{ proto string Redis::setOption(string $option, mixed $value) */
-PHP_METHOD(Redis, setOption)
-{
-    RedisSock *redis_sock;
-
-    if ((redis_sock = redis_sock_get_instance(getThis(), 0)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-
-    redis_setoption_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, NULL);
 }
 /* }}} */
 

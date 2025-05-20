@@ -177,6 +177,13 @@ int execute_exists_command(const void *glide_client, zval *keys, int keys_count,
 int execute_touch_command(const void *glide_client, zval *keys, int keys_count, long *output_value);
 int execute_unlink_command(const void *glide_client, zval *keys, int keys_count, long *output_value);
 
+/* New commands added in redis_glide_commands.c */
+int execute_setOption_command(const void *glide_client, zend_long option, zval *value);
+int execute_mset_command(const void *glide_client, zval *arr);
+int execute_msetnx_command(const void *glide_client, zval *arr, int *output_value);
+int execute_rpoplpush_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len, char **result, size_t *result_len);
+int execute_brpoplpush_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len, zend_long timeout, char **result, size_t *result_len);
+
 /* Don't include command_response.h here to avoid circular dependencies */
 
 #endif /* REDIS_GLIDE_H */
