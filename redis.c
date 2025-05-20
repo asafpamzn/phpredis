@@ -1220,33 +1220,6 @@ PHP_METHOD(Redis, sortDescAlpha)
 }
 /* }}} */
 
-/* {{{ proto bool Redis::pexpire(string key, long ms) */
-PHP_METHOD(Redis, pexpire)
-{
-    REDIS_PROCESS_KW_CMD("PEXPIRE", redis_expire_cmd, redis_1_response);
-}
-/* }}} */
-
-/* {{{ proto array Redis::pexpireAt(string key, int timestamp) */
-PHP_METHOD(Redis, pexpireAt)
-{
-    REDIS_PROCESS_KW_CMD("PEXPIREAT", redis_expire_cmd, redis_1_response);
-}
-/* }}} */
-
-/* {{{ proto Redis::expiretime(string $key): int */
-PHP_METHOD(Redis, expiretime)
-{
-    REDIS_PROCESS_KW_CMD("EXPIRETIME", redis_key_cmd, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto Redis::expiretime(string $key): int */
-PHP_METHOD(Redis, pexpiretime)
-{
-    REDIS_PROCESS_KW_CMD("PEXPIRETIME", redis_key_cmd, redis_long_response);
-}
-
 PHP_METHOD(Redis, expiremember)
 {
     REDIS_PROCESS_CMD(expiremember, redis_long_response);

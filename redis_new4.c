@@ -174,8 +174,8 @@ PHP_METHOD(Redis, expireAt)
 }
 /* }}} */
 
-/* {{{ proto bool Redis::pExpire(string key, long milliseconds [, string mode]) */
-PHP_METHOD(Redis, pExpire)
+/* {{{ proto bool Redis::pexpire(string key, long milliseconds [, string mode]) */
+PHP_METHOD(Redis, pexpire)
 {
     zval *object;
     redis_object *redis;
@@ -224,8 +224,8 @@ PHP_METHOD(Redis, pExpire)
 }
 /* }}} */
 
-/* {{{ proto bool Redis::pExpireAt(string key, long milliseconds_timestamp [, string mode]) */
-PHP_METHOD(Redis, pExpireAt)
+/* {{{ proto bool Redis::pexpireAt(string key, long milliseconds_timestamp [, string mode]) */
+PHP_METHOD(Redis, pexpireAt)
 {
     zval *object;
     redis_object *redis;
@@ -310,8 +310,8 @@ PHP_METHOD(Redis, persist)
 }
 /* }}} */
 
-/* {{{ proto long Redis::expireTime(string key) */
-PHP_METHOD(Redis, expireTime)
+/* {{{ proto long Redis::expiretime(string key) */
+PHP_METHOD(Redis, expiretime)
 {
     zval *object;
     redis_object *redis;
@@ -347,8 +347,8 @@ PHP_METHOD(Redis, expireTime)
 }
 /* }}} */
 
-/* {{{ proto long Redis::pExpireTime(string key) */
-PHP_METHOD(Redis, pExpireTime)
+/* {{{ proto long Redis::pexpireTime(string key) */
+PHP_METHOD(Redis, pexpiretime)
 {
     zval *object;
     redis_object *redis;
