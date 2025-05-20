@@ -271,6 +271,18 @@ int execute_getex_command(const void *glide_client, const char *key, size_t key_
                     has_ex = has_px = has_exat = has_pxat = 0;
                 }
             }
+            else if (Z_TYPE_P(z_option) == IS_STRING)
+            {
+                /* Handle numeric keys with string values - could be ['PERSIST'] format */
+                if (strcasecmp(Z_STRVAL_P(z_option), "PERSIST") == 0)
+                {
+                    /* PERSIST option */
+                    arg_count += 1;
+                    has_persist = 1;
+                    /* Reset other time options */
+                    has_ex = has_px = has_exat = has_pxat = 0;
+                }
+            }
         }
         ZEND_HASH_FOREACH_END();
     }
