@@ -417,20 +417,35 @@ PHP_METHOD(Redis, incrByFloat)
 }
 /* }}} */
 
-/* {{{ proto long Redis::decr(string key) */
+/* {{{ proto long Redis::decr(string key, [long value]) */
 PHP_METHOD(Redis, decr)
 {
     zval *object;
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
+    zend_long value = 1;
     long result_value;
+    int argc = ZEND_NUM_ARGS();
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    if (argc == 1)
     {
-        RETURN_FALSE;
+        /* Only key parameter provided - standard DECR */
+        if (zend_parse_method_parameters(argc, getThis(), "Os",
+                                         &object, redis_ce, &key, &key_len) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Both key and value parameters provided - like DECRBY */
+        if (zend_parse_method_parameters(argc, getThis(), "Osl",
+                                         &object, redis_ce, &key, &key_len, &value) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
     }
 
     /* Get Redis object */
@@ -439,16 +454,26 @@ PHP_METHOD(Redis, decr)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the DECR command using the Glide client */
-        if (execute_decr_command(redis->glide_client, key, key_len, &result_value))
+        if (argc == 1)
         {
-            /* Return the result */
-            RETURN_LONG(result_value);
+            /* Standard DECR command if only key is provided */
+            if (execute_decr_command(redis->glide_client, key, key_len, &result_value))
+            {
+                /* Return the result */
+                RETURN_LONG(result_value);
+            }
         }
         else
         {
-            RETURN_FALSE;
+            /* Use DECRBY if both key and value are provided */
+            if (execute_decrby_command(redis->glide_client, key, key_len, value, &result_value))
+            {
+                /* Return the result */
+                RETURN_LONG(result_value);
+            }
         }
+
+        RETURN_FALSE;
     }
 }
 /* }}} */
