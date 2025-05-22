@@ -720,17 +720,30 @@ PHP_METHOD(Redis, unlink)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the UNLINK command using the Glide client */
-        if (execute_unlink_command(redis->glide_client, z_args, argc, &result_value))
+        /* Check if we have a single array argument */
+        if (argc == 1 && Z_TYPE(z_args[0]) == IS_ARRAY)
         {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
+            /* Use array elements as keys */
+            long result_value = 0;
+            if (execute_unlink_array(redis->glide_client, Z_ARRVAL(z_args[0]), &result_value))
+            {
+                /* Command succeeded, return the value */
+                RETURN_LONG(result_value);
+            }
         }
         else
         {
-            /* Command failed */
-            RETURN_FALSE;
+            /* Multiple arguments - use standard unlink command */
+            long result_value = 0;
+            if (execute_unlink_command(redis->glide_client, z_args, argc, &result_value))
+            {
+                /* Command succeeded, return the value */
+                RETURN_LONG(result_value);
+            }
         }
+
+        /* If we reach here, the command failed */
+        RETURN_FALSE;
     }
 }
 /* }}} */
