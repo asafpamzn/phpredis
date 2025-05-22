@@ -34,35 +34,26 @@ int execute_object_command(const void *glide_client,
                            const char *key, size_t key_len,
                            zval *return_value)
 {
-    CommandResponse *response = NULL;
     CommandResult *result = NULL;
     int ret_val = -1; /* Default to error */
 
     /* Create command array: ["OBJECT", subcommand, key] */
-    const char *argv[3];
-    size_t argv_len[3];
+    uintptr_t args[3];
+    unsigned long args_len[3];
 
-    argv[0] = "OBJECT";
-    argv_len[0] = 6; /* strlen("OBJECT") */
+    args[0] = (uintptr_t)"OBJECT";
+    args_len[0] = 6; /* strlen("OBJECT") */
 
-    argv[1] = subcommand;
-    argv_len[1] = subcommand_len;
+    args[1] = (uintptr_t)subcommand;
+    args_len[1] = subcommand_len;
 
-    argv[2] = key;
-    argv_len[2] = key_len;
+    args[2] = (uintptr_t)key;
+    args_len[2] = key_len;
 
     /* Execute the command */
-    response = execute_command(glide_client, 3, argv, argv_len);
-    if (response == NULL)
-    {
-        return -1;
-    }
-
-    /* Get the result */
-    result = get_command_result(response);
+    result = execute_command(glide_client, Object, 3, args, args_len);
     if (result == NULL)
     {
-        free_command_response(response);
         return -1;
     }
 
@@ -72,15 +63,13 @@ int execute_object_command(const void *glide_client,
         strncasecmp(subcommand, "FREQ", subcommand_len) == 0)
     {
         /* These subcommands return integers */
-        long long int_val;
-
-        if (get_long_long_result(result, &int_val) == 0)
+        if (result->response && result->response->response_type == Int)
         {
             /* Success, set return value */
-            ZVAL_LONG(return_value, (long)int_val);
+            ZVAL_LONG(return_value, (long)result->response->int_value);
             ret_val = 1;
         }
-        else if (is_nil_result(result))
+        else if (result->response && result->response->response_type == Null)
         {
             /* Key doesn't exist */
             ZVAL_NULL(return_value);
@@ -90,16 +79,13 @@ int execute_object_command(const void *glide_client,
     else if (strncasecmp(subcommand, "ENCODING", subcommand_len) == 0)
     {
         /* ENCODING returns a string */
-        char *str_val;
-        size_t str_len;
-
-        if (get_string_result(result, &str_val, &str_len) == 0)
+        if (result->response && result->response->response_type == String)
         {
             /* Success, set return value */
-            ZVAL_STRINGL(return_value, str_val, str_len);
+            ZVAL_STRINGL(return_value, result->response->string_value, result->response->string_value_len);
             ret_val = 1;
         }
-        else if (is_nil_result(result))
+        else if (result->response && result->response->response_type == Null)
         {
             /* Key doesn't exist */
             ZVAL_NULL(return_value);
@@ -109,9 +95,16 @@ int execute_object_command(const void *glide_client,
     else if (strncasecmp(subcommand, "HELP", subcommand_len) == 0)
     {
         /* HELP returns an array of strings */
-        if (get_array_result(result, return_value) == 0)
+        if (result->response && result->response->response_type == Array)
         {
-            ret_val = 1;
+            if (command_response_to_zval(result->response, return_value) == 1)
+            {
+                ret_val = 1;
+            }
+            else
+            {
+                ret_val = -1;
+            }
         }
         else
         {
@@ -126,7 +119,6 @@ int execute_object_command(const void *glide_client,
 
     /* Clean up */
     free_command_result(result);
-    free_command_response(response);
 
     return ret_val;
 }
