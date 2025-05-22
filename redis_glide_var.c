@@ -38,17 +38,11 @@ int execute_object_command(const void *glide_client,
     int ret_val = -1; /* Default to error */
 
     /* Create command array: ["OBJECT", subcommand, key] */
-    uintptr_t args[3];
-    unsigned long args_len[3];
+    uintptr_t args[1];
+    unsigned long args_len[1];
 
-    args[0] = (uintptr_t)"OBJECT";
-    args_len[0] = 6; /* strlen("OBJECT") */
-
-    args[1] = (uintptr_t)subcommand;
-    args_len[1] = subcommand_len;
-
-    args[2] = (uintptr_t)key;
-    args_len[2] = key_len;
+        args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
 
     /* Select appropriate request type based on subcommand */
     enum RequestType req_type = CustomCommand; /* Default to CustomCommand */
@@ -72,7 +66,7 @@ int execute_object_command(const void *glide_client,
     /* For HELP and other subcommands, use CustomCommand (default) */
 
     /* Execute the command */
-    result = execute_command(glide_client, req_type, 3, args, args_len);
+    result = execute_command(glide_client, req_type, 1, args, args_len);
     if (result == NULL)
     {
         return -1;
