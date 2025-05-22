@@ -22,6 +22,34 @@
 #include <string.h>
 #include <stdio.h>
 
+/* Helper function to safely convert string to double */
+static int safe_strtod(const char *str, size_t len, double *output)
+{
+    if (!str || !output || len == 0)
+    {
+        return 0;
+    }
+
+    /* Create a null-terminated copy of the string */
+    char *temp = malloc(len + 1);
+    if (!temp)
+    {
+        return 0;
+    }
+    memcpy(temp, str, len);
+    temp[len] = '\0';
+
+    /* Convert to double */
+    char *endptr;
+    *output = strtod(temp, &endptr);
+
+    /* Check if conversion was successful */
+    int success = (*endptr == '\0' || endptr == temp + len);
+    free(temp);
+
+    return success;
+}
+
 int execute_zrandmember_command(const void *glide_client, const char *key, size_t key_len, long count, int withscores, zval *return_value)
 {
     /* Check if client and key are valid */
