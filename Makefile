@@ -10,7 +10,7 @@ SHLIB_SUFFIX_NAME = dylib
 SHLIB_DL_SUFFIX_NAME = so
 AWK = awk
 REDIS_SHARED_LIBADD = ../ffi/target/release/libglide_ffi.a -lresolv -lSystem
-shared_objects_redis = redis.lo redis_new.lo redis_new1.lo redis_new2.lo redis_new3.lo redis_new4.lo redis_new5.lo redis_new6.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo redis_sentinel.lo sentinel_library.lo backoff.lo redis_glide.lo redis_glide_var.lo redis_expire_glide.lo lcs_command.lo rpush_command.lo command_response.lo redis_hash_glide.lo redis_geo_glide.lo redis_glide_commands.lo redis_glide_z.lo redis_newz.lo redis_glide_keys.lo redis_glide_list.lo src/connection_request.pb-c.lo src/command_request.pb-c.lo src/response.pb-c.lo
+shared_objects_redis = redis.lo redis_new.lo redis_new1.lo redis_new2.lo redis_new3.lo redis_new4.lo redis_new5.lo redis_new6.lo redis_new7.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo redis_sentinel.lo sentinel_library.lo backoff.lo redis_glide.lo redis_glide_var.lo redis_expire_glide.lo lcs_command.lo rpush_command.lo command_response.lo redis_hash_glide.lo redis_geo_glide.lo redis_glide_commands.lo redis_glide_z.lo redis_newz.lo redis_glide_keys.lo redis_glide_list.lo redis_glide_str.lo src/connection_request.pb-c.lo src/command_request.pb-c.lo src/response.pb-c.lo
 PHP_PECL_EXTENSION = redis
 PHP_MODULES = $(phplibdir)/redis.la
 PHP_ZEND_EX =
@@ -354,6 +354,12 @@ src/command_request.pb-c.lo: /Users/asafp/work/valkey-glide-php/phpredis/src/com
 -include src/response.pb-c.dep
 src/response.pb-c.lo: /Users/asafp/work/valkey-glide-php/phpredis/src/response.pb-c.c
 	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/src/response.pb-c.c -o src/response.pb-c.lo  -MMD -MF src/response.pb-c.dep -MT src/response.pb-c.lo
+-include redis_glide_str.dep
+redis_glide_str.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_glide_str.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_glide_str.c -o redis_glide_str.lo  -MMD -MF redis_glide_str.dep -MT redis_glide_str.lo
+-include redis_new7.dep
+redis_new7.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_new7.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_new7.c -o redis_new7.lo  -MMD -MF redis_new7.dep -MT redis_new7.lo
 $(phplibdir)/redis.la: ./redis.la
 	$(LIBTOOL) --tag=CC --mode=install cp ./redis.la $(phplibdir)
 ./redis.la: $(shared_objects_redis) $(REDIS_SHARED_DEPENDENCIES)
