@@ -134,6 +134,7 @@ extern int execute_getbit_command(const void *glide_client, const char *key, siz
 extern int execute_setbit_command(const void *glide_client, const char *key, size_t key_len, long offset, int value, long *output_value);
 extern int execute_del_command(const void *glide_client, zval *keys, int keys_count, long *output_value);
 int execute_del_array(const void *glide_client, HashTable *keys_hash, long *output_value);
+int execute_unlink_array(const void *glide_client, HashTable *keys_hash, long *output_value);
 extern int execute_strlen_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
 extern int execute_setrange_command(const void *glide_client, const char *key, size_t key_len, long offset, const char *value, size_t value_len, long *output_value);
 extern long execute_rpush_command(const void *glide_client, const char *key, size_t key_len, zval *values, int values_count);
