@@ -849,7 +849,3 @@ PHP_METHOD(Redis, zinter)
     RETURN_FALSE;
 }
 /* }}} */
-
-/* {{{ proto long Redis::zintercard(array keys [, long limit]) */
-PHP_METHOD(Redis, zintercard)
-{

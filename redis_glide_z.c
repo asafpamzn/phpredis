@@ -17,48 +17,114 @@
 #include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
+#include "include/glide_bindings.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 int execute_zrandmember_command(const void *glide_client, const char *key, size_t key_len, long count, int withscores, zval *return_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZRANDMEMBER;
-    CommandRequest *request = create_command_request(cmd_type);
-
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
-
-    // Add count parameter
-    char count_str[32];
-    int count_str_len = snprintf(count_str, sizeof(count_str), "%ld", count);
-    command_request_add_string(request, count_str, count_str_len);
-
-    // Add WITHSCORES if required
-    if (withscores)
-    {
-        command_request_add_string(request, "WITHSCORES", 10);
-    }
-
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
-
-    // Free the request
-    command_request_free(request);
-
-    // Process response
-    if (!response)
+    /* Check if client and key are valid */
+    if (!glide_client || !key)
     {
         return 0;
     }
 
-    int success = 0;
-
-    CommandResult *result = response->result;
-    if (result && (result->type == Array))
+    /* Prepare command arguments */
+    unsigned long arg_count = 1; /* Start with key */
+    if (count != 0)
     {
-        parse_array_response_to_zval(result, return_value);
+        arg_count++; /* Add count parameter */
+    }
+    if (withscores)
+    {
+        arg_count++; /* Add WITHSCORES parameter */
+    }
+
+    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+
+    if (!args || !args_len)
+    {
+        if (args)
+            free(args);
+        if (args_len)
+            free(args_len);
+        return 0;
+    }
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Add count parameter if not default */
+    int arg_idx = 1;
+    char count_str[32] = {0};
+    if (count != 0)
+    {
+        int count_str_len = snprintf(count_str, sizeof(count_str), "%ld", count);
+        args[arg_idx] = (uintptr_t)count_str;
+        args_len[arg_idx] = count_str_len;
+        arg_idx++;
+    }
+
+    /* Add WITHSCORES if required */
+    if (withscores)
+    {
+        const char *withscores_str = "WITHSCORES";
+        args[arg_idx] = (uintptr_t)withscores_str;
+        args_len[arg_idx] = 10; /* length of "WITHSCORES" */
+    }
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZRandMember, /* command type from RequestType enum */
+        arg_count,   /* number of arguments */
+        args,        /* arguments array */
+        args_len     /* argument lengths array */
+    );
+
+    /* Free the argument arrays */
+    free(args);
+    free(args_len);
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
+    int success = 0;
+    if (result->response && result->response->response_type == Array)
+    {
+        /* Convert array response to PHP array */
+        size_t i;
+        for (i = 0; i < result->response->array_value_len; i++)
+        {
+            struct CommandResponse *element = &result->response->array_value[i];
+            if (element->response_type == String)
+            {
+                add_next_index_stringl(return_value, element->string_value, element->string_value_len);
+            }
+            else if (element->response_type == Null)
+            {
+                add_next_index_null(return_value);
+            }
+        }
         success = 1;
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
@@ -66,48 +132,66 @@ int execute_zrandmember_command(const void *glide_client, const char *key, size_
 int execute_zscore_command(const void *glide_client, const char *key, size_t key_len,
                            const char *member, size_t member_len, double *output_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZSCORE;
-    CommandRequest *request = create_command_request(cmd_type);
-
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
-
-    // Add member parameter
-    command_request_add_string(request, member, member_len);
-
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
-
-    // Free the request
-    command_request_free(request);
-
-    // Process response
-    if (!response)
+    /* Check if client and parameters are valid */
+    if (!glide_client || !key || !member)
     {
-        return -1; // Error
+        return -1;
     }
 
-    CommandResult *result = response->result;
-    int success = 0;
+    /* Prepare command arguments */
+    unsigned long arg_count = 2; /* key + member */
+    uintptr_t args[2];
+    unsigned long args_len[2];
 
-    if (result)
+    /* Set arguments */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    args[1] = (uintptr_t)member;
+    args_len[1] = member_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZScore,    /* command type from RequestType enum */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Check if the command was successful */
+    if (!result)
     {
-        if (result->type == Null)
+        return -1;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return -1;
+    }
+
+    int success = 0;
+    if (result->response)
+    {
+        if (result->response->response_type == Null)
         {
-            // Member doesn't exist in the sorted set
+            /* Member doesn't exist in the sorted set */
             success = 0;
         }
-        else if (result->type == String)
+        else if (result->response->response_type == String)
         {
-            // Parse string as double
-            if (safe_strtod(result->string_value, result->string_length, output_value))
+            /* Parse string as double */
+            if (safe_strtod(result->response->string_value, result->response->string_value_len, output_value))
             {
                 success = 1;
             }
         }
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
@@ -115,43 +199,158 @@ int execute_zscore_command(const void *glide_client, const char *key, size_t key
 int execute_zmscore_command(const void *glide_client, const char *key, size_t key_len,
                             zval *members, int members_count, zval *return_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZMSCORE;
-    CommandRequest *request = create_command_request(cmd_type);
+    /* Check if client, key, and members are valid */
+    if (!glide_client || !key || !members || members_count <= 0)
+    {
+        return 0;
+    }
 
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
+    /* Prepare command arguments */
+    unsigned long arg_count = 1 + members_count; /* key + members */
+    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    char **allocated_strings = (char **)malloc(members_count * sizeof(char *));
 
-    // Add all member parameters
+    if (!args || !args_len || !allocated_strings)
+    {
+        if (args)
+            free(args);
+        if (args_len)
+            free(args_len);
+        if (allocated_strings)
+            free(allocated_strings);
+        return 0;
+    }
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Add members as arguments */
     int i;
+    int allocated_count = 0;
     for (i = 0; i < members_count; i++)
     {
         zval *z_member = &members[i];
-        convert_to_string(z_member);
-        command_request_add_string(request, Z_STRVAL_P(z_member), Z_STRLEN_P(z_member));
+
+        if (Z_TYPE_P(z_member) == IS_STRING)
+        {
+            args[i + 1] = (uintptr_t)Z_STRVAL_P(z_member);
+            args_len[i + 1] = Z_STRLEN_P(z_member);
+        }
+        else
+        {
+            /* Convert non-string values to string */
+            char *str_val = NULL;
+            size_t str_len = 0;
+
+            if (Z_TYPE_P(z_member) == IS_LONG)
+            {
+                str_val = long_to_string(Z_LVAL_P(z_member), &str_len);
+            }
+            else if (Z_TYPE_P(z_member) == IS_DOUBLE)
+            {
+                str_val = double_to_string(Z_DVAL_P(z_member), &str_len);
+            }
+            else if (Z_TYPE_P(z_member) == IS_TRUE)
+            {
+                str_val = strdup("1");
+                str_len = 1;
+            }
+            else if (Z_TYPE_P(z_member) == IS_FALSE)
+            {
+                str_val = strdup("0");
+                str_len = 1;
+            }
+            else
+            {
+                /* Handle other types or error */
+                int j;
+                for (j = 0; j < allocated_count; j++)
+                {
+                    free(allocated_strings[j]);
+                }
+                free(allocated_strings);
+                free(args);
+                free(args_len);
+                return 0;
+            }
+
+            if (str_val)
+            {
+                args[i + 1] = (uintptr_t)str_val;
+                args_len[i + 1] = str_len;
+                allocated_strings[allocated_count++] = str_val;
+            }
+            else
+            {
+                int j;
+                for (j = 0; j < allocated_count; j++)
+                {
+                    free(allocated_strings[j]);
+                }
+                free(allocated_strings);
+                free(args);
+                free(args_len);
+                return 0;
+            }
+        }
     }
 
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZMScore,   /* command type from RequestType enum */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
 
-    // Free the request
-    command_request_free(request);
-
-    // Process response
-    if (!response)
+    /* Free allocated strings */
+    for (i = 0; i < allocated_count; i++)
     {
-        return 0; // Error
+        free(allocated_strings[i]);
+    }
+    free(allocated_strings);
+    free(args);
+    free(args_len);
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return 0;
     }
 
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
     int success = 0;
-
-    CommandResult *result = response->result;
-    if (result && (result->type == Array))
+    if (result->response && result->response->response_type == Array)
     {
-        parse_array_response_to_zval(result, return_value);
+        /* Convert array response to PHP array */
+        size_t i;
+        for (i = 0; i < result->response->array_value_len; i++)
+        {
+            struct CommandResponse *element = &result->response->array_value[i];
+            if (element->response_type == String)
+            {
+                add_next_index_stringl(return_value, element->string_value, element->string_value_len);
+            }
+            else if (element->response_type == Null)
+            {
+                add_next_index_null(return_value);
+            }
+        }
         success = 1;
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
@@ -160,75 +359,111 @@ int execute_zrank_command(const void *glide_client, const char *key, size_t key_
                           const char *member, size_t member_len, int withscore,
                           long *rank_value, double *score_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZRANK;
-    CommandRequest *request = create_command_request(cmd_type);
+    /* Check if client and parameters are valid */
+    if (!glide_client || !key || !member)
+    {
+        return -1;
+    }
 
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
+    /* Prepare command arguments */
+    unsigned long arg_count = withscore ? 3 : 2; /* key + member + optional WITHSCORE */
+    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
 
-    // Add member parameter
-    command_request_add_string(request, member, member_len);
+    if (!args || !args_len)
+    {
+        if (args)
+            free(args);
+        if (args_len)
+            free(args_len);
+        return -1;
+    }
 
-    // Add WITHSCORE if required
+    /* Set arguments */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    args[1] = (uintptr_t)member;
+    args_len[1] = member_len;
+
+    /* Add WITHSCORE if required */
     if (withscore)
     {
-        command_request_add_string(request, "WITHSCORE", 9);
+        const char *withscore_str = "WITHSCORE";
+        args[2] = (uintptr_t)withscore_str;
+        args_len[2] = 9; /* length of "WITHSCORE" */
     }
 
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZRank,     /* command type from RequestType enum */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
 
-    // Free the request
-    command_request_free(request);
+    /* Free the argument arrays */
+    free(args);
+    free(args_len);
 
-    // Process response
-    if (!response)
+    /* Check if the command was successful */
+    if (!result)
     {
-        return -1; // Error
+        return -1;
     }
 
-    CommandResult *result = response->result;
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return -1;
+    }
+
     int success = 0;
-
-    if (result)
+    if (result->response)
     {
-        if (result->type == Null)
+        if (result->response->response_type == Null)
         {
-            // Member doesn't exist in the sorted set
+            /* Member doesn't exist in the sorted set */
             success = 0;
         }
-        else if (result->type == Integer)
+        else if (result->response->response_type == Int)
         {
-            // Integer rank
-            *rank_value = result->int_value;
+            /* Integer rank */
+            *rank_value = result->response->int_value;
             success = 1;
         }
-        else if (result->type == Array && withscore)
+        else if (result->response->response_type == Array && withscore)
         {
-            // Array with rank and score [rank, score]
-            Array *rank_array = result->array_value;
-            if (rank_array && rank_array->length == 2 &&
-                rank_array->items[0]->type == Integer &&
-                (rank_array->items[1]->type == String || rank_array->items[1]->type == Double))
+            /* Array with rank and score [rank, score] */
+            if (result->response->array_value_len >= 2)
             {
+                struct CommandResponse *rank = &result->response->array_value[0];
+                struct CommandResponse *score = &result->response->array_value[1];
 
-                *rank_value = rank_array->items[0]->int_value;
-
-                if (rank_array->items[1]->type == String)
+                if (rank->response_type == Int &&
+                    (score->response_type == String || score->response_type == Float))
                 {
-                    safe_strtod(rank_array->items[1]->string_value, rank_array->items[1]->string_length, score_value);
-                }
-                else
-                {
-                    *score_value = rank_array->items[1]->double_value;
-                }
+                    *rank_value = rank->int_value;
 
-                success = 1;
+                    if (score->response_type == String)
+                    {
+                        safe_strtod(score->string_value, score->string_value_len, score_value);
+                    }
+                    else
+                    {
+                        *score_value = score->float_value;
+                    }
+
+                    success = 1;
+                }
             }
         }
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
@@ -237,75 +472,111 @@ int execute_zrevrank_command(const void *glide_client, const char *key, size_t k
                              const char *member, size_t member_len, int withscore,
                              long *rank_value, double *score_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZREVRANK;
-    CommandRequest *request = create_command_request(cmd_type);
+    /* Check if client and parameters are valid */
+    if (!glide_client || !key || !member)
+    {
+        return -1;
+    }
 
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
+    /* Prepare command arguments */
+    unsigned long arg_count = withscore ? 3 : 2; /* key + member + optional WITHSCORE */
+    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
 
-    // Add member parameter
-    command_request_add_string(request, member, member_len);
+    if (!args || !args_len)
+    {
+        if (args)
+            free(args);
+        if (args_len)
+            free(args_len);
+        return -1;
+    }
 
-    // Add WITHSCORE if required
+    /* Set arguments */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    args[1] = (uintptr_t)member;
+    args_len[1] = member_len;
+
+    /* Add WITHSCORE if required */
     if (withscore)
     {
-        command_request_add_string(request, "WITHSCORE", 9);
+        const char *withscore_str = "WITHSCORE";
+        args[2] = (uintptr_t)withscore_str;
+        args_len[2] = 9; /* length of "WITHSCORE" */
     }
 
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZRevRank,  /* command type from RequestType enum */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
 
-    // Free the request
-    command_request_free(request);
+    /* Free the argument arrays */
+    free(args);
+    free(args_len);
 
-    // Process response
-    if (!response)
+    /* Check if the command was successful */
+    if (!result)
     {
-        return -1; // Error
+        return -1;
     }
 
-    CommandResult *result = response->result;
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return -1;
+    }
+
     int success = 0;
-
-    if (result)
+    if (result->response)
     {
-        if (result->type == Null)
+        if (result->response->response_type == Null)
         {
-            // Member doesn't exist in the sorted set
+            /* Member doesn't exist in the sorted set */
             success = 0;
         }
-        else if (result->type == Integer)
+        else if (result->response->response_type == Int)
         {
-            // Integer rank
-            *rank_value = result->int_value;
+            /* Integer rank */
+            *rank_value = result->response->int_value;
             success = 1;
         }
-        else if (result->type == Array && withscore)
+        else if (result->response->response_type == Array && withscore)
         {
-            // Array with rank and score [rank, score]
-            Array *rank_array = result->array_value;
-            if (rank_array && rank_array->length == 2 &&
-                rank_array->items[0]->type == Integer &&
-                (rank_array->items[1]->type == String || rank_array->items[1]->type == Double))
+            /* Array with rank and score [rank, score] */
+            if (result->response->array_value_len >= 2)
             {
+                struct CommandResponse *rank = &result->response->array_value[0];
+                struct CommandResponse *score = &result->response->array_value[1];
 
-                *rank_value = rank_array->items[0]->int_value;
-
-                if (rank_array->items[1]->type == String)
+                if (rank->response_type == Int &&
+                    (score->response_type == String || score->response_type == Float))
                 {
-                    safe_strtod(rank_array->items[1]->string_value, rank_array->items[1]->string_length, score_value);
-                }
-                else
-                {
-                    *score_value = rank_array->items[1]->double_value;
-                }
+                    *rank_value = rank->int_value;
 
-                success = 1;
+                    if (score->response_type == String)
+                    {
+                        safe_strtod(score->string_value, score->string_value_len, score_value);
+                    }
+                    else
+                    {
+                        *score_value = score->float_value;
+                    }
+
+                    success = 1;
+                }
             }
         }
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
@@ -314,50 +585,71 @@ int execute_zincrby_command(const void *glide_client, const char *key, size_t ke
                             double increment, const char *member, size_t member_len,
                             double *output_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZINCRBY;
-    CommandRequest *request = create_command_request(cmd_type);
-
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
-
-    // Add increment parameter
-    char increment_str[64];
-    int increment_str_len = snprintf(increment_str, sizeof(increment_str), "%f", increment);
-    command_request_add_string(request, increment_str, increment_str_len);
-
-    // Add member parameter
-    command_request_add_string(request, member, member_len);
-
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
-
-    // Free the request
-    command_request_free(request);
-
-    // Process response
-    if (!response)
+    /* Check if client and parameters are valid */
+    if (!glide_client || !key || !member)
     {
         return 0;
     }
 
-    CommandResult *result = response->result;
-    int success = 0;
+    /* Prepare command arguments */
+    unsigned long arg_count = 3; /* key + increment + member */
+    uintptr_t args[3];
+    unsigned long args_len[3];
 
-    if (result)
+    /* Set arguments */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Add increment parameter */
+    char increment_str[64];
+    int increment_str_len = snprintf(increment_str, sizeof(increment_str), "%.17g", increment);
+    args[1] = (uintptr_t)increment_str;
+    args_len[1] = increment_str_len;
+
+    /* Add member parameter */
+    args[2] = (uintptr_t)member;
+    args_len[2] = member_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZIncrBy,   /* command type from RequestType enum */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Check if the command was successful */
+    if (!result)
     {
-        if (result->type == String)
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
+    int success = 0;
+    if (result->response)
+    {
+        if (result->response->response_type == String)
         {
-            // Parse string as double
-            success = safe_strtod(result->string_value, result->string_length, output_value);
+            /* Parse string as double */
+            success = safe_strtod(result->response->string_value, result->response->string_value_len, output_value);
         }
-        else if (result->type == Double)
+        else if (result->response->response_type == Float)
         {
-            *output_value = result->double_value;
+            *output_value = result->response->float_value;
             success = 1;
         }
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
@@ -366,38 +658,59 @@ int execute_zcount_command(const void *glide_client, const char *key, size_t key
                            const char *min, size_t min_len, const char *max, size_t max_len,
                            long *output_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZCOUNT;
-    CommandRequest *request = create_command_request(cmd_type);
-
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
-
-    // Add min and max parameters
-    command_request_add_string(request, min, min_len);
-    command_request_add_string(request, max, max_len);
-
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
-
-    // Free the request
-    command_request_free(request);
-
-    // Process response
-    if (!response)
+    /* Check if client and parameters are valid */
+    if (!glide_client || !key || !min || !max)
     {
         return 0;
     }
 
-    CommandResult *result = response->result;
-    int success = 0;
+    /* Prepare command arguments */
+    unsigned long arg_count = 3; /* key + min + max */
+    uintptr_t args[3];
+    unsigned long args_len[3];
 
-    if (result && result->type == Integer)
+    /* Set arguments */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    args[1] = (uintptr_t)min;
+    args_len[1] = min_len;
+
+    args[2] = (uintptr_t)max;
+    args_len[2] = max_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZCount,    /* command type from RequestType enum */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Check if the command was successful */
+    if (!result)
     {
-        *output_value = result->int_value;
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
+    int success = 0;
+    if (result->response && result->response->response_type == Int)
+    {
+        *output_value = result->response->int_value;
         success = 1;
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
@@ -406,38 +719,59 @@ int execute_zlexcount_command(const void *glide_client, const char *key, size_t 
                               const char *min, size_t min_len, const char *max, size_t max_len,
                               long *output_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZLEXCOUNT;
-    CommandRequest *request = create_command_request(cmd_type);
-
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
-
-    // Add min and max parameters
-    command_request_add_string(request, min, min_len);
-    command_request_add_string(request, max, max_len);
-
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
-
-    // Free the request
-    command_request_free(request);
-
-    // Process response
-    if (!response)
+    /* Check if client and parameters are valid */
+    if (!glide_client || !key || !min || !max)
     {
         return 0;
     }
 
-    CommandResult *result = response->result;
-    int success = 0;
+    /* Prepare command arguments */
+    unsigned long arg_count = 3; /* key + min + max */
+    uintptr_t args[3];
+    unsigned long args_len[3];
 
-    if (result && result->type == Integer)
+    /* Set arguments */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    args[1] = (uintptr_t)min;
+    args_len[1] = min_len;
+
+    args[2] = (uintptr_t)max;
+    args_len[2] = max_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZLexCount, /* command type from RequestType enum */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Check if the command was successful */
+    if (!result)
     {
-        *output_value = result->int_value;
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
+    int success = 0;
+    if (result->response && result->response->response_type == Int)
+    {
+        *output_value = result->response->int_value;
         success = 1;
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
@@ -445,43 +779,145 @@ int execute_zlexcount_command(const void *glide_client, const char *key, size_t 
 int execute_zrem_command(const void *glide_client, const char *key, size_t key_len,
                          zval *members, int members_count, long *output_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZREM;
-    CommandRequest *request = create_command_request(cmd_type);
-
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
-
-    // Add all member parameters
-    int i;
-    for (i = 0; i < members_count; i++)
-    {
-        zval *z_member = &members[i];
-        convert_to_string(z_member);
-        command_request_add_string(request, Z_STRVAL_P(z_member), Z_STRLEN_P(z_member));
-    }
-
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
-
-    // Free the request
-    command_request_free(request);
-
-    // Process response
-    if (!response)
+    /* Check if client, key, and members are valid */
+    if (!glide_client || !key || !members || members_count <= 0)
     {
         return 0;
     }
 
-    CommandResult *result = response->result;
-    int success = 0;
+    /* Prepare command arguments */
+    unsigned long arg_count = 1 + members_count; /* key + members */
+    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    char **allocated_strings = (char **)malloc(members_count * sizeof(char *));
 
-    if (result && result->type == Integer)
+    if (!args || !args_len || !allocated_strings)
     {
-        *output_value = result->int_value;
+        if (args)
+            free(args);
+        if (args_len)
+            free(args_len);
+        if (allocated_strings)
+            free(allocated_strings);
+        return 0;
+    }
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Add members as arguments */
+    int i;
+    int allocated_count = 0;
+    for (i = 0; i < members_count; i++)
+    {
+        zval *z_member = &members[i];
+
+        if (Z_TYPE_P(z_member) == IS_STRING)
+        {
+            args[i + 1] = (uintptr_t)Z_STRVAL_P(z_member);
+            args_len[i + 1] = Z_STRLEN_P(z_member);
+        }
+        else
+        {
+            /* Convert non-string values to string */
+            char *str_val = NULL;
+            size_t str_len = 0;
+
+            if (Z_TYPE_P(z_member) == IS_LONG)
+            {
+                str_val = long_to_string(Z_LVAL_P(z_member), &str_len);
+            }
+            else if (Z_TYPE_P(z_member) == IS_DOUBLE)
+            {
+                str_val = double_to_string(Z_DVAL_P(z_member), &str_len);
+            }
+            else if (Z_TYPE_P(z_member) == IS_TRUE)
+            {
+                str_val = strdup("1");
+                str_len = 1;
+            }
+            else if (Z_TYPE_P(z_member) == IS_FALSE)
+            {
+                str_val = strdup("0");
+                str_len = 1;
+            }
+            else
+            {
+                /* Handle other types or error */
+                int j;
+                for (j = 0; j < allocated_count; j++)
+                {
+                    free(allocated_strings[j]);
+                }
+                free(allocated_strings);
+                free(args);
+                free(args_len);
+                return 0;
+            }
+
+            if (str_val)
+            {
+                args[i + 1] = (uintptr_t)str_val;
+                args_len[i + 1] = str_len;
+                allocated_strings[allocated_count++] = str_val;
+            }
+            else
+            {
+                int j;
+                for (j = 0; j < allocated_count; j++)
+                {
+                    free(allocated_strings[j]);
+                }
+                free(allocated_strings);
+                free(args);
+                free(args_len);
+                return 0;
+            }
+        }
+    }
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZRem,      /* command type from RequestType enum */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Free allocated strings */
+    for (i = 0; i < allocated_count; i++)
+    {
+        free(allocated_strings[i]);
+    }
+    free(allocated_strings);
+    free(args);
+    free(args_len);
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
+    int success = 0;
+    if (result->response && result->response->response_type == Int)
+    {
+        *output_value = result->response->int_value;
         success = 1;
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
@@ -490,38 +926,59 @@ int execute_zremrangebylex_command(const void *glide_client, const char *key, si
                                    const char *min, size_t min_len, const char *max, size_t max_len,
                                    long *output_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZREMRANGEBYLEX;
-    CommandRequest *request = create_command_request(cmd_type);
-
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
-
-    // Add min and max parameters
-    command_request_add_string(request, min, min_len);
-    command_request_add_string(request, max, max_len);
-
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
-
-    // Free the request
-    command_request_free(request);
-
-    // Process response
-    if (!response)
+    /* Check if client and parameters are valid */
+    if (!glide_client || !key || !min || !max)
     {
         return 0;
     }
 
-    CommandResult *result = response->result;
-    int success = 0;
+    /* Prepare command arguments */
+    unsigned long arg_count = 3; /* key + min + max */
+    uintptr_t args[3];
+    unsigned long args_len[3];
 
-    if (result && result->type == Integer)
+    /* Set arguments */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    args[1] = (uintptr_t)min;
+    args_len[1] = min_len;
+
+    args[2] = (uintptr_t)max;
+    args_len[2] = max_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZRemRangeByLex, /* command type from RequestType enum */
+        arg_count,      /* number of arguments */
+        args,           /* arguments */
+        args_len        /* argument lengths */
+    );
+
+    /* Check if the command was successful */
+    if (!result)
     {
-        *output_value = result->int_value;
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
+    int success = 0;
+    if (result->response && result->response->response_type == Int)
+    {
+        *output_value = result->response->int_value;
         success = 1;
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
@@ -529,42 +986,64 @@ int execute_zremrangebylex_command(const void *glide_client, const char *key, si
 int execute_zremrangebyrank_command(const void *glide_client, const char *key, size_t key_len,
                                     long start, long end, long *output_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZREMRANGEBYRANK;
-    CommandRequest *request = create_command_request(cmd_type);
-
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
-
-    // Add start and end parameters
-    char start_str[32], end_str[32];
-    int start_str_len = snprintf(start_str, sizeof(start_str), "%ld", start);
-    int end_str_len = snprintf(end_str, sizeof(end_str), "%ld", end);
-
-    command_request_add_string(request, start_str, start_str_len);
-    command_request_add_string(request, end_str, end_str_len);
-
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
-
-    // Free the request
-    command_request_free(request);
-
-    // Process response
-    if (!response)
+    /* Check if client and key are valid */
+    if (!glide_client || !key)
     {
         return 0;
     }
 
-    CommandResult *result = response->result;
-    int success = 0;
+    /* Prepare command arguments */
+    unsigned long arg_count = 3; /* key + start + end */
+    uintptr_t args[3];
+    unsigned long args_len[3];
 
-    if (result && result->type == Integer)
+    /* Set arguments */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Add start and end parameters */
+    char start_str[32], end_str[32];
+    int start_str_len = snprintf(start_str, sizeof(start_str), "%ld", start);
+    int end_str_len = snprintf(end_str, sizeof(end_str), "%ld", end);
+
+    args[1] = (uintptr_t)start_str;
+    args_len[1] = start_str_len;
+
+    args[2] = (uintptr_t)end_str;
+    args_len[2] = end_str_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZRemRangeByRank, /* command type from RequestType enum */
+        arg_count,       /* number of arguments */
+        args,            /* arguments */
+        args_len         /* argument lengths */
+    );
+
+    /* Check if the command was successful */
+    if (!result)
     {
-        *output_value = result->int_value;
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
+    int success = 0;
+    if (result->response && result->response->response_type == Int)
+    {
+        *output_value = result->response->int_value;
         success = 1;
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
@@ -573,72 +1052,112 @@ int execute_zremrangebyscore_command(const void *glide_client, const char *key, 
                                      const char *min, size_t min_len, const char *max, size_t max_len,
                                      long *output_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZREMRANGEBYSCORE;
-    CommandRequest *request = create_command_request(cmd_type);
-
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
-
-    // Add min and max parameters
-    command_request_add_string(request, min, min_len);
-    command_request_add_string(request, max, max_len);
-
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
-
-    // Free the request
-    command_request_free(request);
-
-    // Process response
-    if (!response)
+    /* Check if client and parameters are valid */
+    if (!glide_client || !key || !min || !max)
     {
         return 0;
     }
 
-    CommandResult *result = response->result;
-    int success = 0;
+    /* Prepare command arguments */
+    unsigned long arg_count = 3; /* key + min + max */
+    uintptr_t args[3];
+    unsigned long args_len[3];
 
-    if (result && result->type == Integer)
+    /* Set arguments */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    args[1] = (uintptr_t)min;
+    args_len[1] = min_len;
+
+    args[2] = (uintptr_t)max;
+    args_len[2] = max_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZRemRangeByScore, /* command type from RequestType enum */
+        arg_count,        /* number of arguments */
+        args,             /* arguments */
+        args_len          /* argument lengths */
+    );
+
+    /* Check if the command was successful */
+    if (!result)
     {
-        *output_value = result->int_value;
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
+    int success = 0;
+    if (result->response && result->response->response_type == Int)
+    {
+        *output_value = result->response->int_value;
         success = 1;
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
 
 int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
 {
-    CommandRequestType cmd_type = REDIS_COMMAND_ZCARD;
-    CommandRequest *request = create_command_request(cmd_type);
-
-    // Add the key parameter
-    command_request_add_string(request, key, key_len);
-
-    // Execute the command
-    CommandResponse *response = execute_command(glide_client, request);
-
-    // Free the request
-    command_request_free(request);
-
-    // Process response
-    if (!response)
+    /* Check if client and key are valid */
+    if (!glide_client || !key)
     {
         return 0;
     }
 
-    CommandResult *result = response->result;
-    int success = 0;
+    /* Prepare command arguments */
+    unsigned long arg_count = 1; /* just key */
+    uintptr_t args[1];
+    unsigned long args_len[1];
 
-    if (result && result->type == Integer)
+    /* Set arguments */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZCard,     /* command type from RequestType enum */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Check if the command was successful */
+    if (!result)
     {
-        *output_value = result->int_value;
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
+    int success = 0;
+    if (result->response && result->response->response_type == Int)
+    {
+        *output_value = result->response->int_value;
         success = 1;
     }
 
-    free_command_response(response);
+    /* Free the result */
+    free_command_result(result);
 
     return success;
 }
