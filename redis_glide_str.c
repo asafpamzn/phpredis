@@ -388,9 +388,9 @@ int execute_sort_command(const void *glide_client, const char *key, size_t key_l
         if (z_store && Z_TYPE_P(z_store) == IS_STRING)
         {
             /* With STORE option, we get the number of stored elements */
-            if (cmd_result->response->response_type == Integer)
+            if (cmd_result->response->response_type == Int)
             {
-                ZVAL_LONG(return_value, cmd_result->response->integer_value);
+                ZVAL_LONG(return_value, cmd_result->response->int_value);
                 ret_val = 1;
             }
             free_command_result(cmd_result);
