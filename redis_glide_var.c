@@ -50,8 +50,29 @@ int execute_object_command(const void *glide_client,
     args[2] = (uintptr_t)key;
     args_len[2] = key_len;
 
+    /* Select appropriate request type based on subcommand */
+    enum RequestType req_type = CustomCommand; /* Default to CustomCommand */
+
+    if (strncasecmp(subcommand, "REFCOUNT", subcommand_len) == 0)
+    {
+        req_type = ObjectRefCount;
+    }
+    else if (strncasecmp(subcommand, "IDLETIME", subcommand_len) == 0)
+    {
+        req_type = ObjectIdleTime;
+    }
+    else if (strncasecmp(subcommand, "FREQ", subcommand_len) == 0)
+    {
+        req_type = ObjectFreq;
+    }
+    else if (strncasecmp(subcommand, "ENCODING", subcommand_len) == 0)
+    {
+        req_type = ObjectEncoding;
+    }
+    /* For HELP and other subcommands, use CustomCommand (default) */
+
     /* Execute the command */
-    result = execute_command(glide_client, Object, 3, args, args_len);
+    result = execute_command(glide_client, req_type, 3, args, args_len);
     if (result == NULL)
     {
         return -1;
