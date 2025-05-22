@@ -423,7 +423,7 @@ int execute_rpop_command(const void *glide_client, const char *key, size_t key_l
         else if (result->response->response_type == Null)
         {
             /* No elements in the list */
-            ZVAL_NULL(return_value);
+            ZVAL_FALSE(return_value);
             ret_val = 1;
         }
     }
