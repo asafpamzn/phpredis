@@ -575,16 +575,88 @@ PHP_METHOD(Redis, exists)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the EXISTS command using the Glide client */
-        if (execute_exists_command(redis->glide_client, z_args, argc, &result_value))
+        /* Check if we received an array as a single argument */
+        if (argc == 1 && Z_TYPE_P(z_args) == IS_ARRAY)
         {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
+            /* Extract keys from the array */
+            HashTable *ht = Z_ARRVAL_P(z_args);
+            int num_keys = zend_hash_num_elements(ht);
+
+            if (num_keys == 0)
+            {
+                /* Empty array, return 0 */
+                RETURN_LONG(0);
+            }
+
+            /* Allocate memory for keys */
+            zval *keys = ecalloc(num_keys, sizeof(zval));
+            if (!keys)
+            {
+                RETURN_FALSE;
+            }
+
+            /* Copy each array value to our keys array */
+            zval *entry;
+            int i = 0;
+
+            ZEND_HASH_FOREACH_VAL(ht, entry)
+            {
+                /* Convert any non-string values to string */
+                if (Z_TYPE_P(entry) != IS_STRING)
+                {
+                    zval tmp;
+                    ZVAL_DUP(&tmp, entry);
+                    convert_to_string(&tmp);
+                    ZVAL_COPY_VALUE(&keys[i], &tmp);
+                }
+                else
+                {
+                    ZVAL_COPY(&keys[i], entry);
+                }
+                i++;
+            }
+            ZEND_HASH_FOREACH_END();
+
+            /* Execute the EXISTS command with the array elements as keys */
+            if (execute_exists_command(redis->glide_client, keys, num_keys, &result_value))
+            {
+                /* Free the keys array */
+                for (i = 0; i < num_keys; i++)
+                {
+                    zval_ptr_dtor(&keys[i]);
+                }
+                efree(keys);
+
+                /* Command succeeded, return the value */
+                RETURN_LONG(result_value);
+            }
+            else
+            {
+                /* Free the keys array */
+                for (i = 0; i < num_keys; i++)
+                {
+                    zval_ptr_dtor(&keys[i]);
+                }
+                efree(keys);
+
+                /* Command failed */
+                RETURN_FALSE;
+            }
         }
         else
         {
-            /* Command failed */
-            RETURN_FALSE;
+            /* Normal case - one or more arguments directly passed */
+            /* Execute the EXISTS command using the Glide client */
+            if (execute_exists_command(redis->glide_client, z_args, argc, &result_value))
+            {
+                /* Command succeeded, return the value */
+                RETURN_LONG(result_value);
+            }
+            else
+            {
+                /* Command failed */
+                RETURN_FALSE;
+            }
         }
     }
 }

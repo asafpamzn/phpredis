@@ -41,7 +41,7 @@ int execute_object_command(const void *glide_client,
     uintptr_t args[1];
     unsigned long args_len[1];
 
-        args[0] = (uintptr_t)key;
+    args[0] = (uintptr_t)key;
     args_len[0] = key_len;
 
     /* Select appropriate request type based on subcommand */
