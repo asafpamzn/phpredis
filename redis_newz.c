@@ -78,6 +78,16 @@ PHP_METHOD(Redis, object)
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the OBJECT command using the Glide client */
+        if (execute_object_command(redis->glide_client, subcommand, subcommand_len, key, key_len, return_value) >= 0)
+        {
+            return;
+        }
+    }
+
     /* Not implemented yet, fallback to the regular Redis implementation */
     ZVAL_FALSE(return_value);
 }

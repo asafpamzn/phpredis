@@ -197,6 +197,12 @@ int execute_msetnx_command(const void *glide_client, zval *arr, int *output_valu
 int execute_rpoplpush_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len, char **result, size_t *result_len);
 int execute_brpoplpush_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len, zend_long timeout, char **result, size_t *result_len);
 
+/* Object operations */
+extern int execute_object_command(const void *glide_client,
+                                  const char *subcommand, size_t subcommand_len,
+                                  const char *key, size_t key_len,
+                                  zval *return_value);
+
 /* Don't include command_response.h here to avoid circular dependencies */
 
 #endif /* REDIS_GLIDE_H */

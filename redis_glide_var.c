@@ -22,6 +22,115 @@
 #include <string.h>
 #include <stdio.h>
 
+/*
+ * Function to execute the OBJECT command using Glide client
+ * Returns:
+ *  1 on success
+ *  0 when key doesn't exist
+ * -1 on error
+ */
+int execute_object_command(const void *glide_client,
+                           const char *subcommand, size_t subcommand_len,
+                           const char *key, size_t key_len,
+                           zval *return_value)
+{
+    CommandResponse *response = NULL;
+    CommandResult *result = NULL;
+    int ret_val = -1; /* Default to error */
+
+    /* Create command array: ["OBJECT", subcommand, key] */
+    const char *argv[3];
+    size_t argv_len[3];
+
+    argv[0] = "OBJECT";
+    argv_len[0] = 6; /* strlen("OBJECT") */
+
+    argv[1] = subcommand;
+    argv_len[1] = subcommand_len;
+
+    argv[2] = key;
+    argv_len[2] = key_len;
+
+    /* Execute the command */
+    response = execute_command(glide_client, 3, argv, argv_len);
+    if (response == NULL)
+    {
+        return -1;
+    }
+
+    /* Get the result */
+    result = get_command_result(response);
+    if (result == NULL)
+    {
+        free_command_response(response);
+        return -1;
+    }
+
+    /* Handle different result types based on the subcommand */
+    if (strncasecmp(subcommand, "REFCOUNT", subcommand_len) == 0 ||
+        strncasecmp(subcommand, "IDLETIME", subcommand_len) == 0 ||
+        strncasecmp(subcommand, "FREQ", subcommand_len) == 0)
+    {
+        /* These subcommands return integers */
+        long long int_val;
+
+        if (get_long_long_result(result, &int_val) == 0)
+        {
+            /* Success, set return value */
+            ZVAL_LONG(return_value, (long)int_val);
+            ret_val = 1;
+        }
+        else if (is_nil_result(result))
+        {
+            /* Key doesn't exist */
+            ZVAL_NULL(return_value);
+            ret_val = 0;
+        }
+    }
+    else if (strncasecmp(subcommand, "ENCODING", subcommand_len) == 0)
+    {
+        /* ENCODING returns a string */
+        char *str_val;
+        size_t str_len;
+
+        if (get_string_result(result, &str_val, &str_len) == 0)
+        {
+            /* Success, set return value */
+            ZVAL_STRINGL(return_value, str_val, str_len);
+            ret_val = 1;
+        }
+        else if (is_nil_result(result))
+        {
+            /* Key doesn't exist */
+            ZVAL_NULL(return_value);
+            ret_val = 0;
+        }
+    }
+    else if (strncasecmp(subcommand, "HELP", subcommand_len) == 0)
+    {
+        /* HELP returns an array of strings */
+        if (get_array_result(result, return_value) == 0)
+        {
+            ret_val = 1;
+        }
+        else
+        {
+            ret_val = -1;
+        }
+    }
+    else
+    {
+        /* Unsupported subcommand */
+        ret_val = -1;
+    }
+
+    /* Clean up */
+    free_command_result(result);
+    free_command_response(response);
+
+    return ret_val;
+}
+
 /* Execute a RENAME command using the Valkey Glide client */
 int execute_rename_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len)
 {
