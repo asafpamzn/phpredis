@@ -53,6 +53,80 @@ extern char *double_to_string(double value, size_t *len);
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
+/* {{{ proto array Redis::keys(string pattern) */
+PHP_METHOD(Redis, keys)
+{
+    zval *object;
+    redis_object *redis;
+    char *pattern = NULL;
+    size_t pattern_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
+                                     &object, redis_ce, &pattern, &pattern_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the KEYS command using the Glide client */
+        int result = execute_keys_command(redis->glide_client, pattern, pattern_len, return_value);
+
+        /* Return the result directly if successful, otherwise return FALSE */
+        if (result == 1)
+        {
+            return; /* Return value already set by execute_keys_command */
+        }
+        else
+        {
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto array Redis::lrange(string key, long start, long end) */
+PHP_METHOD(Redis, lrange)
+{
+    zval *object;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long start, end;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osll",
+                                     &object, redis_ce, &key, &key_len, &start, &end) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the LRANGE command using the Glide client */
+        int result = execute_lrange_command(redis->glide_client, key, key_len, start, end, return_value);
+
+        /* Return the result directly if successful, otherwise return FALSE */
+        if (result == 1)
+        {
+            return; /* Return value already set by execute_lrange_command */
+        }
+        else
+        {
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
 /* {{{ proto boolean Redis::setOption(long option, mixed value) */
 PHP_METHOD(Redis, setOption)
 {

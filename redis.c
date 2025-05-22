@@ -786,14 +786,6 @@ PHP_METHOD(Redis, unwatch)
 }
 /* }}} */
 
-/* {{{ proto array Redis::keys(string pattern)
- */
-PHP_METHOD(Redis, keys)
-{
-    REDIS_PROCESS_KW_CMD("KEYS", redis_key_cmd, redis_mbulk_reply_raw);
-}
-/* }}} */
-
 /* {{{ proto int Redis::type(string key)
  */
 PHP_METHOD(Redis, type)
@@ -923,14 +915,6 @@ PHP_METHOD(Redis, ltrim)
 PHP_METHOD(Redis, lindex)
 {
     REDIS_PROCESS_KW_CMD("LINDEX", redis_key_long_cmd, redis_string_response);
-}
-/* }}} */
-
-/* {{{ proto array Redis::lrange(string key, int start , int end) */
-PHP_METHOD(Redis, lrange)
-{
-    REDIS_PROCESS_KW_CMD("LRANGE", redis_key_long_long_cmd,
-                         redis_sock_read_multibulk_reply);
 }
 /* }}} */
 
