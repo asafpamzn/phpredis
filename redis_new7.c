@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 /* Declaration of functions from redis_glide_str.c */
-int execute_type_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);
+int execute_type_command(const void *glide_client, const char *key, size_t key_len, long *result);
 int execute_append_command(const void *glide_client, const char *key, size_t key_len, const char *value, size_t value_len, long *output_value);
 int execute_getrange_command(const void *glide_client, const char *key, size_t key_len, long start, long end, char **result, size_t *result_len);
 int execute_sort_command(const void *glide_client, const char *key, size_t key_len, zval *sort_pattern, zend_bool alpha, zend_bool desc, zval *return_value);
@@ -32,14 +32,15 @@ int execute_expirememberat_command(const void *glide_client, const char *key, si
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
-/* {{{ proto string Redis::type(string key)
+/* {{{ proto long Redis::type(string key)
  * Returns the type of data pointed by a given key */
 PHP_METHOD(Redis, type)
 {
     zval *object;
     redis_object *redis;
-    char *key = NULL, *type_response = NULL;
-    size_t key_len = 0, response_len = 0;
+    char *key = NULL;
+    size_t key_len = 0;
+    long type_value = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
@@ -55,11 +56,9 @@ PHP_METHOD(Redis, type)
     if (redis->glide_client)
     {
         /* Execute the TYPE command using the Glide client */
-        if (execute_type_command(redis->glide_client, key, key_len, &type_response, &response_len))
+        if (execute_type_command(redis->glide_client, key, key_len, &type_value))
         {
-            RETVAL_STRINGL(type_response, response_len);
-            free(type_response);
-            return;
+            RETURN_LONG(type_value);
         }
     }
 

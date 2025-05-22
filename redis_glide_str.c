@@ -23,7 +23,7 @@
 #include <stdio.h>
 
 /* Execute a TYPE command using the Valkey Glide client */
-int execute_type_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len)
+int execute_type_command(const void *glide_client, const char *key, size_t key_len, long *result)
 {
     /* Check if client and key are valid */
     if (!glide_client || !key)
@@ -49,8 +49,65 @@ int execute_type_command(const void *glide_client, const char *key, size_t key_l
         args_len   /* argument lengths */
     );
 
-    /* Use the generic handler to process the result */
-    return handle_string_response(cmd_result, result, result_len);
+    /* Get the string result first */
+    char *type_str = NULL;
+    size_t type_len = 0;
+    int ret = handle_string_response(cmd_result, &type_str, &type_len);
+
+    /* If we have a valid string response, map it to the appropriate constant */
+    if (ret == 1 && type_str != NULL)
+    {
+        if (strcmp(type_str, "string") == 0)
+        {
+            *result = 1; /* REDIS_STRING */
+        }
+        else if (strcmp(type_str, "list") == 0)
+        {
+            *result = 3; /* REDIS_LIST */
+        }
+        else if (strcmp(type_str, "set") == 0)
+        {
+            *result = 2; /* REDIS_SET */
+        }
+        else if (strcmp(type_str, "zset") == 0)
+        {
+            *result = 4; /* REDIS_ZSET */
+        }
+        else if (strcmp(type_str, "hash") == 0)
+        {
+            *result = 5; /* REDIS_HASH */
+        }
+        else if (strcmp(type_str, "stream") == 0)
+        {
+            *result = 6; /* REDIS_STREAM */
+        }
+        else if (strcmp(type_str, "none") == 0)
+        {
+            *result = 0; /* REDIS_NOT_FOUND */
+        }
+        else
+        {
+            /* Unknown type, default to NOT_FOUND */
+            *result = 0;
+        }
+
+        /* Free the string response */
+        if (type_str)
+        {
+            free(type_str);
+        }
+
+        return 1; /* Success */
+    }
+    else if (ret == 0)
+    {
+        /* Key doesn't exist */
+        *result = 0; /* REDIS_NOT_FOUND */
+        return 1;
+    }
+
+    /* Error occurred */
+    return ret;
 }
 
 /* Execute an APPEND command using the Valkey Glide client */
