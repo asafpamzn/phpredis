@@ -26,7 +26,6 @@
 #include "redis_array.h"
 #include "redis_cluster.h"
 #include "redis_commands.h"
-#include "redis_sentinel.h"
 #include "redis_glide.h"
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
@@ -438,9 +437,6 @@ PHP_MINIT_FUNCTION(redis)
     /* RedisCluster class */
     ZEND_MINIT(redis_cluster)(INIT_FUNC_ARGS_PASSTHRU);
 
-    /* RedisSentinel class */
-    ZEND_MINIT(redis_sentinel)(INIT_FUNC_ARGS_PASSTHRU);
-
     /* Register our cluster cache list item */
     le_cluster_slot_cache = zend_register_list_destructors_ex(NULL, cluster_cache_dtor,
                                                               "Redis cluster slot cache",
@@ -508,7 +504,6 @@ PHP_MINFO_FUNCTION(redis)
     php_info_print_table_start();
     php_info_print_table_header(2, "Redis Support", "enabled");
     php_info_print_table_row(2, "Redis Version", PHP_REDIS_VERSION);
-    php_info_print_table_row(2, "Redis Sentinel Version", PHP_REDIS_SENTINEL_VERSION);
 #ifdef GIT_REVISION
     php_info_print_table_row(2, "Git revision", "$Id: " GIT_REVISION " $");
 #endif

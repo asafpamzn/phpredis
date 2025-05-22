@@ -26,7 +26,6 @@
 #include "redis_array.h"
 #include "redis_cluster.h"
 #include "redis_commands.h"
-#include "redis_sentinel.h"
 #include "redis_glide.h"
 #include "command_response.h"
 #include <ext/spl/spl_exceptions.h>

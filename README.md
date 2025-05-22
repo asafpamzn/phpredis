@@ -34,7 +34,6 @@ You can also make a one-time contribution with [![PayPal](https://img.shields.io
    * [PHP Session handler](#php-session-handler)
    * [Distributed Redis Array](./arrays.md#readme)
    * [Redis Cluster support](./cluster.md#readme)
-   * [Redis Sentinel support](./sentinel.md#readme)
    * [Running the unit tests](#running-the-unit-tests)
 1. [Classes and methods](#classes-and-methods)
    * [Usage](#usage)
@@ -145,9 +144,6 @@ tests/mkring.sh stop
 tests/make-cluster.sh start
 php tests/TestRedis.php --class RedisCluster
 tests/make-cluster.sh stop
-
-# Run tests for RedisSentinel class
-php tests/TestRedis.php --class RedisSentinel
 ~~~
 
 Note that it is possible to run only tests which match a substring of the test itself by passing the additional argument '--test <str>' when invoking.

@@ -3472,17 +3472,7 @@ redis_sock_check_liveness(RedisSock *redis_sock)
         }
     }
 
-    /* check echo response */
-    if ((redis_sock->sentinel && (redis_strncmp(inbuf, ZEND_STRL("-ERR unknown command")) != 0 ||
-                                  strstr(inbuf, id) == NULL)) ||
-        *inbuf != TYPE_BULK || atoi(inbuf + 1) != idlen ||
-        redis_sock_gets(redis_sock, inbuf, sizeof(inbuf) - 1, &len) < 0 ||
-        redis_strncmp(inbuf, id, idlen) != 0)
-    {
-        goto failure;
-    }
-
-    return SUCCESS;
+       return SUCCESS;
 failure:
     redis_sock->status = REDIS_SOCK_STATUS_DISCONNECTED;
     if (redis_sock->stream)
