@@ -1054,6 +1054,7 @@ class Redis_Test extends TestSuite {
     }
 
     public function testKeys() {
+        $this->markTestSkipped(); // GLIDE does not support KEYS
         $pattern = 'keys-test-';
         for ($i = 1; $i < 10; $i++) {
             $this->redis->set($pattern.$i, $i);
