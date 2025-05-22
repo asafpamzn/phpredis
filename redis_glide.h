@@ -154,6 +154,19 @@ extern int execute_pexpiretime_command(const void *glide_client, const char *key
 
 /* Sorted set operations */
 extern int execute_zadd_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, int flags, long *output_value);
+extern int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
+extern int execute_zscore_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, double *output_value);
+extern int execute_zmscore_command(const void *glide_client, const char *key, size_t key_len, zval *members, int members_count, zval *return_value);
+extern int execute_zrank_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, int withscore, long *rank_value, double *score_value);
+extern int execute_zrevrank_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, int withscore, long *rank_value, double *score_value);
+extern int execute_zincrby_command(const void *glide_client, const char *key, size_t key_len, double increment, const char *member, size_t member_len, double *output_value);
+extern int execute_zcount_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *output_value);
+extern int execute_zlexcount_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *output_value);
+extern int execute_zrem_command(const void *glide_client, const char *key, size_t key_len, zval *members, int members_count, long *output_value);
+extern int execute_zremrangebylex_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *output_value);
+extern int execute_zremrangebyrank_command(const void *glide_client, const char *key, size_t key_len, long start, long end, long *output_value);
+extern int execute_zremrangebyscore_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *output_value);
+extern int execute_zrandmember_command(const void *glide_client, const char *key, size_t key_len, long count, int withscores, zval *return_value);
 
 /* Hash operations */
 extern int execute_hset_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, long *output_value);
