@@ -1,7 +1,8 @@
-/* -*- Mode: C; tab-width: 4 -*- */
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2009 The PHP Group                                |
+  | Redis Glide FFI integration for phpredis                             |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2023-2025 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -11,52 +12,34 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Original author: Alfonso Jimenez <yo@alfonsojimenez.com>             |
-  | Maintainer: Nicolas Favre-Felix <n.favre-felix@owlient.eu>           |
-  | Maintainer: Nasreddine Bouafif <n.bouafif@owlient.eu>                |
-  | Maintainer: Michael Grunder <michael.grunder@gmail.com>              |
-  +----------------------------------------------------------------------+
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "php_redis.h"
-#include "redis_array.h"
-#include "redis_cluster.h"
-#include "redis_commands.h"
-#include "redis_sentinel.h"
 #include "redis_glide.h"
-#include "command_response.h"
-#include <ext/spl/spl_exceptions.h>
-#include <zend_exceptions.h>
-#include <ext/standard/info.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
-#ifdef PHP_SESSION
-#include <ext/session/php_session.h>
-#endif
+/* Declaration of functions from redis_glide_str.c */
+int execute_type_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);
+int execute_append_command(const void *glide_client, const char *key, size_t key_len, const char *value, size_t value_len, long *output_value);
+int execute_getrange_command(const void *glide_client, const char *key, size_t key_len, long start, long end, char **result, size_t *result_len);
+int execute_sort_command(const void *glide_client, const char *key, size_t key_len, zval *sort_pattern, zend_bool alpha, zend_bool desc, zval *return_value);
+int execute_sort_ro_command(const void *glide_client, const char *key, size_t key_len, zval *sort_pattern, zend_bool alpha, zend_bool desc, zval *return_value);
+int execute_expiremember_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, long seconds, long *output_value);
+int execute_expirememberat_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, long timestamp, long *output_value);
 
-/* Import needed external variables */
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
-/* Import the execute functions */
-extern int execute_type_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);
-extern int execute_append_command(const void *glide_client, const char *key, size_t key_len, const char *value, size_t value_len, long *output_value);
-extern int execute_getrange_command(const void *glide_client, const char *key, size_t key_len, long start, long end, char **result, size_t *result_len);
-extern int execute_sort_command(const void *glide_client, const char *key, size_t key_len, zval *sort_pattern, zend_bool alpha, zend_bool desc, zval *return_value);
-extern int execute_sort_ro_command(const void *glide_client, const char *key, size_t key_len, zval *sort_pattern, zend_bool alpha, zend_bool desc, zval *return_value);
-extern int execute_expiremember_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, long seconds, long *output_value);
-extern int execute_expirememberat_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, long timestamp, long *output_value);
-
-/* {{{ proto string Redis::type(string key) */
+/* {{{ proto string Redis::type(string key)
+ * Returns the type of data pointed by a given key */
 PHP_METHOD(Redis, type)
 {
     zval *object;
     redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
+    char *key = NULL, *type_response = NULL;
+    size_t key_len = 0, response_len = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
@@ -71,33 +54,28 @@ PHP_METHOD(Redis, type)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        char *result = NULL;
-        size_t result_len = 0;
-
         /* Execute the TYPE command using the Glide client */
-        int cmd_result = execute_type_command(redis->glide_client, key, key_len, &result, &result_len);
-
-        /* Process the result */
-        if (cmd_result > 0 && result)
+        if (execute_type_command(redis->glide_client, key, key_len, &type_response, &response_len))
         {
-            RETVAL_STRINGL(result, result_len);
-            free(result); /* Free the result string */
-        }
-        else
-        {
-            RETURN_FALSE;
+            RETVAL_STRINGL(type_response, response_len);
+            free(type_response);
+            return;
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto long Redis::append(string key, string value) */
+/* {{{ proto long Redis::append(string key, string value)
+ * Append specified string to the string stored in specified key */
 PHP_METHOD(Redis, append)
 {
     zval *object;
     redis_object *redis;
     char *key = NULL, *value = NULL;
-    size_t key_len, value_len;
+    size_t key_len = 0, value_len = 0;
+    long result_value = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
@@ -113,29 +91,30 @@ PHP_METHOD(Redis, append)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        long result = 0;
-
         /* Execute the APPEND command using the Glide client */
-        if (execute_append_command(redis->glide_client, key, key_len, value, value_len, &result))
+        if (execute_append_command(redis->glide_client, key, key_len, value, value_len, &result_value))
         {
-            RETURN_LONG(result);
+            RETURN_LONG(result_value);
         }
         else
         {
             RETURN_FALSE;
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto string Redis::getRange(string key, long start, long end) */
+/* {{{ proto string Redis::getRange(string key, long start, long end)
+ * Return a substring of a larger string */
 PHP_METHOD(Redis, getRange)
 {
     zval *object;
     redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zend_long start, end;
+    char *key = NULL, *result = NULL;
+    size_t key_len = 0, result_len = 0;
+    long start = 0, end = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osll",
@@ -151,34 +130,37 @@ PHP_METHOD(Redis, getRange)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        char *result = NULL;
-        size_t result_len = 0;
-
         /* Execute the GETRANGE command using the Glide client */
-        int cmd_result = execute_getrange_command(redis->glide_client, key, key_len, start, end, &result, &result_len);
+        int ret = execute_getrange_command(redis->glide_client, key, key_len, start, end, &result, &result_len);
 
-        /* Process the result */
-        if (cmd_result > 0 && result)
+        if (ret > 0)
         {
+            /* Command succeeded with data */
             RETVAL_STRINGL(result, result_len);
-            free(result); /* Free the result string */
+            free(result);
+            return;
         }
-        else
+        else if (ret == 0)
         {
-            RETURN_FALSE;
+            /* Key didn't exist, return empty string */
+            RETURN_EMPTY_STRING();
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto array Redis::sort(string key [, array options]) */
+/* {{{ proto array Redis::sort(string key, array options)
+ * Sort a list, set or sorted set */
 PHP_METHOD(Redis, sort)
 {
     zval *object;
     redis_object *redis;
     char *key = NULL;
-    size_t key_len;
+    size_t key_len = 0;
     zval *z_opts = NULL;
+    zend_bool alpha = 0, desc = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|a",
@@ -195,23 +177,26 @@ PHP_METHOD(Redis, sort)
     if (redis->glide_client)
     {
         /* Execute the SORT command using the Glide client */
-        /* Default: numeric, ascending */
-        if (!execute_sort_command(redis->glide_client, key, key_len, z_opts, 0, 0, return_value))
+        if (execute_sort_command(redis->glide_client, key, key_len, z_opts, alpha, desc, return_value))
         {
-            RETURN_FALSE;
+            return;
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto array Redis::sort_ro(string key [, array options]) */
+/* {{{ proto array Redis::sort_ro(string key, array options)
+ * Sort a list, set or sorted set in read-only mode */
 PHP_METHOD(Redis, sort_ro)
 {
     zval *object;
     redis_object *redis;
     char *key = NULL;
-    size_t key_len;
+    size_t key_len = 0;
     zval *z_opts = NULL;
+    zend_bool alpha = 0, desc = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|a",
@@ -228,23 +213,26 @@ PHP_METHOD(Redis, sort_ro)
     if (redis->glide_client)
     {
         /* Execute the SORT_RO command using the Glide client */
-        /* Default: numeric, ascending */
-        if (!execute_sort_ro_command(redis->glide_client, key, key_len, z_opts, 0, 0, return_value))
+        if (execute_sort_ro_command(redis->glide_client, key, key_len, z_opts, alpha, desc, return_value))
         {
-            RETURN_FALSE;
+            return;
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto array Redis::sortAsc(string key [, array options]) */
+/* {{{ proto array Redis::sortAsc(string key, array options)
+ * Sort a list, set or sorted set in ascending order */
 PHP_METHOD(Redis, sortAsc)
 {
     zval *object;
     redis_object *redis;
     char *key = NULL;
-    size_t key_len;
+    size_t key_len = 0;
     zval *z_opts = NULL;
+    zend_bool alpha = 0, desc = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|a",
@@ -260,24 +248,28 @@ PHP_METHOD(Redis, sortAsc)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the SORT command using the Glide client */
-        /* Ascending, numeric */
-        if (!execute_sort_command(redis->glide_client, key, key_len, z_opts, 0, 0, return_value))
+        /* Execute the SORT command in ascending order */
+        desc = 0; /* Ascending order */
+        if (execute_sort_command(redis->glide_client, key, key_len, z_opts, alpha, desc, return_value))
         {
-            RETURN_FALSE;
+            return;
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto array Redis::sortAscAlpha(string key [, array options]) */
+/* {{{ proto array Redis::sortAscAlpha(string key, array options)
+ * Sort a list, set or sorted set in ascending order with alpha flag */
 PHP_METHOD(Redis, sortAscAlpha)
 {
     zval *object;
     redis_object *redis;
     char *key = NULL;
-    size_t key_len;
+    size_t key_len = 0;
     zval *z_opts = NULL;
+    zend_bool alpha = 1, desc = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|a",
@@ -293,24 +285,29 @@ PHP_METHOD(Redis, sortAscAlpha)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the SORT command using the Glide client */
-        /* Ascending, alpha */
-        if (!execute_sort_command(redis->glide_client, key, key_len, z_opts, 1, 0, return_value))
+        /* Execute the SORT command in ascending order with alpha flag */
+        desc = 0;  /* Ascending order */
+        alpha = 1; /* Alpha flag */
+        if (execute_sort_command(redis->glide_client, key, key_len, z_opts, alpha, desc, return_value))
         {
-            RETURN_FALSE;
+            return;
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto array Redis::sortDesc(string key [, array options]) */
+/* {{{ proto array Redis::sortDesc(string key, array options)
+ * Sort a list, set or sorted set in descending order */
 PHP_METHOD(Redis, sortDesc)
 {
     zval *object;
     redis_object *redis;
     char *key = NULL;
-    size_t key_len;
+    size_t key_len = 0;
     zval *z_opts = NULL;
+    zend_bool alpha = 0, desc = 1;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|a",
@@ -326,24 +323,28 @@ PHP_METHOD(Redis, sortDesc)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the SORT command using the Glide client */
-        /* Descending, numeric */
-        if (!execute_sort_command(redis->glide_client, key, key_len, z_opts, 0, 1, return_value))
+        /* Execute the SORT command in descending order */
+        desc = 1; /* Descending order */
+        if (execute_sort_command(redis->glide_client, key, key_len, z_opts, alpha, desc, return_value))
         {
-            RETURN_FALSE;
+            return;
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto array Redis::sortDescAlpha(string key [, array options]) */
+/* {{{ proto array Redis::sortDescAlpha(string key, array options)
+ * Sort a list, set or sorted set in descending order with alpha flag */
 PHP_METHOD(Redis, sortDescAlpha)
 {
     zval *object;
     redis_object *redis;
     char *key = NULL;
-    size_t key_len;
+    size_t key_len = 0;
     zval *z_opts = NULL;
+    zend_bool alpha = 1, desc = 1;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|a",
@@ -359,24 +360,28 @@ PHP_METHOD(Redis, sortDescAlpha)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the SORT command using the Glide client */
-        /* Descending, alpha */
-        if (!execute_sort_command(redis->glide_client, key, key_len, z_opts, 1, 1, return_value))
+        /* Execute the SORT command in descending order with alpha flag */
+        desc = 1;  /* Descending order */
+        alpha = 1; /* Alpha flag */
+        if (execute_sort_command(redis->glide_client, key, key_len, z_opts, alpha, desc, return_value))
         {
-            RETURN_FALSE;
+            return;
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto boolean Redis::expiremember(string key, string member, long seconds) */
+/* {{{ proto bool Redis::expiremember(string key, string member, int ttl)
+ * Set a timeout on a member of a collection */
 PHP_METHOD(Redis, expiremember)
 {
     zval *object;
     redis_object *redis;
     char *key = NULL, *member = NULL;
-    size_t key_len, member_len;
-    zend_long seconds;
+    size_t key_len = 0, member_len = 0;
+    long seconds = 0, result_value = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ossl",
@@ -392,36 +397,27 @@ PHP_METHOD(Redis, expiremember)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        long result = 0;
-
         /* Execute the EXPIREMEMBER command using the Glide client */
-        if (execute_expiremember_command(redis->glide_client, key, key_len, member, member_len, seconds, &result))
+        if (execute_expiremember_command(redis->glide_client, key, key_len,
+                                         member, member_len, seconds, &result_value))
         {
-            if (result)
-            {
-                RETURN_TRUE;
-            }
-            else
-            {
-                RETURN_FALSE;
-            }
-        }
-        else
-        {
-            RETURN_FALSE;
+            RETURN_BOOL(result_value);
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto boolean Redis::expirememberat(string key, string member, long timestamp) */
+/* {{{ proto bool Redis::expirememberat(string key, string member, int timestamp)
+ * Set a timeout on a member of a collection at a given timestamp */
 PHP_METHOD(Redis, expirememberat)
 {
     zval *object;
     redis_object *redis;
     char *key = NULL, *member = NULL;
-    size_t key_len, member_len;
-    zend_long timestamp;
+    size_t key_len = 0, member_len = 0;
+    long timestamp = 0, result_value = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ossl",
@@ -437,24 +433,14 @@ PHP_METHOD(Redis, expirememberat)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        long result = 0;
-
         /* Execute the EXPIREMEMBERAT command using the Glide client */
-        if (execute_expirememberat_command(redis->glide_client, key, key_len, member, member_len, timestamp, &result))
+        if (execute_expirememberat_command(redis->glide_client, key, key_len,
+                                           member, member_len, timestamp, &result_value))
         {
-            if (result)
-            {
-                RETURN_TRUE;
-            }
-            else
-            {
-                RETURN_FALSE;
-            }
-        }
-        else
-        {
-            RETURN_FALSE;
+            RETURN_BOOL(result_value);
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
