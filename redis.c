@@ -1334,13 +1334,6 @@ PHP_METHOD(Redis, bzPopMin)
 }
 /* }}} */
 
-/* {{{ proto Redis|array|false Redis::bzmpop(double $timeout, array $keys, string $from, int $count = 1) */
-PHP_METHOD(Redis, bzmpop)
-{
-    REDIS_PROCESS_KW_CMD("BZMPOP", redis_mpop_cmd, redis_mpop_response);
-}
-
-/* }}} */
 /* hashes */
 
 /* flag : get, set {ATOMIC, MULTI, PIPELINE} */

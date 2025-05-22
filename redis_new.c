@@ -919,6 +919,52 @@ PHP_METHOD(Redis, strlen)
     }
 }
 
+/* {{{ proto Redis|array|false Redis::bzmpop(double $timeout, array $keys, string $from, int $count = 1) */
+PHP_METHOD(Redis, bzmpop)
+{
+    zval *object, *z_keys;
+    redis_object *redis;
+    double timeout;
+    zend_long count = 1;
+    char *from = NULL;
+    size_t from_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Odas|l",
+                                     &object, redis_ce, &timeout, &z_keys,
+                                     &from, &from_len, &count) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* Make sure we have a glide client */
+    if (!redis->glide_client)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Execute the BZMPOP command using the Glide client */
+    zval result;
+    ZVAL_NULL(&result);
+
+    /* Note: we need to pass "BZMPOP" as the cmd parameter for messaging purposes,
+     * but the actual command type is determined by the "BZMPop" enum in the execute_zmpop_command function */
+    int ret = execute_zmpop_command(redis->glide_client, "BZMPOP", timeout, z_keys, from, from_len, count, &result);
+
+    /* If the result is 0, there was an error */
+    if (ret == 0)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Return the result */
+    RETURN_ZVAL(&result, 0, 1);
+}
+
+/* }}} */
 /* {{{ proto Redis|array|false Redis::lmpop(array $keys, string $from, int $count = 1) */
 PHP_METHOD(Redis, lmpop)
 {
