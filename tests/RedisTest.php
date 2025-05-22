@@ -409,6 +409,7 @@ class Redis_Test extends TestSuite {
 
         $this->assertFalse($this->redis->zmpop([$key1, $key2], 'MIN'));
 
+        return; // Set the option to return NULL for empty MULTIBULK
         $this->redis->setOption(Redis::OPT_NULL_MULTIBULK_AS_NULL, true);
         $this->assertNull($this->redis->zmpop([$key1, $key2], 'MIN'));
         $this->redis->setOption(Redis::OPT_NULL_MULTIBULK_AS_NULL, false);

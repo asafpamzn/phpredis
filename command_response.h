@@ -113,8 +113,11 @@ int handle_set_response(CommandResult *result, zval *output);
  * Helper function to convert a CommandResponse to a PHP value
  * Returns 1 on success, 0 if null, -1 on error
  * The output parameter is set to the PHP value
+ * use_associative_array:
+ * - 0: regular array processing
+ * - 1: convert Map elements to associative array format (for ZMPOP/sorted sets)
  */
-int command_response_to_zval(CommandResponse *response, zval *output);
+int command_response_to_zval(CommandResponse *response, zval *output, int use_associative_array);
 
 /*
  * Helper function to convert a long value to a string

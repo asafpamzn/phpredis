@@ -316,7 +316,7 @@ int execute_lpop_command(const void *glide_client, const char *key, size_t key_l
         {
             /* Multiple values returned (when count > 1) */
 
-            ret_val = command_response_to_zval(result->response, return_value);
+            ret_val = command_response_to_zval(result->response, return_value, false);
         }
         else if (result->response->response_type == Null)
         {
@@ -418,7 +418,7 @@ int execute_rpop_command(const void *glide_client, const char *key, size_t key_l
         else if (result->response->response_type == Array)
         {
             /* Multiple values returned (when count > 1) */
-            ret_val = command_response_to_zval(result->response, return_value);
+            ret_val = command_response_to_zval(result->response, return_value, false);
         }
         else if (result->response->response_type == Null)
         {
@@ -585,7 +585,7 @@ int execute_blpop_command(const void *glide_client, zval *keys, double timeout, 
         {
             /* Got a result, convert to PHP array [key, value] */
             array_init(return_value);
-            ret_val = command_response_to_zval(result->response, return_value);
+            ret_val = command_response_to_zval(result->response, return_value, false);
         }
         else if (result->response->response_type == Null)
         {
@@ -650,7 +650,7 @@ int execute_brpop_command(const void *glide_client, zval *keys, double timeout, 
         {
             /* Got a result, convert to PHP array [key, value] */
             array_init(return_value);
-            ret_val = command_response_to_zval(result->response, return_value);
+            ret_val = command_response_to_zval(result->response, return_value, false);
         }
         else if (result->response->response_type == Null)
         {

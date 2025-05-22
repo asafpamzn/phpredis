@@ -316,8 +316,12 @@ int handle_double_response(CommandResult *result, double *output)
     return ret_val;
 }
 
-/* Helper function to convert a CommandResponse to a PHP value */
-int command_response_to_zval(CommandResponse *response, zval *output)
+/* Helper function to convert a CommandResponse to a PHP value
+ * use_associative_array:
+ * - 0: regular array processing
+ * - 1: convert Map elements to associative array format (for ZMPOP/sorted sets)
+ */
+int command_response_to_zval(CommandResponse *response, zval *output, int use_associative_array)
 {
     if (!response)
     {
@@ -347,7 +351,7 @@ int command_response_to_zval(CommandResponse *response, zval *output)
         for (int i = 0; i < response->array_value_len; i++)
         {
             zval value;
-            command_response_to_zval(&response->array_value[i], &value);
+            command_response_to_zval(&response->array_value[i], &value, use_associative_array);
             add_next_index_zval(output, &value);
         }
         return 1;
@@ -362,7 +366,7 @@ int command_response_to_zval(CommandResponse *response, zval *output)
             // Process the key
             if (element->map_key != NULL)
             {
-                command_response_to_zval(element->map_key, &key);
+                command_response_to_zval(element->map_key, &key, 0);
             }
             else
             {
@@ -372,18 +376,26 @@ int command_response_to_zval(CommandResponse *response, zval *output)
             // Process the value
             if (element->map_value != NULL)
             {
-                command_response_to_zval(element->map_value, &value);
+                command_response_to_zval(element->map_value, &value, 0);
             }
             else
             {
                 ZVAL_NULL(&value);
             }
 
-            // Add the key as a separate array element
-            add_next_index_zval(output, &key);
-
-            // Add the value as the next array element
-            add_next_index_zval(output, &value);
+            if (use_associative_array && Z_TYPE(key) == IS_STRING)
+            {
+                // Add as associative array where the key is the index
+                add_assoc_zval(output, Z_STRVAL(key), &value);
+                zval_dtor(&key); // Clean up the key since we're using it as an index
+            }
+            else
+            {
+                // Add the key as a separate array element (original behavior)
+                add_next_index_zval(output, &key);
+                // Add the value as the next array element
+                add_next_index_zval(output, &value);
+            }
         }
         return 1;
 #endif
@@ -438,7 +450,7 @@ int handle_array_response(CommandResult *result, zval *output)
         }
         else if (result->response->response_type == Array)
         {
-            ret_val = command_response_to_zval(result->response, output);
+            ret_val = command_response_to_zval(result->response, output, 0);
         }
         else
         {
@@ -480,7 +492,7 @@ int handle_map_response(CommandResult *result, zval *output)
         }
         else if (result->response->response_type == Map)
         {
-            ret_val = command_response_to_zval(result->response, output);
+            ret_val = command_response_to_zval(result->response, output, 0);
         }
         else
         {
@@ -522,7 +534,7 @@ int handle_set_response(CommandResult *result, zval *output)
         }
         else if (result->response->response_type == Sets)
         {
-            ret_val = command_response_to_zval(result->response, output);
+            ret_val = command_response_to_zval(result->response, output, 0);
         }
         else
         {
