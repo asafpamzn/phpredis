@@ -308,18 +308,21 @@ int execute_lpop_command(const void *glide_client, const char *key, size_t key_l
         if (result->response->response_type == String)
         {
             /* Single value returned */
+
             ZVAL_STRINGL(return_value, result->response->string_value, result->response->string_value_len);
             ret_val = 1;
         }
         else if (result->response->response_type == Array)
         {
             /* Multiple values returned (when count > 1) */
+
             ret_val = command_response_to_zval(result->response, return_value);
         }
         else if (result->response->response_type == Null)
         {
             /* No elements in the list */
-            ZVAL_NULL(return_value);
+
+            ZVAL_FALSE(return_value);
             ret_val = 1;
         }
     }
