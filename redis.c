@@ -815,65 +815,15 @@ PHP_METHOD(Redis, getRange)
 }
 /* }}} */
 
-/* {{{ proto boolean Redis::lPush(string key , string value)
- */
-PHP_METHOD(Redis, lPush)
-{
-    REDIS_PROCESS_KW_CMD("LPUSH", redis_key_varval_cmd, redis_long_response);
-}
-/* }}} */
-
 PHP_METHOD(Redis, lInsert)
 {
     REDIS_PROCESS_CMD(linsert, redis_long_response);
 }
 
-/* {{{ proto long Redis::lPushx(string key, mixed value) */
-PHP_METHOD(Redis, lPushx)
-{
-    REDIS_PROCESS_KW_CMD("LPUSHX", redis_kv_cmd, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto long Redis::rPushx(string key, mixed value) */
-PHP_METHOD(Redis, rPushx)
-{
-    REDIS_PROCESS_KW_CMD("RPUSHX", redis_kv_cmd, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto string Redis::lPop(string key, [int count = 0]) */
-PHP_METHOD(Redis, lPop)
-{
-    REDIS_PROCESS_KW_CMD("LPOP", redis_pop_cmd, redis_pop_response);
-}
-/* }}} */
-
 /* {{{ proto string Redis::lPos(string key, mixed value, [array options = null]) */
 PHP_METHOD(Redis, lPos)
 {
     REDIS_PROCESS_CMD(lpos, redis_lpos_response);
-}
-/* }}} */
-
-/* {{{ proto string Redis::rPop(string key, [int count = 0]) */
-PHP_METHOD(Redis, rPop)
-{
-    REDIS_PROCESS_KW_CMD("RPOP", redis_pop_cmd, redis_pop_response);
-}
-/* }}} */
-
-/* {{{ proto string Redis::blPop(string key1, string key2, ..., int timeout) */
-PHP_METHOD(Redis, blPop)
-{
-    REDIS_PROCESS_KW_CMD("BLPOP", redis_blocking_pop_cmd, redis_sock_read_multibulk_reply);
-}
-/* }}} */
-
-/* {{{ proto string Redis::brPop(string key1, string key2, ..., int timeout) */
-PHP_METHOD(Redis, brPop)
-{
-    REDIS_PROCESS_KW_CMD("BRPOP", redis_blocking_pop_cmd, redis_sock_read_multibulk_reply);
 }
 /* }}} */
 

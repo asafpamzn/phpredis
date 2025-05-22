@@ -84,6 +84,7 @@ PHP_METHOD(Redis, keys)
         }
         else
         {
+
             RETURN_FALSE;
         }
     }
@@ -113,6 +114,7 @@ PHP_METHOD(Redis, lrange)
     if (redis->glide_client)
     {
         /* Execute the LRANGE command using the Glide client */
+
         int result = execute_lrange_command(redis->glide_client, key, key_len, start, end, return_value);
 
         /* Return the result directly if successful, otherwise return FALSE */
