@@ -1017,6 +1017,71 @@ int execute_setbit_command(const void *glide_client, const char *key, size_t key
     return handle_int_response(result, output_value);
 }
 
+/* Helper function to execute del_command with arrays */
+int execute_del_array(const void *glide_client, HashTable *keys_hash, long *output_value)
+{
+    /* Check if client and hash are valid */
+    if (!glide_client || !keys_hash || zend_hash_num_elements(keys_hash) <= 0)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = zend_hash_num_elements(keys_hash);
+    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+
+    if (!args || !args_len)
+    {
+        if (args)
+            free(args);
+        if (args_len)
+            free(args_len);
+        return 0;
+    }
+
+    /* Add keys from hash table as arguments */
+    zval *key;
+    unsigned long idx = 0;
+    ZEND_HASH_FOREACH_VAL(keys_hash, key)
+    {
+        /* Convert to string if needed */
+        zval tmp;
+        ZVAL_NULL(&tmp);
+        if (Z_TYPE_P(key) != IS_STRING)
+        {
+            /* Convert to string */
+            ZVAL_COPY(&tmp, key);
+            convert_to_string(&tmp);
+            args[idx] = (uintptr_t)Z_STRVAL(tmp);
+            args_len[idx] = Z_STRLEN(tmp);
+        }
+        else
+        {
+            args[idx] = (uintptr_t)Z_STRVAL_P(key);
+            args_len[idx] = Z_STRLEN_P(key);
+        }
+        idx++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        Del,       /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Free the argument arrays */
+    free(args);
+    free(args_len);
+
+    /* Use the generic handler to process the result */
+    return handle_int_response(result, output_value);
+}
+
 /* Execute a DEL command using the Valkey Glide client */
 int execute_del_command(const void *glide_client, zval *keys, int keys_count, long *output_value)
 {

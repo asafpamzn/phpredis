@@ -234,17 +234,17 @@ PHP_METHOD(Redis, setBit)
 }
 /* }}} */
 
-/* {{{ proto long Redis::del(string key, ...) */
+/* {{{ proto long Redis::del(string key, ...) or Redis::del(array keys) */
 PHP_METHOD(Redis, del)
 {
     zval *object;
     redis_object *redis;
-    zval *keys = NULL;
-    int keys_count = 0;
+    zval *args = NULL;
+    int argc = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O*",
-                                     &object, redis_ce, &keys, &keys_count) == FAILURE)
+                                     &object, redis_ce, &args, &argc) == FAILURE)
     {
         RETURN_FALSE;
     }
@@ -255,17 +255,26 @@ PHP_METHOD(Redis, del)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the DEL command using the Glide client */
-        long result_value;
-        if (execute_del_command(redis->glide_client, keys, keys_count, &result_value))
+        /* Check if we have a single array argument */
+        if (argc == 1 && Z_TYPE(args[0]) == IS_ARRAY)
         {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
+            /* Use array elements as keys */
+            long result_value = 0;
+            if (execute_del_array(redis->glide_client, Z_ARRVAL(args[0]), &result_value))
+            {
+                /* Command succeeded, return the value */
+                RETURN_LONG(result_value);
+            }
         }
         else
         {
-            /* Command failed */
-            RETURN_FALSE;
+            /* Multiple arguments - use standard del command */
+            long result_value = 0;
+            if (execute_del_command(redis->glide_client, args, argc, &result_value))
+            {
+                /* Command succeeded, return the value */
+                RETURN_LONG(result_value);
+            }
         }
     }
 }
