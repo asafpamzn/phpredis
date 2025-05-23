@@ -63,15 +63,15 @@ static int prepare_mpop_arguments(
     }
 
     /* Allocate memory for arguments */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -86,8 +86,8 @@ static int prepare_mpop_arguments(
         char *timeout_str = double_to_string(timeout, &timeout_len);
         if (!timeout_str)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[arg_idx] = (uintptr_t)timeout_str;
@@ -101,11 +101,11 @@ static int prepare_mpop_arguments(
     char *numkeys_str = long_to_string(keys_count, &numkeys_len);
     if (!numkeys_str)
     {
-        free(args);
-        free(args_len);
+        efree(args);
+        efree(args_len);
         if (is_blocking)
         {
-            free(*timeout_str_ptr);
+            efree(*timeout_str_ptr);
             *timeout_str_ptr = NULL;
         }
         return 0;
@@ -124,13 +124,13 @@ static int prepare_mpop_arguments(
     {
         if (Z_TYPE_P(z_key) != IS_STRING)
         {
-            free(args);
-            free(args_len);
-            free(numkeys_str);
+            efree(args);
+            efree(args_len);
+            efree(numkeys_str);
             *numkeys_str_ptr = NULL;
             if (is_blocking)
             {
-                free(*timeout_str_ptr);
+                efree(*timeout_str_ptr);
                 *timeout_str_ptr = NULL;
             }
             return 0;
@@ -153,18 +153,18 @@ static int prepare_mpop_arguments(
         arg_count += 2;
 
         /* Reallocate args and args_len arrays */
-        uintptr_t *new_args = (uintptr_t *)realloc(args, arg_count * sizeof(uintptr_t));
-        unsigned long *new_args_len = (unsigned long *)realloc(args_len, arg_count * sizeof(unsigned long));
+        uintptr_t *new_args = (uintptr_t *)erealloc(args, arg_count * sizeof(uintptr_t));
+        unsigned long *new_args_len = (unsigned long *)erealloc(args_len, arg_count * sizeof(unsigned long));
 
         if (!new_args || !new_args_len)
         {
-            free(args);
-            free(args_len);
-            free(numkeys_str);
+            efree(args);
+            efree(args_len);
+            efree(numkeys_str);
             *numkeys_str_ptr = NULL;
             if (is_blocking)
             {
-                free(*timeout_str_ptr);
+                efree(*timeout_str_ptr);
                 *timeout_str_ptr = NULL;
             }
             return 0;
@@ -183,13 +183,13 @@ static int prepare_mpop_arguments(
         char *count_str = long_to_string(count, &count_len);
         if (!count_str)
         {
-            free(args);
-            free(args_len);
-            free(numkeys_str);
+            efree(args);
+            efree(args_len);
+            efree(numkeys_str);
             *numkeys_str_ptr = NULL;
             if (is_blocking)
             {
-                free(*timeout_str_ptr);
+                efree(*timeout_str_ptr);
                 *timeout_str_ptr = NULL;
             }
             return 0;
@@ -256,13 +256,13 @@ int execute_zmpop_command(const void *glide_client, const char *cmd, double time
 
     /* Free the argument strings */
     if (numkeys_str)
-        free(numkeys_str);
+        efree(numkeys_str);
     if (timeout_str)
-        free(timeout_str);
+        efree(timeout_str);
     if (count_str)
-        free(count_str);
-    free(args);
-    free(args_len);
+        efree(count_str);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!cmd_result)
@@ -324,15 +324,15 @@ long execute_rpush_command(const void *glide_client, const char *key, size_t key
     }
 
     /* Prepare command arguments */
-    uintptr_t *args = (uintptr_t *)malloc(total_args * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(total_args * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(total_args * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(total_args * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -365,8 +365,8 @@ long execute_rpush_command(const void *glide_client, const char *key, size_t key
                 /* Each array element must be a string */
                 if (Z_TYPE_P(z_item) != IS_STRING)
                 {
-                    free(args);
-                    free(args_len);
+                    efree(args);
+                    efree(args_len);
                     return 0;
                 }
 
@@ -379,8 +379,8 @@ long execute_rpush_command(const void *glide_client, const char *key, size_t key
         else
         {
             /* Unexpected type (already checked above, but for safety) */
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
     }
@@ -395,8 +395,8 @@ long execute_rpush_command(const void *glide_client, const char *key, size_t key
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     long output_value = -1;
@@ -460,13 +460,13 @@ int execute_lmpop_command(const void *glide_client, const char *cmd, double time
 
     /* Free the argument strings */
     if (numkeys_str)
-        free(numkeys_str);
+        efree(numkeys_str);
     if (timeout_str)
-        free(timeout_str);
+        efree(timeout_str);
     if (count_str)
-        free(count_str);
-    free(args);
-    free(args_len);
+        efree(count_str);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!cmd_result)

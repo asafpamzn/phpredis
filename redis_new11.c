@@ -292,7 +292,6 @@ PHP_METHOD(Redis, lindex)
     zend_long index;
     char *output_value = NULL;
     size_t output_len;
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osl",
                                      &object, redis_ce,
@@ -301,7 +300,7 @@ PHP_METHOD(Redis, lindex)
     {
         RETURN_FALSE;
     }
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
@@ -311,13 +310,10 @@ PHP_METHOD(Redis, lindex)
         int status;
 
         /* Execute the LINDEX command using the Glide client */
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         status = execute_lindex_command(redis->glide_client,
                                         key, key_len,
                                         index,
                                         &output_value, &output_len);
-
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
         if (status > 0)
         {

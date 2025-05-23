@@ -31,7 +31,7 @@ static int safe_strtod(const char *str, size_t len, double *output)
     }
 
     /* Create a null-terminated copy of the string */
-    char *temp = malloc(len + 1);
+    char *temp = emalloc(len + 1);
     if (!temp)
     {
         return 0;
@@ -45,7 +45,7 @@ static int safe_strtod(const char *str, size_t len, double *output)
 
     /* Check if conversion was successful */
     int success = (*endptr == '\0' || endptr == temp + len);
-    free(temp);
+    efree(temp);
 
     return success;
 }
@@ -69,15 +69,15 @@ int execute_zrandmember_command(const void *glide_client, const char *key, size_
         arg_count++; /* Add WITHSCORES parameter */
     }
 
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -114,8 +114,8 @@ int execute_zrandmember_command(const void *glide_client, const char *key, size_
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -235,18 +235,18 @@ int execute_zmscore_command(const void *glide_client, const char *key, size_t ke
 
     /* Prepare command arguments */
     unsigned long arg_count = 1 + members_count; /* key + members */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
-    char **allocated_strings = (char **)malloc(members_count * sizeof(char *));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    char **allocated_strings = (char **)emalloc(members_count * sizeof(char *));
 
     if (!args || !args_len || !allocated_strings)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         if (allocated_strings)
-            free(allocated_strings);
+            efree(allocated_strings);
         return 0;
     }
 
@@ -282,12 +282,12 @@ int execute_zmscore_command(const void *glide_client, const char *key, size_t ke
             }
             else if (Z_TYPE_P(z_member) == IS_TRUE)
             {
-                str_val = strdup("1");
+                str_val = estrdup("1");
                 str_len = 1;
             }
             else if (Z_TYPE_P(z_member) == IS_FALSE)
             {
-                str_val = strdup("0");
+                str_val = estrdup("0");
                 str_len = 1;
             }
             else
@@ -296,11 +296,11 @@ int execute_zmscore_command(const void *glide_client, const char *key, size_t ke
                 int j;
                 for (j = 0; j < allocated_count; j++)
                 {
-                    free(allocated_strings[j]);
+                    efree(allocated_strings[j]);
                 }
-                free(allocated_strings);
-                free(args);
-                free(args_len);
+                efree(allocated_strings);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
 
@@ -315,11 +315,11 @@ int execute_zmscore_command(const void *glide_client, const char *key, size_t ke
                 int j;
                 for (j = 0; j < allocated_count; j++)
                 {
-                    free(allocated_strings[j]);
+                    efree(allocated_strings[j]);
                 }
-                free(allocated_strings);
-                free(args);
-                free(args_len);
+                efree(allocated_strings);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
         }
@@ -337,11 +337,11 @@ int execute_zmscore_command(const void *glide_client, const char *key, size_t ke
     /* Free allocated strings */
     for (i = 0; i < allocated_count; i++)
     {
-        free(allocated_strings[i]);
+        efree(allocated_strings[i]);
     }
-    free(allocated_strings);
-    free(args);
-    free(args_len);
+    efree(allocated_strings);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -395,15 +395,15 @@ int execute_zrank_command(const void *glide_client, const char *key, size_t key_
 
     /* Prepare command arguments */
     unsigned long arg_count = withscore ? 3 : 2; /* key + member + optional WITHSCORE */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return -1;
     }
 
@@ -432,8 +432,8 @@ int execute_zrank_command(const void *glide_client, const char *key, size_t key_
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -508,15 +508,15 @@ int execute_zrevrank_command(const void *glide_client, const char *key, size_t k
 
     /* Prepare command arguments */
     unsigned long arg_count = withscore ? 3 : 2; /* key + member + optional WITHSCORE */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return -1;
     }
 
@@ -545,8 +545,8 @@ int execute_zrevrank_command(const void *glide_client, const char *key, size_t k
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -815,18 +815,18 @@ int execute_zrem_command(const void *glide_client, const char *key, size_t key_l
 
     /* Prepare command arguments */
     unsigned long arg_count = 1 + members_count; /* key + members */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
-    char **allocated_strings = (char **)malloc(members_count * sizeof(char *));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    char **allocated_strings = (char **)emalloc(members_count * sizeof(char *));
 
     if (!args || !args_len || !allocated_strings)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         if (allocated_strings)
-            free(allocated_strings);
+            efree(allocated_strings);
         return 0;
     }
 
@@ -862,12 +862,12 @@ int execute_zrem_command(const void *glide_client, const char *key, size_t key_l
             }
             else if (Z_TYPE_P(z_member) == IS_TRUE)
             {
-                str_val = strdup("1");
+                str_val = estrdup("1");
                 str_len = 1;
             }
             else if (Z_TYPE_P(z_member) == IS_FALSE)
             {
-                str_val = strdup("0");
+                str_val = estrdup("0");
                 str_len = 1;
             }
             else
@@ -876,11 +876,11 @@ int execute_zrem_command(const void *glide_client, const char *key, size_t key_l
                 int j;
                 for (j = 0; j < allocated_count; j++)
                 {
-                    free(allocated_strings[j]);
+                    efree(allocated_strings[j]);
                 }
-                free(allocated_strings);
-                free(args);
-                free(args_len);
+                efree(allocated_strings);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
 
@@ -895,11 +895,11 @@ int execute_zrem_command(const void *glide_client, const char *key, size_t key_l
                 int j;
                 for (j = 0; j < allocated_count; j++)
                 {
-                    free(allocated_strings[j]);
+                    efree(allocated_strings[j]);
                 }
-                free(allocated_strings);
-                free(args);
-                free(args_len);
+                efree(allocated_strings);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
         }
@@ -917,11 +917,11 @@ int execute_zrem_command(const void *glide_client, const char *key, size_t key_l
     /* Free allocated strings */
     for (i = 0; i < allocated_count; i++)
     {
-        free(allocated_strings[i]);
+        efree(allocated_strings[i]);
     }
-    free(allocated_strings);
-    free(args);
-    free(args_len);
+    efree(allocated_strings);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)

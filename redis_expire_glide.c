@@ -34,15 +34,15 @@ int execute_expire_command(const void *glide_client, const char *key, size_t key
 
     /* Prepare command arguments */
     unsigned long arg_count = mode ? 3 : 2;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -55,8 +55,8 @@ int execute_expire_command(const void *glide_client, const char *key, size_t key
     char *seconds_str = long_to_string(seconds, &seconds_len);
     if (!seconds_str)
     {
-        free(args);
-        free(args_len);
+        efree(args);
+        efree(args_len);
         return 0;
     }
     args[1] = (uintptr_t)seconds_str;
@@ -79,9 +79,9 @@ int execute_expire_command(const void *glide_client, const char *key, size_t key
     );
 
     /* Free allocated memory */
-    free(seconds_str);
-    free(args);
-    free(args_len);
+    efree(seconds_str);
+    efree(args);
+    efree(args_len);
     /* Check if the command was successful */
     if (!result)
     {
@@ -113,15 +113,15 @@ int execute_expireat_command(const void *glide_client, const char *key, size_t k
 
     /* Prepare command arguments */
     unsigned long arg_count = mode ? 3 : 2;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -134,8 +134,8 @@ int execute_expireat_command(const void *glide_client, const char *key, size_t k
     char *timestamp_str = long_to_string(timestamp, &timestamp_len);
     if (!timestamp_str)
     {
-        free(args);
-        free(args_len);
+        efree(args);
+        efree(args_len);
         return 0;
     }
     args[1] = (uintptr_t)timestamp_str;
@@ -158,9 +158,9 @@ int execute_expireat_command(const void *glide_client, const char *key, size_t k
     );
 
     /* Free allocated memory */
-    free(timestamp_str);
-    free(args);
-    free(args_len);
+    efree(timestamp_str);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -192,15 +192,15 @@ int execute_pexpire_command(const void *glide_client, const char *key, size_t ke
 
     /* Prepare command arguments */
     unsigned long arg_count = mode ? 3 : 2;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -213,8 +213,8 @@ int execute_pexpire_command(const void *glide_client, const char *key, size_t ke
     char *ms_str = long_to_string(milliseconds, &ms_len);
     if (!ms_str)
     {
-        free(args);
-        free(args_len);
+        efree(args);
+        efree(args_len);
         return 0;
     }
     args[1] = (uintptr_t)ms_str;
@@ -237,9 +237,9 @@ int execute_pexpire_command(const void *glide_client, const char *key, size_t ke
     );
 
     /* Free allocated memory */
-    free(ms_str);
-    free(args);
-    free(args_len);
+    efree(ms_str);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -271,15 +271,15 @@ int execute_pexpireat_command(const void *glide_client, const char *key, size_t 
 
     /* Prepare command arguments */
     unsigned long arg_count = mode ? 3 : 2;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -292,8 +292,8 @@ int execute_pexpireat_command(const void *glide_client, const char *key, size_t 
     char *timestamp_str = long_to_string(timestamp_ms, &timestamp_len);
     if (!timestamp_str)
     {
-        free(args);
-        free(args_len);
+        efree(args);
+        efree(args_len);
         return 0;
     }
     args[1] = (uintptr_t)timestamp_str;
@@ -316,9 +316,9 @@ int execute_pexpireat_command(const void *glide_client, const char *key, size_t 
     );
 
     /* Free allocated memory */
-    free(timestamp_str);
-    free(args);
-    free(args_len);
+    efree(timestamp_str);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)

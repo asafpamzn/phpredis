@@ -34,15 +34,15 @@ int execute_hset_command(const void *glide_client, const char *key, size_t key_l
 
     /* Prepare command arguments */
     unsigned long arg_count = 1 + argc; /* key + field/value pairs */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -77,19 +77,19 @@ int execute_hset_command(const void *glide_client, const char *key, size_t key_l
             }
             else if (Z_TYPE_P(value) == IS_TRUE)
             {
-                str_val = strdup("1");
+                str_val = estrdup("1");
                 str_len = 1;
             }
             else if (Z_TYPE_P(value) == IS_FALSE)
             {
-                str_val = strdup("0");
+                str_val = estrdup("0");
                 str_len = 1;
             }
             else
             {
                 /* Handle other types or error */
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
 
@@ -100,8 +100,8 @@ int execute_hset_command(const void *glide_client, const char *key, size_t key_l
             }
             else
             {
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
         }
@@ -122,13 +122,13 @@ int execute_hset_command(const void *glide_client, const char *key, size_t key_l
         zval *value = &z_args[i];
         if (Z_TYPE_P(value) != IS_STRING)
         {
-            free((void *)args[i + 1]);
+            efree((void *)args[i + 1]);
         }
     }
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -324,15 +324,15 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
 
     /* Prepare command arguments */
     unsigned long arg_count = 1 + fields_count; /* key + fields */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -367,19 +367,19 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
             }
             else if (Z_TYPE_P(field) == IS_TRUE)
             {
-                str_val = strdup("1");
+                str_val = estrdup("1");
                 str_len = 1;
             }
             else if (Z_TYPE_P(field) == IS_FALSE)
             {
-                str_val = strdup("0");
+                str_val = estrdup("0");
                 str_len = 1;
             }
             else
             {
                 /* Handle other types or error */
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
 
@@ -390,8 +390,8 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
             }
             else
             {
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
         }
@@ -412,13 +412,13 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
         zval *field = &fields[i];
         if (Z_TYPE_P(field) != IS_STRING)
         {
-            free((void *)args[i + 1]);
+            efree((void *)args[i + 1]);
         }
     }
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -464,12 +464,12 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
                 }
                 else if (Z_TYPE_P(field) == IS_TRUE)
                 {
-                    field_str = strdup("1");
+                    field_str = estrdup("1");
                     field_len = 1;
                 }
                 else if (Z_TYPE_P(field) == IS_FALSE)
                 {
-                    field_str = strdup("0");
+                    field_str = estrdup("0");
                     field_len = 1;
                 }
             }
@@ -496,7 +496,7 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
                 /* Free the field string if we allocated it */
                 if (Z_TYPE_P(field) != IS_STRING)
                 {
-                    free(field_str);
+                    efree(field_str);
                 }
             }
             else
@@ -528,19 +528,19 @@ int execute_hmset_command(const void *glide_client, const char *key, size_t key_
     int pairs_count = zend_hash_num_elements(keyvals_hash);
     unsigned long arg_count = 1 + (pairs_count * 2); /* key + (field, value) pairs */
 
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
-    char **allocated_strings = (char **)malloc((pairs_count * 2) * sizeof(char *));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    char **allocated_strings = (char **)emalloc((pairs_count * 2) * sizeof(char *));
     int allocated_count = 0;
 
     if (!args || !args_len || !allocated_strings)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         if (allocated_strings)
-            free(allocated_strings);
+            efree(allocated_strings);
         return 0;
     }
 
@@ -594,23 +594,23 @@ int execute_hmset_command(const void *glide_client, const char *key, size_t key_
             }
             else if (Z_TYPE_P(data) == IS_TRUE)
             {
-                str_val = strdup("1");
+                str_val = estrdup("1");
                 str_len = 1;
             }
             else if (Z_TYPE_P(data) == IS_FALSE)
             {
-                str_val = strdup("0");
+                str_val = estrdup("0");
                 str_len = 1;
             }
             else if (Z_TYPE_P(data) == IS_NULL)
             {
-                str_val = strdup("");
+                str_val = estrdup("");
                 str_len = 0;
             }
             else
             {
                 /* Handle other types as empty string */
-                str_val = strdup("");
+                str_val = estrdup("");
                 str_len = 0;
             }
 
@@ -626,11 +626,11 @@ int execute_hmset_command(const void *glide_client, const char *key, size_t key_
                 int i;
                 for (i = 0; i < allocated_count; i++)
                 {
-                    free(allocated_strings[i]);
+                    efree(allocated_strings[i]);
                 }
-                free(allocated_strings);
-                free(args);
-                free(args_len);
+                efree(allocated_strings);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
         }
@@ -651,11 +651,11 @@ int execute_hmset_command(const void *glide_client, const char *key, size_t key_
     int i;
     for (i = 0; i < allocated_count; i++)
     {
-        free(allocated_strings[i]);
+        efree(allocated_strings[i]);
     }
-    free(allocated_strings);
-    free(args);
-    free(args_len);
+    efree(allocated_strings);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -712,15 +712,15 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
         arg_count = 3;
     }
 
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -753,8 +753,8 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -949,15 +949,15 @@ int execute_hdel_command(const void *glide_client, const char *key, size_t key_l
 
     /* Prepare command arguments */
     unsigned long arg_count = 1 + fields_count; /* key + fields */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -992,19 +992,19 @@ int execute_hdel_command(const void *glide_client, const char *key, size_t key_l
             }
             else if (Z_TYPE_P(field) == IS_TRUE)
             {
-                str_val = strdup("1");
+                str_val = estrdup("1");
                 str_len = 1;
             }
             else if (Z_TYPE_P(field) == IS_FALSE)
             {
-                str_val = strdup("0");
+                str_val = estrdup("0");
                 str_len = 1;
             }
             else
             {
                 /* Handle other types or error */
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
 
@@ -1015,8 +1015,8 @@ int execute_hdel_command(const void *glide_client, const char *key, size_t key_l
             }
             else
             {
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
         }
@@ -1037,13 +1037,13 @@ int execute_hdel_command(const void *glide_client, const char *key, size_t key_l
         zval *field = &fields[i];
         if (Z_TYPE_P(field) != IS_STRING)
         {
-            free((void *)args[i + 1]);
+            efree((void *)args[i + 1]);
         }
     }
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);

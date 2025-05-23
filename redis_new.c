@@ -102,7 +102,7 @@ PHP_METHOD(Redis, echo)
         {
             /* Return the echoed message */
             RETVAL_STRINGL(response, response_len);
-            free(response);
+            efree(response);
             return;
         }
         else
@@ -380,7 +380,6 @@ PHP_METHOD(Redis, set)
     int has_get_opt = 0;     /* Flag to indicate if GET option is present */
     char *old_val = NULL;    /* For storing GET response */
     size_t old_val_len = 0;
-
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osz|za",
                                      &object, redis_ce, &key, &key_len,
@@ -452,19 +451,19 @@ PHP_METHOD(Redis, set)
             break;
         case IS_TRUE:
             /* Convert boolean TRUE to "1" */
-            val = strdup("1");
+            val = estrdup("1");
             val_len = 1;
             free_val = 1;
             break;
         case IS_FALSE:
             /* Convert boolean FALSE to "0" */
-            val = strdup("0");
+            val = estrdup("0");
             val_len = 1;
             free_val = 1;
             break;
         case IS_NULL:
             /* Convert NULL to empty string */
-            val = strdup("");
+            val = estrdup("");
             val_len = 0;
             free_val = 1;
             break;
@@ -510,7 +509,8 @@ PHP_METHOD(Redis, set)
         /* Free the allocated string if needed */
         if (free_val)
         {
-            free(val);
+
+            efree(val);
         }
 
         /* Process the result */
@@ -526,7 +526,7 @@ PHP_METHOD(Redis, set)
             {
                 /* Return the old value */
                 RETVAL_STRINGL(old_val, old_val_len);
-                free(old_val); /* Free the allocated old value */
+                efree(old_val); /* Free the allocated old value */
                 return;
             }
             /* Fallback to returning TRUE when GET is used but handling fails */
@@ -699,7 +699,7 @@ PHP_METHOD(Redis, getset)
         {
             /* Return the old value */
             RETVAL_STRINGL(response, response_len);
-            free(response);
+            efree(response);
             return;
         }
         else if (result == 0 || (result == 2 && response == NULL))
@@ -747,7 +747,7 @@ PHP_METHOD(Redis, get)
         {
             /* Return the value */
             RETVAL_STRINGL(response, response_len);
-            free(response);
+            efree(response);
             return;
         }
         else if (result == 0)
@@ -794,7 +794,7 @@ PHP_METHOD(Redis, randomKey)
         {
             /* Return the random key */
             RETVAL_STRINGL(response, response_len);
-            free(response);
+            efree(response);
             return;
         }
         else if (result == 0)
@@ -1134,7 +1134,7 @@ PHP_METHOD(Redis, info)
             redis_parse_info_response(response, &z_ret);
 
             /* Free the response string */
-            free(response);
+            efree(response);
 
             /* Return the parsed array */
             RETVAL_ZVAL(&z_ret, 0, 1);

@@ -33,15 +33,15 @@ int execute_sinter_command(const void *glide_client, zval *keys, int keys_count,
 
     /* Prepare command arguments */
     unsigned long arg_count = keys_count; /* Just keys */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -78,8 +78,8 @@ int execute_sinter_command(const void *glide_client, zval *keys, int keys_count,
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the result as a set response */
     return handle_set_response(result, return_value);
@@ -97,15 +97,15 @@ int execute_sintercard_command(const void *glide_client, zval *keys, int keys_co
     /* Prepare command arguments */
     int use_limit = (limit > 0);
     unsigned long arg_count = keys_count + 1 + (use_limit ? 2 : 0); /* numkeys + keys + [LIMIT limit] */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -162,8 +162,8 @@ int execute_sintercard_command(const void *glide_client, zval *keys, int keys_co
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the response as integer (cardinality of intersection) */
     long cardinality;
@@ -188,15 +188,15 @@ int execute_sinterstore_command(const void *glide_client, const char *dst, size_
 
     /* Prepare command arguments */
     unsigned long arg_count = keys_count + 1; /* destination + keys */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -237,8 +237,8 @@ int execute_sinterstore_command(const void *glide_client, const char *dst, size_
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the response as integer (cardinality of result set) */
     return handle_int_response(result, output_value);
@@ -255,15 +255,15 @@ int execute_sunion_command(const void *glide_client, zval *keys, int keys_count,
 
     /* Prepare command arguments */
     unsigned long arg_count = keys_count; /* Just keys */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -300,8 +300,8 @@ int execute_sunion_command(const void *glide_client, zval *keys, int keys_count,
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the result as a set response */
     return handle_set_response(result, return_value);
@@ -319,15 +319,15 @@ int execute_sunionstore_command(const void *glide_client, const char *dst, size_
 
     /* Prepare command arguments */
     unsigned long arg_count = keys_count + 1; /* destination + keys */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -368,8 +368,8 @@ int execute_sunionstore_command(const void *glide_client, const char *dst, size_
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the response as integer (cardinality of result set) */
     return handle_int_response(result, output_value);
@@ -386,15 +386,15 @@ int execute_sdiff_command(const void *glide_client, zval *keys, int keys_count, 
 
     /* Prepare command arguments */
     unsigned long arg_count = keys_count; /* Just keys */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -431,8 +431,8 @@ int execute_sdiff_command(const void *glide_client, zval *keys, int keys_count, 
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the result as a set response */
     return handle_set_response(result, return_value);
@@ -450,15 +450,15 @@ int execute_sdiffstore_command(const void *glide_client, const char *dst, size_t
 
     /* Prepare command arguments */
     unsigned long arg_count = keys_count + 1; /* destination + keys */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -499,8 +499,8 @@ int execute_sdiffstore_command(const void *glide_client, const char *dst, size_t
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the response as integer (cardinality of result set) */
     return handle_int_response(result, output_value);
@@ -739,15 +739,15 @@ int execute_scan_command(const void *glide_client, long *it, const char *pattern
     unsigned long arg_count = 1 + (has_pattern ? 2 : 0) + (has_count ? 2 : 0); /* cursor [MATCH pattern] [COUNT count] */
 
     /* Prepare command arguments */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -794,8 +794,8 @@ int execute_scan_command(const void *glide_client, long *it, const char *pattern
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the response */
     int status = 0;

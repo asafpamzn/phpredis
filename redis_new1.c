@@ -108,13 +108,13 @@ PHP_METHOD(Redis, ping)
         {
             if (strncmp(response, "PONG", 4) == 0)
             {
-                free(response);
+                efree(response);
                 RETURN_TRUE;
             }
 
             /* Return the response */
             RETVAL_STRINGL(response, response_len);
-            free(response);
+            efree(response);
             return;
         }
         else
@@ -291,7 +291,7 @@ PHP_METHOD(Redis, hGet)
         {
             /* Return the value */
             RETVAL_STRINGL(response, response_len);
-            free(response);
+            efree(response);
             return;
         }
         else if (result == 0)

@@ -94,7 +94,7 @@ int execute_type_command(const void *glide_client, const char *key, size_t key_l
         /* Free the string response */
         if (type_str)
         {
-            free(type_str);
+            efree(type_str);
         }
 
         return 1; /* Success */
@@ -178,7 +178,7 @@ int execute_getrange_command(const void *glide_client, const char *key, size_t k
     char *end_str = long_to_string(end, &end_len);
     if (!end_str)
     {
-        free(start_str);
+        efree(start_str);
         return -1;
     }
     args[2] = (uintptr_t)end_str;
@@ -194,8 +194,8 @@ int execute_getrange_command(const void *glide_client, const char *key, size_t k
     );
 
     /* Free the argument strings */
-    free(start_str);
-    free(end_str);
+    efree(start_str);
+    efree(end_str);
 
     /* Use the generic handler to process the result */
     return handle_string_response(cmd_result, result, result_len);
@@ -223,15 +223,15 @@ static void build_sort_args(
         max_args++; /* DESC */
 
     /* Allocate arrays for arguments */
-    uintptr_t *args = (uintptr_t *)malloc(max_args * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(max_args * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(max_args * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(max_args * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         *args_ptr = NULL;
         *args_len_ptr = NULL;
         *arg_count_ptr = 0;
@@ -302,7 +302,7 @@ static void build_sort_args(
                 }
                 else
                 {
-                    free(offset_str);
+                    efree(offset_str);
                 }
             }
         }
@@ -381,12 +381,12 @@ static void free_sort_args(uintptr_t *args, unsigned long *args_len, unsigned lo
                 ((i > 1 && strcmp((const char *)args[i - 1], "LIMIT") == 0) || /* Only free offset and count */
                  (i > 2 && strcmp((const char *)args[i - 2], "LIMIT") == 0)))
             {
-                free((void *)args[i]);
+                efree((void *)args[i]);
             }
         }
 
-        free(args);
-        free(args_len);
+        efree(args);
+        efree(args_len);
     }
 }
 
@@ -409,9 +409,9 @@ int execute_sort_command(const void *glide_client, const char *key, size_t key_l
     if (!args || !args_len || arg_count == 0)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -491,9 +491,9 @@ int execute_sort_ro_command(const void *glide_client, const char *key, size_t ke
     if (!args || !args_len || arg_count == 0)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -583,7 +583,7 @@ int execute_expiremember_command(const void *glide_client, const char *key, size
     );
 
     /* Free the argument strings */
-    free(seconds_str);
+    efree(seconds_str);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -635,7 +635,7 @@ int execute_expirememberat_command(const void *glide_client, const char *key, si
     );
 
     /* Free the argument strings */
-    free(timestamp_str);
+    efree(timestamp_str);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);

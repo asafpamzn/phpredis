@@ -179,7 +179,7 @@ PHP_METHOD(Redis, getWithMeta)
         {
             /* Return the value */
             RETVAL_STRINGL(response, response_len);
-            free(response);
+            efree(response);
             return;
         }
         else if (result == 0)
@@ -227,7 +227,7 @@ PHP_METHOD(Redis, getDel)
         {
             /* Return the value */
             RETVAL_STRINGL(response, response_len);
-            free(response);
+            efree(response);
             return;
         }
         else if (result == 0)
@@ -276,7 +276,7 @@ PHP_METHOD(Redis, getEx)
         {
             /* Return the value */
             RETVAL_STRINGL(response, response_len);
-            free(response);
+            efree(response);
             return;
         }
         else if (result == 0)

@@ -72,7 +72,7 @@ int execute_blmove_command(const void *glide_client, const char *src, size_t src
     );
 
     /* Free the timeout string */
-    free(timeout_str);
+    efree(timeout_str);
 
     /* Use the generic handler to process the result */
     return handle_string_response(result, output_value, output_len);
@@ -164,7 +164,7 @@ int execute_lrem_command(const void *glide_client, const char *key, size_t key_l
     );
 
     /* Free the count string */
-    free(count_str);
+    efree(count_str);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -204,7 +204,7 @@ int execute_ltrim_command(const void *glide_client, const char *key, size_t key_
     char *end_str = long_to_string(end, &end_len);
     if (!end_str)
     {
-        free(start_str);
+        efree(start_str);
         return 0;
     }
     args[2] = (uintptr_t)end_str;
@@ -220,8 +220,8 @@ int execute_ltrim_command(const void *glide_client, const char *key, size_t key_
     );
 
     /* Free the start and end strings */
-    free(start_str);
-    free(end_str);
+    efree(start_str);
+    efree(end_str);
 
     /* Use the proper handler for OK response */
     int status = handle_ok_response(result);
@@ -269,7 +269,7 @@ int execute_lindex_command(const void *glide_client, const char *key, size_t key
     );
 
     /* Free the index string */
-    free(index_str);
+    efree(index_str);
 
     /* Use the generic handler to process the result */
     return handle_string_response(result, output_value, output_len);
@@ -317,7 +317,7 @@ int execute_lset_command(const void *glide_client, const char *key, size_t key_l
     );
 
     /* Free the index string */
-    free(index_str);
+    efree(index_str);
 
     /* Use the proper handler for OK response */
     int status = handle_ok_response(result);

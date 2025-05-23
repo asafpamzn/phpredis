@@ -126,7 +126,7 @@ int execute_lrange_command(const void *glide_client, const char *key, size_t key
     char *end_str = long_to_string(end, &end_len);
     if (!end_str)
     {
-        free(start_str);
+        efree(start_str);
         return 0;
     }
     args[2] = (uintptr_t)end_str;
@@ -142,8 +142,8 @@ int execute_lrange_command(const void *glide_client, const char *key, size_t key
     );
 
     /* Free the allocated strings */
-    free(start_str);
-    free(end_str);
+    efree(start_str);
+    efree(end_str);
 
     /* Check if the command was successful */
     if (!result)

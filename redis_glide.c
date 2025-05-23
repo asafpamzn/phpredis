@@ -62,7 +62,7 @@ static uint8_t *create_connection_request(const char *host, int port, const char
     *len = connection_request__connection_request__get_packed_size(&conn_req);
 
     /* Allocate memory for the serialized message */
-    uint8_t *buffer = (uint8_t *)malloc(*len);
+    uint8_t *buffer = (uint8_t *)emalloc(*len);
     if (!buffer)
     {
         *len = 0;
@@ -105,7 +105,7 @@ const void *create_glide_client(ClientConfig *config)
     );
 
     /* Free the request bytes as they're no longer needed */
-    free(request_bytes);
+    efree(request_bytes);
 
     /* Check if there was an error */
     if (conn_resp->connection_error_message)
@@ -159,7 +159,7 @@ int execute_bitcount_command(const void *glide_client, const char *key, size_t k
     char *end_str = long_to_string(end, &end_len);
     if (!end_str)
     {
-        free(start_str);
+        efree(start_str);
         return 0;
     }
     args[2] = (uintptr_t)end_str;
@@ -182,8 +182,8 @@ int execute_bitcount_command(const void *glide_client, const char *key, size_t k
     );
 
     /* Free the argument strings */
-    free(start_str);
-    free(end_str);
+    efree(start_str);
+    efree(end_str);
 
     /* Use the generic handler to process the result using the new signature */
     return handle_int_response(result, output_value);
@@ -200,15 +200,15 @@ int execute_bitop_command(const void *glide_client, const char *op, size_t op_le
 
     /* Prepare command arguments */
     unsigned long arg_count = 2 + keys_count; /* op + dst + keys */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -227,8 +227,8 @@ int execute_bitop_command(const void *glide_client, const char *op, size_t op_le
         zval *key = &keys[i];
         if (Z_TYPE_P(key) != IS_STRING)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[2 + i] = (uintptr_t)Z_STRVAL_P(key);
@@ -245,8 +245,8 @@ int execute_bitop_command(const void *glide_client, const char *op, size_t op_le
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -285,7 +285,7 @@ int execute_bitpos_command(const void *glide_client, const char *key, size_t key
     char *start_str = long_to_string(start, &start_len);
     if (!start_str)
     {
-        free(bit_str);
+        efree(bit_str);
         return 0; /* False - failure */
     }
     args[2] = (uintptr_t)start_str;
@@ -296,8 +296,8 @@ int execute_bitpos_command(const void *glide_client, const char *key, size_t key
     char *end_str = long_to_string(end, &end_len);
     if (!end_str)
     {
-        free(bit_str);
-        free(start_str);
+        efree(bit_str);
+        efree(start_str);
         return 0; /* False - failure */
     }
     args[3] = (uintptr_t)end_str;
@@ -320,9 +320,9 @@ int execute_bitpos_command(const void *glide_client, const char *key, size_t key
     );
 
     /* Free the argument strings */
-    free(bit_str);
-    free(start_str);
-    free(end_str);
+    efree(bit_str);
+    efree(start_str);
+    efree(end_str);
 
     /* Use the generic handler to process the result with output parameter */
     return handle_int_response(result, output_value);
@@ -499,15 +499,15 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
     }
 
     /* Allocate memory for arguments */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -535,8 +535,8 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
         char *expire_str = long_to_string(expire, &expire_len);
         if (!expire_str)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[arg_idx] = (uintptr_t)expire_str;
@@ -603,10 +603,10 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
     /* Free the argument arrays */
     if (has_ex || has_px)
     {
-        free((void *)args[3]); /* Free the expire string */
+        efree((void *)args[3]); /* Free the expire string */
     }
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -641,7 +641,7 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
             /* Extract the string value for the caller if requested */
             if (has_get && old_val != NULL && old_val_len != NULL && result->response->string_value != NULL)
             {
-                *old_val = malloc(result->response->string_value_len + 1);
+                *old_val = emalloc(result->response->string_value_len + 1);
                 if (*old_val)
                 {
                     memcpy(*old_val, result->response->string_value, result->response->string_value_len);
@@ -788,7 +788,7 @@ int execute_ping_command(const void *glide_client, const char *msg, size_t msg_l
     if (cmd_result && cmd_result->response && cmd_result->response->response_type == Ok)
     {
         /* PONG response with no message */
-        *result = strdup("PONG");
+        *result = estrdup("PONG");
         *result_len = 4;
         free_command_result(cmd_result);
         return 1;
@@ -960,7 +960,7 @@ int execute_getbit_command(const void *glide_client, const char *key, size_t key
     );
 
     /* Free the argument strings */
-    free(offset_str);
+    efree(offset_str);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -1011,7 +1011,7 @@ int execute_setbit_command(const void *glide_client, const char *key, size_t key
     );
 
     /* Free the argument strings */
-    free(offset_str);
+    efree(offset_str);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -1028,15 +1028,15 @@ int execute_del_array(const void *glide_client, HashTable *keys_hash, long *outp
 
     /* Prepare command arguments */
     unsigned long arg_count = zend_hash_num_elements(keys_hash);
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -1075,8 +1075,8 @@ int execute_del_array(const void *glide_client, HashTable *keys_hash, long *outp
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -1093,15 +1093,15 @@ int execute_del_command(const void *glide_client, zval *keys, int keys_count, lo
 
     /* Prepare command arguments */
     unsigned long arg_count = keys_count;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -1112,8 +1112,8 @@ int execute_del_command(const void *glide_client, zval *keys, int keys_count, lo
         zval *key = &keys[i];
         if (Z_TYPE_P(key) != IS_STRING)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[i] = (uintptr_t)Z_STRVAL_P(key);
@@ -1130,8 +1130,8 @@ int execute_del_command(const void *glide_client, zval *keys, int keys_count, lo
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -1148,15 +1148,15 @@ int execute_unlink_array(const void *glide_client, HashTable *keys_hash, long *o
 
     /* Prepare command arguments */
     unsigned long arg_count = zend_hash_num_elements(keys_hash);
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -1195,8 +1195,8 @@ int execute_unlink_array(const void *glide_client, HashTable *keys_hash, long *o
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -1275,7 +1275,7 @@ int execute_setrange_command(const void *glide_client, const char *key, size_t k
     );
 
     /* Free the argument strings */
-    free(offset_str);
+    efree(offset_str);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -1422,15 +1422,15 @@ int execute_zadd_command(const void *glide_client, const char *key, size_t key_l
 
     /* Prepare command arguments */
     unsigned long arg_count = 1 + argc; /* key + (score, member) pairs */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -1464,8 +1464,8 @@ int execute_zadd_command(const void *glide_client, const char *key, size_t key_l
         else
         {
             /* Unsupported type for score */
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
 
@@ -1480,10 +1480,10 @@ int execute_zadd_command(const void *glide_client, const char *key, size_t key_l
             /* Free score string if we allocated it */
             if (Z_TYPE_P(score) == IS_DOUBLE || Z_TYPE_P(score) == IS_LONG)
             {
-                free((void *)score_str);
+                efree((void *)score_str);
             }
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[arg_idx] = (uintptr_t)Z_STRVAL_P(member);
@@ -1506,13 +1506,13 @@ int execute_zadd_command(const void *glide_client, const char *key, size_t key_l
         zval *score = &z_args[i];
         if (Z_TYPE_P(score) == IS_DOUBLE || Z_TYPE_P(score) == IS_LONG)
         {
-            free((void *)args[1 + i]);
+            efree((void *)args[1 + i]);
         }
     }
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);

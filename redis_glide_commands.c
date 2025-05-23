@@ -56,15 +56,15 @@ int execute_mset_command(const void *glide_client, zval *arr)
 
     /* Prepare command arguments - each key-value pair requires 2 arguments */
     unsigned long arg_count = key_count * 2;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -83,8 +83,8 @@ int execute_mset_command(const void *glide_client, zval *arr)
             char *key_str = long_to_string((long)num_key, &key_len);
             if (!key_str)
             {
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
 
@@ -124,7 +124,7 @@ int execute_mset_command(const void *glide_client, zval *arr)
             }
 
             /* Free the key string we created */
-            free(key_str);
+            efree(key_str);
         }
         else
         {
@@ -173,8 +173,8 @@ int execute_mset_command(const void *glide_client, zval *arr)
     );
 
     /* Free the allocated arguments */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -223,15 +223,15 @@ int execute_msetnx_command(const void *glide_client, zval *arr, int *output_valu
 
     /* Prepare command arguments - each key-value pair requires 2 arguments */
     unsigned long arg_count = key_count * 2;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -250,8 +250,8 @@ int execute_msetnx_command(const void *glide_client, zval *arr, int *output_valu
             char *key_str = long_to_string((long)num_key, &key_len);
             if (!key_str)
             {
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
 
@@ -291,7 +291,7 @@ int execute_msetnx_command(const void *glide_client, zval *arr, int *output_valu
             }
 
             /* Free the key string we created */
-            free(key_str);
+            efree(key_str);
         }
         else
         {
@@ -340,8 +340,8 @@ int execute_msetnx_command(const void *glide_client, zval *arr, int *output_valu
     );
 
     /* Free the allocated arguments */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     long output;
@@ -431,7 +431,7 @@ int execute_brpoplpush_command(const void *glide_client, const char *src, size_t
     );
 
     /* Free the timeout string */
-    free(timeout_str);
+    efree(timeout_str);
 
     /* Use the generic handler to process the result */
     return handle_string_response(cmd_result, result, result_len);

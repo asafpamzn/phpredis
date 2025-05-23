@@ -512,7 +512,7 @@ class Redis_Test extends TestSuite {
         $this->redis->del('key');
         $this->redis->del('key2');
 
-        
+
         $this->redis->set('key', $value2);
         $this->assertKeyEquals($value2, 'key');
         $this->redis->del('key');
@@ -531,10 +531,10 @@ class Redis_Test extends TestSuite {
         $this->assertTrue($this->redis->set('key', $data));
         $this->assertEquals('value1', gzuncompress($this->redis->get('key')));
 
-        
+
         $this->redis->del('key');
 
-        
+
         $this->assertTrue($this->redis->set('key', 0));
 
         
@@ -556,10 +556,10 @@ class Redis_Test extends TestSuite {
         $this->assertTrue($this->redis->set('key', NULL));
         $this->assertKeyEquals('', 'key');
 
-        
+
         $this->assertTrue($this->redis->set('key', gzcompress('42')));
         $this->assertEquals('42', gzuncompress($this->redis->get('key')));
-        
+
     }
 
     /* Extended SET options for Redis >= 2.6.12 */
@@ -1522,15 +1522,11 @@ class Redis_Test extends TestSuite {
                 print_r("file: ".__FILE__." line: ".__LINE__."\n");
 
         $this->redis->del('list');
-        print_r("file: ".__FILE__." line: ".__LINE__."\n");
         $this->redis->lPush('list', 'val');
-                print_r("file: ".__FILE__." line: ".__LINE__."\n");
 
         $this->redis->lPush('list', 'val2');
-                print_r("file: ".__FILE__." line: ".__LINE__."\n");
 
         $this->redis->lPush('list', 'val3');
-        print_r("file: ".__FILE__." line: ".__LINE__."\n");
 
         $this->assertEquals('val3', $this->redis->lIndex('list', 0));
         $this->assertEquals('val2', $this->redis->lIndex('list', 1));

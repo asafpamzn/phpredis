@@ -404,15 +404,15 @@ int execute_getex_command(const void *glide_client, const char *key, size_t key_
     }
 
     /* Allocate memory for arguments */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return -1;
     }
 
@@ -435,8 +435,8 @@ int execute_getex_command(const void *glide_client, const char *key, size_t key_
         char *expire_str = long_to_string(expire, &expire_len);
         if (!expire_str)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return -1;
         }
         args[arg_idx] = (uintptr_t)expire_str;
@@ -455,8 +455,8 @@ int execute_getex_command(const void *glide_client, const char *key, size_t key_
         char *expire_str = long_to_string(expire, &expire_len);
         if (!expire_str)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return -1;
         }
         args[arg_idx] = (uintptr_t)expire_str;
@@ -475,8 +475,8 @@ int execute_getex_command(const void *glide_client, const char *key, size_t key_
         char *expire_str = long_to_string(expire, &expire_len);
         if (!expire_str)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return -1;
         }
         args[arg_idx] = (uintptr_t)expire_str;
@@ -495,8 +495,8 @@ int execute_getex_command(const void *glide_client, const char *key, size_t key_
         char *expire_str = long_to_string(expire, &expire_len);
         if (!expire_str)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return -1;
         }
         args[arg_idx] = (uintptr_t)expire_str;
@@ -523,10 +523,10 @@ int execute_getex_command(const void *glide_client, const char *key, size_t key_
     /* Free the allocated arguments */
     if (has_ex || has_px || has_exat || has_pxat)
     {
-        free((void *)args[2]); /* Free the expire string */
+        efree((void *)args[2]); /* Free the expire string */
     }
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     return handle_string_response(cmd_result, result, result_len);
@@ -624,7 +624,7 @@ long execute_incrby_command(const void *glide_client, const char *key, size_t ke
     );
 
     /* Free the increment string */
-    free(incr_str);
+    efree(incr_str);
 
     /* Check if the command was successful */
     if (!result)
@@ -691,7 +691,7 @@ int execute_incrbyfloat_command(const void *glide_client, const char *key, size_
     );
 
     /* Free the increment string */
-    free(incr_str);
+    efree(incr_str);
 
     /* Check if the command was successful */
     if (!result)
@@ -802,7 +802,7 @@ int execute_decrby_command(const void *glide_client, const char *key, size_t key
     );
 
     /* Free the decrement string */
-    free(decr_str);
+    efree(decr_str);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -828,15 +828,15 @@ int execute_mget_command(const void *glide_client, zval *keys, zval *return_valu
 
     /* Prepare command arguments */
     unsigned long arg_count = keys_count;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -875,10 +875,10 @@ int execute_mget_command(const void *glide_client, zval *keys, zval *return_valu
                 for (j = 0; j < i; j++)
                 {
                     if (args[j])
-                        free((void *)args[j]);
+                        efree((void *)args[j]);
                 }
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
         }
@@ -903,10 +903,10 @@ int execute_mget_command(const void *glide_client, zval *keys, zval *return_valu
                 for (j = 0; j < i; j++)
                 {
                     if (args[j])
-                        free((void *)args[j]);
+                        efree((void *)args[j]);
                 }
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
         }
@@ -919,8 +919,8 @@ int execute_mget_command(const void *glide_client, zval *keys, zval *return_valu
         else
         {
             /* Not a valid key */
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         i++;
@@ -928,7 +928,7 @@ int execute_mget_command(const void *glide_client, zval *keys, zval *return_valu
     ZEND_HASH_FOREACH_END();
 
     /* Track which arguments need to be freed after execution */
-    char **allocated_strings = (char **)calloc(arg_count, sizeof(char *));
+    char **allocated_strings = (char **)ecalloc(arg_count, sizeof(char *));
     if (!allocated_strings)
     {
         /* Free previously allocated memory */
@@ -937,11 +937,11 @@ int execute_mget_command(const void *glide_client, zval *keys, zval *return_valu
         {
             if (Z_TYPE_P(&keys[j]) == IS_LONG || Z_TYPE_P(&keys[j]) == IS_DOUBLE)
             {
-                free((void *)args[j]);
+                efree((void *)args[j]);
             }
         }
-        free(args);
-        free(args_len);
+        efree(args);
+        efree(args_len);
         return 0;
     }
 
@@ -960,16 +960,16 @@ int execute_mget_command(const void *glide_client, zval *keys, zval *return_valu
     {
         if (Z_TYPE_P(data) == IS_LONG || Z_TYPE_P(data) == IS_DOUBLE)
         {
-            free((void *)args[i]);
+            efree((void *)args[i]);
         }
         i++;
     }
     ZEND_HASH_FOREACH_END();
-    free(allocated_strings);
+    efree(allocated_strings);
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -1053,15 +1053,15 @@ int execute_exists_command(const void *glide_client, zval *keys, int keys_count,
 
     /* Prepare command arguments */
     unsigned long arg_count = keys_count;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -1072,8 +1072,8 @@ int execute_exists_command(const void *glide_client, zval *keys, int keys_count,
         zval *key = &keys[i];
         if (Z_TYPE_P(key) != IS_STRING)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[i] = (uintptr_t)Z_STRVAL_P(key);
@@ -1090,8 +1090,8 @@ int execute_exists_command(const void *glide_client, zval *keys, int keys_count,
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -1108,15 +1108,15 @@ int execute_touch_command(const void *glide_client, zval *keys, int keys_count, 
 
     /* Prepare command arguments */
     unsigned long arg_count = keys_count;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -1127,8 +1127,8 @@ int execute_touch_command(const void *glide_client, zval *keys, int keys_count, 
         zval *key = &keys[i];
         if (Z_TYPE_P(key) != IS_STRING)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[i] = (uintptr_t)Z_STRVAL_P(key);
@@ -1145,8 +1145,8 @@ int execute_touch_command(const void *glide_client, zval *keys, int keys_count, 
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
@@ -1163,15 +1163,15 @@ int execute_unlink_command(const void *glide_client, zval *keys, int keys_count,
 
     /* Prepare command arguments */
     unsigned long arg_count = keys_count;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -1182,8 +1182,8 @@ int execute_unlink_command(const void *glide_client, zval *keys, int keys_count,
         zval *key = &keys[i];
         if (Z_TYPE_P(key) != IS_STRING)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[i] = (uintptr_t)Z_STRVAL_P(key);
@@ -1200,8 +1200,8 @@ int execute_unlink_command(const void *glide_client, zval *keys, int keys_count,
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);

@@ -276,7 +276,7 @@ PHP_METHOD(Redis, rpoplpush)
         {
             /* Return the value */
             RETVAL_STRINGL(response, response_len);
-            free(response);
+            efree(response);
             return;
         }
         else if (result == 0)
@@ -326,7 +326,7 @@ PHP_METHOD(Redis, brpoplpush)
         {
             /* Return the value */
             RETVAL_STRINGL(response, response_len);
-            free(response);
+            efree(response);
             return;
         }
         else if (result == 0)

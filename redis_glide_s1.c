@@ -34,15 +34,15 @@ int execute_sadd_command(const void *glide_client, const char *key, size_t key_l
 
     /* Prepare command arguments */
     unsigned long arg_count = members_count + 1; /* key + members */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -83,8 +83,8 @@ int execute_sadd_command(const void *glide_client, const char *key, size_t key_l
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the response */
     return handle_int_response(result, output_value);
@@ -109,15 +109,15 @@ int execute_sadd_array_command(const void *glide_client, const char *key, size_t
 
     /* Prepare command arguments */
     unsigned long arg_count = members_count + 1; /* key + members */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -161,8 +161,8 @@ int execute_sadd_array_command(const void *glide_client, const char *key, size_t
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the response */
     return handle_int_response(result, output_value);
@@ -212,15 +212,15 @@ int execute_srem_command(const void *glide_client, const char *key, size_t key_l
 
     /* Prepare command arguments */
     unsigned long arg_count = members_count + 1; /* key + members */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -261,8 +261,8 @@ int execute_srem_command(const void *glide_client, const char *key, size_t key_l
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the response */
     return handle_int_response(result, output_value);
@@ -323,15 +323,15 @@ int execute_spop_command(const void *glide_client, const char *key, size_t key_l
 
     /* Prepare command arguments */
     unsigned long arg_count = count > 1 ? 2 : 1; /* key [count] */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -358,8 +358,8 @@ int execute_spop_command(const void *glide_client, const char *key, size_t key_l
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the response */
     int status = 0;
@@ -397,15 +397,15 @@ int execute_srandmember_command(const void *glide_client, const char *key, size_
 
     /* Prepare command arguments */
     unsigned long arg_count = count != 1 ? 2 : 1; /* key [count] */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -432,8 +432,8 @@ int execute_srandmember_command(const void *glide_client, const char *key, size_
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the response */
     int status = 0;
@@ -543,15 +543,15 @@ int execute_smismember_command(const void *glide_client, const char *key, size_t
 
     /* Prepare command arguments */
     unsigned long arg_count = members_count + 1; /* key + members */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -592,8 +592,8 @@ int execute_smismember_command(const void *glide_client, const char *key, size_t
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Initialize an array for the result */
     array_init(return_value);

@@ -33,15 +33,15 @@ int execute_watch_command(const void *glide_client, zval *keys, int keys_count)
 
     /* Prepare command arguments */
     unsigned long arg_count = keys_count;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -52,8 +52,8 @@ int execute_watch_command(const void *glide_client, zval *keys, int keys_count)
         zval *key = &keys[i];
         if (Z_TYPE_P(key) != IS_STRING)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[i] = (uintptr_t)Z_STRVAL_P(key);
@@ -70,8 +70,8 @@ int execute_watch_command(const void *glide_client, zval *keys, int keys_count)
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the proper handler for OK response */
     int status = handle_ok_response(result);
@@ -119,15 +119,15 @@ int execute_acl_command(const void *glide_client, zval *args, int args_count, zv
 
     /* Prepare command arguments */
     unsigned long arg_count = args_count;
-    uintptr_t *cmd_args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!cmd_args || !args_len)
     {
         if (cmd_args)
-            free(cmd_args);
+            efree(cmd_args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -156,19 +156,19 @@ int execute_acl_command(const void *glide_client, zval *args, int args_count, zv
 
     /* Set the first argument as "ACL" */
     const char *acl_cmd = "ACL";
-    uintptr_t *final_args = (uintptr_t *)malloc((arg_count + 1) * sizeof(uintptr_t));
-    unsigned long *final_args_len = (unsigned long *)malloc((arg_count + 1) * sizeof(unsigned long));
+    uintptr_t *final_args = (uintptr_t *)emalloc((arg_count + 1) * sizeof(uintptr_t));
+    unsigned long *final_args_len = (unsigned long *)emalloc((arg_count + 1) * sizeof(unsigned long));
 
     if (!final_args || !final_args_len)
     {
         if (cmd_args)
-            free(cmd_args);
+            efree(cmd_args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         if (final_args)
-            free(final_args);
+            efree(final_args);
         if (final_args_len)
-            free(final_args_len);
+            efree(final_args_len);
         return 0;
     }
 
@@ -192,10 +192,10 @@ int execute_acl_command(const void *glide_client, zval *args, int args_count, zv
     );
 
     /* Free the argument arrays */
-    free(cmd_args);
-    free(args_len);
-    free(final_args);
-    free(final_args_len);
+    efree(cmd_args);
+    efree(args_len);
+    efree(final_args);
+    efree(final_args_len);
 
     /* Handle the result directly */
     int status = 0;
@@ -309,15 +309,15 @@ int execute_lpos_command(const void *glide_client, const char *key, size_t key_l
 
     /* Prepare command arguments */
     unsigned long arg_count = 2 + opt_count; /* key + element + options */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -377,8 +377,8 @@ int execute_lpos_command(const void *glide_client, const char *key, size_t key_l
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Handle the response directly */
     int status = 0;

@@ -33,15 +33,15 @@ long execute_lpush_command(const void *glide_client, const char *key, size_t key
 
     /* Prepare command arguments */
     unsigned long arg_count = 1 + values_count; /* key + values */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -56,8 +56,8 @@ long execute_lpush_command(const void *glide_client, const char *key, size_t key
         zval *value = &values[i];
         if (Z_TYPE_P(value) != IS_STRING)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[1 + i] = (uintptr_t)Z_STRVAL_P(value);
@@ -74,8 +74,8 @@ long execute_lpush_command(const void *glide_client, const char *key, size_t key
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     long output_value = -1;
@@ -102,15 +102,15 @@ long execute_lpushx_command(const void *glide_client, const char *key, size_t ke
 
     /* Prepare command arguments */
     unsigned long arg_count = 1 + values_count; /* key + values */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -125,8 +125,8 @@ long execute_lpushx_command(const void *glide_client, const char *key, size_t ke
         zval *value = &values[i];
         if (Z_TYPE_P(value) != IS_STRING)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[1 + i] = (uintptr_t)Z_STRVAL_P(value);
@@ -143,8 +143,8 @@ long execute_lpushx_command(const void *glide_client, const char *key, size_t ke
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     long output_value = -1;
@@ -171,15 +171,15 @@ long execute_rpushx_command(const void *glide_client, const char *key, size_t ke
 
     /* Prepare command arguments */
     unsigned long arg_count = 1 + values_count; /* key + values */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -194,8 +194,8 @@ long execute_rpushx_command(const void *glide_client, const char *key, size_t ke
         zval *value = &values[i];
         if (Z_TYPE_P(value) != IS_STRING)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[1 + i] = (uintptr_t)Z_STRVAL_P(value);
@@ -212,8 +212,8 @@ long execute_rpushx_command(const void *glide_client, const char *key, size_t ke
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Use the generic handler to process the result */
     long output_value = -1;
@@ -245,16 +245,16 @@ int execute_lpop_command(const void *glide_client, const char *key, size_t key_l
         arg_count = 2; /* key + count */
     }
 
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
     char *count_str = NULL;
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -270,8 +270,8 @@ int execute_lpop_command(const void *glide_client, const char *key, size_t key_l
         count_str = long_to_string(count, &count_len);
         if (!count_str)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[1] = (uintptr_t)count_str;
@@ -290,10 +290,10 @@ int execute_lpop_command(const void *glide_client, const char *key, size_t key_l
     /* Free allocated memory */
     if (count_str)
     {
-        free(count_str);
+        efree(count_str);
     }
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -349,16 +349,16 @@ int execute_rpop_command(const void *glide_client, const char *key, size_t key_l
         arg_count = 2; /* key + count */
     }
 
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
     char *count_str = NULL;
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -374,8 +374,8 @@ int execute_rpop_command(const void *glide_client, const char *key, size_t key_l
         count_str = long_to_string(count, &count_len);
         if (!count_str)
         {
-            free(args);
-            free(args_len);
+            efree(args);
+            efree(args_len);
             return 0;
         }
         args[1] = (uintptr_t)count_str;
@@ -394,10 +394,10 @@ int execute_rpop_command(const void *glide_client, const char *key, size_t key_l
     /* Free allocated memory */
     if (count_str)
     {
-        free(count_str);
+        efree(count_str);
     }
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -472,15 +472,15 @@ static int prepare_bpop_arguments(
     unsigned long arg_count = keys_count + 1; /* keys + timeout */
 
     /* Allocate memory for arguments */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -496,8 +496,8 @@ static int prepare_bpop_arguments(
         {
             if (Z_TYPE_P(z_key) != IS_STRING)
             {
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
             args[arg_idx] = (uintptr_t)Z_STRVAL_P(z_key);
@@ -519,8 +519,8 @@ static int prepare_bpop_arguments(
     char *timeout_str = double_to_string(timeout, &timeout_len);
     if (!timeout_str)
     {
-        free(args);
-        free(args_len);
+        efree(args);
+        efree(args_len);
         return 0;
     }
     args[arg_idx] = (uintptr_t)timeout_str;
@@ -567,9 +567,9 @@ int execute_blpop_command(const void *glide_client, zval *keys, double timeout, 
     );
 
     /* Free allocated memory */
-    free(timeout_str);
-    free(args);
-    free(args_len);
+    efree(timeout_str);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -632,9 +632,9 @@ int execute_brpop_command(const void *glide_client, zval *keys, double timeout, 
     );
 
     /* Free allocated memory */
-    free(timeout_str);
-    free(args);
-    free(args_len);
+    efree(timeout_str);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)

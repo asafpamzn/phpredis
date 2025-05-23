@@ -136,7 +136,7 @@ PHP_METHOD(Redis, getRange)
         {
             /* Command succeeded with data */
             RETVAL_STRINGL(result, result_len);
-            free(result);
+            efree(result);
             return;
         }
         else if (ret == 0)

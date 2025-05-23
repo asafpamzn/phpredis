@@ -34,15 +34,15 @@ int execute_geoadd_command(const void *glide_client, const char *key, size_t key
 
     /* Prepare command arguments */
     unsigned long arg_count = 1 + argc; /* key + (longitude, latitude, member) triplets */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -76,19 +76,19 @@ int execute_geoadd_command(const void *glide_client, const char *key, size_t key
             }
             else if (Z_TYPE_P(value) == IS_TRUE)
             {
-                str_val = strdup("1");
+                str_val = estrdup("1");
                 str_len = 1;
             }
             else if (Z_TYPE_P(value) == IS_FALSE)
             {
-                str_val = strdup("0");
+                str_val = estrdup("0");
                 str_len = 1;
             }
             else
             {
                 /* Handle other types or error */
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
 
@@ -99,8 +99,8 @@ int execute_geoadd_command(const void *glide_client, const char *key, size_t key
             }
             else
             {
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
         }
@@ -121,13 +121,13 @@ int execute_geoadd_command(const void *glide_client, const char *key, size_t key
         zval *value = &z_args[i];
         if (Z_TYPE_P(value) != IS_STRING)
         {
-            free((void *)args[i + 1]);
+            efree((void *)args[i + 1]);
         }
     }
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Process the result */
     return handle_int_response(result, output_value);
@@ -148,15 +148,15 @@ int execute_geodist_command(const void *glide_client, const char *key, size_t ke
 
     /* Prepare command arguments */
     unsigned long arg_count = unit ? 4 : 3;
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -187,8 +187,8 @@ int execute_geodist_command(const void *glide_client, const char *key, size_t ke
     );
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -241,15 +241,15 @@ int execute_geohash_command(const void *glide_client, const char *key, size_t ke
 
     /* Prepare command arguments */
     unsigned long arg_count = 1 + member_count; /* key + members */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -283,19 +283,19 @@ int execute_geohash_command(const void *glide_client, const char *key, size_t ke
             }
             else if (Z_TYPE_P(member) == IS_TRUE)
             {
-                str_val = strdup("1");
+                str_val = estrdup("1");
                 str_len = 1;
             }
             else if (Z_TYPE_P(member) == IS_FALSE)
             {
-                str_val = strdup("0");
+                str_val = estrdup("0");
                 str_len = 1;
             }
             else
             {
                 /* Handle other types or error */
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
 
@@ -306,8 +306,8 @@ int execute_geohash_command(const void *glide_client, const char *key, size_t ke
             }
             else
             {
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
         }
@@ -328,13 +328,13 @@ int execute_geohash_command(const void *glide_client, const char *key, size_t ke
         zval *member = &members[i];
         if (Z_TYPE_P(member) != IS_STRING)
         {
-            free((void *)args[i + 1]);
+            efree((void *)args[i + 1]);
         }
     }
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -387,15 +387,15 @@ int execute_geopos_command(const void *glide_client, const char *key, size_t key
 
     /* Prepare command arguments */
     unsigned long arg_count = 1 + member_count; /* key + members */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -429,19 +429,19 @@ int execute_geopos_command(const void *glide_client, const char *key, size_t key
             }
             else if (Z_TYPE_P(member) == IS_TRUE)
             {
-                str_val = strdup("1");
+                str_val = estrdup("1");
                 str_len = 1;
             }
             else if (Z_TYPE_P(member) == IS_FALSE)
             {
-                str_val = strdup("0");
+                str_val = estrdup("0");
                 str_len = 1;
             }
             else
             {
                 /* Handle other types or error */
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
 
@@ -452,8 +452,8 @@ int execute_geopos_command(const void *glide_client, const char *key, size_t key
             }
             else
             {
-                free(args);
-                free(args_len);
+                efree(args);
+                efree(args_len);
                 return 0;
             }
         }
@@ -474,13 +474,13 @@ int execute_geopos_command(const void *glide_client, const char *key, size_t key
         zval *member = &members[i];
         if (Z_TYPE_P(member) != IS_STRING)
         {
-            free((void *)args[i + 1]);
+            efree((void *)args[i + 1]);
         }
     }
 
     /* Free the argument arrays */
-    free(args);
-    free(args_len);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -618,8 +618,8 @@ int execute_georadius_command(const void *glide_client, const char *key, size_t 
     }
 
     /* Allocate argument arrays */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
     char *longitude_str = NULL;
     char *latitude_str = NULL;
     char *radius_str = NULL;
@@ -628,9 +628,9 @@ int execute_georadius_command(const void *glide_client, const char *key, size_t 
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -648,15 +648,15 @@ int execute_georadius_command(const void *glide_client, const char *key, size_t 
     if (!longitude_str || !latitude_str || !radius_str || (count > 0 && !count_str))
     {
         if (longitude_str)
-            free(longitude_str);
+            efree(longitude_str);
         if (latitude_str)
-            free(latitude_str);
+            efree(latitude_str);
         if (radius_str)
-            free(radius_str);
+            efree(radius_str);
         if (count_str)
-            free(count_str);
-        free(args);
-        free(args_len);
+            efree(count_str);
+        efree(args);
+        efree(args_len);
         return 0;
     }
 
@@ -721,13 +721,13 @@ int execute_georadius_command(const void *glide_client, const char *key, size_t 
     );
 
     /* Free allocated memory */
-    free(longitude_str);
-    free(latitude_str);
-    free(radius_str);
+    efree(longitude_str);
+    efree(latitude_str);
+    efree(radius_str);
     if (count_str)
-        free(count_str);
-    free(args);
-    free(args_len);
+        efree(count_str);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
@@ -932,8 +932,8 @@ int execute_georadius_ro_command(const void *glide_client, const char *key, size
     }
 
     /* Allocate argument arrays */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
     char *longitude_str = NULL;
     char *latitude_str = NULL;
     char *radius_str = NULL;
@@ -942,9 +942,9 @@ int execute_georadius_ro_command(const void *glide_client, const char *key, size
     if (!args || !args_len)
     {
         if (args)
-            free(args);
+            efree(args);
         if (args_len)
-            free(args_len);
+            efree(args_len);
         return 0;
     }
 
@@ -962,15 +962,15 @@ int execute_georadius_ro_command(const void *glide_client, const char *key, size
     if (!longitude_str || !latitude_str || !radius_str || (count > 0 && !count_str))
     {
         if (longitude_str)
-            free(longitude_str);
+            efree(longitude_str);
         if (latitude_str)
-            free(latitude_str);
+            efree(latitude_str);
         if (radius_str)
-            free(radius_str);
+            efree(radius_str);
         if (count_str)
-            free(count_str);
-        free(args);
-        free(args_len);
+            efree(count_str);
+        efree(args);
+        efree(args_len);
         return 0;
     }
 
@@ -1035,13 +1035,13 @@ int execute_georadius_ro_command(const void *glide_client, const char *key, size
     );
 
     /* Free allocated memory */
-    free(longitude_str);
-    free(latitude_str);
-    free(radius_str);
+    efree(longitude_str);
+    efree(latitude_str);
+    efree(radius_str);
     if (count_str)
-        free(count_str);
-    free(args);
-    free(args_len);
+        efree(count_str);
+    efree(args);
+    efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
