@@ -456,15 +456,7 @@ int execute_xgroup_command(const void *glide_client, const char *subcommand, siz
             return status;
         }
 
-        /* Handle "OK" response for commands like CREATE */
-        if (result->command_status == CommandStatus_Ok)
-        {
-            RETURN_TRUE;
-            free_command_result(result);
-            return 1;
-        }
-
-        free_command_result(result);
+         free_command_result(result);
     }
 
     return 0;
