@@ -864,4 +864,5 @@ int execute_sscan_command(const void *glide_client, const char *key, size_t key_
                           long count, zval *return_value)
 {
     /* Check if client and key are valid */
-    if (!glide_client || !key || key_len == 0 || !
+    return 0;
+}

@@ -740,135 +740,6 @@ redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
     return SUCCESS;
 }
 
-/* {{{ proto long Redis::sAdd(string key , mixed value) */
-PHP_METHOD(Redis, sAdd)
-{
-    REDIS_PROCESS_KW_CMD("SADD", redis_key_varval_cmd, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto boolean Redis::sAddArray(string key, array $values) */
-PHP_METHOD(Redis, sAddArray)
-{
-    REDIS_PROCESS_KW_CMD("SADD", redis_key_val_arr_cmd, redis_long_response);
-} /* }}} */
-
-/* {{{ proto int Redis::scard(string key) */
-PHP_METHOD(Redis, scard)
-{
-    REDIS_PROCESS_KW_CMD("SCARD", redis_key_cmd, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto boolean Redis::srem(string set, string value) */
-PHP_METHOD(Redis, srem)
-{
-    REDIS_PROCESS_KW_CMD("SREM", redis_key_varval_cmd, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto boolean Redis::sMove(string src, string dst, mixed value) */
-PHP_METHOD(Redis, sMove)
-{
-    REDIS_PROCESS_CMD(smove, redis_1_response);
-}
-/* }}} */
-
-/* {{{ proto string Redis::sPop(string key) */
-PHP_METHOD(Redis, sPop)
-{
-    if (ZEND_NUM_ARGS() == 1)
-    {
-        REDIS_PROCESS_KW_CMD("SPOP", redis_key_cmd, redis_string_response);
-    }
-    else if (ZEND_NUM_ARGS() == 2)
-    {
-        REDIS_PROCESS_KW_CMD("SPOP", redis_key_long_cmd, redis_sock_read_multibulk_reply);
-    }
-    else
-    {
-        ZEND_WRONG_PARAM_COUNT();
-    }
-}
-/* }}} */
-
-/* {{{ proto string Redis::sRandMember(string key [int count]) */
-PHP_METHOD(Redis, sRandMember)
-{
-    REDIS_PROCESS_CMD(srandmember, redis_srandmember_response);
-}
-/* }}} */
-
-/* {{{ proto boolean Redis::sismember(string set, string value) */
-PHP_METHOD(Redis, sismember)
-{
-    REDIS_PROCESS_KW_CMD("SISMEMBER", redis_kv_cmd, redis_1_response);
-}
-/* }}} */
-
-/* {{{ proto array Redis::sMembers(string set) */
-PHP_METHOD(Redis, sMembers)
-{
-    REDIS_PROCESS_KW_CMD("SMEMBERS", redis_key_cmd,
-                         redis_sock_read_multibulk_reply);
-}
-
-/* {{{ proto array Redis::sMisMember(string key, string member0, ...memberN) */
-PHP_METHOD(Redis, sMisMember)
-{
-    REDIS_PROCESS_KW_CMD("SMISMEMBER", redis_key_varval_cmd, redis_read_variant_reply);
-}
-/* }}} */
-
-/* {{{ proto array Redis::sInter(string key0, ... string keyN) */
-PHP_METHOD(Redis, sInter)
-{
-    REDIS_PROCESS_KW_CMD("SINTER", redis_varkey_cmd, redis_sock_read_multibulk_reply);
-}
-/* }}} */
-
-PHP_METHOD(Redis, sintercard)
-{
-    REDIS_PROCESS_KW_CMD("SINTERCARD", redis_intercard_cmd, redis_long_response);
-}
-
-/* {{{ proto array Redis::sInterStore(string dst, string key0,...string keyN) */
-PHP_METHOD(Redis, sInterStore)
-{
-    REDIS_PROCESS_KW_CMD("SINTERSTORE", redis_varkey_cmd, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto array Redis::sUnion(string key0, ... string keyN) */
-PHP_METHOD(Redis, sUnion)
-{
-    REDIS_PROCESS_KW_CMD("SUNION", redis_varkey_cmd, redis_sock_read_multibulk_reply);
-}
-/* }}} */
-
-/* {{{ proto array Redis::sUnionStore(array|string $key, string ...$srckeys) */
-PHP_METHOD(Redis, sUnionStore)
-{
-    REDIS_PROCESS_KW_CMD("SUNIONSTORE", redis_varkey_cmd, redis_long_response);
-}
-/* }}} */
-
-/* {{{ proto array Redis::sDiff(string key0, ... string keyN) */
-PHP_METHOD(Redis, sDiff)
-{
-    REDIS_PROCESS_KW_CMD("SDIFF", redis_varkey_cmd, redis_sock_read_multibulk_reply);
-}
-/* }}} */
-
-/* {{{ proto array Redis::sDiffStore(string dst, string key0, ... keyN) */
-PHP_METHOD(Redis, sDiffStore)
-{
-    REDIS_PROCESS_KW_CMD("SDIFFSTORE", redis_varkey_cmd, redis_long_response);
-}
-/* }}} */
-
-/* }}} */
-
 /* {{{ proto string Redis::save() */
 PHP_METHOD(Redis, save)
 {
@@ -1782,50 +1653,6 @@ PHP_METHOD(Redis, getPort)
     }
 }
 
-PHP_METHOD(Redis, serverName)
-{
-    RedisSock *rs;
-
-    if ((rs = redis_sock_get_instance(getThis(), 1)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-    else if (!IS_ATOMIC(rs))
-    {
-        php_error_docref(NULL, E_ERROR,
-                         "Can't call serverName in multi or pipeline mode!");
-        RETURN_FALSE;
-    }
-    else if (rs->hello.server != NULL)
-    {
-        RETURN_STR_COPY(rs->hello.server);
-    }
-
-    REDIS_PROCESS_KW_CMD("HELLO", redis_empty_cmd, redis_hello_server_response);
-}
-
-PHP_METHOD(Redis, serverVersion)
-{
-    RedisSock *rs;
-
-    if ((rs = redis_sock_get_instance(getThis(), 1)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-    else if (!IS_ATOMIC(rs))
-    {
-        php_error_docref(NULL, E_ERROR,
-                         "Can't call serverVersion in multi or pipeline mode!");
-        RETURN_FALSE;
-    }
-    else if (rs->hello.version != NULL)
-    {
-        RETURN_STR_COPY(rs->hello.version);
-    }
-
-    REDIS_PROCESS_KW_CMD("HELLO", redis_empty_cmd, redis_hello_version_response);
-}
-
 /* {{{ proto Redis::getDBNum */
 PHP_METHOD(Redis, getDBNum)
 {
@@ -2181,18 +2008,11 @@ generic_scan_cmd(INTERNAL_FUNCTION_PARAMETERS, REDIS_SCAN_TYPE type)
     redisSetScanCursor(z_cursor, cursor);
 }
 
-PHP_METHOD(Redis, scan)
-{
-    generic_scan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_SCAN);
-}
 PHP_METHOD(Redis, hscan)
 {
     generic_scan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_HSCAN);
 }
-PHP_METHOD(Redis, sscan)
-{
-    generic_scan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_SSCAN);
-}
+
 PHP_METHOD(Redis, zscan)
 {
     generic_scan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_ZSCAN);
