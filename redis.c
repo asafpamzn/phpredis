@@ -1827,7 +1827,7 @@ redis_build_scan_cmd(char **cmd, REDIS_SCAN_TYPE type, char *key, int key_len,
 
 PHP_METHOD(Redis, hscan)
 {
-    // generic_scan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_HSCAN);
+    REDIS_PROCESS_CMD(pfadd, redis_long_response);
 }
 
 /*
