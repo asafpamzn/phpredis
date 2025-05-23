@@ -1519,11 +1519,18 @@ class Redis_Test extends TestSuite {
     }
 
     public function testLindex() {
-        $this->redis->del('list');
+                print_r("file: ".__FILE__." line: ".__LINE__."\n");
 
+        $this->redis->del('list');
+        print_r("file: ".__FILE__." line: ".__LINE__."\n");
         $this->redis->lPush('list', 'val');
+                print_r("file: ".__FILE__." line: ".__LINE__."\n");
+
         $this->redis->lPush('list', 'val2');
+                print_r("file: ".__FILE__." line: ".__LINE__."\n");
+
         $this->redis->lPush('list', 'val3');
+        print_r("file: ".__FILE__." line: ".__LINE__."\n");
 
         $this->assertEquals('val3', $this->redis->lIndex('list', 0));
         $this->assertEquals('val2', $this->redis->lIndex('list', 1));
@@ -6183,7 +6190,6 @@ class Redis_Test extends TestSuite {
     public function testScan() {
         if (version_compare($this->version, '2.8.0') < 0)
             $this->markTestSkipped();
-
         // Key count
         $key_count = $this->get_keyspace_count('db0');
 

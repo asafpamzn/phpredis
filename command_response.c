@@ -106,7 +106,7 @@ int handle_string_response(CommandResult *result, char **output, size_t *output_
             /* Command returns a string/binary data */
             if (result->response->string_value_len == 0)
             {
-                *output = malloc(1); // Allocate at least one byte
+                *output = emalloc(1); // Allocate at least one byte using PHP's memory manager
                 if (*output)
                 {
                     (*output)[0] = '\0'; // Empty string is still null-terminated
@@ -115,8 +115,8 @@ int handle_string_response(CommandResult *result, char **output, size_t *output_
             }
             else
             {
-                // Allocate exact size needed for binary data
-                *output = malloc(result->response->string_value_len);
+                // Allocate exact size needed for binary data using PHP's memory manager
+                *output = emalloc(result->response->string_value_len);
                 if (*output)
                 {
                     // Copy binary data without assuming null-termination
@@ -239,7 +239,7 @@ int handle_null_or_string_response(CommandResult *result, char **output, size_t 
             /* Command returns a string/binary data */
             if (result->response->string_value_len == 0)
             {
-                *output = malloc(1); // Allocate at least one byte
+                *output = emalloc(1); // Allocate at least one byte using PHP's memory manager
                 if (*output)
                 {
                     (*output)[0] = '\0'; // Empty string is still null-terminated
@@ -248,8 +248,8 @@ int handle_null_or_string_response(CommandResult *result, char **output, size_t 
             }
             else
             {
-                // Allocate exact size needed for binary data
-                *output = malloc(result->response->string_value_len);
+                // Allocate exact size needed for binary data using PHP's memory manager
+                *output = emalloc(result->response->string_value_len);
                 if (*output)
                 {
                     // Copy binary data without assuming null-termination
@@ -553,7 +553,7 @@ char *long_to_string(long value, size_t *len)
 {
     char buffer[32];
     *len = snprintf(buffer, sizeof(buffer), "%ld", value);
-    char *str = (char *)malloc(*len + 1);
+    char *str = (char *)emalloc(*len + 1);
     if (str)
     {
         memcpy(str, buffer, *len);
@@ -568,7 +568,7 @@ char *double_to_string(double value, size_t *len)
     char buffer[64];
     /* Use %.6g format to get a more user-friendly representation */
     *len = snprintf(buffer, sizeof(buffer), "%.6g", value);
-    char *str = (char *)malloc(*len + 1);
+    char *str = (char *)emalloc(*len + 1);
     if (str)
     {
         memcpy(str, buffer, *len);
