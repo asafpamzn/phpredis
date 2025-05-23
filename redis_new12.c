@@ -678,58 +678,123 @@ PHP_METHOD(Redis, sInterStore)
     HashTable *ht_keys = NULL;
     int keys_count = 0;
     zval *z_extracted_keys = NULL;
+    zval *data;
+    int idx = 0;
+    int has_destination = 0;
 
-    /* First argument is always the destination key */
-    if (zend_parse_method_parameters(1, getThis(), "Os",
-                                     &object, redis_ce, &dst, &dst_len) == FAILURE)
+    /* Check if we have a single array argument */
+    if (ZEND_NUM_ARGS() == 1)
     {
-        RETURN_FALSE;
-    }
-
-    /* Check if we have exactly two parameters (destination + array) */
-    if (ZEND_NUM_ARGS() == 2)
-    {
-        /* Try to parse second parameter as an array */
-        if (zend_parse_parameters(1, "a", &z_keys_arr) == SUCCESS)
+        /* Try to parse it as an array */
+        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa",
+                                         &object, redis_ce, &z_keys_arr) == SUCCESS)
         {
-            /* We have an array of keys */
+            /* We have an array which will contain both destination and source keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
             keys_count = zend_hash_num_elements(ht_keys);
 
-            /* If array is empty, return FALSE */
+            /* We need at least one element (destination key) */
             if (keys_count == 0)
             {
                 RETURN_FALSE;
             }
 
-            /* Allocate memory for array of zvals */
-            z_extracted_keys = ecalloc(keys_count, sizeof(zval));
+            /* Extract the first element as the destination key */
+            HashPosition pointer;
+            zend_hash_internal_pointer_reset_ex(ht_keys, &pointer);
+            data = zend_hash_get_current_data_ex(ht_keys, &pointer);
+            if (data == NULL || Z_TYPE_P(data) != IS_STRING)
+            {
+                php_error_docref(NULL, E_WARNING, "Destination key must be a string");
+                RETURN_FALSE;
+            }
 
-            /* Copy array values to sequential array */
-            zval *data;
-            int idx = 0;
-            ZEND_HASH_FOREACH_VAL(ht_keys, data)
+            /* Set the destination key */
+            dst = Z_STRVAL_P(data);
+            dst_len = Z_STRLEN_P(data);
+            has_destination = 1;
+
+            /* If there's only the destination key, return false */
+            if (keys_count == 1)
+            {
+                RETURN_FALSE;
+            }
+
+            /* Move past the destination key */
+            zend_hash_move_forward_ex(ht_keys, &pointer);
+
+            /* Allocate memory for array of source keys (excluding destination) */
+            z_extracted_keys = ecalloc(keys_count - 1, sizeof(zval));
+
+            /* Copy all remaining values (source keys) to sequential array */
+            idx = 0;
+            while ((data = zend_hash_get_current_data_ex(ht_keys, &pointer)))
             {
                 ZVAL_COPY(&z_extracted_keys[idx], data);
                 idx++;
+                zend_hash_move_forward_ex(ht_keys, &pointer);
             }
-            ZEND_HASH_FOREACH_END();
 
             /* Set for later use */
             z_args = z_extracted_keys;
-            argc = keys_count;
+            argc = keys_count - 1;
         }
     }
 
-    /* If we didn't get an array, parse remaining args as variadic */
-    if (!z_args)
+    /* If we didn't get a single array, try other parameter formats */
+    if (!has_destination)
     {
-        /* Parse all parameters including destination key */
-        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os+",
-                                         &object, redis_ce, &dst, &dst_len,
-                                         &z_args, &argc) == FAILURE)
+        /* First argument is always the destination key */
+        if (zend_parse_method_parameters(1, getThis(), "Os",
+                                         &object, redis_ce, &dst, &dst_len) == FAILURE)
         {
             RETURN_FALSE;
+        }
+
+        /* Check if we have exactly two parameters (destination + array) */
+        if (ZEND_NUM_ARGS() == 2)
+        {
+            /* Try to parse second parameter as an array */
+            if (zend_parse_parameters(1, "a", &z_keys_arr) == SUCCESS)
+            {
+                /* We have an array of source keys */
+                ht_keys = Z_ARRVAL_P(z_keys_arr);
+                keys_count = zend_hash_num_elements(ht_keys);
+
+                /* If array is empty, return FALSE */
+                if (keys_count == 0)
+                {
+                    RETURN_FALSE;
+                }
+
+                /* Allocate memory for array of zvals */
+                z_extracted_keys = ecalloc(keys_count, sizeof(zval));
+
+                /* Copy array values to sequential array */
+                idx = 0;
+                ZEND_HASH_FOREACH_VAL(ht_keys, data)
+                {
+                    ZVAL_COPY(&z_extracted_keys[idx], data);
+                    idx++;
+                }
+                ZEND_HASH_FOREACH_END();
+
+                /* Set for later use */
+                z_args = z_extracted_keys;
+                argc = keys_count;
+            }
+        }
+
+        /* If we didn't get an array as the second parameter, parse remaining args as variadic */
+        if (!z_args)
+        {
+            /* Parse all parameters including destination key */
+            if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os+",
+                                             &object, redis_ce, &dst, &dst_len,
+                                             &z_args, &argc) == FAILURE)
+            {
+                RETURN_FALSE;
+            }
         }
     }
 
@@ -747,7 +812,7 @@ PHP_METHOD(Redis, sInterStore)
             /* Clean up if we allocated memory for the array keys */
             if (z_extracted_keys)
             {
-                for (int i = 0; i < keys_count; i++)
+                for (int i = 0; i < (has_destination ? keys_count - 1 : keys_count); i++)
                 {
                     zval_dtor(&z_extracted_keys[i]);
                 }
@@ -762,7 +827,7 @@ PHP_METHOD(Redis, sInterStore)
             /* Clean up if we allocated memory for the array keys */
             if (z_extracted_keys)
             {
-                for (int i = 0; i < keys_count; i++)
+                for (int i = 0; i < (has_destination ? keys_count - 1 : keys_count); i++)
                 {
                     zval_dtor(&z_extracted_keys[i]);
                 }
@@ -776,7 +841,7 @@ PHP_METHOD(Redis, sInterStore)
     /* Clean up if we allocated memory for the array keys but didn't execute the command */
     if (z_extracted_keys)
     {
-        for (int i = 0; i < keys_count; i++)
+        for (int i = 0; i < (has_destination ? keys_count - 1 : keys_count); i++)
         {
             zval_dtor(&z_extracted_keys[i]);
         }
@@ -907,58 +972,123 @@ PHP_METHOD(Redis, sUnionStore)
     HashTable *ht_keys = NULL;
     int keys_count = 0;
     zval *z_extracted_keys = NULL;
+    zval *data;
+    int idx = 0;
+    int has_destination = 0;
 
-    /* First argument is always the destination key */
-    if (zend_parse_method_parameters(1, getThis(), "Os",
-                                     &object, redis_ce, &dst, &dst_len) == FAILURE)
+    /* Check if we have a single array argument */
+    if (ZEND_NUM_ARGS() == 1)
     {
-        RETURN_FALSE;
-    }
-
-    /* Check if we have exactly two parameters (destination + array) */
-    if (ZEND_NUM_ARGS() == 2)
-    {
-        /* Try to parse second parameter as an array */
-        if (zend_parse_parameters(1, "a", &z_keys_arr) == SUCCESS)
+        /* Try to parse it as an array */
+        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa",
+                                         &object, redis_ce, &z_keys_arr) == SUCCESS)
         {
-            /* We have an array of keys */
+            /* We have an array which will contain both destination and source keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
             keys_count = zend_hash_num_elements(ht_keys);
 
-            /* If array is empty, return FALSE */
+            /* We need at least one element (destination key) */
             if (keys_count == 0)
             {
                 RETURN_FALSE;
             }
 
-            /* Allocate memory for array of zvals */
-            z_extracted_keys = ecalloc(keys_count, sizeof(zval));
+            /* Extract the first element as the destination key */
+            HashPosition pointer;
+            zend_hash_internal_pointer_reset_ex(ht_keys, &pointer);
+            data = zend_hash_get_current_data_ex(ht_keys, &pointer);
+            if (data == NULL || Z_TYPE_P(data) != IS_STRING)
+            {
+                php_error_docref(NULL, E_WARNING, "Destination key must be a string");
+                RETURN_FALSE;
+            }
 
-            /* Copy array values to sequential array */
-            zval *data;
-            int idx = 0;
-            ZEND_HASH_FOREACH_VAL(ht_keys, data)
+            /* Set the destination key */
+            dst = Z_STRVAL_P(data);
+            dst_len = Z_STRLEN_P(data);
+            has_destination = 1;
+
+            /* If there's only the destination key, return false */
+            if (keys_count == 1)
+            {
+                RETURN_FALSE;
+            }
+
+            /* Move past the destination key */
+            zend_hash_move_forward_ex(ht_keys, &pointer);
+
+            /* Allocate memory for array of source keys (excluding destination) */
+            z_extracted_keys = ecalloc(keys_count - 1, sizeof(zval));
+
+            /* Copy all remaining values (source keys) to sequential array */
+            idx = 0;
+            while ((data = zend_hash_get_current_data_ex(ht_keys, &pointer)))
             {
                 ZVAL_COPY(&z_extracted_keys[idx], data);
                 idx++;
+                zend_hash_move_forward_ex(ht_keys, &pointer);
             }
-            ZEND_HASH_FOREACH_END();
 
             /* Set for later use */
             z_args = z_extracted_keys;
-            argc = keys_count;
+            argc = keys_count - 1;
         }
     }
 
-    /* If we didn't get an array, parse remaining args as variadic */
-    if (!z_args)
+    /* If we didn't get a single array, try other parameter formats */
+    if (!has_destination)
     {
-        /* Parse all parameters including destination key */
-        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os+",
-                                         &object, redis_ce, &dst, &dst_len,
-                                         &z_args, &argc) == FAILURE)
+        /* First argument is always the destination key */
+        if (zend_parse_method_parameters(1, getThis(), "Os",
+                                         &object, redis_ce, &dst, &dst_len) == FAILURE)
         {
             RETURN_FALSE;
+        }
+
+        /* Check if we have exactly two parameters (destination + array) */
+        if (ZEND_NUM_ARGS() == 2)
+        {
+            /* Try to parse second parameter as an array */
+            if (zend_parse_parameters(1, "a", &z_keys_arr) == SUCCESS)
+            {
+                /* We have an array of source keys */
+                ht_keys = Z_ARRVAL_P(z_keys_arr);
+                keys_count = zend_hash_num_elements(ht_keys);
+
+                /* If array is empty, return FALSE */
+                if (keys_count == 0)
+                {
+                    RETURN_FALSE;
+                }
+
+                /* Allocate memory for array of zvals */
+                z_extracted_keys = ecalloc(keys_count, sizeof(zval));
+
+                /* Copy array values to sequential array */
+                idx = 0;
+                ZEND_HASH_FOREACH_VAL(ht_keys, data)
+                {
+                    ZVAL_COPY(&z_extracted_keys[idx], data);
+                    idx++;
+                }
+                ZEND_HASH_FOREACH_END();
+
+                /* Set for later use */
+                z_args = z_extracted_keys;
+                argc = keys_count;
+            }
+        }
+
+        /* If we didn't get an array as the second parameter, parse remaining args as variadic */
+        if (!z_args)
+        {
+            /* Parse all parameters including destination key */
+            if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os+",
+                                             &object, redis_ce, &dst, &dst_len,
+                                             &z_args, &argc) == FAILURE)
+            {
+                RETURN_FALSE;
+            }
         }
     }
 
@@ -976,7 +1106,7 @@ PHP_METHOD(Redis, sUnionStore)
             /* Clean up if we allocated memory for the array keys */
             if (z_extracted_keys)
             {
-                for (int i = 0; i < keys_count; i++)
+                for (int i = 0; i < (has_destination ? keys_count - 1 : keys_count); i++)
                 {
                     zval_dtor(&z_extracted_keys[i]);
                 }
@@ -991,7 +1121,7 @@ PHP_METHOD(Redis, sUnionStore)
             /* Clean up if we allocated memory for the array keys */
             if (z_extracted_keys)
             {
-                for (int i = 0; i < keys_count; i++)
+                for (int i = 0; i < (has_destination ? keys_count - 1 : keys_count); i++)
                 {
                     zval_dtor(&z_extracted_keys[i]);
                 }
@@ -1005,7 +1135,7 @@ PHP_METHOD(Redis, sUnionStore)
     /* Clean up if we allocated memory for the array keys but didn't execute the command */
     if (z_extracted_keys)
     {
-        for (int i = 0; i < keys_count; i++)
+        for (int i = 0; i < (has_destination ? keys_count - 1 : keys_count); i++)
         {
             zval_dtor(&z_extracted_keys[i]);
         }
@@ -1136,58 +1266,123 @@ PHP_METHOD(Redis, sDiffStore)
     HashTable *ht_keys = NULL;
     int keys_count = 0;
     zval *z_extracted_keys = NULL;
+    zval *data;
+    int idx = 0;
+    int has_destination = 0;
 
-    /* First argument is always the destination key */
-    if (zend_parse_method_parameters(1, getThis(), "Os",
-                                     &object, redis_ce, &dst, &dst_len) == FAILURE)
+    /* Check if we have a single array argument */
+    if (ZEND_NUM_ARGS() == 1)
     {
-        RETURN_FALSE;
-    }
-
-    /* Check if we have exactly two parameters (destination + array) */
-    if (ZEND_NUM_ARGS() == 2)
-    {
-        /* Try to parse second parameter as an array */
-        if (zend_parse_parameters(1, "a", &z_keys_arr) == SUCCESS)
+        /* Try to parse it as an array */
+        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa",
+                                         &object, redis_ce, &z_keys_arr) == SUCCESS)
         {
-            /* We have an array of keys */
+            /* We have an array which will contain both destination and source keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
             keys_count = zend_hash_num_elements(ht_keys);
 
-            /* If array is empty, return FALSE */
+            /* We need at least one element (destination key) */
             if (keys_count == 0)
             {
                 RETURN_FALSE;
             }
 
-            /* Allocate memory for array of zvals */
-            z_extracted_keys = ecalloc(keys_count, sizeof(zval));
+            /* Extract the first element as the destination key */
+            HashPosition pointer;
+            zend_hash_internal_pointer_reset_ex(ht_keys, &pointer);
+            data = zend_hash_get_current_data_ex(ht_keys, &pointer);
+            if (data == NULL || Z_TYPE_P(data) != IS_STRING)
+            {
+                php_error_docref(NULL, E_WARNING, "Destination key must be a string");
+                RETURN_FALSE;
+            }
 
-            /* Copy array values to sequential array */
-            zval *data;
-            int idx = 0;
-            ZEND_HASH_FOREACH_VAL(ht_keys, data)
+            /* Set the destination key */
+            dst = Z_STRVAL_P(data);
+            dst_len = Z_STRLEN_P(data);
+            has_destination = 1;
+
+            /* If there's only the destination key, return false */
+            if (keys_count == 1)
+            {
+                RETURN_FALSE;
+            }
+
+            /* Move past the destination key */
+            zend_hash_move_forward_ex(ht_keys, &pointer);
+
+            /* Allocate memory for array of source keys (excluding destination) */
+            z_extracted_keys = ecalloc(keys_count - 1, sizeof(zval));
+
+            /* Copy all remaining values (source keys) to sequential array */
+            idx = 0;
+            while ((data = zend_hash_get_current_data_ex(ht_keys, &pointer)))
             {
                 ZVAL_COPY(&z_extracted_keys[idx], data);
                 idx++;
+                zend_hash_move_forward_ex(ht_keys, &pointer);
             }
-            ZEND_HASH_FOREACH_END();
 
             /* Set for later use */
             z_args = z_extracted_keys;
-            argc = keys_count;
+            argc = keys_count - 1;
         }
     }
 
-    /* If we didn't get an array, parse remaining args as variadic */
-    if (!z_args)
+    /* If we didn't get a single array, try other parameter formats */
+    if (!has_destination)
     {
-        /* Parse all parameters including destination key */
-        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os+",
-                                         &object, redis_ce, &dst, &dst_len,
-                                         &z_args, &argc) == FAILURE)
+        /* First argument is always the destination key */
+        if (zend_parse_method_parameters(1, getThis(), "Os",
+                                         &object, redis_ce, &dst, &dst_len) == FAILURE)
         {
             RETURN_FALSE;
+        }
+
+        /* Check if we have exactly two parameters (destination + array) */
+        if (ZEND_NUM_ARGS() == 2)
+        {
+            /* Try to parse second parameter as an array */
+            if (zend_parse_parameters(1, "a", &z_keys_arr) == SUCCESS)
+            {
+                /* We have an array of source keys */
+                ht_keys = Z_ARRVAL_P(z_keys_arr);
+                keys_count = zend_hash_num_elements(ht_keys);
+
+                /* If array is empty, return FALSE */
+                if (keys_count == 0)
+                {
+                    RETURN_FALSE;
+                }
+
+                /* Allocate memory for array of zvals */
+                z_extracted_keys = ecalloc(keys_count, sizeof(zval));
+
+                /* Copy array values to sequential array */
+                idx = 0;
+                ZEND_HASH_FOREACH_VAL(ht_keys, data)
+                {
+                    ZVAL_COPY(&z_extracted_keys[idx], data);
+                    idx++;
+                }
+                ZEND_HASH_FOREACH_END();
+
+                /* Set for later use */
+                z_args = z_extracted_keys;
+                argc = keys_count;
+            }
+        }
+
+        /* If we didn't get an array as the second parameter, parse remaining args as variadic */
+        if (!z_args)
+        {
+            /* Parse all parameters including destination key */
+            if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os+",
+                                             &object, redis_ce, &dst, &dst_len,
+                                             &z_args, &argc) == FAILURE)
+            {
+                RETURN_FALSE;
+            }
         }
     }
 
@@ -1205,7 +1400,7 @@ PHP_METHOD(Redis, sDiffStore)
             /* Clean up if we allocated memory for the array keys */
             if (z_extracted_keys)
             {
-                for (int i = 0; i < keys_count; i++)
+                for (int i = 0; i < (has_destination ? keys_count - 1 : keys_count); i++)
                 {
                     zval_dtor(&z_extracted_keys[i]);
                 }
@@ -1220,7 +1415,7 @@ PHP_METHOD(Redis, sDiffStore)
             /* Clean up if we allocated memory for the array keys */
             if (z_extracted_keys)
             {
-                for (int i = 0; i < keys_count; i++)
+                for (int i = 0; i < (has_destination ? keys_count - 1 : keys_count); i++)
                 {
                     zval_dtor(&z_extracted_keys[i]);
                 }
@@ -1234,7 +1429,7 @@ PHP_METHOD(Redis, sDiffStore)
     /* Clean up if we allocated memory for the array keys but didn't execute the command */
     if (z_extracted_keys)
     {
-        for (int i = 0; i < keys_count; i++)
+        for (int i = 0; i < (has_destination ? keys_count - 1 : keys_count); i++)
         {
             zval_dtor(&z_extracted_keys[i]);
         }
