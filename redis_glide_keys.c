@@ -167,7 +167,6 @@ int execute_lrange_command(const void *glide_client, const char *key, size_t key
         array_init(return_value);
 
         /* Add array elements to the result */
-        printf("Array length: %d\n", result->response->array_value_len);
         for (int i = 0; i < result->response->array_value_len; i++)
         {
             CommandResponse *element = &result->response->array_value[i];
@@ -175,12 +174,10 @@ int execute_lrange_command(const void *glide_client, const char *key, size_t key
             /* Process each element based on its type */
             if (element->response_type == String)
             {
-                printf("Adding string: %.*s\n", (int)element->string_value_len, element->string_value);
                 add_next_index_stringl(return_value, element->string_value, element->string_value_len);
             }
             else if (element->response_type == Null)
             {
-                printf("Adding string: %.*s\n", (int)element->string_value_len, element->string_value);
                 add_next_index_null(return_value);
             }
         }

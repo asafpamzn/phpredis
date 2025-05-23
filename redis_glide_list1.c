@@ -73,21 +73,11 @@ int execute_watch_command(const void *glide_client, zval *keys, int keys_count)
     free(args);
     free(args_len);
 
-    /* Check if the command was successful */
-    int status = 0;
-    if (result && result->response)
-    {
-        if (result->response->response_type == Status &&
-            strcmp(result->response->status_value, "OK") == 0)
-        {
-            status = 1;
-        }
-    }
+    /* Use the proper handler for OK response */
+    int status = handle_ok_response(result);
 
-    /* Free the result */
-    free_command_result(result);
-
-    return status;
+    /* Convert response status to boolean */
+    return (status == 1) ? 1 : 0;
 }
 
 /* Execute an UNWATCH command using the Valkey Glide client */
@@ -111,21 +101,11 @@ int execute_unwatch_command(const void *glide_client)
         NULL       /* no argument lengths */
     );
 
-    /* Check if the command was successful */
-    int status = 0;
-    if (result && result->response)
-    {
-        if (result->response->response_type == Status &&
-            strcmp(result->response->status_value, "OK") == 0)
-        {
-            status = 1;
-        }
-    }
+    /* Use the proper handler for OK response */
+    int status = handle_ok_response(result);
 
-    /* Free the result */
-    free_command_result(result);
-
-    return status;
+    /* Convert response status to boolean */
+    return (status == 1) ? 1 : 0;
 }
 
 /* Execute an ACL command using the Valkey Glide client */
@@ -174,31 +154,71 @@ int execute_acl_command(const void *glide_client, zval *args, int args_count, zv
         }
     }
 
+    /* Set the first argument as "ACL" */
+    const char *acl_cmd = "ACL";
+    uintptr_t *final_args = (uintptr_t *)malloc((arg_count + 1) * sizeof(uintptr_t));
+    unsigned long *final_args_len = (unsigned long *)malloc((arg_count + 1) * sizeof(unsigned long));
+
+    if (!final_args || !final_args_len)
+    {
+        if (cmd_args)
+            free(cmd_args);
+        if (args_len)
+            free(args_len);
+        if (final_args)
+            free(final_args);
+        if (final_args_len)
+            free(final_args_len);
+        return 0;
+    }
+
+    final_args[0] = (uintptr_t)acl_cmd;
+    final_args_len[0] = strlen(acl_cmd);
+
+    /* Copy the rest of the arguments */
+    for (i = 0; i < arg_count; i++)
+    {
+        final_args[i + 1] = cmd_args[i];
+        final_args_len[i + 1] = args_len[i];
+    }
+
     /* Execute the command */
     CommandResult *result = execute_command(
         glide_client,
         CustomCommand, /* ACL commands use custom command type */
         arg_count + 1, /* ACL command + args */
-        cmd_args,      /* arguments */
-        args_len       /* argument lengths */
+        final_args,    /* arguments */
+        final_args_len /* argument lengths */
     );
 
     /* Free the argument arrays */
     free(cmd_args);
     free(args_len);
+    free(final_args);
+    free(final_args_len);
 
-    /* Check if the command was successful */
+    /* Handle the result directly */
     int status = 0;
-    if (result && result->response)
+    if (result)
     {
-        /* ACL can return various types based on subcommand */
-        status = command_response_to_zval(result->response, return_value, 0);
+        if (result->command_error)
+        {
+            /* Command failed */
+            free_command_result(result);
+            return 0;
+        }
+
+        if (result->response)
+        {
+            /* ACL can return various types based on subcommand */
+            status = command_response_to_zval(result->response, return_value, 0);
+            free_command_result(result);
+            return status;
+        }
+        free_command_result(result);
     }
 
-    /* Free the result */
-    free_command_result(result);
-
-    return status;
+    return 0;
 }
 
 /* Execute an LINSERT command using the Valkey Glide client */
@@ -238,23 +258,8 @@ int execute_linsert_command(const void *glide_client, const char *key, size_t ke
         args_len   /* argument lengths */
     );
 
-    /* Check if the command was successful */
-    int status = 0;
-    if (result && result->response)
-    {
-        /* LINSERT returns the length of the list after the insert,
-         * or -1 if the pivot was not found */
-        if (result->response->response_type == Integer)
-        {
-            *output_value = result->response->integer_value;
-            status = 1;
-        }
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return status;
+    /* Use the proper handler for integer response */
+    return handle_int_response(result, output_value);
 }
 
 /* Execute an LPOS command using the Valkey Glide client */
@@ -375,18 +380,28 @@ int execute_lpos_command(const void *glide_client, const char *key, size_t key_l
     free(args);
     free(args_len);
 
-    /* Check if the command was successful */
+    /* Handle the response directly */
     int status = 0;
-    if (result && result->response)
+    if (result)
     {
-        /* LPOS returns position(s) of the element */
-        status = command_response_to_zval(result->response, return_value, 0);
+        if (result->command_error)
+        {
+            /* Command failed */
+            free_command_result(result);
+            return 0;
+        }
+
+        if (result->response)
+        {
+            /* LPOS returns position(s) of the element */
+            status = command_response_to_zval(result->response, return_value, 0);
+            free_command_result(result);
+            return status;
+        }
+        free_command_result(result);
     }
 
-    /* Free the result */
-    free_command_result(result);
-
-    return status;
+    return 0;
 }
 
 /* Execute an LLEN command using the Valkey Glide client */
