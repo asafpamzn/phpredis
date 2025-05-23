@@ -470,14 +470,57 @@ PHP_METHOD(Redis, sInter)
 {
     zval *object;
     redis_object *redis;
-    zval *z_args;
+    zval *z_args = NULL;
     int argc = 0;
+    zval *z_keys_arr = NULL;
+    HashTable *ht_keys = NULL;
+    int keys_count = 0;
+    zval *z_extracted_keys = NULL;
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O+",
-                                     &object, redis_ce, &z_args, &argc) == FAILURE)
+    /* Check if we have a single array argument or variadic string arguments */
+    if (ZEND_NUM_ARGS() == 1)
     {
-        RETURN_FALSE;
+        /* Try to parse as a single array argument */
+        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa",
+                                         &object, redis_ce, &z_keys_arr) == SUCCESS)
+        {
+            /* We have an array of keys */
+            ht_keys = Z_ARRVAL_P(z_keys_arr);
+            keys_count = zend_hash_num_elements(ht_keys);
+
+            /* If array is empty, return FALSE */
+            if (keys_count == 0)
+            {
+                RETURN_FALSE;
+            }
+
+            /* Allocate memory for array of zvals */
+            z_extracted_keys = ecalloc(keys_count, sizeof(zval));
+
+            /* Copy array values to sequential array */
+            zval *data;
+            int idx = 0;
+            ZEND_HASH_FOREACH_VAL(ht_keys, data)
+            {
+                ZVAL_COPY(&z_extracted_keys[idx], data);
+                idx++;
+            }
+            ZEND_HASH_FOREACH_END();
+
+            /* Set for later use */
+            z_args = z_extracted_keys;
+            argc = keys_count;
+        }
+    }
+
+    /* If we didn't get an array, parse as variadic arguments */
+    if (!z_args)
+    {
+        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O+",
+                                         &object, redis_ce, &z_args, &argc) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
     }
 
     /* Get Redis object */
@@ -490,13 +533,43 @@ PHP_METHOD(Redis, sInter)
         if (execute_sinter_command(redis->glide_client, z_args, argc,
                                    return_value))
         {
+            /* Clean up if we allocated memory for the array keys */
+            if (z_extracted_keys)
+            {
+                for (int i = 0; i < keys_count; i++)
+                {
+                    zval_dtor(&z_extracted_keys[i]);
+                }
+                efree(z_extracted_keys);
+            }
+
             /* Return value already set in execute_sinter_command */
             return;
         }
         else
         {
+            /* Clean up if we allocated memory for the array keys */
+            if (z_extracted_keys)
+            {
+                for (int i = 0; i < keys_count; i++)
+                {
+                    zval_dtor(&z_extracted_keys[i]);
+                }
+                efree(z_extracted_keys);
+            }
+
             RETURN_FALSE;
         }
+    }
+
+    /* Clean up if we allocated memory for the array keys but didn't execute the command */
+    if (z_extracted_keys)
+    {
+        for (int i = 0; i < keys_count; i++)
+        {
+            zval_dtor(&z_extracted_keys[i]);
+        }
+        efree(z_extracted_keys);
     }
 }
 /* }}} */
