@@ -361,14 +361,8 @@ int execute_smove_command(const void *glide_client, const char *src, size_t src_
         args_len   /* argument lengths */
     );
 
-    /* Handle the response as integer (1 if moved, 0 if not) */
-    long int_result;
-    int status = handle_int_response(result, &int_result);
-    if (status)
-    {
-        *output_value = (int)int_result;
-    }
-    return status;
+    return handle_bool_response(result);
+    ;
 }
 
 /* Execute an SPOP command using the Valkey Glide client */

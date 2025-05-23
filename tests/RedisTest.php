@@ -1726,7 +1726,7 @@ class Redis_Test extends TestSuite {
         }
     }
 
-    public function testsRandMember1() {
+    public function testsRandMember() {
         $this->redis->del('set0');
         $this->assertFalse($this->redis->sRandMember('set0'));
 
