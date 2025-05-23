@@ -806,71 +806,6 @@ PHP_METHOD(Redis, move)
 }
 /* }}} */
 
-PHP_METHOD(Redis, zintercard)
-{
-    REDIS_PROCESS_KW_CMD("ZINTERCARD", redis_intercard_cmd, redis_long_response);
-}
-
-/* {{{ proto array Redis::zunion(array keys, array|null weights, array options) */
-PHP_METHOD(Redis, zunion)
-{
-    REDIS_PROCESS_KW_CMD("ZUNION", redis_zinterunion_cmd, redis_zdiff_response);
-}
-/* }}} */
-
-/* {{{ proto array Redis::zdiffstore(string destination, array keys) */
-PHP_METHOD(Redis, zdiffstore)
-{
-    REDIS_PROCESS_CMD(zdiffstore, redis_long_response);
-}
-/* }}} */
-
-/* zinterstore */
-PHP_METHOD(Redis, zinterstore)
-{
-    REDIS_PROCESS_KW_CMD("ZINTERSTORE", redis_zinterunionstore_cmd, redis_long_response);
-}
-
-/* zunionstore */
-PHP_METHOD(Redis, zunionstore)
-{
-    REDIS_PROCESS_KW_CMD("ZUNIONSTORE", redis_zinterunionstore_cmd, redis_long_response);
-}
-
-/* {{{ proto array Redis::zPopMax(string key) */
-PHP_METHOD(Redis, zPopMax)
-{
-    if (ZEND_NUM_ARGS() == 1)
-    {
-        REDIS_PROCESS_KW_CMD("ZPOPMAX", redis_key_cmd, redis_mbulk_reply_zipped_keys_dbl);
-    }
-    else if (ZEND_NUM_ARGS() == 2)
-    {
-        REDIS_PROCESS_KW_CMD("ZPOPMAX", redis_key_long_cmd, redis_mbulk_reply_zipped_keys_dbl);
-    }
-    else
-    {
-        ZEND_WRONG_PARAM_COUNT();
-    }
-}
-/* }}} */
-
-/* {{{ proto array Redis::zPopMin(string key) */
-PHP_METHOD(Redis, zPopMin)
-{
-    if (ZEND_NUM_ARGS() == 1)
-    {
-        REDIS_PROCESS_KW_CMD("ZPOPMIN", redis_key_cmd, redis_mbulk_reply_zipped_keys_dbl);
-    }
-    else if (ZEND_NUM_ARGS() == 2)
-    {
-        REDIS_PROCESS_KW_CMD("ZPOPMIN", redis_key_long_cmd, redis_mbulk_reply_zipped_keys_dbl);
-    }
-    else
-    {
-        ZEND_WRONG_PARAM_COUNT();
-    }
-}
 /* }}} */
 
 /* {{{ proto Redis::bzPopMax(Array[keys] [, timeout]): Array */
@@ -2011,11 +1946,6 @@ generic_scan_cmd(INTERNAL_FUNCTION_PARAMETERS, REDIS_SCAN_TYPE type)
 PHP_METHOD(Redis, hscan)
 {
     generic_scan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_HSCAN);
-}
-
-PHP_METHOD(Redis, zscan)
-{
-    generic_scan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_ZSCAN);
 }
 
 /*
