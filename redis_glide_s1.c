@@ -60,11 +60,31 @@ int execute_sadd_command(const void *glide_client, const char *key, size_t key_l
         /* Convert to string if needed */
         if (Z_TYPE_P(member) != IS_STRING)
         {
-            ZVAL_COPY(&temp, member);
-            convert_to_string(&temp);
-            args[i + 1] = (uintptr_t)Z_STRVAL(temp);
-            args_len[i + 1] = Z_STRLEN(temp);
-            zval_dtor(&temp);
+            /* Special handling for various types */
+            if (Z_TYPE_P(member) == IS_OBJECT)
+            {
+                /* For objects, we need to handle conversion specially */
+                zval tmp_zval;
+                ZVAL_COPY(&tmp_zval, member);
+
+                /* Use standard PHP object-to-string conversion */
+                zend_std_cast_object_tostring(&tmp_zval, &tmp_zval, IS_STRING);
+
+                args[i + 1] = (uintptr_t)Z_STRVAL(tmp_zval);
+                args_len[i + 1] = Z_STRLEN(tmp_zval);
+
+                /* Clean up the temporary zval properly */
+                zval_dtor(&tmp_zval);
+            }
+            else
+            {
+                /* For all other non-object types */
+                ZVAL_COPY(&temp, member);
+                convert_to_string(&temp);
+                args[i + 1] = (uintptr_t)Z_STRVAL(temp);
+                args_len[i + 1] = Z_STRLEN(temp);
+                zval_dtor(&temp);
+            }
         }
         else
         {
@@ -136,11 +156,31 @@ int execute_sadd_array_command(const void *glide_client, const char *key, size_t
         /* Convert to string if needed */
         if (Z_TYPE_P(val) != IS_STRING)
         {
-            ZVAL_COPY(&temp, val);
-            convert_to_string(&temp);
-            args[i] = (uintptr_t)Z_STRVAL(temp);
-            args_len[i] = Z_STRLEN(temp);
-            zval_dtor(&temp);
+            /* Special handling for various types */
+            if (Z_TYPE_P(val) == IS_OBJECT)
+            {
+                /* For objects, we need to handle conversion specially */
+                zval tmp_zval;
+                ZVAL_COPY(&tmp_zval, val);
+
+                /* Use standard PHP object-to-string conversion */
+                zend_std_cast_object_tostring(&tmp_zval, &tmp_zval, IS_STRING);
+
+                args[i] = (uintptr_t)Z_STRVAL(tmp_zval);
+                args_len[i] = Z_STRLEN(tmp_zval);
+
+                /* Clean up the temporary zval properly */
+                zval_dtor(&tmp_zval);
+            }
+            else
+            {
+                /* For all other non-object types */
+                ZVAL_COPY(&temp, val);
+                convert_to_string(&temp);
+                args[i] = (uintptr_t)Z_STRVAL(temp);
+                args_len[i] = Z_STRLEN(temp);
+                zval_dtor(&temp);
+            }
         }
         else
         {
@@ -238,11 +278,31 @@ int execute_srem_command(const void *glide_client, const char *key, size_t key_l
         /* Convert to string if needed */
         if (Z_TYPE_P(member) != IS_STRING)
         {
-            ZVAL_COPY(&temp, member);
-            convert_to_string(&temp);
-            args[i + 1] = (uintptr_t)Z_STRVAL(temp);
-            args_len[i + 1] = Z_STRLEN(temp);
-            zval_dtor(&temp);
+            /* Special handling for various types */
+            if (Z_TYPE_P(member) == IS_OBJECT)
+            {
+                /* For objects, we need to handle conversion specially */
+                zval tmp_zval;
+                ZVAL_COPY(&tmp_zval, member);
+
+                /* Use standard PHP object-to-string conversion */
+                zend_std_cast_object_tostring(&tmp_zval, &tmp_zval, IS_STRING);
+
+                args[i + 1] = (uintptr_t)Z_STRVAL(tmp_zval);
+                args_len[i + 1] = Z_STRLEN(tmp_zval);
+
+                /* Clean up the temporary zval properly */
+                zval_dtor(&tmp_zval);
+            }
+            else
+            {
+                /* For all other non-object types */
+                ZVAL_COPY(&temp, member);
+                convert_to_string(&temp);
+                args[i + 1] = (uintptr_t)Z_STRVAL(temp);
+                args_len[i + 1] = Z_STRLEN(temp);
+                zval_dtor(&temp);
+            }
         }
         else
         {
@@ -490,13 +550,7 @@ int execute_sismember_command(const void *glide_client, const char *key, size_t 
     );
 
     /* Handle the response as integer (1 if member, 0 if not) */
-    long int_result;
-    int status = handle_int_response(result, &int_result);
-    if (status)
-    {
-        *output_value = (int)int_result;
-    }
-    return status;
+    return handle_bool_response(result);
 }
 
 /* Execute an SMEMBERS command using the Valkey Glide client */
@@ -569,11 +623,31 @@ int execute_smismember_command(const void *glide_client, const char *key, size_t
         /* Convert to string if needed */
         if (Z_TYPE_P(member) != IS_STRING)
         {
-            ZVAL_COPY(&temp, member);
-            convert_to_string(&temp);
-            args[i + 1] = (uintptr_t)Z_STRVAL(temp);
-            args_len[i + 1] = Z_STRLEN(temp);
-            zval_dtor(&temp);
+            /* Special handling for various types */
+            if (Z_TYPE_P(member) == IS_OBJECT)
+            {
+                /* For objects, we need to handle conversion specially */
+                zval tmp_zval;
+                ZVAL_COPY(&tmp_zval, member);
+
+                /* Use standard PHP object-to-string conversion */
+                zend_std_cast_object_tostring(&tmp_zval, &tmp_zval, IS_STRING);
+
+                args[i + 1] = (uintptr_t)Z_STRVAL(tmp_zval);
+                args_len[i + 1] = Z_STRLEN(tmp_zval);
+
+                /* Clean up the temporary zval properly */
+                zval_dtor(&tmp_zval);
+            }
+            else
+            {
+                /* For all other non-object types */
+                ZVAL_COPY(&temp, member);
+                convert_to_string(&temp);
+                args[i + 1] = (uintptr_t)Z_STRVAL(temp);
+                args_len[i + 1] = Z_STRLEN(temp);
+                zval_dtor(&temp);
+            }
         }
         else
         {
