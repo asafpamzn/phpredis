@@ -297,10 +297,35 @@ long execute_rpush_command(const void *glide_client, const char *key, size_t key
         return 0;
     }
 
+    /* First, count the total number of arguments including expanded arrays */
+    unsigned long total_args = 1; /* Start with 1 for the key */
+    int i, j;
+
+    /* Count all items, including those in nested arrays */
+    for (i = 0; i < values_count; i++)
+    {
+        zval *value = &values[i];
+        if (Z_TYPE_P(value) == IS_STRING)
+        {
+            /* Direct string argument */
+            total_args++;
+        }
+        else if (Z_TYPE_P(value) == IS_ARRAY)
+        {
+            /* Array argument - count all elements in the array */
+            HashTable *ht = Z_ARRVAL_P(value);
+            total_args += zend_hash_num_elements(ht);
+        }
+        else
+        {
+            /* Unsupported type */
+            return 0;
+        }
+    }
+
     /* Prepare command arguments */
-    unsigned long arg_count = 1 + values_count; /* key + values */
-    uintptr_t *args = (uintptr_t *)malloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)malloc(arg_count * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)malloc(total_args * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)malloc(total_args * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
@@ -315,28 +340,58 @@ long execute_rpush_command(const void *glide_client, const char *key, size_t key
     args[0] = (uintptr_t)key;
     args_len[0] = key_len;
 
-    /* Remaining arguments: values */
-    int i;
+    /* Process all values and add to args array */
+    unsigned long arg_idx = 1; /* Start after the key */
+
     for (i = 0; i < values_count; i++)
     {
         zval *value = &values[i];
-        if (Z_TYPE_P(value) != IS_STRING)
+
+        if (Z_TYPE_P(value) == IS_STRING)
         {
+            /* Process string directly */
+            args[arg_idx] = (uintptr_t)Z_STRVAL_P(value);
+            args_len[arg_idx] = Z_STRLEN_P(value);
+            arg_idx++;
+        }
+        else if (Z_TYPE_P(value) == IS_ARRAY)
+        {
+            /* Process each element in the array */
+            HashTable *ht = Z_ARRVAL_P(value);
+            zval *z_item;
+
+            ZEND_HASH_FOREACH_VAL(ht, z_item)
+            {
+                /* Each array element must be a string */
+                if (Z_TYPE_P(z_item) != IS_STRING)
+                {
+                    free(args);
+                    free(args_len);
+                    return 0;
+                }
+
+                args[arg_idx] = (uintptr_t)Z_STRVAL_P(z_item);
+                args_len[arg_idx] = Z_STRLEN_P(z_item);
+                arg_idx++;
+            }
+            ZEND_HASH_FOREACH_END();
+        }
+        else
+        {
+            /* Unexpected type (already checked above, but for safety) */
             free(args);
             free(args_len);
             return 0;
         }
-        args[1 + i] = (uintptr_t)Z_STRVAL_P(value);
-        args_len[1 + i] = Z_STRLEN_P(value);
     }
 
     /* Execute the command */
     CommandResult *result = execute_command(
         glide_client,
-        RPush,     /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
+        RPush,      /* command type */
+        total_args, /* number of arguments including expanded arrays */
+        args,       /* arguments */
+        args_len    /* argument lengths */
     );
 
     /* Free the argument arrays */
