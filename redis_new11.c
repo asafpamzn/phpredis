@@ -182,22 +182,22 @@ PHP_METHOD(Redis, lMove)
 }
 /* }}} */
 
-/* {{{ proto long Redis::lrem(string key, long count, string value) */
+/* {{{ proto long Redis::lrem(string key, string value [, long count = 0]) */
 PHP_METHOD(Redis, lrem)
 {
     zval *object;
     redis_object *redis;
     char *key = NULL, *value = NULL;
     size_t key_len, value_len;
-    zend_long count;
+    zend_long count = 0;
     long output_value;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osls",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss|l",
                                      &object, redis_ce,
                                      &key, &key_len,
-                                     &count,
-                                     &value, &value_len) == FAILURE)
+                                     &value, &value_len,
+                                     &count) == FAILURE)
     {
         RETURN_FALSE;
     }
@@ -213,7 +213,7 @@ PHP_METHOD(Redis, lrem)
         /* Execute the LREM command using the Glide client */
         status = execute_lrem_command(redis->glide_client,
                                       key, key_len,
-                                      count,
+                                      count, /* count is now the 3rd parameter in PHP, but still passed as 3rd param to C function */
                                       value, value_len,
                                       &output_value);
 
