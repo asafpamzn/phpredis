@@ -22,7 +22,7 @@
 extern int execute_blmove_command(const void *glide_client, const char *src, size_t src_len,
                                   const char *dst, size_t dst_len, const char *wherefrom,
                                   size_t wherefrom_len, const char *whereto, size_t whereto_len,
-                                  long timeout, char **output_value, size_t *output_len);
+                                  double timeout, char **output_value, size_t *output_len);
 extern int execute_lmove_command(const void *glide_client, const char *src, size_t src_len,
                                  const char *dst, size_t dst_len, const char *wherefrom,
                                  size_t wherefrom_len, const char *whereto, size_t whereto_len,
@@ -51,12 +51,12 @@ PHP_METHOD(Redis, blmove)
     redis_object *redis;
     char *src = NULL, *dst = NULL, *wherefrom = NULL, *whereto = NULL;
     size_t src_len, dst_len, wherefrom_len, whereto_len;
-    zend_long timeout;
+    double timeout;
     char *output_value = NULL;
     size_t output_len;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ossssl",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ossssd",
                                      &object, redis_ce,
                                      &src, &src_len,
                                      &dst, &dst_len,

@@ -26,7 +26,7 @@
 int execute_blmove_command(const void *glide_client, const char *src, size_t src_len,
                            const char *dst, size_t dst_len, const char *wherefrom,
                            size_t wherefrom_len, const char *whereto, size_t whereto_len,
-                           long timeout, char **output_value, size_t *output_len)
+                           double timeout, char **output_value, size_t *output_len)
 {
     /* Check if client and parameters are valid */
     if (!glide_client || !src || !dst || !wherefrom || !whereto || !output_value || !output_len)
@@ -53,12 +53,20 @@ int execute_blmove_command(const void *glide_client, const char *src, size_t src
     args_len[3] = whereto_len;
 
     /* Convert timeout to string */
-    size_t timeout_len;
-    char *timeout_str = long_to_string(timeout, &timeout_len);
+    char timeout_buf[64];
+    size_t timeout_len = snprintf(timeout_buf, sizeof(timeout_buf), "%.6f", timeout);
+    if (timeout_len <= 0 || timeout_len >= sizeof(timeout_buf))
+    {
+        return -1;
+    }
+
+    char *timeout_str = emalloc(timeout_len + 1);
     if (!timeout_str)
     {
         return -1;
     }
+    memcpy(timeout_str, timeout_buf, timeout_len + 1);
+
     args[4] = (uintptr_t)timeout_str;
     args_len[4] = timeout_len;
 
