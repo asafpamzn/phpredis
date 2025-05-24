@@ -31,20 +31,38 @@ extern int execute_zscan_command(const void *glide_client, const char *key, size
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
-/* {{{ proto array Redis::zintercard(array $keys, array $options = null) */
+/* {{{ proto array Redis::zintercard(array $keys, int|array $limit_or_options = null) */
 PHP_METHOD(Redis, zintercard)
 {
     zval *object;
     redis_object *redis;
     zval *z_keys, *z_options = NULL;
+    zval z_temp_options;
     HashTable *keys_hash;
     long cardinality = 0;
+    long limit = 0;
+    int free_options = 0;
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa|a",
+    /* Parse parameters - accept either array,array or array,long */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa|z",
                                      &object, redis_ce, &z_keys, &z_options) == FAILURE)
     {
         RETURN_FALSE;
+    }
+
+    /* If second parameter is an integer (limit), convert it to an options array */
+    if (z_options && Z_TYPE_P(z_options) == IS_LONG)
+    {
+        limit = Z_LVAL_P(z_options);
+        if (limit < 0)
+        {
+            RETURN_FALSE;
+        }
+
+        array_init(&z_temp_options);
+        add_assoc_long(&z_temp_options, "LIMIT", limit);
+        z_options = &z_temp_options;
+        free_options = 1; /* Flag to free the temporary array */
     }
 
     /* Get Redis object */
@@ -63,17 +81,24 @@ PHP_METHOD(Redis, zintercard)
         /* Execute the ZINTERCARD command using the Glide client */
         if (execute_zintercard_command(redis->glide_client, z_keys, zend_hash_num_elements(keys_hash), z_options))
         {
+            printf("ZINTERCARD executed successfully\n");
+            /* If we created a temporary options array, free it */
+            if (free_options)
+            {
+                zval_dtor(&z_temp_options);
+            }
             RETURN_LONG(cardinality);
         }
         else
         {
+            printf("ZINTERCARD execution failed\n");
+            /* If we created a temporary options array, free it */
+            if (free_options)
+            {
+                zval_dtor(&z_temp_options);
+            }
             RETURN_FALSE;
         }
-    }
-    else
-    {
-        /* Fall back to the original implementation if Glide isn't available */
-        RETURN_FALSE;
     }
 }
 /* }}} */

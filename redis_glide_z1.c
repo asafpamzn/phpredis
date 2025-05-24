@@ -260,7 +260,7 @@ int execute_zintercard_command(const void *glide_client, zval *keys, int keys_co
     /* Handle the result */
     long output_value = 0;
     int status = handle_int_response(result, &output_value);
-
+    printf("status: %d, output_value: %ld\n", status, output_value);
     return status;
 }
 
