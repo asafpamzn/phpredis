@@ -165,7 +165,7 @@ static int prepare_aggregate_option(zval *options, uintptr_t *agg_arg, unsigned 
 }
 
 /* Execute a ZINTERCARD command using the Valkey Glide client */
-int execute_zintercard_command(const void *glide_client, zval *keys, int keys_count, zval *options)
+int execute_zintercard_command(const void *glide_client, zval *keys, int keys_count, zval *options, zval *return_value)
 {
     /* Check if client and keys are valid */
     if (!glide_client || !keys || keys_count <= 0)
@@ -182,8 +182,8 @@ int execute_zintercard_command(const void *glide_client, zval *keys, int keys_co
         return 0;
     }
 
-    /* Calculate total arguments (keys + LIMIT if present) */
-    unsigned long arg_count = keys_count;
+    /* Calculate total arguments (numkeys + keys + LIMIT if present) */
+    unsigned long arg_count = keys_count + 1; /* +1 for numkeys */
     int has_limit = 0;
     long limit = 0;
 
@@ -216,15 +216,21 @@ int execute_zintercard_command(const void *glide_client, zval *keys, int keys_co
         return 0;
     }
 
-    /* Copy keys to args array */
-    memcpy(args, keys_args, keys_count * sizeof(uintptr_t));
-    memcpy(args_len, keys_len, keys_count * sizeof(unsigned long));
+    /* Add numkeys as the first argument */
+    char numkeys_str[32];
+    snprintf(numkeys_str, sizeof(numkeys_str), "%d", keys_count);
+    args[0] = (uintptr_t)estrdup(numkeys_str);
+    args_len[0] = strlen(numkeys_str);
+
+    /* Copy keys to args array (offset by 1 for numkeys) */
+    memcpy(args + 1, keys_args, keys_count * sizeof(uintptr_t));
+    memcpy(args_len + 1, keys_len, keys_count * sizeof(unsigned long));
 
     /* Add LIMIT option if present */
     if (has_limit)
     {
         char limit_str[32];
-        unsigned int offset = keys_count;
+        unsigned int offset = keys_count + 1; /* +1 for numkeys */
 
         /* Add LIMIT keyword */
         args[offset] = (uintptr_t)"LIMIT";
@@ -250,8 +256,9 @@ int execute_zintercard_command(const void *glide_client, zval *keys, int keys_co
     if (has_limit)
     {
         /* Free the limit value string */
-        efree((void *)args[keys_count + 1]);
+        efree((void *)args[keys_count + 2]); /* +2 for numkeys and LIMIT */
     }
+    efree((void *)args[0]); /* Free the numkeys string */
     efree(keys_args);
     efree(keys_len);
     efree(args);
@@ -260,7 +267,13 @@ int execute_zintercard_command(const void *glide_client, zval *keys, int keys_co
     /* Handle the result */
     long output_value = 0;
     int status = handle_int_response(result, &output_value);
-    printf("status: %d, output_value: %ld\n", status, output_value);
+
+    /* Set output value as the return value for PHP */
+    if (status)
+    {
+        ZVAL_LONG(return_value, output_value);
+    }
+
     return status;
 }
 

@@ -19,7 +19,7 @@
 #include "redis_glide.h"
 
 /* Forward declarations for the Glide execute functions */
-extern int execute_zintercard_command(const void *glide_client, zval *keys, int keys_count, zval *options);
+extern int execute_zintercard_command(const void *glide_client, zval *keys, int keys_count, zval *options, zval *return_value);
 extern int execute_zunion_command(const void *glide_client, zval *keys, int keys_count, zval *weights, zval *options, zval *return_value);
 extern int execute_zdiffstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count, zval *weights, zval *options, long *output_value);
 extern int execute_zinterstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count, zval *weights, zval *options, long *output_value);
@@ -79,7 +79,7 @@ PHP_METHOD(Redis, zintercard)
     if (redis->glide_client)
     {
         /* Execute the ZINTERCARD command using the Glide client */
-        if (execute_zintercard_command(redis->glide_client, z_keys, zend_hash_num_elements(keys_hash), z_options))
+        if (execute_zintercard_command(redis->glide_client, z_keys, zend_hash_num_elements(keys_hash), z_options, return_value))
         {
             printf("ZINTERCARD executed successfully\n");
             /* If we created a temporary options array, free it */
