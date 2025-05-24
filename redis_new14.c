@@ -39,7 +39,6 @@ PHP_METHOD(Redis, zintercard)
     zval *z_keys, *z_options = NULL;
     zval z_temp_options;
     HashTable *keys_hash;
-    long cardinality = 0;
     long limit = 0;
     int free_options = 0;
 
@@ -81,17 +80,15 @@ PHP_METHOD(Redis, zintercard)
         /* Execute the ZINTERCARD command using the Glide client */
         if (execute_zintercard_command(redis->glide_client, z_keys, zend_hash_num_elements(keys_hash), z_options, return_value))
         {
-            printf("ZINTERCARD executed successfully\n");
             /* If we created a temporary options array, free it */
             if (free_options)
             {
                 zval_dtor(&z_temp_options);
             }
-            RETURN_LONG(cardinality);
+            return;
         }
         else
         {
-            printf("ZINTERCARD execution failed\n");
             /* If we created a temporary options array, free it */
             if (free_options)
             {
