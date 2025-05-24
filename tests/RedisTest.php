@@ -2273,7 +2273,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals($exp, $act);
         $act = $this->redis->zintercard($zsets);
         $this->assertEquals($exp, $act);
- return;
+
         $this->assertEquals(1, $this->redis->sintercard($ssets, 1));
         $this->assertEquals(2, $this->redis->sintercard($ssets, 2));
        
