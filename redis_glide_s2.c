@@ -89,7 +89,7 @@ int execute_sinter_command(const void *glide_client, zval *keys, int keys_count,
 int execute_sintercard_command(const void *glide_client, zval *keys, int keys_count, long limit, zval *return_value)
 {
     /* Check if client and keys are valid */
-    if (!glide_client || !keys || keys_count <= 0 || !return_value)
+    if (!glide_client || !keys || keys_count <= 0 || !return_value || limit < 0)
     {
         return 0;
     }

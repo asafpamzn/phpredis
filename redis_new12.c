@@ -603,10 +603,10 @@ PHP_METHOD(Redis, sintercard)
     ht_keys = Z_ARRVAL_P(z_keys);
     keys_count = zend_hash_num_elements(ht_keys);
 
-    /* If we have no keys, return empty array */
+    /* If we have no keys, return false */
     if (keys_count == 0)
     {
-        RETURN_LONG(0);
+        RETURN_FALSE;
     }
 
     /* Allocate memory for array of zvals */
@@ -655,13 +655,6 @@ PHP_METHOD(Redis, sintercard)
             RETURN_FALSE;
         }
     }
-
-    /* Clean up if we didn't execute the command */
-    for (int i = 0; i < keys_count; i++)
-    {
-        zval_dtor(&z_args[i]);
-    }
-    efree(z_args);
 }
 /* }}} */
 
