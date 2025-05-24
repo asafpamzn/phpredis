@@ -53,8 +53,7 @@ PHP_METHOD(Redis, select)
         /* Execute the SELECT command using the Glide client */
         if (execute_select_command(redis->glide_client, dbindex))
         {
-            /* Update the database in the Redis object */
-            redis->dbNumber = dbindex;
+
             RETURN_TRUE;
         }
         else
