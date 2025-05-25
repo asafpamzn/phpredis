@@ -308,7 +308,7 @@ int execute_zadd_command(const void *glide_client, const char *key, size_t key_l
             /* For INCR option, we get back a float score or NULL */
             if (result->response->response_type == Float)
             {
-                *output_value = (long)(result->response->float_value * 10); /* Store as long with one decimal place */
+                *output_value = (long)(result->response->float_value); /* Store as long with one decimal place */
                 success = 1;
             }
             else if (result->response->response_type == String)
@@ -319,7 +319,6 @@ int execute_zadd_command(const void *glide_client, const char *key, size_t key_l
                 if (result->response->string_value && result->response->string_value_len > 0)
                 {
                     score_val = strtod(result->response->string_value, &str_end);
-                    *output_value = (long)(score_val * 10);
                     success = 1;
                 }
             }
