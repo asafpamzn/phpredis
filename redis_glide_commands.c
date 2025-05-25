@@ -391,14 +391,50 @@ int execute_msetnx_command(const void *glide_client, zval *arr, int *output_valu
     efree(args);
     efree(args_len);
 
-    /* Use the generic handler to process the result */
-    long output;
-    int ret = handle_int_response(result, &output);
-    if (ret == 1)
+    /* Check if the command was successful */
+    int ret = 0;
+
+    if (!result)
     {
-        /* Set output value */
-        *output_value = (int)output;
+        return 0; /* Failed to execute command */
     }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        printf("Error executing MSETNX command: %s\n", result->command_error->command_error_message);
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result based on its type */
+    if (result->response)
+    {
+        switch (result->response->response_type)
+        {
+        case Int:
+            /* Handle integer response */
+            *output_value = (int)result->response->int_value;
+            ret = 1;
+            break;
+
+        case Bool:
+            /* Handle boolean response */
+            *output_value = result->response->bool_value ? 1 : 0;
+            ret = 1;
+            break;
+
+        default:
+            /* Unexpected response type */
+            printf("Unexpected response type for MSETNX command: %d\n", result->response->response_type);
+            ret = 0;
+            break;
+        }
+    }
+
+    /* Free the result */
+    free_command_result(result);
+
     return ret;
 }
 
