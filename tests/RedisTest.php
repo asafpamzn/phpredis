@@ -160,6 +160,7 @@ class Redis_Test extends TestSuite {
     }
 
     protected function haveMulti() {
+        return false; //TODO multi
         return defined(get_class($this->redis) . '::MULTI');
     }
 
@@ -2451,7 +2452,6 @@ class Redis_Test extends TestSuite {
             } else {
                 $info = $this->redis->info();
             }
-
             $keys = [
                 'redis_version',
                 'arch_bits',

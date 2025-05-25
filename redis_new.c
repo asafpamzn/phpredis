@@ -1100,17 +1100,19 @@ PHP_METHOD(Redis, zmpop)
 }
 /* }}} */
 
-/* {{{ proto array Redis::info() */
+/* {{{ proto array Redis::info([string section [, string section...]]) */
 PHP_METHOD(Redis, info)
 {
     zval *object;
     redis_object *redis;
-    char *section = NULL, *response = NULL;
-    size_t section_len = 0, response_len = 0;
+    char *response = NULL;
+    size_t response_len = 0;
+    int argc = 0;
+    zval *sections = NULL;
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|s",
-                                     &object, redis_ce, &section, &section_len) == FAILURE)
+    /* Parse parameters - accept variable number of string arguments */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O*",
+                                     &object, redis_ce, &sections, &argc) == FAILURE)
     {
         RETURN_FALSE;
     }
@@ -1121,8 +1123,19 @@ PHP_METHOD(Redis, info)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the INFO command using the Glide client */
-        int result = execute_info_command(redis->glide_client, section, section_len, &response, &response_len);
+        int result = 0;
+
+        /* Handle different cases based on number of arguments */
+        if (argc == 0)
+        {
+            /* No sections specified, call with NULL section */
+            result = execute_info_command(redis->glide_client, NULL, 0, &response, &response_len);
+        }
+        else
+        {
+            /* One or more sections specified */
+            result = execute_info_sections_command(redis->glide_client, sections, argc, &response, &response_len);
+        }
 
         /* Process the result */
         if (result == 1 && response != NULL)

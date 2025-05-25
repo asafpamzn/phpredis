@@ -73,6 +73,11 @@ long handle_int_response(CommandResult *result, long *output_value)
         free_command_result(result);
         return 1; /* True - success */
     }
+    else
+    {
+        printf("Unexpected response type for integer command\n");
+        assert(0); /* This should never happen */
+    }
 
     /* Unexpected response type */
     free_command_result(result);
