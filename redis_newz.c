@@ -180,6 +180,7 @@ PHP_METHOD(Redis, zrangestore)
     char *src = NULL, *dst = NULL;
     size_t src_len, dst_len;
     zval *z_start, *z_end;
+    long result_count;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osszz|a",
@@ -192,7 +193,18 @@ PHP_METHOD(Redis, zrangestore)
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Not implemented yet, fallback to the regular Redis implementation */
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the ZRANGESTORE command using the Glide client */
+        if (execute_zrangestore_command(redis->glide_client, dst, dst_len, src, src_len,
+                                        z_start, z_end, options, &result_count))
+        {
+            RETURN_LONG(result_count);
+        }
+    }
+
+    /* Fallback to the regular Redis implementation */
     RETURN_FALSE;
 }
 /* }}} */
@@ -217,7 +229,23 @@ PHP_METHOD(Redis, zRevRange)
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Not implemented yet, fallback to the regular Redis implementation */
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize return array */
+        array_init(return_value);
+
+        /* Execute the ZREVRANGE command using the Glide client */
+        if (execute_zrevrange_command(redis->glide_client, key, key_len, z_start, z_end, options, return_value))
+        {
+            return;
+        }
+
+        /* If the command failed, clean up and return FALSE */
+        zval_dtor(return_value);
+    }
+
+    /* Fallback to the regular Redis implementation */
     RETURN_FALSE;
 }
 /* }}} */
@@ -242,7 +270,23 @@ PHP_METHOD(Redis, zRangeByScore)
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Not implemented yet, fallback to the regular Redis implementation */
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize return array */
+        array_init(return_value);
+
+        /* Execute the ZRANGEBYSCORE command using the Glide client */
+        if (execute_zrangebyscore_command(redis->glide_client, key, key_len, z_min, z_max, options, return_value))
+        {
+            return;
+        }
+
+        /* If the command failed, clean up and return FALSE */
+        zval_dtor(return_value);
+    }
+
+    /* Fallback to the regular Redis implementation */
     RETURN_FALSE;
 }
 /* }}} */
@@ -267,7 +311,23 @@ PHP_METHOD(Redis, zRevRangeByScore)
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Not implemented yet, fallback to the regular Redis implementation */
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize return array */
+        array_init(return_value);
+
+        /* Execute the ZREVRANGEBYSCORE command using the Glide client */
+        if (execute_zrevrangebyscore_command(redis->glide_client, key, key_len, z_max, z_min, options, return_value))
+        {
+            return;
+        }
+
+        /* If the command failed, clean up and return FALSE */
+        zval_dtor(return_value);
+    }
+
+    /* Fallback to the regular Redis implementation */
     RETURN_FALSE;
 }
 /* }}} */
@@ -292,7 +352,23 @@ PHP_METHOD(Redis, zRangeByLex)
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Not implemented yet, fallback to the regular Redis implementation */
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize return array */
+        array_init(return_value);
+
+        /* Execute the ZRANGEBYLEX command using the Glide client */
+        if (execute_zrangebylex_command(redis->glide_client, key, key_len, z_min, z_max, options, return_value))
+        {
+            return;
+        }
+
+        /* If the command failed, clean up and return FALSE */
+        zval_dtor(return_value);
+    }
+
+    /* Fallback to the regular Redis implementation */
     RETURN_FALSE;
 }
 /* }}} */
@@ -317,7 +393,23 @@ PHP_METHOD(Redis, zRevRangeByLex)
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Not implemented yet, fallback to the regular Redis implementation */
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize return array */
+        array_init(return_value);
+
+        /* Execute the ZREVRANGEBYLEX command using the Glide client */
+        if (execute_zrevrangebylex_command(redis->glide_client, key, key_len, z_max, z_min, options, return_value))
+        {
+            return;
+        }
+
+        /* If the command failed, clean up and return FALSE */
+        zval_dtor(return_value);
+    }
+
+    /* Fallback to the regular Redis implementation */
     RETURN_FALSE;
 }
 /* }}} */
@@ -811,7 +903,23 @@ PHP_METHOD(Redis, zdiff)
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Not implemented yet, fallback to the regular Redis implementation */
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize return array */
+        array_init(return_value);
+
+        /* Execute the ZDIFF command using the Glide client */
+        if (execute_zdiff_command(redis->glide_client, z_keys, z_opts, return_value))
+        {
+            return;
+        }
+
+        /* If the command failed, clean up and return FALSE */
+        zval_dtor(return_value);
+    }
+
+    /* Fallback to the regular Redis implementation */
     RETURN_FALSE;
 }
 /* }}} */
@@ -832,7 +940,23 @@ PHP_METHOD(Redis, zinter)
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Not implemented yet, fallback to the regular Redis implementation */
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize return array */
+        array_init(return_value);
+
+        /* Execute the ZINTER command using the Glide client */
+        if (execute_zinter_command(redis->glide_client, z_keys, z_weights, z_opts, return_value))
+        {
+            return;
+        }
+
+        /* If the command failed, clean up and return FALSE */
+        zval_dtor(return_value);
+    }
+
+    /* Fallback to the regular Redis implementation */
     RETURN_FALSE;
 }
 /* }}} */

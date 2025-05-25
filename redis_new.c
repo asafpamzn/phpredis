@@ -1308,10 +1308,20 @@ PHP_METHOD(Redis, zAdd)
     {
         /* Execute the ZADD command using the Glide client */
         long result_value;
-        if (execute_zadd_command(redis->glide_client, key, key_len, z_args, argc, flags, &result_value))
+        double result_value_double = 0;
+        int res = execute_zadd_command(redis->glide_client, key, key_len, z_args, argc, flags, &result_value, &result_value_double);
+        if (res != 0)
         {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
+            if (res == 2)
+            {
+                /* If the result is 2, it means we got a double value */
+                RETURN_DOUBLE(result_value_double);
+            }
+            else
+            {
+                /* If the result is 1, it means we got a long value */
+                RETURN_LONG(result_value);
+            }
         }
         else
         {
