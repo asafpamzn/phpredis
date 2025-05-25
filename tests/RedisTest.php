@@ -2674,7 +2674,7 @@ class Redis_Test extends TestSuite {
     }
 
     public function testZAddFirstArg() {
-        $this->redis->del('key');
+        $this->redis->del('100');
 
         $zsetName = 100; // not a string!
         $this->assertEquals(1, $this->redis->zAdd($zsetName, 0, 'val0'));

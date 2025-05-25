@@ -1582,6 +1582,36 @@ int execute_zadd_command(const void *glide_client, const char *key, size_t key_l
     efree(args);
     efree(args_len);
 
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    /* Process the result directly instead of using handle_int_response */
+    int success = 0;
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return 0; /* False - failure */
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0; /* False - failure */
+    }
+
+    /* Get the result value */
+
+    if (result->response && result->response->response_type == Int)
+    {
+        *output_value = result->response->int_value;
+        success = 1; /* True - success */
+    }
+
+    /* Free the result */
+    free_command_result(result);
+
+    /* For ZADD, we need to return success if the command executed correctly,
+     * regardless of whether elements were added or not. The actual number of
+     * elements added is stored in output_value.
+     */
+    return success;
 }
