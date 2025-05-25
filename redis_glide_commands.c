@@ -68,6 +68,17 @@ int execute_mset_command(const void *glide_client, zval *arr)
         return 0;
     }
 
+    /* Track allocated strings that need to be freed after command execution */
+    char **allocated_strings = (char **)ecalloc(arg_count, sizeof(char *));
+    int allocated_count = 0;
+
+    if (!allocated_strings)
+    {
+        efree(args);
+        efree(args_len);
+        return 0;
+    }
+
     /* Add keys and values as arguments */
     zval *data;
     zend_string *key;
@@ -83,6 +94,13 @@ int execute_mset_command(const void *glide_client, zval *arr)
             char *key_str = long_to_string((long)num_key, &key_len);
             if (!key_str)
             {
+                /* Free any previously allocated strings */
+                int i;
+                for (i = 0; i < allocated_count; i++)
+                {
+                    efree(allocated_strings[i]);
+                }
+                efree(allocated_strings);
                 efree(args);
                 efree(args_len);
                 return 0;
@@ -91,10 +109,11 @@ int execute_mset_command(const void *glide_client, zval *arr)
             /* Add key */
             args[arg_idx] = (uintptr_t)key_str;
             args_len[arg_idx] = key_len;
-            arg_idx++;
 
-            /* We need to remember to free this later */
-            int free_key = 1;
+            /* Track this allocated string */
+            allocated_strings[allocated_count++] = key_str;
+
+            arg_idx++;
 
             /* Add value */
             if (Z_TYPE_P(data) == IS_STRING)
@@ -122,9 +141,6 @@ int execute_mset_command(const void *glide_client, zval *arr)
                 /* We will free this when we free the arguments */
                 zval_dtor(&copy);
             }
-
-            /* Free the key string we created */
-            efree(key_str);
         }
         else
         {
@@ -171,6 +187,14 @@ int execute_mset_command(const void *glide_client, zval *arr)
         args,      /* arguments */
         args_len   /* argument lengths */
     );
+
+    /* Free all allocated key strings */
+    int i;
+    for (i = 0; i < allocated_count; i++)
+    {
+        efree(allocated_strings[i]);
+    }
+    efree(allocated_strings);
 
     /* Free the allocated arguments */
     efree(args);
@@ -235,6 +259,17 @@ int execute_msetnx_command(const void *glide_client, zval *arr, int *output_valu
         return 0;
     }
 
+    /* Track allocated strings that need to be freed after command execution */
+    char **allocated_strings = (char **)ecalloc(arg_count, sizeof(char *));
+    int allocated_count = 0;
+
+    if (!allocated_strings)
+    {
+        efree(args);
+        efree(args_len);
+        return 0;
+    }
+
     /* Add keys and values as arguments */
     zval *data;
     zend_string *key;
@@ -250,6 +285,13 @@ int execute_msetnx_command(const void *glide_client, zval *arr, int *output_valu
             char *key_str = long_to_string((long)num_key, &key_len);
             if (!key_str)
             {
+                /* Free any previously allocated strings */
+                int i;
+                for (i = 0; i < allocated_count; i++)
+                {
+                    efree(allocated_strings[i]);
+                }
+                efree(allocated_strings);
                 efree(args);
                 efree(args_len);
                 return 0;
@@ -258,10 +300,11 @@ int execute_msetnx_command(const void *glide_client, zval *arr, int *output_valu
             /* Add key */
             args[arg_idx] = (uintptr_t)key_str;
             args_len[arg_idx] = key_len;
-            arg_idx++;
 
-            /* We need to remember to free this later */
-            int free_key = 1;
+            /* Track this allocated string */
+            allocated_strings[allocated_count++] = key_str;
+
+            arg_idx++;
 
             /* Add value */
             if (Z_TYPE_P(data) == IS_STRING)
@@ -289,9 +332,6 @@ int execute_msetnx_command(const void *glide_client, zval *arr, int *output_valu
                 /* We will free this when we free the arguments */
                 zval_dtor(&copy);
             }
-
-            /* Free the key string we created */
-            efree(key_str);
         }
         else
         {
@@ -338,6 +378,14 @@ int execute_msetnx_command(const void *glide_client, zval *arr, int *output_valu
         args,      /* arguments */
         args_len   /* argument lengths */
     );
+
+    /* Free all allocated key strings */
+    int i;
+    for (i = 0; i < allocated_count; i++)
+    {
+        efree(allocated_strings[i]);
+    }
+    efree(allocated_strings);
 
     /* Free the allocated arguments */
     efree(args);
