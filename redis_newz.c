@@ -87,9 +87,6 @@ PHP_METHOD(Redis, object)
             return;
         }
     }
-
-    /* Not implemented yet, fallback to the regular Redis implementation */
-    ZVAL_FALSE(return_value);
 }
 /* }}} */
 
@@ -167,9 +164,6 @@ PHP_METHOD(Redis, zRange)
         zval_dtor(return_value);
         RETURN_FALSE;
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -204,9 +198,6 @@ PHP_METHOD(Redis, zrangestore)
             RETURN_LONG(result_count);
         }
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -245,9 +236,6 @@ PHP_METHOD(Redis, zRevRange)
         /* If the command failed, clean up and return FALSE */
         zval_dtor(return_value);
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -286,9 +274,6 @@ PHP_METHOD(Redis, zRangeByScore)
         /* If the command failed, clean up and return FALSE */
         zval_dtor(return_value);
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -327,9 +312,6 @@ PHP_METHOD(Redis, zRevRangeByScore)
         /* If the command failed, clean up and return FALSE */
         zval_dtor(return_value);
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -368,9 +350,6 @@ PHP_METHOD(Redis, zRangeByLex)
         /* If the command failed, clean up and return FALSE */
         zval_dtor(return_value);
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -409,9 +388,6 @@ PHP_METHOD(Redis, zRevRangeByLex)
         /* If the command failed, clean up and return FALSE */
         zval_dtor(return_value);
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -919,9 +895,6 @@ PHP_METHOD(Redis, zdiff)
         /* If the command failed, clean up and return FALSE */
         zval_dtor(return_value);
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -956,8 +929,5 @@ PHP_METHOD(Redis, zinter)
         /* If the command failed, clean up and return FALSE */
         zval_dtor(return_value);
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
