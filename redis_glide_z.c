@@ -1156,17 +1156,25 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
 
     /* Check if we have options that need to be added */
     int withscores = 0;
-    if (options != NULL && Z_TYPE_P(options) == IS_ARRAY)
+    if (options != NULL)
     {
-        zval *z_withscores;
-        if ((z_withscores = zend_hash_str_find(Z_ARRVAL_P(options), "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL &&
-            Z_TYPE_P(z_withscores) == IS_TRUE)
+        if (Z_TYPE_P(options) == IS_TRUE)
         {
+            /* Direct boolean TRUE means WITHSCORES - this is expected behavior */
             withscores = 1;
             arg_count++; /* Add WITHSCORES parameter */
         }
+        else if (Z_TYPE_P(options) == IS_ARRAY)
+        {
+            zval *z_withscores;
+            if ((z_withscores = zend_hash_str_find(Z_ARRVAL_P(options), "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL &&
+                Z_TYPE_P(z_withscores) == IS_TRUE)
+            {
+                withscores = 1;
+                arg_count++; /* Add WITHSCORES parameter */
+            }
+        }
     }
-
     /* Allocate memory for arguments */
     args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
     args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
@@ -1227,7 +1235,6 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             return 0;
         }
     }
-
     /* Convert end to string if needed */
     if (Z_TYPE_P(z_end) == IS_STRING)
     {
@@ -1268,7 +1275,6 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             return 0;
         }
     }
-
     /* Add WITHSCORES if required */
     if (withscores)
     {
@@ -1285,7 +1291,6 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
         args,      /* arguments array */
         args_len   /* argument lengths array */
     );
-
     /* Free allocated strings */
     int i;
     for (i = 0; i < allocated_count; i++)
@@ -1308,7 +1313,6 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
         free_command_result(result);
         return 0;
     }
-
     /* Process the result */
     if (result->response && result->response->response_type == Array)
     {
@@ -1328,7 +1332,6 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
         }
         success = 1;
     }
-
     /* Free the result */
     free_command_result(result);
 

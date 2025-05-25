@@ -128,7 +128,7 @@ PHP_METHOD(Redis, zRandMember)
 }
 /* }}} */
 
-/* {{{ proto array Redis::zRange(string key, mixed start, mixed end [, array options]) */
+/* {{{ proto array Redis::zRange(string key, mixed start, mixed end [, bool|array options]) */
 PHP_METHOD(Redis, zRange)
 {
     zval *object, *options = NULL;
@@ -137,8 +137,8 @@ PHP_METHOD(Redis, zRange)
     size_t key_len;
     zval *z_start, *z_end;
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|a",
+    /* Parse parameters - allow either boolean or array for the optional 4th parameter */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|b!a",
                                      &object, redis_ce, &key, &key_len, &z_start, &z_end,
                                      &options) == FAILURE)
     {

@@ -2683,7 +2683,8 @@ class Redis_Test extends TestSuite {
 
         $this->assertEquals([], $this->redis->zRange('key', 0, -1));
         $this->assertEquals([], $this->redis->zRange('key', 0, -1, true));
-
+        
+        echo __FILE__ . ':' . __LINE__;
         $this->assertEquals(1, $this->redis->zAdd('key', 0, 'val0'));
         $this->assertEquals(1, $this->redis->zAdd('key', 2, 'val2'));
         $this->assertEquals(2, $this->redis->zAdd('key', 4, 'val4', 5, 'val5')); // multiple parameters
@@ -2700,9 +2701,9 @@ class Redis_Test extends TestSuite {
                 $this->assertEquals(0, $this->redis->zAdd('key', ['gt'], 2, 'val3')); // gt option
             }
         }
-
+echo __FILE__ . ':' . __LINE__;
         $this->assertEquals(['val0', 'val1', 'val2', 'val3', 'val4', 'val5'], $this->redis->zRange('key', 0, -1));
-
+echo __FILE__ . ':' . __LINE__;
         // withscores
         $ret = $this->redis->zRange('key', 0, -1, true);
         $this->assertEquals(6, count($ret));
@@ -2719,7 +2720,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(1, $this->redis->zRem('key', 'val5'));
 
         $this->assertEquals(['val0', 'val1', 'val2'], $this->redis->zRange('key', 0, -1));
-
+echo __FILE__ . ':' . __LINE__;
         // zGetReverseRange
 
         $this->assertEquals(1, $this->redis->zAdd('key', 3, 'val3'));
