@@ -127,9 +127,6 @@ PHP_METHOD(Redis, zRandMember)
         zval_dtor(return_value);
         RETURN_FALSE;
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -153,7 +150,24 @@ PHP_METHOD(Redis, zRange)
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Not implemented yet, fallback to the regular Redis implementation */
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize return array */
+        array_init(return_value);
+
+        /* Execute the ZRANGE command using the Glide client */
+        if (execute_zrange_command(redis->glide_client, key, key_len, z_start, z_end, options, return_value))
+        {
+            return;
+        }
+
+        /* If the command failed, clean up and return FALSE */
+        zval_dtor(return_value);
+        RETURN_FALSE;
+    }
+
+    /* Fallback to the regular Redis implementation */
     RETURN_FALSE;
 }
 /* }}} */
@@ -601,9 +615,6 @@ PHP_METHOD(Redis, zScore)
             RETURN_FALSE; /* Error */
         }
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -664,9 +675,6 @@ PHP_METHOD(Redis, zMscore)
         zval_dtor(return_value);
         RETURN_FALSE;
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -709,9 +717,6 @@ PHP_METHOD(Redis, zRank)
             RETURN_FALSE; /* Error */
         }
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -754,9 +759,6 @@ PHP_METHOD(Redis, zRevRank)
             RETURN_FALSE; /* Error */
         }
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -790,9 +792,6 @@ PHP_METHOD(Redis, zIncrBy)
         }
         RETURN_FALSE;
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 

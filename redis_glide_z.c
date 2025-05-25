@@ -1137,6 +1137,204 @@ int execute_zremrangebyscore_command(const void *glide_client, const char *key, 
     return success;
 }
 
+int execute_zrange_command(const void *glide_client, const char *key, size_t key_len,
+                           zval *z_start, zval *z_end, zval *options, zval *return_value)
+{
+    /* Check if client and key are valid */
+    if (!glide_client || !key)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 3; /* key + start + end */
+    uintptr_t *args = NULL;
+    unsigned long *args_len = NULL;
+    char **allocated_strings = NULL;
+    int allocated_count = 0;
+    int success = 0;
+
+    /* Check if we have options that need to be added */
+    int withscores = 0;
+    if (options != NULL && Z_TYPE_P(options) == IS_ARRAY)
+    {
+        zval *z_withscores;
+        if ((z_withscores = zend_hash_str_find(Z_ARRVAL_P(options), "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL &&
+            Z_TYPE_P(z_withscores) == IS_TRUE)
+        {
+            withscores = 1;
+            arg_count++; /* Add WITHSCORES parameter */
+        }
+    }
+
+    /* Allocate memory for arguments */
+    args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    allocated_strings = (char **)emalloc((arg_count - 1) * sizeof(char *)); /* For potential string conversions */
+
+    if (!args || !args_len || !allocated_strings)
+    {
+        if (args)
+            efree(args);
+        if (args_len)
+            efree(args_len);
+        if (allocated_strings)
+            efree(allocated_strings);
+        return 0;
+    }
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Convert start to string if needed */
+    if (Z_TYPE_P(z_start) == IS_STRING)
+    {
+        args[1] = (uintptr_t)Z_STRVAL_P(z_start);
+        args_len[1] = Z_STRLEN_P(z_start);
+    }
+    else
+    {
+        char *str_val = NULL;
+        size_t str_len = 0;
+
+        if (Z_TYPE_P(z_start) == IS_LONG)
+        {
+            str_val = long_to_string(Z_LVAL_P(z_start), &str_len);
+        }
+        else if (Z_TYPE_P(z_start) == IS_DOUBLE)
+        {
+            str_val = double_to_string(Z_DVAL_P(z_start), &str_len);
+        }
+
+        if (str_val)
+        {
+            args[1] = (uintptr_t)str_val;
+            args_len[1] = str_len;
+            allocated_strings[allocated_count++] = str_val;
+        }
+        else
+        {
+            /* Error handling */
+            int i;
+            for (i = 0; i < allocated_count; i++)
+            {
+                efree(allocated_strings[i]);
+            }
+            efree(allocated_strings);
+            efree(args);
+            efree(args_len);
+            return 0;
+        }
+    }
+
+    /* Convert end to string if needed */
+    if (Z_TYPE_P(z_end) == IS_STRING)
+    {
+        args[2] = (uintptr_t)Z_STRVAL_P(z_end);
+        args_len[2] = Z_STRLEN_P(z_end);
+    }
+    else
+    {
+        char *str_val = NULL;
+        size_t str_len = 0;
+
+        if (Z_TYPE_P(z_end) == IS_LONG)
+        {
+            str_val = long_to_string(Z_LVAL_P(z_end), &str_len);
+        }
+        else if (Z_TYPE_P(z_end) == IS_DOUBLE)
+        {
+            str_val = double_to_string(Z_DVAL_P(z_end), &str_len);
+        }
+
+        if (str_val)
+        {
+            args[2] = (uintptr_t)str_val;
+            args_len[2] = str_len;
+            allocated_strings[allocated_count++] = str_val;
+        }
+        else
+        {
+            /* Error handling */
+            int i;
+            for (i = 0; i < allocated_count; i++)
+            {
+                efree(allocated_strings[i]);
+            }
+            efree(allocated_strings);
+            efree(args);
+            efree(args_len);
+            return 0;
+        }
+    }
+
+    /* Add WITHSCORES if required */
+    if (withscores)
+    {
+        const char *withscores_str = "WITHSCORES";
+        args[3] = (uintptr_t)withscores_str;
+        args_len[3] = 10; /* length of "WITHSCORES" */
+    }
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZRange,    /* command type from RequestType enum */
+        arg_count, /* number of arguments */
+        args,      /* arguments array */
+        args_len   /* argument lengths array */
+    );
+
+    /* Free allocated strings */
+    int i;
+    for (i = 0; i < allocated_count; i++)
+    {
+        efree(allocated_strings[i]);
+    }
+    efree(allocated_strings);
+    efree(args);
+    efree(args_len);
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
+    if (result->response && result->response->response_type == Array)
+    {
+        /* Convert array response to PHP array */
+        size_t i;
+        for (i = 0; i < result->response->array_value_len; i++)
+        {
+            struct CommandResponse *element = &result->response->array_value[i];
+            if (element->response_type == String)
+            {
+                add_next_index_stringl(return_value, element->string_value, element->string_value_len);
+            }
+            else if (element->response_type == Null)
+            {
+                add_next_index_null(return_value);
+            }
+        }
+        success = 1;
+    }
+
+    /* Free the result */
+    free_command_result(result);
+
+    return success;
+}
+
 int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
 {
     /* Check if client and key are valid */
