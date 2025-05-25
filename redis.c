@@ -768,130 +768,8 @@ PHP_METHOD(Redis, failover)
 }
 /* }}} */
 
-/* {{{ proto mixed Redis::function(string op, mixed ...args) */
-PHP_METHOD(Redis, function){
-    REDIS_PROCESS_CMD(function, redis_function_response)}
-
-/* }}} */
-
-/* flag : get, set {ATOMIC, MULTI, PIPELINE} */
-
-PHP_METHOD(Redis, multi)
-{
-
-    RedisSock *redis_sock;
-    char *resp;
-    int resp_len;
-    zval *object;
-    zend_long multi_value = MULTI;
-
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-                                     "O|l", &object, redis_ce, &multi_value) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* if the flag is activated, send the command, the reply will be "QUEUED"
-     * or -ERR */
-    if ((redis_sock = redis_sock_get(object, 0)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-
-    if (multi_value == PIPELINE)
-    {
-        /* Cannot enter pipeline mode in a MULTI block */
-        if (IS_MULTI(redis_sock))
-        {
-            php_error_docref(NULL, E_ERROR, "Can't activate pipeline in multi mode!");
-            RETURN_FALSE;
-        }
-
-        /* Enable PIPELINE if we're not already in one */
-        if (IS_ATOMIC(redis_sock))
-        {
-            REDIS_ENABLE_MODE(redis_sock, PIPELINE);
-        }
-    }
-    else if (multi_value == MULTI)
-    {
-        /* Don't want to do anything if we're already in MULTI mode */
-        if (!IS_MULTI(redis_sock))
-        {
-            if (IS_PIPELINE(redis_sock))
-            {
-                PIPELINE_ENQUEUE_COMMAND(RESP_MULTI_CMD, sizeof(RESP_MULTI_CMD) - 1);
-                REDIS_SAVE_CALLBACK(NULL, NULL);
-                REDIS_ENABLE_MODE(redis_sock, MULTI);
-            }
-            else
-            {
-                if (redis_sock_write(redis_sock, ZEND_STRL(RESP_MULTI_CMD)) < 0)
-                {
-                    RETURN_FALSE;
-                }
-                if ((resp = redis_sock_read(redis_sock, &resp_len)) == NULL)
-                {
-                    RETURN_FALSE;
-                }
-                else if (redis_strncmp(resp, ZEND_STRL("+OK")) != 0)
-                {
-                    efree(resp);
-                    RETURN_FALSE;
-                }
-                efree(resp);
-                REDIS_ENABLE_MODE(redis_sock, MULTI);
-            }
-        }
-    }
-    else
-    {
-        php_error_docref(NULL, E_WARNING, "Unknown mode sent to Redis::multi");
-        RETURN_FALSE;
-    }
-
-    RETURN_ZVAL(getThis(), 1, 0);
-}
-
-/* discard */
-PHP_METHOD(Redis, discard)
-{
-    int ret = FAILURE;
-    RedisSock *redis_sock;
-    zval *object;
-
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-                                     &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    if ((redis_sock = redis_sock_get(object, 0)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-
-    if (IS_PIPELINE(redis_sock))
-    {
-        ret = SUCCESS;
-        smart_string_free(&redis_sock->pipeline_cmd);
-    }
-    else if (IS_MULTI(redis_sock))
-    {
-        ret = redis_send_discard(redis_sock);
-    }
-    if (ret == SUCCESS)
-    {
-        redis_free_reply_callbacks(redis_sock);
-        redis_sock->mode = ATOMIC;
-        RETURN_TRUE;
-    }
-    RETURN_FALSE;
-}
-
-PHP_REDIS_API int
-redis_sock_read_multibulk_multi_reply(INTERNAL_FUNCTION_PARAMETERS,
-                                      RedisSock *redis_sock, zval *z_tab)
+PHP_REDIS_API int redis_sock_read_multibulk_multi_reply(INTERNAL_FUNCTION_PARAMETERS,
+                                                        RedisSock *redis_sock, zval *z_tab)
 {
 
     char inbuf[4096];
@@ -914,79 +792,6 @@ redis_sock_read_multibulk_multi_reply(INTERNAL_FUNCTION_PARAMETERS,
 
     return redis_sock_read_multibulk_multi_reply_loop(INTERNAL_FUNCTION_PARAM_PASSTHRU,
                                                       redis_sock, z_tab);
-}
-
-/* exec */
-PHP_METHOD(Redis, exec)
-{
-    RedisSock *redis_sock;
-    int ret;
-    zval *object, z_ret;
-
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-                                     "O", &object, redis_ce) == FAILURE ||
-        (redis_sock = redis_sock_get(object, 0)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-
-    ZVAL_FALSE(&z_ret);
-
-    if (IS_MULTI(redis_sock))
-    {
-        if (IS_PIPELINE(redis_sock))
-        {
-            PIPELINE_ENQUEUE_COMMAND(RESP_EXEC_CMD, sizeof(RESP_EXEC_CMD) - 1);
-            REDIS_SAVE_CALLBACK(NULL, NULL);
-            REDIS_DISABLE_MODE(redis_sock, MULTI);
-            RETURN_ZVAL(getThis(), 1, 0);
-        }
-        if (redis_sock_write(redis_sock, ZEND_STRL(RESP_EXEC_CMD)) < 0)
-        {
-            RETURN_FALSE;
-        }
-        ret = redis_sock_read_multibulk_multi_reply(
-            INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, &z_ret);
-        redis_free_reply_callbacks(redis_sock);
-        REDIS_DISABLE_MODE(redis_sock, MULTI);
-        redis_sock->watching = 0;
-        if (ret < 0)
-        {
-            zval_dtor(&z_ret);
-            ZVAL_FALSE(&z_ret);
-        }
-    }
-
-    if (IS_PIPELINE(redis_sock))
-    {
-        if (redis_sock->pipeline_cmd.len == 0)
-        {
-            /* Empty array when no command was run. */
-            ZVAL_EMPTY_ARRAY(&z_ret);
-        }
-        else
-        {
-            if (redis_sock_write(redis_sock, redis_sock->pipeline_cmd.c,
-                                 redis_sock->pipeline_cmd.len) < 0)
-            {
-                ZVAL_FALSE(&z_ret);
-            }
-            else
-            {
-                array_init(&z_ret);
-                if (redis_sock_read_multibulk_multi_reply_loop(
-                        INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, &z_ret) != SUCCESS)
-                {
-                    zval_dtor(&z_ret);
-                    ZVAL_FALSE(&z_ret);
-                }
-            }
-            smart_string_free(&redis_sock->pipeline_cmd);
-        }
-        redis_free_reply_callbacks(redis_sock);
-        REDIS_DISABLE_MODE(redis_sock, PIPELINE);
-    }
-    RETURN_ZVAL(&z_ret, 0, 1);
 }
 
 PHP_REDIS_API int
@@ -1210,12 +1015,6 @@ PHP_METHOD(Redis, slowlog)
     REDIS_PROCESS_CMD(slowlog, redis_read_variant_reply);
 }
 
-/* {{{ proto Redis::wait(int num_slaves, int ms) }}} */
-PHP_METHOD(Redis, wait)
-{
-    REDIS_PROCESS_KW_CMD("WAIT", redis_long_long_cmd, redis_long_response);
-}
-
 /*
  * {{{ proto Redis::pubsub("channels", pattern);
  *     proto Redis::pubsub("numsub", Array channels);
@@ -1250,37 +1049,11 @@ PHP_METHOD(Redis, evalsha_ro)
     REDIS_PROCESS_KW_CMD("EVALSHA_RO", redis_eval_cmd, redis_read_raw_variant_reply);
 }
 
-/* {{{ proto variant Redis::fcall(string fn [, array keys [, array args]]) */
-PHP_METHOD(Redis, fcall)
-{
-    REDIS_PROCESS_KW_CMD("FCALL", redis_fcall_cmd, redis_read_raw_variant_reply);
-}
-
-/* {{{ proto variant Redis::fcall_ro(string fn [, array keys [, array args]]) */
-PHP_METHOD(Redis, fcall_ro)
-{
-    REDIS_PROCESS_KW_CMD("FCALL_RO", redis_fcall_cmd, redis_read_raw_variant_reply);
-}
-
 /* {{{ public function script($args...): mixed }}} */
 PHP_METHOD(Redis, script)
 {
     REDIS_PROCESS_CMD(script, redis_read_variant_reply);
 }
-
-/* {{{ proto DUMP key */
-PHP_METHOD(Redis, dump)
-{
-    REDIS_PROCESS_KW_CMD("DUMP", redis_key_cmd, redis_string_response);
-}
-/* }}} */
-
-/* {{{ proto Redis::restore(ttl, key, value) */
-PHP_METHOD(Redis, restore)
-{
-    REDIS_PROCESS_CMD(restore, redis_boolean_response);
-}
-/* }}} */
 
 /* {{{ proto Redis::debug(string key) */
 PHP_METHOD(Redis, debug)

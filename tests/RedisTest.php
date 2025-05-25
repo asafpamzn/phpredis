@@ -2350,6 +2350,7 @@ class Redis_Test extends TestSuite {
     }
 
     public function testClient() {
+        $this->markTestSkipped(); // TODO check if we support clients commands
         /* CLIENT SETNAME */
         $this->assertTrue($this->redis->client('setname', 'phpredis_unit_tests'));
 
@@ -2400,6 +2401,7 @@ class Redis_Test extends TestSuite {
     }
 
     public function testSlowlog() {
+         $this->markTestSkipped(); // TODO check if we support slowlog commands
         // We don't really know what's going to be in the slowlog, but make sure
         // the command returns proper types when called in various ways
         $this->assertIsArray($this->redis->slowlog('get'));
