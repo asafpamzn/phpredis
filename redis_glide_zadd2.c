@@ -16,6 +16,7 @@
 
 #include "php_redis.h"
 #include "redis_glide.h"
+#include "redis_glide_zadd.h"
 #include "command_response.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
@@ -23,9 +24,9 @@
 #include <stdio.h>
 
 /* Helper function to parse range options */
-static int parse_range_options(zval *options, int *has_withscores,
-                               int *has_byscore, int *has_bylex, int *has_rev,
-                               int *has_limit, long *offset, long *count)
+int parse_range_options(zval *options, int *has_withscores,
+                        int *has_byscore, int *has_bylex, int *has_rev,
+                        int *has_limit, long *offset, long *count)
 {
     if (!options || Z_TYPE_P(options) != IS_ARRAY)
     {
@@ -91,112 +92,4 @@ static int parse_range_options(zval *options, int *has_withscores,
     }
 
     return 1;
-}
-
-/* Execute a ZREVRANGE command using the Valkey Glide client */
-int execute_zrevrange_command(const void *glide_client, const char *key, size_t key_len,
-                              zval *z_start, zval *z_end, zval *options, zval *return_value)
-{
-    /* Check if client and key are valid */
-    if (!glide_client || !key || !z_start || !z_end)
-    {
-        return 0;
-    }
-
-    /* Parse range options */
-    int has_withscores = 0, has_byscore = 0, has_bylex = 0, has_rev = 1; /* ZREVRANGE is always REV */
-    int has_limit = 0;
-    long offset = 0, count = 0;
-
-    if (options)
-    {
-        parse_range_options(options, &has_withscores, &has_byscore, &has_bylex, NULL,
-                            &has_limit, &offset, &count);
-    }
-
-    /* Use the helper function to build and execute command */
-    return build_range_cmd_args(glide_client, ZRange, key, key_len,
-                                z_start, z_end, has_withscores, has_byscore, has_bylex,
-                                has_rev, has_limit, offset, count, return_value);
-}
-
-/* Execute a ZRANGEBYSCORE command using the Valkey Glide client */
-int execute_zrangebyscore_command(const void *glide_client, const char *key, size_t key_len,
-                                  zval *z_min, zval *z_max, zval *options, zval *return_value)
-{
-    /* Check if client and key are valid */
-    if (!glide_client || !key || !z_min || !z_max)
-    {
-        return 0;
-    }
-
-    /* Parse range options */
-    int has_withscores = 0, has_byscore = 1, has_bylex = 0, has_rev = 0; /* ZRANGEBYSCORE uses BYSCORE */
-    int has_limit = 0;
-    long offset = 0, count = 0;
-
-    if (options)
-    {
-        parse_range_options(options, &has_withscores, NULL, NULL, &has_rev,
-                            &has_limit, &offset, &count);
-    }
-
-    /* Use the helper function to build and execute command */
-    return build_range_cmd_args(glide_client, ZRange, key, key_len,
-                                z_min, z_max, has_withscores, has_byscore, has_bylex,
-                                has_rev, has_limit, offset, count, return_value);
-}
-
-/* Execute a ZREVRANGEBYSCORE command using the Valkey Glide client */
-int execute_zrevrangebyscore_command(const void *glide_client, const char *key, size_t key_len,
-                                     zval *z_max, zval *z_min, zval *options, zval *return_value)
-{
-    /* Check if client and key are valid */
-    if (!glide_client || !key || !z_min || !z_max)
-    {
-        return 0;
-    }
-
-    /* Parse range options */
-    int has_withscores = 0, has_byscore = 1, has_bylex = 0, has_rev = 1; /* ZREVRANGEBYSCORE uses BYSCORE + REV */
-    int has_limit = 0;
-    long offset = 0, count = 0;
-
-    if (options)
-    {
-        parse_range_options(options, &has_withscores, NULL, NULL, NULL,
-                            &has_limit, &offset, &count);
-    }
-
-    /* Use the helper function to build and execute command */
-    return build_range_cmd_args(glide_client, ZRange, key, key_len,
-                                z_max, z_min, has_withscores, has_byscore, has_bylex,
-                                has_rev, has_limit, offset, count, return_value);
-}
-
-/* Execute a ZRANGEBYLEX command using the Valkey Glide client */
-int execute_zrangebylex_command(const void *glide_client, const char *key, size_t key_len,
-                                zval *z_min, zval *z_max, zval *options, zval *return_value)
-{
-    /* Check if client and key are valid */
-    if (!glide_client || !key || !z_min || !z_max)
-    {
-        return 0;
-    }
-
-    /* Parse range options */
-    int has_withscores = 0, has_byscore = 0, has_bylex = 1, has_rev = 0; /* ZRANGEBYLEX uses BYLEX */
-    int has_limit = 0;
-    long offset = 0, count = 0;
-
-    if (options)
-    {
-        parse_range_options(options, NULL, NULL, NULL, &has_rev,
-                            &has_limit, &offset, &count);
-    }
-
-    /* Use the helper function to build and execute command */
-    return build_range_cmd_args(glide_client, ZRange, key, key_len,
-                                z_min, z_max, has_withscores, has_byscore, has_bylex,
-                                has_rev, has_limit, offset, count, return_value);
 }

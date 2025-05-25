@@ -105,19 +105,6 @@ class Redis_Test extends TestSuite {
         }
     }
 
-    protected function sessionPrefix(): string {
-        return 'PHPREDIS_SESSION:';
-    }
-
-    protected function sessionSaveHandler(): string {
-        return 'redis';
-    }
-
-    protected function sessionSavePath(): string {
-        return sprintf('tcp://%s:%d?%s', $this->getHost(), $this->getPort(),
-                       $this->getAuthFragment());
-    }
-
     protected function getAuthFragment() {
         $this->getAuthParts($user, $pass);
 
@@ -7583,14 +7570,6 @@ class Redis_Test extends TestSuite {
         }
     }
 
-    protected function sessionRunner() {
-        $this->getAuthParts($user, $pass);
-
-        return (new SessionHelpers\Runner())
-            ->prefix($this->sessionPrefix())
-            ->handler($this->sessionSaveHandler())
-            ->savePath($this->sessionSavePath());
-    }
 
     protected function testRequiresMode(string $mode) {
         if (php_sapi_name() != $mode) {

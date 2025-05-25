@@ -39,7 +39,6 @@ int build_range_cmd_args(const void *glide_client, enum RequestType cmd_type, co
 int execute_zadd_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, int flags, long *output_value, double *output_value_double);
 
 /* ZRANGE command family */
-int execute_zrange_command(const void *glide_client, const char *key, size_t key_len, zval *z_start, zval *z_end, zval *options, zval *return_value);
 int execute_zrangestore_command(const void *glide_client, const char *dst, size_t dst_len, const char *src, size_t src_len, zval *z_start, zval *z_end, zval *options, long *output_value);
 
 /* Functions from redis_glide_zadd2.c */

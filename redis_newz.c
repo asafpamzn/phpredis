@@ -26,6 +26,7 @@
 #include "redis_cluster.h"
 #include "redis_commands.h"
 #include "redis_glide.h"
+#include "redis_glide_zadd.h"
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>

@@ -16,6 +16,7 @@
 
 #include "php_redis.h"
 #include "redis_glide.h"
+#include "redis_glide_zadd.h"
 #include "command_response.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
