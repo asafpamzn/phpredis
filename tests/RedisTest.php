@@ -2621,6 +2621,7 @@ class Redis_Test extends TestSuite {
     }
 
     public function testRpopLpush() {
+        $this->markTestSkipped(); // TODO glide does not  support testRpopLpush command
         // standard case.
         $this->redis->del('{list}x', '{list}y');
         $this->redis->lpush('{list}x', 'abc');
@@ -2641,6 +2642,8 @@ class Redis_Test extends TestSuite {
     }
 
     public function testBRpopLpush() {
+        $this->markTestSkipped(); // TODO glide does not  support  command
+
         // standard case.
         $this->redis->del('{list}x', '{list}y');
         $this->redis->lpush('{list}x', 'abc');

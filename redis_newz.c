@@ -340,9 +340,6 @@ PHP_METHOD(Redis, zLexCount)
         }
         RETURN_FALSE;
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -378,9 +375,6 @@ PHP_METHOD(Redis, zRemRangeByLex)
         }
         RETURN_FALSE;
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -429,9 +423,6 @@ PHP_METHOD(Redis, zRem)
 
     /* Free our arguments array */
     efree(z_args);
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -467,9 +458,6 @@ PHP_METHOD(Redis, zRemRangeByScore)
         }
         RETURN_FALSE;
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -504,9 +492,6 @@ PHP_METHOD(Redis, zRemRangeByRank)
         }
         RETURN_FALSE;
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -542,9 +527,6 @@ PHP_METHOD(Redis, zCount)
         }
         RETURN_FALSE;
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
@@ -577,9 +559,6 @@ PHP_METHOD(Redis, zCard)
         }
         RETURN_FALSE;
     }
-
-    /* Fallback to the regular Redis implementation */
-    RETURN_FALSE;
 }
 /* }}} */
 
