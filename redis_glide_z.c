@@ -1143,9 +1143,10 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     /* Check if client and key are valid */
     if (!glide_client || !key)
     {
+        printf("Invalid glide client or key for ZRANGE command.\n");
         return 0;
     }
-
+    printf("Executing ZRANGE command with key: %s\n", key);
     /* Prepare command arguments */
     unsigned long arg_count = 3; /* key + start + end */
     uintptr_t *args = NULL;
@@ -1156,16 +1157,20 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
 
     /* Check if we have options that need to be added */
     int withscores = 0;
+    printf("Executing ZRANGE command with key: %s\n", key);
     if (options != NULL)
     {
+        printf("Options provided for ZRANGE command.\n");
         if (Z_TYPE_P(options) == IS_TRUE)
         {
+            printf("Options is a boolean TRUE, setting WITHSCORES.\n");
             /* Direct boolean TRUE means WITHSCORES - this is expected behavior */
             withscores = 1;
             arg_count++; /* Add WITHSCORES parameter */
         }
         else if (Z_TYPE_P(options) == IS_ARRAY)
         {
+            printf("Options is an array, checking for WITHSCORES.\n");
             zval *z_withscores;
             if ((z_withscores = zend_hash_str_find(Z_ARRVAL_P(options), "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL &&
                 Z_TYPE_P(z_withscores) == IS_TRUE)
@@ -1188,6 +1193,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             efree(args_len);
         if (allocated_strings)
             efree(allocated_strings);
+        printf("Memory allocation failed for ZRANGE command arguments.\n");
         return 0;
     }
 
@@ -1232,6 +1238,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             efree(allocated_strings);
             efree(args);
             efree(args_len);
+            printf("Failed to convert start value to string for ZRANGE command.\n");
             return 0;
         }
     }
@@ -1272,6 +1279,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             efree(allocated_strings);
             efree(args);
             efree(args_len);
+            printf("Failed to convert end value to string for ZRANGE command.\n");
             return 0;
         }
     }
@@ -1284,6 +1292,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     }
 
     /* Execute the command */
+    printf("Executing ZRANGE command with %lu arguments.\n", arg_count);
     CommandResult *result = execute_command(
         glide_client,
         ZRange,    /* command type from RequestType enum */
@@ -1304,6 +1313,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     /* Check if the command was successful */
     if (!result)
     {
+        printf("Failed to execute ZRANGE command: result is NULL\n");
         return 0;
     }
 
@@ -1311,30 +1321,16 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     if (result->command_error)
     {
         free_command_result(result);
+        printf("ZRANGE command error: %s\n", result->command_error);
         return 0;
     }
     /* Process the result */
-    if (result->response && result->response->response_type == Array)
-    {
-        /* Convert array response to PHP array */
-        size_t i;
-        for (i = 0; i < result->response->array_value_len; i++)
-        {
-            struct CommandResponse *element = &result->response->array_value[i];
-            if (element->response_type == String)
-            {
-                add_next_index_stringl(return_value, element->string_value, element->string_value_len);
-            }
-            else if (element->response_type == Null)
-            {
-                add_next_index_null(return_value);
-            }
-        }
-        success = 1;
-    }
-    /* Free the result */
-    free_command_result(result);
+    success = command_response_to_zval(result->response, return_value, 0);
 
+    printf("result->response = %p, response_type = %d\n", result->response, result->response ? result->response->response_type : -1);
+
+    free_command_result(result);
+    printf("ZRANGE command completed successfully. succees = %d\n", success);
     return success;
 }
 

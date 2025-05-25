@@ -138,19 +138,23 @@ PHP_METHOD(Redis, zRange)
     zval *z_start, *z_end;
 
     /* Parse parameters - allow either boolean or array for the optional 4th parameter */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|b!a",
+    printf("Parsing parameters for zRange command.\n");
+    printf("zend_parse_method_parameters called with %d arguments.\n", ZEND_NUM_ARGS());
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|z",
                                      &object, redis_ce, &key, &key_len, &z_start, &z_end,
                                      &options) == FAILURE)
     {
+        printf("Failed to parse parameters for zRange command.\n");
         RETURN_FALSE;
     }
-
+    printf("Parsed parameters successfully.\n");
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
+        printf("Using Glide client for zRange command.\n");
         /* Initialize return array */
         array_init(return_value);
 
