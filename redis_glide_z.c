@@ -1158,6 +1158,12 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
 
     /* Check if we have options that need to be added */
     int withscores = 0;
+    int byscore = 0;
+    int rev = 0;
+    int limit = 0;
+    long limit_offset = 0;
+    long limit_count = 0;
+
     printf("Executing ZRANGE command with key: %s\n", key);
     if (options != NULL)
     {
@@ -1171,13 +1177,96 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
         }
         else if (Z_TYPE_P(options) == IS_ARRAY)
         {
-            printf("Options is an array, checking for WITHSCORES.\n");
+            printf("Options is an array, checking for parameters.\n");
             zval *z_withscores;
             if ((z_withscores = zend_hash_str_find(Z_ARRVAL_P(options), "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL &&
                 Z_TYPE_P(z_withscores) == IS_TRUE)
             {
                 withscores = 1;
                 arg_count++; /* Add WITHSCORES parameter */
+            }
+
+            /* Check for BYSCORE option */
+            zval *z_byscore;
+            if ((z_byscore = zend_hash_str_find(Z_ARRVAL_P(options), "byscore", sizeof("byscore") - 1)) != NULL ||
+                (z_byscore = zend_hash_str_find(Z_ARRVAL_P(options), "BYSCORE", sizeof("BYSCORE") - 1)) != NULL)
+            {
+                byscore = 1;
+                arg_count++; /* Add BYSCORE parameter */
+                printf("BYSCORE option found.\n");
+            }
+            else
+            {
+                /* Check if 'byscore' exists as a value in the array */
+                zval *entry;
+                ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(options), entry)
+                {
+                    if (Z_TYPE_P(entry) == IS_STRING &&
+                        (strncasecmp(Z_STRVAL_P(entry), "byscore", Z_STRLEN_P(entry)) == 0))
+                    {
+                        byscore = 1;
+                        arg_count++; /* Add BYSCORE parameter */
+                        printf("BYSCORE option found as array value.\n");
+                        break;
+                    }
+                }
+                ZEND_HASH_FOREACH_END();
+            }
+
+            /* Check for REV option */
+            zval *z_rev;
+            if ((z_rev = zend_hash_str_find(Z_ARRVAL_P(options), "rev", sizeof("rev") - 1)) != NULL ||
+                (z_rev = zend_hash_str_find(Z_ARRVAL_P(options), "REV", sizeof("REV") - 1)) != NULL)
+            {
+                rev = 1;
+                arg_count++; /* Add REV parameter */
+                printf("REV option found.\n");
+            }
+            else
+            {
+                /* Check if 'rev' exists as a value in the array */
+                zval *entry;
+                ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(options), entry)
+                {
+                    if (Z_TYPE_P(entry) == IS_STRING &&
+                        (strncasecmp(Z_STRVAL_P(entry), "rev", Z_STRLEN_P(entry)) == 0))
+                    {
+                        rev = 1;
+                        arg_count++; /* Add REV parameter */
+                        printf("REV option found as array value.\n");
+                        break;
+                    }
+                }
+                ZEND_HASH_FOREACH_END();
+            }
+
+            /* Check for LIMIT option */
+            zval *z_limit;
+            if ((z_limit = zend_hash_str_find(Z_ARRVAL_P(options), "limit", sizeof("limit") - 1)) != NULL ||
+                (z_limit = zend_hash_str_find(Z_ARRVAL_P(options), "LIMIT", sizeof("LIMIT") - 1)) != NULL)
+            {
+                if (Z_TYPE_P(z_limit) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(z_limit)) >= 2)
+                {
+                    zval *z_offset, *z_count;
+                    HashTable *limit_ht = Z_ARRVAL_P(z_limit);
+
+                    /* Get offset (first element) */
+                    z_offset = zend_hash_index_find(limit_ht, 0);
+                    if (z_offset && Z_TYPE_P(z_offset) == IS_LONG)
+                    {
+                        limit_offset = Z_LVAL_P(z_offset);
+
+                        /* Get count (second element) */
+                        z_count = zend_hash_index_find(limit_ht, 1);
+                        if (z_count && Z_TYPE_P(z_count) == IS_LONG)
+                        {
+                            limit_count = Z_LVAL_P(z_count);
+                            limit = 1;
+                            arg_count += 3; /* Add LIMIT + offset + count parameters */
+                            printf("LIMIT option found with offset %ld and count %ld.\n", limit_offset, limit_count);
+                        }
+                    }
+                }
             }
         }
     }
@@ -1284,12 +1373,90 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             return 0;
         }
     }
-    /* Add WITHSCORES if required */
+    /* Add optional parameters in the correct order */
+    int arg_idx = 3; /* Start after key, start, end */
+
+    /* Add BYSCORE parameter if required */
+    if (byscore)
+    {
+        const char *byscore_str = "BYSCORE";
+        args[arg_idx] = (uintptr_t)byscore_str;
+        args_len[arg_idx] = 7; /* length of "BYSCORE" */
+        arg_idx++;
+    }
+
+    /* Add REV parameter if required */
+    if (rev)
+    {
+        const char *rev_str = "REV";
+        args[arg_idx] = (uintptr_t)rev_str;
+        args_len[arg_idx] = 3; /* length of "REV" */
+        arg_idx++;
+    }
+
+    /* Add LIMIT parameter if required */
+    if (limit)
+    {
+        /* Add LIMIT keyword */
+        const char *limit_str = "LIMIT";
+        args[arg_idx] = (uintptr_t)limit_str;
+        args_len[arg_idx] = 5; /* length of "LIMIT" */
+        arg_idx++;
+
+        /* Add offset parameter */
+        char offset_str[32];
+        int offset_str_len = snprintf(offset_str, sizeof(offset_str), "%ld", limit_offset);
+        char *offset_str_copy = estrndup(offset_str, offset_str_len);
+        if (!offset_str_copy)
+        {
+            /* Error handling */
+            int i;
+            for (i = 0; i < allocated_count; i++)
+            {
+                efree(allocated_strings[i]);
+            }
+            efree(allocated_strings);
+            efree(args);
+            efree(args_len);
+            printf("Failed to allocate memory for LIMIT offset value.\n");
+            return 0;
+        }
+        args[arg_idx] = (uintptr_t)offset_str_copy;
+        args_len[arg_idx] = offset_str_len;
+        allocated_strings[allocated_count++] = offset_str_copy;
+        arg_idx++;
+
+        /* Add count parameter */
+        char count_str[32];
+        int count_str_len = snprintf(count_str, sizeof(count_str), "%ld", limit_count);
+        char *count_str_copy = estrndup(count_str, count_str_len);
+        if (!count_str_copy)
+        {
+            /* Error handling */
+            int i;
+            for (i = 0; i < allocated_count; i++)
+            {
+                efree(allocated_strings[i]);
+            }
+            efree(allocated_strings);
+            efree(args);
+            efree(args_len);
+            printf("Failed to allocate memory for LIMIT count value.\n");
+            return 0;
+        }
+        args[arg_idx] = (uintptr_t)count_str_copy;
+        args_len[arg_idx] = count_str_len;
+        allocated_strings[allocated_count++] = count_str_copy;
+        arg_idx++;
+    }
+
+    /* Add WITHSCORES if required - add it last as per Redis command syntax */
     if (withscores)
     {
         const char *withscores_str = "WITHSCORES";
-        args[3] = (uintptr_t)withscores_str;
-        args_len[3] = 10; /* length of "WITHSCORES" */
+        args[arg_idx] = (uintptr_t)withscores_str;
+        args_len[arg_idx] = 10; /* length of "WITHSCORES" */
+        arg_idx++;
     }
 
     /* Execute the command */
