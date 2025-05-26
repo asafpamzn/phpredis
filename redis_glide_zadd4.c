@@ -215,6 +215,7 @@ int execute_zrangebyscore_command(const void *glide_client, const char *key, siz
 
     if (options)
     {
+
         parse_range_options(options, &has_withscores, NULL, &has_bylex, &has_rev,
                             &has_limit, &offset, &count);
     }
@@ -359,7 +360,7 @@ int execute_zrangebyscore_command(const void *glide_client, const char *key, siz
     efree(args_len);
 
     /* Process the result */
-    printf("has_withscores: %d\n", has_withscores);
+
     return process_zrange_response(result, return_value, has_withscores);
 }
 
