@@ -36,8 +36,32 @@ int parse_range_options(zval *options, int *has_withscores,
     HashTable *options_ht = Z_ARRVAL_P(options);
     zval *z_tmp;
 
-    /* Look for WITHSCORES option */
-    /* Look for WITHSCORES option */
+    /* First iterate through array values to check for flat format options */
+    ZEND_HASH_FOREACH_VAL(options_ht, z_tmp)
+    {
+        if (Z_TYPE_P(z_tmp) == IS_STRING)
+        {
+            if (strcasecmp(Z_STRVAL_P(z_tmp), "WITHSCORES") == 0)
+            {
+                *has_withscores = 1;
+            }
+            else if (strcasecmp(Z_STRVAL_P(z_tmp), "BYSCORE") == 0)
+            {
+                *has_byscore = 1;
+            }
+            else if (strcasecmp(Z_STRVAL_P(z_tmp), "BYLEX") == 0)
+            {
+                *has_bylex = 1;
+            }
+            else if (strcasecmp(Z_STRVAL_P(z_tmp), "REV") == 0)
+            {
+                *has_rev = 1;
+            }
+        }
+    }
+    ZEND_HASH_FOREACH_END();
+
+    /* Look for WITHSCORES option as key-value */
     if ((z_tmp = zend_hash_str_find(options_ht, "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL ||
         (z_tmp = zend_hash_str_find(options_ht, "withscores", sizeof("withscores") - 1)) != NULL)
     {
@@ -48,7 +72,7 @@ int parse_range_options(zval *options, int *has_withscores,
         }
     }
 
-    /* Look for BY option */
+    /* Look for BY option as key-value */
     if ((z_tmp = zend_hash_str_find(options_ht, "BY", sizeof("BY") - 1)) != NULL ||
         (z_tmp = zend_hash_str_find(options_ht, "by", sizeof("by") - 1)) != NULL)
     {
@@ -65,7 +89,7 @@ int parse_range_options(zval *options, int *has_withscores,
         }
     }
 
-    /* Look for REV option */
+    /* Look for REV option as key-value */
     if ((z_tmp = zend_hash_str_find(options_ht, "REV", sizeof("REV") - 1)) != NULL ||
         (z_tmp = zend_hash_str_find(options_ht, "rev", sizeof("rev") - 1)) != NULL)
     {

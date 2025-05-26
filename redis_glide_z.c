@@ -904,7 +904,6 @@ int execute_zrem_command(const void *glide_client, const char *key, size_t key_l
             }
         }
     }
-    printf("Allocated %d strings for ZREM command\n", allocated_count);
 
     /* Execute the command */
     CommandResult *result = execute_command(
@@ -936,7 +935,7 @@ int execute_zrem_command(const void *glide_client, const char *key, size_t key_l
         free_command_result(result);
         return 0;
     }
-    printf("ZREM command executed successfully\n");
+
     /* Process the result */
     int success = 0;
     if (result->response && result->response->response_type == Int)
@@ -1147,7 +1146,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
         printf("Invalid glide client or key for ZRANGE command.\n");
         return 0;
     }
-    printf("Executing ZRANGE command with key: %s\n", key);
+
     /* Prepare command arguments */
     unsigned long arg_count = 3; /* key + start + end */
     uintptr_t *args = NULL;
@@ -1164,20 +1163,19 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     long limit_offset = 0;
     long limit_count = 0;
 
-    printf("Executing ZRANGE command with key: %s\n", key);
     if (options != NULL)
     {
-        printf("Options provided for ZRANGE command.\n");
+
         if (Z_TYPE_P(options) == IS_TRUE)
         {
-            printf("Options is a boolean TRUE, setting WITHSCORES.\n");
+
             /* Direct boolean TRUE means WITHSCORES - this is expected behavior */
             withscores = 1;
             arg_count++; /* Add WITHSCORES parameter */
         }
         else if (Z_TYPE_P(options) == IS_ARRAY)
         {
-            printf("Options is an array, checking for parameters.\n");
+
             zval *z_withscores;
             if ((z_withscores = zend_hash_str_find(Z_ARRVAL_P(options), "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL &&
                 Z_TYPE_P(z_withscores) == IS_TRUE)
@@ -1193,7 +1191,6 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             {
                 byscore = 1;
                 arg_count++; /* Add BYSCORE parameter */
-                printf("BYSCORE option found.\n");
             }
             else
             {
@@ -1206,7 +1203,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
                     {
                         byscore = 1;
                         arg_count++; /* Add BYSCORE parameter */
-                        printf("BYSCORE option found as array value.\n");
+
                         break;
                     }
                 }
@@ -1220,7 +1217,6 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             {
                 rev = 1;
                 arg_count++; /* Add REV parameter */
-                printf("REV option found.\n");
             }
             else
             {
@@ -1233,7 +1229,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
                     {
                         rev = 1;
                         arg_count++; /* Add REV parameter */
-                        printf("REV option found as array value.\n");
+
                         break;
                     }
                 }
@@ -1263,7 +1259,6 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
                             limit_count = Z_LVAL_P(z_count);
                             limit = 1;
                             arg_count += 3; /* Add LIMIT + offset + count parameters */
-                            printf("LIMIT option found with offset %ld and count %ld.\n", limit_offset, limit_count);
                         }
                     }
                 }
@@ -1283,7 +1278,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             efree(args_len);
         if (allocated_strings)
             efree(allocated_strings);
-        printf("Memory allocation failed for ZRANGE command arguments.\n");
+
         return 0;
     }
 
@@ -1328,7 +1323,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             efree(allocated_strings);
             efree(args);
             efree(args_len);
-            printf("Failed to convert start value to string for ZRANGE command.\n");
+
             return 0;
         }
     }
@@ -1369,7 +1364,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             efree(allocated_strings);
             efree(args);
             efree(args_len);
-            printf("Failed to convert end value to string for ZRANGE command.\n");
+
             return 0;
         }
     }
@@ -1418,7 +1413,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             efree(allocated_strings);
             efree(args);
             efree(args_len);
-            printf("Failed to allocate memory for LIMIT offset value.\n");
+
             return 0;
         }
         args[arg_idx] = (uintptr_t)offset_str_copy;
@@ -1441,7 +1436,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             efree(allocated_strings);
             efree(args);
             efree(args_len);
-            printf("Failed to allocate memory for LIMIT count value.\n");
+
             return 0;
         }
         args[arg_idx] = (uintptr_t)count_str_copy;
@@ -1460,7 +1455,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     }
 
     /* Execute the command */
-    printf("Executing ZRANGE command with %lu arguments.\n", arg_count);
+
     CommandResult *result = execute_command(
         glide_client,
         ZRange,    /* command type from RequestType enum */
@@ -1481,7 +1476,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     /* Check if the command was successful */
     if (!result)
     {
-        printf("Failed to execute ZRANGE command: result is NULL\n");
+
         return 0;
     }
 
@@ -1489,16 +1484,14 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     if (result->command_error)
     {
         free_command_result(result);
-        // printf("ZRANGE command error: %s\n", result->command_error);
+
         return 0;
     }
     /* Process the result */
     success = command_response_to_zval(result->response, return_value, 1);
 
-    printf("result->response = %p, response_type = %d\n", result->response, result->response ? result->response->response_type : -1);
-
     free_command_result(result);
-    printf("ZRANGE command completed successfully. succees = %d\n", success);
+
     return success;
 }
 

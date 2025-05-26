@@ -352,12 +352,12 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
         ZVAL_STRINGL(output, response->string_value, response->string_value_len);
         return 1;
     case Array:
-        printf("ARRAY\n");
+
         array_init(output);
         for (int64_t i = 0; i < response->array_value_len; i++)
         {
             zval value;
-            printf("add value of array\n");
+
             command_response_to_zval(&response->array_value[i], &value, use_associative_array);
             if (use_associative_array == 2)
             {
@@ -374,7 +374,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
         return 1;
 #if 1
     case Map:
-        printf("MAP\n");
+
         array_init(output);
         for (int i = 0; i < response->array_value_len; i++)
         {
@@ -404,7 +404,6 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             if (use_associative_array && Z_TYPE(key) == IS_STRING)
             {
 
-                printf("regular order\n");
                 add_assoc_zval(output, Z_STRVAL(key), &value);
                 zval_dtor(&key); // Clean up the key since we're using it as an index
             }
@@ -605,9 +604,9 @@ int process_zrange_response(CommandResult *result, zval *return_value, int has_w
             free_command_result(result);
         return 0;
     }
-    printf("has_withscores = %d\n", has_withscores);
+
     int res = command_response_to_zval(result->response, return_value, has_withscores ? 2 : 0);
-    printf("result->response = %p, response_type = %d\n", result->response, result->response ? result->response->response_type : -1);
+
     free_command_result(result);
     return res;
 }
