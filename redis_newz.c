@@ -475,30 +475,34 @@ PHP_METHOD(Redis, zRem)
     int argc = ZEND_NUM_ARGS();
     long count;
 
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* We need at least key, value */
     if (argc < 2)
     {
         WRONG_PARAM_COUNT;
     }
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* Allocate argument array and parse */
     z_args = emalloc(sizeof(zval) * (argc - 1));
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     if (zend_parse_method_parameters(argc, getThis(), "Os*",
                                      &object, redis_ce, &key, &key_len, z_args,
                                      argc - 1) == FAILURE)
     {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
         efree(z_args);
         RETURN_FALSE;
     }
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
         /* Execute the ZREM command using the Glide client */
+        printf("Executing ZREM command with key: %s\n", key);
         if (execute_zrem_command(redis->glide_client, key, key_len, z_args, argc - 1, &count))
         {
             efree(z_args);
@@ -507,7 +511,7 @@ PHP_METHOD(Redis, zRem)
         efree(z_args);
         RETURN_FALSE;
     }
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* Free our arguments array */
     efree(z_args);
 }

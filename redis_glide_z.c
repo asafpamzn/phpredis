@@ -904,6 +904,7 @@ int execute_zrem_command(const void *glide_client, const char *key, size_t key_l
             }
         }
     }
+    printf("Allocated %d strings for ZREM command\n", allocated_count);
 
     /* Execute the command */
     CommandResult *result = execute_command(
@@ -935,7 +936,7 @@ int execute_zrem_command(const void *glide_client, const char *key, size_t key_l
         free_command_result(result);
         return 0;
     }
-
+    printf("ZREM command executed successfully\n");
     /* Process the result */
     int success = 0;
     if (result->response && result->response->response_type == Int)
@@ -1321,11 +1322,11 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     if (result->command_error)
     {
         free_command_result(result);
-        printf("ZRANGE command error: %s\n", result->command_error);
+        // printf("ZRANGE command error: %s\n", result->command_error);
         return 0;
     }
     /* Process the result */
-    success = command_response_to_zval(result->response, return_value, 0);
+    success = command_response_to_zval(result->response, return_value, true);
 
     printf("result->response = %p, response_type = %d\n", result->response, result->response ? result->response->response_type : -1);
 

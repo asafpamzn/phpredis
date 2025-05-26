@@ -2704,23 +2704,23 @@ class Redis_Test extends TestSuite {
         // withscores
         $ret = $this->redis->zRange('key', 0, -1, true);
         
-        $this->assertEquals(6, count($ret));
-      //  printf_r($ret);
-        return;
+        $this->assertEquals(6, count($ret));        
+      
         $this->assertEquals(0.0, $ret['val0']);
         $this->assertEquals(1.0, $ret['val1']);
         $this->assertEquals(2.0, $ret['val2']);
         $this->assertEquals(3.0, $ret['val3']);
         $this->assertEquals(4.0, $ret['val4']);
         $this->assertEquals(5.0, $ret['val5']);
-
+    
         $this->assertEquals(0, $this->redis->zRem('key', 'valX'));
+            return;
         $this->assertEquals(1, $this->redis->zRem('key', 'val3'));
         $this->assertEquals(1, $this->redis->zRem('key', 'val4'));
         $this->assertEquals(1, $this->redis->zRem('key', 'val5'));
 
         $this->assertEquals(['val0', 'val1', 'val2'], $this->redis->zRange('key', 0, -1));
-echo __FILE__ . ':' . __LINE__;
+
         // zGetReverseRange
 
         $this->assertEquals(1, $this->redis->zAdd('key', 3, 'val3'));
