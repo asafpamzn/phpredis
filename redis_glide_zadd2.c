@@ -49,7 +49,8 @@ int parse_range_options(zval *options, int *has_withscores,
     }
 
     /* Look for BY option */
-    if ((z_tmp = zend_hash_str_find(options_ht, "BY", sizeof("BY") - 1)) != NULL)
+    if ((z_tmp = zend_hash_str_find(options_ht, "BY", sizeof("BY") - 1)) != NULL ||
+        (z_tmp = zend_hash_str_find(options_ht, "by", sizeof("by") - 1)) != NULL)
     {
         if (Z_TYPE_P(z_tmp) == IS_STRING)
         {
@@ -65,7 +66,8 @@ int parse_range_options(zval *options, int *has_withscores,
     }
 
     /* Look for REV option */
-    if ((z_tmp = zend_hash_str_find(options_ht, "REV", sizeof("REV") - 1)) != NULL)
+    if ((z_tmp = zend_hash_str_find(options_ht, "REV", sizeof("REV") - 1)) != NULL ||
+        (z_tmp = zend_hash_str_find(options_ht, "rev", sizeof("rev") - 1)) != NULL)
     {
         if (Z_TYPE_P(z_tmp) == IS_TRUE ||
             (Z_TYPE_P(z_tmp) == IS_LONG && Z_LVAL_P(z_tmp) == 1))
@@ -75,7 +77,8 @@ int parse_range_options(zval *options, int *has_withscores,
     }
 
     /* Look for LIMIT option */
-    if ((z_tmp = zend_hash_str_find(options_ht, "LIMIT", sizeof("LIMIT") - 1)) != NULL)
+    if ((z_tmp = zend_hash_str_find(options_ht, "LIMIT", sizeof("LIMIT") - 1)) != NULL ||
+        (z_tmp = zend_hash_str_find(options_ht, "limit", sizeof("limit") - 1)) != NULL)
     {
         if (Z_TYPE_P(z_tmp) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(z_tmp)) == 2)
         {

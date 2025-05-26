@@ -2748,7 +2748,7 @@ echo("here1\n\n");
         
         // limit
         $this->assertEquals(['val0'], $this->redis->zRangeByScore('key', 0, 3, ['limit' => [0, 1]]));
-        return;
+        
         $this->assertEquals(['val0', 'val1'],
                             $this->redis->zRangeByScore('key', 0, 3, ['limit' => [0, 2]]));
         $this->assertEquals(['val1', 'val2'],
