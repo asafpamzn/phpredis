@@ -410,6 +410,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
                     printf("revert the order\n");
                     // Use the key as an index, but keep the value separate
                     printf("key = %s, \n", Z_STRVAL(key));
+#if 0
                     zval *zv = &value;
                     switch (Z_TYPE_P(zv))
                     {
@@ -429,15 +430,15 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
                     default:
                         php_printf("zval is of type %d\n", Z_TYPE_P(zv));
                     }
+#endif
                     convert_to_string(&value);
-                    add_assoc_zval(output, Z_STRVAL(value), Z_STRVAL(key));
+                    add_assoc_zval(output, Z_STRVAL(value), &key);
                 }
                 else
                 {
                     printf("regular order\n");
                     add_assoc_zval(output, Z_STRVAL(key), &value);
-                }
-
+                                }
                 zval_dtor(&key); // Clean up the key since we're using it as an index
             }
             else

@@ -2734,13 +2734,13 @@ echo("here1\n\n");
         $this->assertEquals(array_reverse(['val0', 'val1', 'val2', 'aal3', 'val3']), $three_to_zero);
 
         $this->assertEquals(5, $this->redis->zCount('key', 0, 3));
-        return;
+        
         // withscores
         echo    "here112222221\n\n"; 
         $this->redis->zRem('key', 'aal3');
         $zero_to_three = $this->redis->zRangeByScore('key', 0, 3, ['withscores' => true]);
         echo    "here111\n\n"; 
-        return;
+        
         $this->assertEquals(['val0' => 0.0, 'val1' => 1.0, 'val2' => 2.0, 'val3' => 3.0], $zero_to_three);
         
         $this->assertEquals(4, $this->redis->zCount('key', 0, 3));
