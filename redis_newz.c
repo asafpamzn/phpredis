@@ -246,36 +246,35 @@ PHP_METHOD(Redis, zRevRange)
 /* {{{ proto array Redis::zRangeByScore(string key, mixed min, mixed max [, array options]) */
 PHP_METHOD(Redis, zRangeByScore)
 {
-    zval *object = NULL, *options = NULL;
+    zval *object = NULL, *z_opts = NULL;
 
     char *key = NULL;
     size_t key_len;
     zval *z_min = NULL, *z_max = NULL;
-    printf("1234\n");
+    printf("1234!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|a",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|z",
                                      &object, redis_ce, &key, &key_len, &z_min, &z_max,
-                                     &options) == FAILURE)
+                                     &z_opts) == FAILURE)
     {
         printf("Failed to parse parameters for zRangeByScore command!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!.\n");
         /* If parsing failed, return FALSE */
         RETURN_FALSE;
     }
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* Get Redis object */
     redis_object *redis;
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
         /* Initialize return array */
         array_init(return_value);
-
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         /* Execute the ZRANGEBYSCORE command using the Glide client */
-        printf("Executing ZRANGEBYSCORE command with key: %s, min: %s, max: %s\n",
-               key, Z_STRVAL_P(z_min), Z_STRVAL_P(z_max));
-        if (execute_zrangebyscore_command(redis->glide_client, key, key_len, z_min, z_max, options, return_value))
+
+        if (execute_zrangebyscore_command(redis->glide_client, key, key_len, z_min, z_max, z_opts, return_value))
         {
             printf("ZRANGEBYSCORE command executed successfully.\n");
             return;
@@ -335,7 +334,7 @@ PHP_METHOD(Redis, zRangeByLex)
     zval *z_min, *z_max;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|a",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|z",
                                      &object, redis_ce, &key, &key_len, &z_min, &z_max,
                                      &options) == FAILURE)
     {
