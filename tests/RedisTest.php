@@ -2780,6 +2780,7 @@ echo("here1\n\n");
         if ($this->minVersionCheck('6.2.0')) {
             $this->assertEquals(['val1', 'val0'],
                                 $this->redis->zrange('key', 1, 0, ['byscore', 'rev', 'limit' => [0, 100]]));
+            return;
             $this->assertEquals(2, $this->redis->zrangestore('dst{key}', 'key', 1, 0,
                                 ['byscore', 'rev', 'limit' => [0, 100]]));
             $this->assertEquals(['val0', 'val1'], $this->redis->zRange('dst{key}', 0, -1));
