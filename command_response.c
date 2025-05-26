@@ -403,42 +403,9 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
 
             if (use_associative_array && Z_TYPE(key) == IS_STRING)
             {
-                // Add as associative array where the key is the index
 
-                if (use_associative_array == 2)
-                {
-                    printf("revert the order\n");
-                    // Use the key as an index, but keep the value separate
-                    printf("key = %s, \n", Z_STRVAL(key));
-#if 0
-                    zval *zv = &value;
-                    switch (Z_TYPE_P(zv))
-                    {
-                    case IS_NULL:
-                        php_printf("zval is NULL\n");
-                        break;
-                    case IS_LONG:
-                        php_printf("zval is LONG: %ld\n", Z_LVAL_P(zv));
-                        break;
-                    case IS_DOUBLE:
-                        php_printf("zval is DOUBLE: %f\n", Z_DVAL_P(zv));
-                        break;
-                    case IS_STRING:
-                        php_printf("zval is STRING: %s\n", Z_STRVAL_P(zv));
-                        break;
-
-                    default:
-                        php_printf("zval is of type %d\n", Z_TYPE_P(zv));
-                    }
-#endif
-                    convert_to_string(&value);
-                    add_assoc_zval(output, Z_STRVAL(value), &key);
-                }
-                else
-                {
-                    printf("regular order\n");
-                    add_assoc_zval(output, Z_STRVAL(key), &value);
-                                }
+                printf("regular order\n");
+                add_assoc_zval(output, Z_STRVAL(key), &value);
                 zval_dtor(&key); // Clean up the key since we're using it as an index
             }
             else
