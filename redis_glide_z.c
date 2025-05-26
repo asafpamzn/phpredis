@@ -1326,7 +1326,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
         return 0;
     }
     /* Process the result */
-    success = command_response_to_zval(result->response, return_value, true);
+    success = command_response_to_zval(result->response, return_value, 1);
 
     printf("result->response = %p, response_type = %d\n", result->response, result->response ? result->response->response_type : -1);
 

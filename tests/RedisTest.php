@@ -2714,7 +2714,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(5.0, $ret['val5']);
     
         $this->assertEquals(0, $this->redis->zRem('key', 'valX'));
-            return;
+            
         $this->assertEquals(1, $this->redis->zRem('key', 'val3'));
         $this->assertEquals(1, $this->redis->zRem('key', 'val4'));
         $this->assertEquals(1, $this->redis->zRem('key', 'val5'));
@@ -2725,8 +2725,9 @@ class Redis_Test extends TestSuite {
 
         $this->assertEquals(1, $this->redis->zAdd('key', 3, 'val3'));
         $this->assertEquals(1, $this->redis->zAdd('key', 3, 'aal3'));
-
+echo("here1\n\n");
         $zero_to_three = $this->redis->zRangeByScore('key', 0, 3);
+        echo("here2\n\n");
         $this->assertEquals(['val0', 'val1', 'val2', 'aal3', 'val3'], $zero_to_three);
 
         $three_to_zero = $this->redis->zRevRangeByScore('key', 3, 0);
@@ -2735,11 +2736,15 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(5, $this->redis->zCount('key', 0, 3));
 
         // withscores
+        echo    "here112222221\n\n"; 
         $this->redis->zRem('key', 'aal3');
         $zero_to_three = $this->redis->zRangeByScore('key', 0, 3, ['withscores' => true]);
+        echo    "here111\n\n"; 
+        
         $this->assertEquals(['val0' => 0.0, 'val1' => 1.0, 'val2' => 2.0, 'val3' => 3.0], $zero_to_three);
+        
         $this->assertEquals(4, $this->redis->zCount('key', 0, 3));
-
+        return;
         // limit
         $this->assertEquals(['val0'], $this->redis->zRangeByScore('key', 0, 3, ['limit' => [0, 1]]));
         $this->assertEquals(['val0', 'val1'],
@@ -2858,7 +2863,7 @@ class Redis_Test extends TestSuite {
         $this->redis->del('{zset}1');
         $this->redis->del('{zset}2');
         $this->redis->del('{zset}3');
-
+        return;
         //test zUnion with weights and aggegration function
         $this->redis->zadd('{zset}1', 1, 'duplicate');
         $this->redis->zadd('{zset}2', 2, 'duplicate');

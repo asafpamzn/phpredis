@@ -28,7 +28,7 @@ int parse_range_options(zval *options, int *has_withscores,
                         int *has_limit, long *offset, long *count);
 
 /* Helper function to process ZRANGE-like responses */
-int process_zrange_response(CommandResult *result, zval *return_value);
+int process_zrange_response(CommandResult *result, zval *return_value, int has_withscores);
 
 /* Helper function to build arguments for range commands */
 int build_range_cmd_args(const void *glide_client, enum RequestType cmd_type, const char *key, size_t key_len,

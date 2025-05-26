@@ -246,21 +246,24 @@ PHP_METHOD(Redis, zRevRange)
 /* {{{ proto array Redis::zRangeByScore(string key, mixed min, mixed max [, array options]) */
 PHP_METHOD(Redis, zRangeByScore)
 {
-    zval *object, *options = NULL;
-    redis_object *redis;
+    zval *object = NULL, *options = NULL;
+
     char *key = NULL;
     size_t key_len;
-    zval *z_min, *z_max;
-
+    zval *z_min = NULL, *z_max = NULL;
+    printf("1234\n");
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|a",
                                      &object, redis_ce, &key, &key_len, &z_min, &z_max,
                                      &options) == FAILURE)
     {
+        printf("Failed to parse parameters for zRangeByScore command!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!.\n");
+        /* If parsing failed, return FALSE */
         RETURN_FALSE;
     }
 
     /* Get Redis object */
+    redis_object *redis;
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -270,11 +273,14 @@ PHP_METHOD(Redis, zRangeByScore)
         array_init(return_value);
 
         /* Execute the ZRANGEBYSCORE command using the Glide client */
+        printf("Executing ZRANGEBYSCORE command with key: %s, min: %s, max: %s\n",
+               key, Z_STRVAL_P(z_min), Z_STRVAL_P(z_max));
         if (execute_zrangebyscore_command(redis->glide_client, key, key_len, z_min, z_max, options, return_value))
         {
+            printf("ZRANGEBYSCORE command executed successfully.\n");
             return;
         }
-
+        printf("ZRANGEBYSCORE command failed.\n");
         /* If the command failed, clean up and return FALSE */
         zval_dtor(return_value);
     }
@@ -468,52 +474,43 @@ PHP_METHOD(Redis, zRemRangeByLex)
 /* {{{ proto long Redis::zRem(string key, string member, ...) */
 PHP_METHOD(Redis, zRem)
 {
-    zval *object, *z_args;
+    zval *object;
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
     int argc = ZEND_NUM_ARGS();
     long count;
+    zval *z_args = NULL;
 
+    /* Parse parameters */
     printf("file = %s, line = %d\n", __FILE__, __LINE__);
-    /* We need at least key, value */
-    if (argc < 2)
-    {
-        WRONG_PARAM_COUNT;
-    }
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
-    /* Allocate argument array and parse */
-    z_args = emalloc(sizeof(zval) * (argc - 1));
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
-    if (zend_parse_method_parameters(argc, getThis(), "Os*",
-                                     &object, redis_ce, &key, &key_len, z_args,
-                                     argc - 1) == FAILURE)
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &argc) == FAILURE)
     {
         printf("file = %s, line = %d\n", __FILE__, __LINE__);
-
-        efree(z_args);
         RETURN_FALSE;
     }
     printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
         /* Execute the ZREM command using the Glide client */
-        printf("Executing ZREM command with key: %s\n", key);
-        if (execute_zrem_command(redis->glide_client, key, key_len, z_args, argc - 1, &count))
+        if (execute_zrem_command(redis->glide_client, key, key_len, z_args, argc, &count))
         {
-            efree(z_args);
+
             RETURN_LONG(count);
         }
-        efree(z_args);
+
         RETURN_FALSE;
     }
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
     /* Free our arguments array */
-    efree(z_args);
+
+    RETURN_FALSE;
 }
 /* }}} */
 

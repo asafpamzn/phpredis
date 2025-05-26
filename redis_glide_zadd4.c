@@ -192,7 +192,7 @@ int execute_zrevrange_command(const void *glide_client, const char *key, size_t 
     efree(args_len);
 
     /* Process the result */
-    return process_zrange_response(result, return_value);
+    return process_zrange_response(result, return_value, has_withscores);
 }
 
 /* Execute a ZRANGEBYSCORE command using the Valkey Glide client */
@@ -359,7 +359,8 @@ int execute_zrangebyscore_command(const void *glide_client, const char *key, siz
     efree(args_len);
 
     /* Process the result */
-    return process_zrange_response(result, return_value);
+    printf("has_withscores: %d\n", has_withscores);
+    return process_zrange_response(result, return_value, has_withscores);
 }
 
 /* Execute a ZREVRANGEBYSCORE command using the Valkey Glide client */
@@ -523,7 +524,7 @@ int execute_zrevrangebyscore_command(const void *glide_client, const char *key, 
     efree(args_len);
 
     /* Process the result */
-    return process_zrange_response(result, return_value);
+    return process_zrange_response(result, return_value, has_withscores);
 }
 
 /* Execute a ZRANGEBYLEX command using the Valkey Glide client */
@@ -684,5 +685,5 @@ int execute_zrangebylex_command(const void *glide_client, const char *key, size_
     efree(args_len);
 
     /* Process the result */
-    return process_zrange_response(result, return_value);
+    return process_zrange_response(result, return_value, has_withscores);
 }

@@ -198,7 +198,7 @@ int execute_zdiff_command(const void *glide_client, zval *keys, zval *options, z
     efree(args_len);
 
     /* Process the result */
-    return process_zrange_response(result, return_value);
+    return process_zrange_response(result, return_value, has_withscores);
 }
 
 /* Execute a ZINTER command using the Valkey Glide client */
@@ -363,5 +363,5 @@ int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights
     efree(args_len);
 
     /* Process the result */
-    return process_zrange_response(result, return_value);
+    return process_zrange_response(result, return_value, has_withscores);
 }

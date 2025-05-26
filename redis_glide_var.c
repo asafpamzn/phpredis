@@ -112,7 +112,7 @@ int execute_object_command(const void *glide_client,
         /* HELP returns an array of strings */
         if (result->response && result->response->response_type == Array)
         {
-            if (command_response_to_zval(result->response, return_value, false) == 1)
+            if (command_response_to_zval(result->response, return_value, 0) == 1)
             {
                 ret_val = 1;
             }

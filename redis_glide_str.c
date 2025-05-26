@@ -459,7 +459,7 @@ int execute_sort_command(const void *glide_client, const char *key, size_t key_l
     if (cmd_result->response->response_type == Array)
     {
         array_init(return_value);
-        ret_val = command_response_to_zval(cmd_result->response, return_value, false);
+        ret_val = command_response_to_zval(cmd_result->response, return_value, 0);
     }
     else if (cmd_result->response->response_type == Null)
     {
@@ -524,7 +524,7 @@ int execute_sort_ro_command(const void *glide_client, const char *key, size_t ke
     if (cmd_result->response->response_type == Array)
     {
         array_init(return_value);
-        ret_val = command_response_to_zval(cmd_result->response, return_value, false);
+        ret_val = command_response_to_zval(cmd_result->response, return_value, 0);
     }
     else if (cmd_result->response->response_type == Null)
     {

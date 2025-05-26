@@ -352,16 +352,29 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
         ZVAL_STRINGL(output, response->string_value, response->string_value_len);
         return 1;
     case Array:
+        printf("ARRAY\n");
         array_init(output);
-        for (int i = 0; i < response->array_value_len; i++)
+        for (int64_t i = 0; i < response->array_value_len; i++)
         {
             zval value;
+            printf("add value of array\n");
             command_response_to_zval(&response->array_value[i], &value, use_associative_array);
-            add_next_index_zval(output, &value);
+            if (use_associative_array == 2)
+            {
+                zval key;
+                // Use the key as an index, but keep the value separate
+                ZVAL_LONG(&key, i);
+                add_assoc_zval(output, Z_STRVAL(value), &key);
+            }
+            else
+            {
+                add_next_index_zval(output, &value);
+            }
         }
         return 1;
 #if 1
     case Map:
+        printf("MAP\n");
         array_init(output);
         for (int i = 0; i < response->array_value_len; i++)
         {
@@ -391,7 +404,40 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             if (use_associative_array && Z_TYPE(key) == IS_STRING)
             {
                 // Add as associative array where the key is the index
-                add_assoc_zval(output, Z_STRVAL(key), &value);
+
+                if (use_associative_array == 2)
+                {
+                    printf("revert the order\n");
+                    // Use the key as an index, but keep the value separate
+                    printf("key = %s, \n", Z_STRVAL(key));
+                    zval *zv = &value;
+                    switch (Z_TYPE_P(zv))
+                    {
+                    case IS_NULL:
+                        php_printf("zval is NULL\n");
+                        break;
+                    case IS_LONG:
+                        php_printf("zval is LONG: %ld\n", Z_LVAL_P(zv));
+                        break;
+                    case IS_DOUBLE:
+                        php_printf("zval is DOUBLE: %f\n", Z_DVAL_P(zv));
+                        break;
+                    case IS_STRING:
+                        php_printf("zval is STRING: %s\n", Z_STRVAL_P(zv));
+                        break;
+
+                    default:
+                        php_printf("zval is of type %d\n", Z_TYPE_P(zv));
+                    }
+                    convert_to_string(&value);
+                    add_assoc_zval(output, Z_STRVAL(value), Z_STRVAL(key));
+                }
+                else
+                {
+                    printf("regular order\n");
+                    add_assoc_zval(output, Z_STRVAL(key), &value);
+                }
+
                 zval_dtor(&key); // Clean up the key since we're using it as an index
             }
             else
@@ -583,7 +629,7 @@ char *double_to_string(double value, size_t *len)
 }
 
 /* Process array response for ZRANGE-like commands */
-int process_zrange_response(CommandResult *result, zval *return_value)
+int process_zrange_response(CommandResult *result, zval *return_value, int has_withscores)
 {
     if (!result || result->command_error || !result->response)
     {
@@ -591,73 +637,11 @@ int process_zrange_response(CommandResult *result, zval *return_value)
             free_command_result(result);
         return 0;
     }
-
-    if (result->response->response_type == Array)
-    {
-        /* Handle array response */
-        CommandResponse *resp = result->response;
-        int elements = resp->array_value_len;
-        int i;
-
-        /* Determine if we have score-member pairs or just members */
-        int has_scores = (elements > 0 && elements % 2 == 0);
-
-        for (i = 0; i < elements; i++)
-        {
-            CommandResponse *item = &resp->array_value[i];
-
-            if (has_scores && i % 2 == 1)
-            {
-                /* This is a score */
-                double score = 0.0;
-
-                /* Get the member from previous iteration */
-                CommandResponse *member_item = &resp->array_value[i - 1];
-
-                /* Find or create array for this member */
-                if (member_item->response_type == String)
-                {
-                    zval z_key;
-                    ZVAL_STRINGL(&z_key, member_item->string_value, member_item->string_value_len);
-
-                    /* Convert score based on type */
-                    if (item->response_type == Float)
-                    {
-                        score = item->float_value;
-                    }
-                    else if (item->response_type == Int)
-                    {
-                        score = (double)item->int_value;
-                    }
-                    else if (item->response_type == String)
-                    {
-                        char *str_end;
-                        if (item->string_value && item->string_value_len > 0)
-                        {
-                            score = strtod(item->string_value, &str_end);
-                        }
-                    }
-
-                    add_assoc_double(return_value, Z_STRVAL(z_key), score);
-                    zval_dtor(&z_key);
-                }
-            }
-            else if (!has_scores || i % 2 == 0)
-            {
-                /* Just members, no scores */
-                if (item->response_type == String)
-                {
-                    add_next_index_stringl(return_value, item->string_value, item->string_value_len);
-                }
-            }
-        }
-
-        free_command_result(result);
-        return 1;
-    }
-
+    printf("has_withscores = %d\n", has_withscores);
+    int res = command_response_to_zval(result->response, return_value, has_withscores ? 2 : 0);
+    printf("result->response = %p, response_type = %d\n", result->response, result->response ? result->response->response_type : -1);
     free_command_result(result);
-    return 0;
+    return res;
 }
 
 /* Helper function to build arguments for range commands */
@@ -840,5 +824,5 @@ int build_range_cmd_args(const void *glide_client, enum RequestType cmd_type, co
     efree(args_len);
 
     /* Process the result */
-    return process_zrange_response(result, return_value);
+    return process_zrange_response(result, return_value, has_withscores);
 }
