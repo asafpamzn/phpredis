@@ -204,17 +204,28 @@ PHP_METHOD(Redis, zinterstore)
     zval *object;
     redis_object *redis;
     zval *z_keys, *z_weights = NULL, *z_options = NULL;
+    zval z_aggregate_option;
+    int free_options = 0;
     HashTable *keys_hash;
     char *dst;
     size_t dst_len;
     long cardinality = 0;
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osa|aa",
+    /* Parse parameters - we accept both array and string for the options parameter */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osa|az",
                                      &object, redis_ce, &dst, &dst_len, &z_keys,
                                      &z_weights, &z_options) == FAILURE)
     {
         RETURN_FALSE;
+    }
+
+    /* If z_options is a string, convert it to an array with ['AGGREGATE' => string] */
+    if (z_options && Z_TYPE_P(z_options) == IS_STRING)
+    {
+        array_init(&z_aggregate_option);
+        add_assoc_stringl(&z_aggregate_option, "AGGREGATE", Z_STRVAL_P(z_options), Z_STRLEN_P(z_options));
+        z_options = &z_aggregate_option;
+        free_options = 1;
     }
 
     /* Get Redis object */
@@ -234,10 +245,20 @@ PHP_METHOD(Redis, zinterstore)
         if (execute_zinterstore_command(redis->glide_client, dst, dst_len, z_keys,
                                         zend_hash_num_elements(keys_hash), z_weights, z_options, &cardinality))
         {
+            /* Free the temporary options array if we created one */
+            if (free_options)
+            {
+                zval_dtor(&z_aggregate_option);
+            }
             RETURN_LONG(cardinality);
         }
         else
         {
+            /* Free the temporary options array if we created one */
+            if (free_options)
+            {
+                zval_dtor(&z_aggregate_option);
+            }
             RETURN_FALSE;
         }
     }
@@ -255,17 +276,28 @@ PHP_METHOD(Redis, zunionstore)
     zval *object;
     redis_object *redis;
     zval *z_keys, *z_weights = NULL, *z_options = NULL;
+    zval z_aggregate_option;
+    int free_options = 0;
     HashTable *keys_hash;
     char *dst;
     size_t dst_len;
     long cardinality = 0;
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osa|aa",
+    /* Parse parameters - we accept both array and string for the options parameter */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osa|az",
                                      &object, redis_ce, &dst, &dst_len, &z_keys,
                                      &z_weights, &z_options) == FAILURE)
     {
         RETURN_FALSE;
+    }
+
+    /* If z_options is a string, convert it to an array with ['AGGREGATE' => string] */
+    if (z_options && Z_TYPE_P(z_options) == IS_STRING)
+    {
+        array_init(&z_aggregate_option);
+        add_assoc_stringl(&z_aggregate_option, "AGGREGATE", Z_STRVAL_P(z_options), Z_STRLEN_P(z_options));
+        z_options = &z_aggregate_option;
+        free_options = 1;
     }
 
     /* Get Redis object */
@@ -285,10 +317,20 @@ PHP_METHOD(Redis, zunionstore)
         if (execute_zunionstore_command(redis->glide_client, dst, dst_len, z_keys,
                                         zend_hash_num_elements(keys_hash), z_weights, z_options, &cardinality))
         {
+            /* Free the temporary options array if we created one */
+            if (free_options)
+            {
+                zval_dtor(&z_aggregate_option);
+            }
             RETURN_LONG(cardinality);
         }
         else
         {
+            /* Free the temporary options array if we created one */
+            if (free_options)
+            {
+                zval_dtor(&z_aggregate_option);
+            }
             RETURN_FALSE;
         }
     }

@@ -2868,12 +2868,13 @@ class Redis_Test extends TestSuite {
         $this->redis->zadd('{zset}1', 1, 'duplicate');
         $this->redis->zadd('{zset}2', 2, 'duplicate');
         $this->redis->zUnionStore('{zset}U', ['{zset}1', '{zset}2'], [1, 1], 'MIN');
-        return;
+        
         $this->assertEquals(1.0, $this->redis->zScore('{zset}U', 'duplicate'));
         $this->redis->del('{zset}U');
         
         //now test zUnion *without* weights but with aggregate function
         $this->redis->zUnionStore('{zset}U', ['{zset}1', '{zset}2'], null, 'MIN');
+        return;
         $this->assertEquals(1.0, $this->redis->zScore('{zset}U', 'duplicate'));
         $this->redis->del('{zset}U', '{zset}1', '{zset}2');
         
@@ -2900,7 +2901,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(5, $this->redis->zUnionStore('{zset}3', ['{zset}1', '{zset}2'], [1, 'inf']) );
         $this->assertEquals(5, $this->redis->zUnionStore('{zset}3', ['{zset}1', '{zset}2'], [1, '-inf']));
         $this->assertEquals(5, $this->redis->zUnionStore('{zset}3', ['{zset}1', '{zset}2'], [1, '+inf']));
-
+        
         // Now, confirm that they're being sent, and that it works
         $weights = ['inf', '-inf', '+inf'];
 
