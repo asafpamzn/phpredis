@@ -1164,6 +1164,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     /* Check if we have options that need to be added */
     int withscores = 0;
     int byscore = 0;
+    int has_bylex = 0;
     int rev = 0;
     int limit = 0;
     long limit_offset = 0;
@@ -1194,6 +1195,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
             }
 
             /* Check for BYSCORE option */
+            /* Check for BYSCORE option */
             zval *z_byscore;
             if ((z_byscore = zend_hash_str_find(Z_ARRVAL_P(options), "byscore", sizeof("byscore") - 1)) != NULL ||
                 (z_byscore = zend_hash_str_find(Z_ARRVAL_P(options), "BYSCORE", sizeof("BYSCORE") - 1)) != NULL)
@@ -1213,6 +1215,31 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
                         byscore = 1;
                         arg_count++; /* Add BYSCORE parameter */
 
+                        break;
+                    }
+                }
+                ZEND_HASH_FOREACH_END();
+            }
+
+            /* Check for BYLEX option */
+            zval *z_bylex;
+            if ((z_bylex = zend_hash_str_find(Z_ARRVAL_P(options), "bylex", sizeof("bylex") - 1)) != NULL ||
+                (z_bylex = zend_hash_str_find(Z_ARRVAL_P(options), "BYLEX", sizeof("BYLEX") - 1)) != NULL)
+            {
+                has_bylex = 1;
+                arg_count++; /* Add BYLEX parameter */
+            }
+            else
+            {
+                /* Check if 'bylex' exists as a value in the array */
+                zval *entry;
+                ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(options), entry)
+                {
+                    if (Z_TYPE_P(entry) == IS_STRING &&
+                        (strncasecmp(Z_STRVAL_P(entry), "bylex", Z_STRLEN_P(entry)) == 0))
+                    {
+                        has_bylex = 1;
+                        arg_count++; /* Add BYLEX parameter */
                         break;
                     }
                 }
@@ -1386,6 +1413,15 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
         const char *byscore_str = "BYSCORE";
         args[arg_idx] = (uintptr_t)byscore_str;
         args_len[arg_idx] = 7; /* length of "BYSCORE" */
+        arg_idx++;
+    }
+
+    /* Add BYLEX parameter if required */
+    if (has_bylex)
+    {
+        const char *bylex_str = "BYLEX";
+        args[arg_idx] = (uintptr_t)bylex_str;
+        args_len[arg_idx] = 5; /* length of "BYLEX" */
         arg_idx++;
     }
 

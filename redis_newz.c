@@ -323,7 +323,7 @@ PHP_METHOD(Redis, zRevRangeByScore)
 }
 /* }}} */
 
-/* {{{ proto array Redis::zRangeByLex(string key, mixed min, mixed max [, array options]) */
+/* {{{ proto array Redis::zRangeByLex(string key, mixed min, mixed max [, array options | long offset, long count]) */
 PHP_METHOD(Redis, zRangeByLex)
 {
     zval *object, *options = NULL;
@@ -331,13 +331,35 @@ PHP_METHOD(Redis, zRangeByLex)
     char *key = NULL;
     size_t key_len;
     zval *z_min, *z_max;
+    zend_long offset = -1, count = -1;
+    int argc = ZEND_NUM_ARGS();
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|z",
-                                     &object, redis_ce, &key, &key_len, &z_min, &z_max,
-                                     &options) == FAILURE)
+    /* Parse parameters - allow either options array or offset/count */
+    if (argc == 4)
     {
-        RETURN_FALSE;
+        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|z",
+                                         &object, redis_ce, &key, &key_len, &z_min, &z_max,
+                                         &options) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+    }
+    else if (argc == 5)
+    {
+        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszzll",
+                                         &object, redis_ce, &key, &key_len, &z_min, &z_max,
+                                         &offset, &count) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz",
+                                         &object, redis_ce, &key, &key_len, &z_min, &z_max) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
     }
 
     /* Get Redis object */
@@ -349,8 +371,33 @@ PHP_METHOD(Redis, zRangeByLex)
         /* Initialize return array */
         array_init(return_value);
 
+        /* If offset and count are provided as separate parameters, create options array */
+        zval new_options;
+        if (offset >= 0 && count >= 0)
+        {
+            array_init(&new_options);
+
+            /* Create LIMIT subarray */
+            zval limit_array;
+            array_init(&limit_array);
+            add_index_long(&limit_array, 0, offset);
+            add_index_long(&limit_array, 1, count);
+
+            /* Add LIMIT subarray to options */
+            add_assoc_zval(&new_options, "LIMIT", &limit_array);
+            options = &new_options;
+        }
+
         /* Execute the ZRANGEBYLEX command using the Glide client */
-        if (execute_zrangebylex_command(redis->glide_client, key, key_len, z_min, z_max, options, return_value))
+        int result = execute_zrangebylex_command(redis->glide_client, key, key_len, z_min, z_max, options, return_value);
+
+        /* Free the temporary options array if we created one */
+        if (offset >= 0 && count >= 0)
+        {
+            zval_dtor(&new_options);
+        }
+
+        if (result)
         {
             return;
         }

@@ -3049,6 +3049,7 @@ class Redis_Test extends TestSuite {
         /* Test getting the same functionality via ZRANGE and options */
         if ($this->minVersionCheck('6.2.0')) {
             $this->assertEquals(['a', 'b', 'c'], $this->redis->zRange('key', '-', '[c', ['BYLEX']));
+            
             $this->assertEquals(['b', 'c'], $this->redis->zRange('key', '-', '[c', ['BYLEX', 'LIMIT' => [1, 2]]));
             $this->assertEquals(['b'], $this->redis->zRange('key', '-', '(c', ['BYLEX', 'LIMIT' => [1, 2]]));
 
