@@ -3111,7 +3111,7 @@ class Redis_Test extends TestSuite {
             $this->redis->zAdd('key', 1, $c);
         }
 
-        $this->assertEquals(['a', 'b', 'c'], $this->redis->zInter(['key']));
+        $this->assertEquals(['a', 'b', 'c'], $this->redis->zInter(['key']));        
         $this->assertEquals(['a' => 1.0, 'b' => 1.0, 'c' => 1.0], $this->redis->zInter(['key'], null, ['withscores' => true]));
     }
 

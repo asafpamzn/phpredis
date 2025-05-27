@@ -596,7 +596,7 @@ int process_zrange_response(CommandResult *result, zval *return_value, int has_w
         return 0;
     }
 
-    int res = command_response_to_zval(result->response, return_value, has_withscores ? 2 : 0);
+    int res = command_response_to_zval(result->response, return_value, has_withscores ? 1 : 0);
 
     free_command_result(result);
     return res;
