@@ -359,17 +359,8 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             zval value;
 
             command_response_to_zval(&response->array_value[i], &value, use_associative_array);
-            if (use_associative_array == 2)
-            {
-                zval key;
-                // Use the key as an index, but keep the value separate
-                ZVAL_LONG(&key, i);
-                add_assoc_zval(output, Z_STRVAL(value), &key);
-            }
-            else
-            {
-                add_next_index_zval(output, &value);
-            }
+
+            add_next_index_zval(output, &value);
         }
         return 1;
 #if 1
