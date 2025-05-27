@@ -216,6 +216,12 @@ int execute_zscore_command(const void *glide_client, const char *key, size_t key
                 success = 1;
             }
         }
+        else if (result->response->response_type == Float)
+        {
+            /* Handle direct float response */
+            *output_value = result->response->float_value;
+            success = 1;
+        }
     }
 
     /* Free the result */

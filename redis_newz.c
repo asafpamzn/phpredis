@@ -680,7 +680,7 @@ PHP_METHOD(Redis, zScore)
         }
         else if (result == 0)
         {
-            RETURN_NULL(); /* Member doesn't exist */
+            RETURN_FALSE; /* Member doesn't exist */
         }
         else
         {
