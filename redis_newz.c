@@ -737,19 +737,81 @@ PHP_METHOD(Redis, zScore)
 }
 /* }}} */
 
-/* {{{ proto array Redis::zMscore(string key, array members) */
+/* {{{ proto array Redis::zMscore(string key, string member, string member2...)
+   proto array Redis::zMscore(string key, array members) */
 PHP_METHOD(Redis, zMscore)
 {
-    zval *object, *z_members;
+    zval *object;
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
     int argc = ZEND_NUM_ARGS();
+    zval *z_args = NULL;
+    int member_count = 0;
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(argc, getThis(), "Osa",
+    /* Method signature can be either of the following:
+     * - zMscore(string key, string member [, string ...])
+     * - zMscore(string key, array members)
+     */
+
+    /* First, check if we have the second signature with an array */
+    if (argc == 2)
+    {
+        zval *z_members;
+
+        /* Try to parse as (key, array) */
+        if (zend_parse_method_parameters(argc, getThis(), "Osa",
+                                         &object, redis_ce, &key, &key_len,
+                                         &z_members) == SUCCESS)
+        {
+            /* Get Redis object */
+            redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+            /* If we have a Glide client, use it */
+            if (redis->glide_client)
+            {
+                HashTable *ht_members = Z_ARRVAL_P(z_members);
+                member_count = zend_hash_num_elements(ht_members);
+
+                if (member_count == 0)
+                {
+                    RETURN_FALSE;
+                }
+
+                /* Create an array of members from the associative array */
+                zval *members = emalloc(sizeof(zval) * member_count);
+                zval *data;
+                int idx = 0;
+
+                ZEND_HASH_FOREACH_VAL(ht_members, data)
+                {
+                    ZVAL_COPY_VALUE(&members[idx++], data);
+                }
+                ZEND_HASH_FOREACH_END();
+
+                /* Initialize return array */
+                array_init(return_value);
+
+                /* Execute the ZMSCORE command using the Glide client */
+                if (execute_zmscore_command(redis->glide_client, key, key_len, members, member_count, return_value))
+                {
+                    efree(members);
+                    return;
+                }
+
+                /* Command failed */
+                efree(members);
+                zval_dtor(return_value);
+                RETURN_FALSE;
+            }
+        }
+    }
+
+    /* If we got here, either the array format failed or we have variadic args */
+    /* Parse as (key, member, member, ...) format */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
                                      &object, redis_ce, &key, &key_len,
-                                     &z_members) == FAILURE)
+                                     &z_args, &member_count) == FAILURE)
     {
         RETURN_FALSE;
     }
@@ -760,24 +822,8 @@ PHP_METHOD(Redis, zMscore)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        HashTable *ht_members = Z_ARRVAL_P(z_members);
-        int member_count = zend_hash_num_elements(ht_members);
-
-        if (member_count == 0)
-        {
-            RETURN_FALSE;
-        }
-
-        /* Create an array of members from the associative array */
-        zval *members = emalloc(sizeof(zval) * member_count);
-        zval *data;
-        int idx = 0;
-
-        ZEND_HASH_FOREACH_VAL(ht_members, data)
-        {
-            ZVAL_COPY_VALUE(&members[idx++], data);
-        }
-        ZEND_HASH_FOREACH_END();
+        /* Create an array for the member arguments */
+        zval *members = z_args; /* z_args already contains our variadic arguments */
 
         /* Initialize return array */
         array_init(return_value);
@@ -785,12 +831,10 @@ PHP_METHOD(Redis, zMscore)
         /* Execute the ZMSCORE command using the Glide client */
         if (execute_zmscore_command(redis->glide_client, key, key_len, members, member_count, return_value))
         {
-            efree(members);
             return;
         }
 
         /* Command failed */
-        efree(members);
         zval_dtor(return_value);
         RETURN_FALSE;
     }
