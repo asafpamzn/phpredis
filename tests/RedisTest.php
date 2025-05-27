@@ -3126,6 +3126,7 @@ class Redis_Test extends TestSuite {
         }
 
         $this->assertEquals(['a', 'b', 'c'], $this->redis->zUnion(['key']));
+
         $this->assertEquals(['a' => 1.0, 'b' => 1.0, 'c' => 1.0], $this->redis->zUnion(['key'], null, ['withscores' => true]));
     }
 

@@ -109,7 +109,7 @@ PHP_METHOD(Redis, zunion)
     HashTable *keys_hash;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa|aa",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa|za",
                                      &object, redis_ce, &z_keys, &z_weights, &z_options) == FAILURE)
     {
         RETURN_FALSE;

@@ -312,8 +312,8 @@ int execute_zunion_command(const void *glide_client, zval *keys, int keys_count,
         return 0;
     }
 
-    /* Calculate total arguments (keys + WEIGHTS + AGGREGATE if present) */
-    unsigned long arg_count = keys_count;
+    /* Calculate total arguments (numkeys + keys + WEIGHTS + AGGREGATE if present) */
+    unsigned long arg_count = 1 + keys_count; /* +1 for numkeys */
     int has_weights = 0;
     int has_aggregate = 0;
     uintptr_t *weights_args = NULL;
@@ -375,10 +375,16 @@ int execute_zunion_command(const void *glide_client, zval *keys, int keys_count,
         return 0;
     }
 
-    /* Copy keys to args array */
-    unsigned int offset = 0;
-    memcpy(args, keys_args, keys_count * sizeof(uintptr_t));
-    memcpy(args_len, keys_len, keys_count * sizeof(unsigned long));
+    /* Add numkeys as the first argument */
+    char numkeys_str[32];
+    snprintf(numkeys_str, sizeof(numkeys_str), "%d", keys_count);
+    args[0] = (uintptr_t)estrdup(numkeys_str);
+    args_len[0] = strlen(numkeys_str);
+
+    /* Copy keys to args array (offset by 1 for numkeys) */
+    unsigned int offset = 1;
+    memcpy(args + offset, keys_args, keys_count * sizeof(uintptr_t));
+    memcpy(args_len + offset, keys_len, keys_count * sizeof(unsigned long));
     offset += keys_count;
 
     /* Add WEIGHTS if present */
@@ -421,6 +427,7 @@ int execute_zunion_command(const void *glide_client, zval *keys, int keys_count,
     );
 
     /* Free the argument arrays */
+    efree((void *)args[0]); /* Free the numkeys string */
     efree(keys_args);
     efree(keys_len);
     if (has_weights)
