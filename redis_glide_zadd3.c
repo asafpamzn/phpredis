@@ -84,8 +84,9 @@ static int parse_multi_options(zval *options, int *has_withscores, char **agg_op
     HashTable *options_ht = Z_ARRVAL_P(options);
     zval *z_tmp;
 
-    /* Look for WITHSCORES option */
-    if ((z_tmp = zend_hash_str_find(options_ht, "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL)
+    /* Look for WITHSCORES option (both uppercase and lowercase) */
+    if (((z_tmp = zend_hash_str_find(options_ht, "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL) ||
+        ((z_tmp = zend_hash_str_find(options_ht, "withscores", sizeof("withscores") - 1)) != NULL))
     {
         if (Z_TYPE_P(z_tmp) == IS_TRUE ||
             (Z_TYPE_P(z_tmp) == IS_LONG && Z_LVAL_P(z_tmp) == 1))
