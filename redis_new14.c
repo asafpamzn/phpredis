@@ -212,11 +212,17 @@ PHP_METHOD(Redis, zinterstore)
     long cardinality = 0;
 
     /* Parse parameters - we accept both array and string for the options parameter */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osa|az",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osa|zz",
                                      &object, redis_ce, &dst, &dst_len, &z_keys,
                                      &z_weights, &z_options) == FAILURE)
     {
         RETURN_FALSE;
+    }
+
+    /* If weights is not an array, set it to NULL */
+    if (z_weights != NULL && Z_TYPE_P(z_weights) != IS_ARRAY)
+    {
+        z_weights = NULL;
     }
 
     /* If z_options is a string, convert it to an array with ['AGGREGATE' => string] */
@@ -284,11 +290,17 @@ PHP_METHOD(Redis, zunionstore)
     long cardinality = 0;
 
     /* Parse parameters - we accept both array and string for the options parameter */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osa|az",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osa|zz",
                                      &object, redis_ce, &dst, &dst_len, &z_keys,
                                      &z_weights, &z_options) == FAILURE)
     {
         RETURN_FALSE;
+    }
+
+    /* If weights is not an array, set it to NULL */
+    if (z_weights != NULL && Z_TYPE_P(z_weights) != IS_ARRAY)
+    {
+        z_weights = NULL;
     }
 
     /* If z_options is a string, convert it to an array with ['AGGREGATE' => string] */
