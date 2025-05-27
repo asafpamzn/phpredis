@@ -312,10 +312,11 @@ int execute_zunion_command(const void *glide_client, zval *keys, int keys_count,
         return 0;
     }
 
-    /* Calculate total arguments (numkeys + keys + WEIGHTS + AGGREGATE if present) */
+    /* Calculate total arguments (numkeys + keys + WEIGHTS + AGGREGATE + WITHSCORES if present) */
     unsigned long arg_count = 1 + keys_count; /* +1 for numkeys */
     int has_weights = 0;
     int has_aggregate = 0;
+    int has_withscores = 0;
     uintptr_t *weights_args = NULL;
     unsigned long *weights_len = NULL;
     uintptr_t agg_type = 0;
@@ -338,14 +339,24 @@ int execute_zunion_command(const void *glide_client, zval *keys, int keys_count,
         }
     }
 
-    /* Check for AGGREGATE option */
+    /* Check for AGGREGATE and WITHSCORES options */
     if (options && Z_TYPE_P(options) == IS_ARRAY)
     {
-        /* Add aggregate if present */
+        /* Check for aggregate option */
         if (prepare_aggregate_option(options, &agg_type, &agg_len))
         {
             has_aggregate = 1;
             arg_count += 2; /* AGGREGATE + value */
+        }
+
+        /* Check for withscores option */
+        HashTable *ht = Z_ARRVAL_P(options);
+        zval *withscores = zend_hash_str_find(ht, "withscores", sizeof("withscores") - 1);
+        if (withscores && (Z_TYPE_P(withscores) == IS_TRUE ||
+                           (Z_TYPE_P(withscores) == IS_LONG && Z_LVAL_P(withscores) == 1)))
+        {
+            has_withscores = 1;
+            arg_count += 1; /* WITHSCORES */
         }
     }
 
@@ -414,6 +425,15 @@ int execute_zunion_command(const void *glide_client, zval *keys, int keys_count,
         /* Add aggregate value */
         args[offset] = agg_type;
         args_len[offset] = agg_len;
+        offset++;
+    }
+
+    /* Add WITHSCORES if present */
+    if (has_withscores)
+    {
+        /* Add WITHSCORES keyword */
+        args[offset] = (uintptr_t)"WITHSCORES";
+        args_len[offset] = 10;
         offset++;
     }
 
