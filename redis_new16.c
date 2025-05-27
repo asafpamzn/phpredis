@@ -113,13 +113,64 @@ PHP_METHOD(Redis, xadd)
     char *key = NULL, *id = NULL;
     size_t key_len = 0, id_len = 0;
     zval *z_field_values, *z_options = NULL;
+    zend_long maxlen = 0;
+    zend_bool approximate = 0;
+    int argc = ZEND_NUM_ARGS();
+    int options_created = 0;
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ossa|a",
-                                     &object, redis_ce, &key, &key_len,
-                                     &id, &id_len, &z_field_values, &z_options) == FAILURE)
+    /* First, try parsing as (key, id, fields, maxlen, approximate) */
+    if (argc >= 4 && argc <= 5)
     {
-        RETURN_FALSE;
+        zend_bool parse_success = 0;
+
+        if (argc == 4)
+        {
+            if (zend_parse_method_parameters(argc, getThis(), "Ossal",
+                                             &object, redis_ce, &key, &key_len,
+                                             &id, &id_len, &z_field_values, &maxlen) == SUCCESS)
+            {
+                parse_success = 1;
+            }
+        }
+        else if (argc == 5)
+        {
+            if (zend_parse_method_parameters(argc, getThis(), "Ossalb",
+                                             &object, redis_ce, &key, &key_len,
+                                             &id, &id_len, &z_field_values, &maxlen, &approximate) == SUCCESS)
+            {
+                parse_success = 1;
+            }
+        }
+
+        if (parse_success)
+        {
+            /* Create options array with MAXLEN */
+            z_options = emalloc(sizeof(zval));
+            array_init(z_options);
+
+            /* Add MAXLEN option */
+            add_assoc_long(z_options, "MAXLEN", maxlen);
+
+            /* Add APPROXIMATE option if true */
+            if (approximate)
+            {
+                add_assoc_bool(z_options, "APPROXIMATE", 1);
+            }
+
+            /* Flag that we created this and will need to free it later */
+            options_created = 1;
+        }
+    }
+
+    /* If above parsing failed or was not attempted, try the standard way */
+    if (!z_options)
+    {
+        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ossa|a",
+                                         &object, redis_ce, &key, &key_len,
+                                         &id, &id_len, &z_field_values, &z_options) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
     }
 
     /* Get Redis object */
@@ -133,11 +184,25 @@ PHP_METHOD(Redis, xadd)
                                  z_field_values, zend_hash_num_elements(Z_ARRVAL_P(z_field_values)),
                                  z_options, return_value))
         {
+            /* Clean up if we created options array */
+            if (options_created)
+            {
+                zval_dtor(z_options);
+                efree(z_options);
+            }
+
             /* Return value already set in execute_xadd_command */
             return;
         }
         else
         {
+            /* Clean up if we created options array */
+            if (options_created)
+            {
+                zval_dtor(z_options);
+                efree(z_options);
+            }
+
             RETURN_FALSE;
         }
     }

@@ -240,17 +240,23 @@ int execute_xadd_command(const void *glide_client, const char *key, size_t key_l
         }
     }
 
-    /* Calculate total args: key + options + ID + field/value pairs */
-    unsigned long arg_count = 1 + extra_args + 1 + fv_count;
+    /* Calculate total args: key + options + ID + field/value pairs (each entry is a pair) */
+    unsigned long arg_count = 1 + extra_args + 1 + (fv_count * 2); /* Each field-value is 2 args */
     uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
     unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
-    if (!args || !args_len)
+    /* Allocate array to track temporary string allocations */
+    char **allocated_strings = (char **)ecalloc(fv_count, sizeof(char *));
+    int allocated_count = 0;
+
+    if (!args || !args_len || !allocated_strings)
     {
         if (args)
             efree(args);
         if (args_len)
             efree(args_len);
+        if (allocated_strings)
+            efree(allocated_strings);
         return 0;
     }
 
@@ -322,9 +328,17 @@ int execute_xadd_command(const void *glide_client, const char *key, size_t key_l
                 zval temp;
                 ZVAL_COPY(&temp, z_value);
                 convert_to_string(&temp);
-                args[arg_idx] = (uintptr_t)Z_STRVAL(temp);
-                args_len[arg_idx] = Z_STRLEN(temp);
-                arg_idx++;
+
+                /* Create persistent copy of the string */
+                char *str_copy = estrndup(Z_STRVAL(temp), Z_STRLEN(temp));
+                if (str_copy)
+                {
+                    allocated_strings[allocated_count++] = str_copy;
+                    args[arg_idx] = (uintptr_t)str_copy;
+                    args_len[arg_idx] = Z_STRLEN(temp);
+                    arg_idx++;
+                }
+
                 zval_dtor(&temp);
             }
             else
@@ -347,6 +361,14 @@ int execute_xadd_command(const void *glide_client, const char *key, size_t key_l
     );
 
     /* Free resources */
+    for (int i = 0; i < allocated_count; i++)
+    {
+        if (allocated_strings[i])
+        {
+            efree(allocated_strings[i]);
+        }
+    }
+    efree(allocated_strings);
     efree(args);
     efree(args_len);
 
