@@ -3190,8 +3190,10 @@ class Redis_Test extends TestSuite {
         $this->redis->zAdd('{zs}1', 0, 'a', 1, 'b', 2, 'c');
         $this->redis->zAdd('{zs}2', 3, 'A', 4, 'B', 5, 'D');
 
-        $this->assertEquals(['{zs}1', 'a', '0'], $this->redis->bzPopMin('{zs}1', '{zs}2', 0));
+        $this->assertEquals(['{zs}1', 'a', '0'], $this->redis->bzPopMin('{zs}1', '{zs}2', 0));        
+        
         $this->assertEquals(['{zs}1', 'c', '2'], $this->redis->bzPopMax(['{zs}1', '{zs}2'], 0));
+        
         $this->assertEquals(['{zs}2', 'A', '3'], $this->redis->bzPopMin('{zs}2', '{zs}1', 0));
 
         /* Verify timeout is being sent */

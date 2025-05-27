@@ -390,8 +390,34 @@ int execute_bzpopmax_command(const void *glide_client, zval *keys, int keys_coun
             }
             else if (result->response->response_type == Array)
             {
-                /* Convert the response array to PHP array */
-                status = command_response_to_zval(result->response, return_value, 0);
+                /* For BZPOPMIN, need to manually ensure the score is a string */
+                if (result->response->array_value_len == 3 &&
+                    result->response->array_value[2].response_type != String)
+                {
+
+                    /* Convert the response array to PHP array */
+                    status = command_response_to_zval(result->response, return_value, 0);
+
+                    /* Get the score element (should be index 2) */
+                    zval *score = NULL;
+                    zval *arr = return_value;
+                    HashTable *ht = Z_ARRVAL_P(arr);
+
+                    /* Convert numeric score to string */
+                    if (ht && zend_hash_index_exists(ht, 2))
+                    {
+                        score = zend_hash_index_find(ht, 2);
+                        if (score && (Z_TYPE_P(score) == IS_LONG || Z_TYPE_P(score) == IS_DOUBLE))
+                        {
+                            convert_to_string(score);
+                        }
+                    }
+                }
+                else
+                {
+                    /* Regular array conversion */
+                    status = command_response_to_zval(result->response, return_value, 0);
+                }
             }
         }
         free_command_result(result);
@@ -491,8 +517,34 @@ int execute_bzpopmin_command(const void *glide_client, zval *keys, int keys_coun
             }
             else if (result->response->response_type == Array)
             {
-                /* Convert the response array to PHP array */
-                status = command_response_to_zval(result->response, return_value, 0);
+                /* For BZPOPMIN, need to manually ensure the score is a string */
+                if (result->response->array_value_len == 3 &&
+                    result->response->array_value[2].response_type != String)
+                {
+
+                    /* Convert the response array to PHP array */
+                    status = command_response_to_zval(result->response, return_value, 0);
+
+                    /* Get the score element (should be index 2) */
+                    zval *score = NULL;
+                    zval *arr = return_value;
+                    HashTable *ht = Z_ARRVAL_P(arr);
+
+                    /* Convert numeric score to string */
+                    if (ht && zend_hash_index_exists(ht, 2))
+                    {
+                        score = zend_hash_index_find(ht, 2);
+                        if (score && (Z_TYPE_P(score) == IS_LONG || Z_TYPE_P(score) == IS_DOUBLE))
+                        {
+                            convert_to_string(score);
+                        }
+                    }
+                }
+                else
+                {
+                    /* Regular array conversion */
+                    status = command_response_to_zval(result->response, return_value, 0);
+                }
             }
         }
         free_command_result(result);
