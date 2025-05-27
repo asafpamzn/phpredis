@@ -224,9 +224,14 @@ int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights
     size_t agg_op_len = 0;
     parse_multi_options(options, &has_withscores, &agg_op, &agg_op_len);
 
-    /* Check if weights array is valid */
-    int has_weights = (z_weights && Z_TYPE_P(z_weights) == IS_ARRAY &&
-                       zend_hash_num_elements(Z_ARRVAL_P(z_weights)) > 0);
+    /* Check if weights array is valid - important fix here:
+       Now we just check if weights are present and valid, but NULL is okay */
+    int has_weights = 0;
+    if (z_weights != NULL && Z_TYPE_P(z_weights) == IS_ARRAY)
+    {
+        has_weights = zend_hash_num_elements(Z_ARRVAL_P(z_weights)) > 0;
+    }
+    /* Note: z_weights being NULL is perfectly valid and simply means "no weights" */
 
     /* Calculate maximum arguments:
        - num_keys (number of keys arg + actual keys)
@@ -279,7 +284,7 @@ int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights
     }
     ZEND_HASH_FOREACH_END();
 
-    /* Add weights if specified */
+    /* Add weights if specified - only use weights if z_weights is not NULL */
     if (has_weights)
     {
         args[arg_idx] = (uintptr_t)"WEIGHTS";

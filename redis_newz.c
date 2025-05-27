@@ -955,7 +955,7 @@ PHP_METHOD(Redis, zinter)
     redis_object *redis;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa|aa",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa|za",
                                      &object, redis_ce, &z_keys, &z_weights, &z_opts) == FAILURE)
     {
         RETURN_FALSE;
