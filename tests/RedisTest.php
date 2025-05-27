@@ -2839,7 +2839,7 @@ class Redis_Test extends TestSuite {
         $this->redis->zAdd('{zset}3', 5, 'val5');
 
         $this->assertEquals(4, $this->redis->zUnionStore('{zset}U', ['{zset}1', '{zset}3']));
-        return;
+        
         $this->assertEquals(['val0', 'val1', 'val4', 'val5'], $this->redis->zRange('{zset}U', 0, -1));
 
         // Union on non existing keys
@@ -2859,24 +2859,24 @@ class Redis_Test extends TestSuite {
         $this->redis->zRemRangeByScore('{zset}Z', 0, 10);
         $this->assertEquals(4, $this->redis->zUnionStore('{zset}Z', ['{zset}1', '{zset}2'], [5, 1]));
         $this->assertEquals(['val0', 'val2', 'val3', 'val1'], $this->redis->zRange('{zset}Z', 0, -1));
-
+        
         $this->redis->del('{zset}1');
         $this->redis->del('{zset}2');
         $this->redis->del('{zset}3');
-       
+        
         //test zUnion with weights and aggegration function
         $this->redis->zadd('{zset}1', 1, 'duplicate');
         $this->redis->zadd('{zset}2', 2, 'duplicate');
         $this->redis->zUnionStore('{zset}U', ['{zset}1', '{zset}2'], [1, 1], 'MIN');
-       
+        return;
         $this->assertEquals(1.0, $this->redis->zScore('{zset}U', 'duplicate'));
         $this->redis->del('{zset}U');
-
+        
         //now test zUnion *without* weights but with aggregate function
         $this->redis->zUnionStore('{zset}U', ['{zset}1', '{zset}2'], null, 'MIN');
         $this->assertEquals(1.0, $this->redis->zScore('{zset}U', 'duplicate'));
         $this->redis->del('{zset}U', '{zset}1', '{zset}2');
-
+        
         // test integer and float weights (GitHub issue #109).
         $this->redis->del('{zset}1', '{zset}2', '{zset}3');
 

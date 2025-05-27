@@ -462,8 +462,8 @@ int execute_zstore_command(const void *glide_client, enum RequestType cmd_type, 
         return 0;
     }
 
-    /* Calculate total arguments (destination + keys + WEIGHTS + AGGREGATE if present) */
-    unsigned long arg_count = 1 + keys_count; /* destination + keys */
+    /* Calculate total arguments (destination + numkeys + keys + WEIGHTS + AGGREGATE if present) */
+    unsigned long arg_count = 2 + keys_count; /* destination + numkeys + keys */
     int has_weights = 0;
     int has_aggregate = 0;
     uintptr_t *weights_args = NULL;
@@ -529,10 +529,16 @@ int execute_zstore_command(const void *glide_client, enum RequestType cmd_type, 
     args[0] = (uintptr_t)dst;
     args_len[0] = dst_len;
 
-    /* Copy keys to args array */
-    memcpy(args + 1, keys_args, keys_count * sizeof(uintptr_t));
-    memcpy(args_len + 1, keys_len, keys_count * sizeof(unsigned long));
-    unsigned int offset = 1 + keys_count;
+    /* Add numkeys as the second argument - required by the Redis command format */
+    char numkeys_str[32];
+    snprintf(numkeys_str, sizeof(numkeys_str), "%d", keys_count);
+    args[1] = (uintptr_t)estrdup(numkeys_str);
+    args_len[1] = strlen(numkeys_str);
+
+    /* Copy keys to args array starting from index 2 */
+    memcpy(args + 2, keys_args, keys_count * sizeof(uintptr_t));
+    memcpy(args_len + 2, keys_len, keys_count * sizeof(unsigned long));
+    unsigned int offset = 2 + keys_count;
 
     /* Add WEIGHTS if present */
     if (has_weights)
@@ -572,6 +578,9 @@ int execute_zstore_command(const void *glide_client, enum RequestType cmd_type, 
         args,      /* arguments */
         args_len   /* argument lengths */
     );
+
+    /* Free the numkeys string we allocated */
+    efree((void *)args[1]);
 
     /* Free the argument arrays */
     efree(keys_args);
