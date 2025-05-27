@@ -83,6 +83,23 @@ static int prepare_weights_array(zval *weights, int weights_count, uintptr_t **a
 
     ZEND_HASH_FOREACH_VAL(weights_hash, weight)
     {
+        /* Special handling for string weights that represent infinity */
+        if (Z_TYPE_P(weight) == IS_STRING)
+        {
+            const char *str_val = Z_STRVAL_P(weight);
+            if (strcasecmp(str_val, "inf") == 0 ||
+                strcasecmp(str_val, "+inf") == 0 ||
+                strcasecmp(str_val, "-inf") == 0)
+            {
+                /* Use the infinity string directly */
+                (*args)[idx] = (uintptr_t)estrdup(str_val);
+                (*args_len)[idx] = Z_STRLEN_P(weight);
+                idx++;
+                continue; /* Skip the rest of this iteration */
+            }
+        }
+
+        /* For non-infinity values, convert as usual */
         if (Z_TYPE_P(weight) != IS_LONG && Z_TYPE_P(weight) != IS_DOUBLE)
         {
             convert_to_double(weight);

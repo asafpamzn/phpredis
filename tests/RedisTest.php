@@ -2913,7 +2913,7 @@ class Redis_Test extends TestSuite {
             $this->assertArrayKey($r, 'one');
             $this->assertArrayKey($r, 'two');
         }
-        return; 
+        
         $this->redis->del('{zset}1', '{zset}2', '{zset}3');
 
         $this->redis->zadd('{zset}1', 2000.1, 'one');
