@@ -1183,11 +1183,14 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
         {
 
             zval *z_withscores;
-            if ((z_withscores = zend_hash_str_find(Z_ARRVAL_P(options), "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL &&
-                Z_TYPE_P(z_withscores) == IS_TRUE)
+            if ((z_withscores = zend_hash_str_find(Z_ARRVAL_P(options), "withscores", sizeof("withscores") - 1)) != NULL ||
+                (z_withscores = zend_hash_str_find(Z_ARRVAL_P(options), "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL)
             {
-                withscores = 1;
-                arg_count++; /* Add WITHSCORES parameter */
+                if (z_withscores && Z_TYPE_P(z_withscores) == IS_TRUE)
+                {
+                    withscores = 1;
+                    arg_count++; /* Add WITHSCORES parameter */
+                }
             }
 
             /* Check for BYSCORE option */
