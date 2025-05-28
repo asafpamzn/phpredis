@@ -3235,16 +3235,17 @@ class Redis_Test extends TestSuite {
         $this->redis->del('key');
         $this->redis->zAdd('key', 0, 'a', 1, 'b', 2, 'c', 3, 'd', 4, 'e');
         $result = $this->redis->zRandMember('key');
-        $this->assertEquals(array_intersect($result,['a', 'b', 'c', 'd', 'e']), $result);
-        #$this->assertInArray($result, ['a', 'b', 'c', 'd', 'e']);
+        $this->assertEquals(array_intersect($result,['a', 'b', 'c', 'd', 'e']), $result);        
         
         $result = $this->redis->zRandMember('key', ['count' => 3]);
-        return;
+        
         $this->assertEquals(3, count($result));
         $this->assertEquals(array_intersect($result, ['a', 'b', 'c', 'd', 'e']), $result);
-
+        print_r("Result: test zRandMember\n"); 
         $result = $this->redis->zRandMember('key', ['count' => 2, 'withscores' => true]);
         $this->assertEquals(2, count($result));
+        print_r($result);
+        print_r(['a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4]);
         $this->assertEquals(array_intersect_key($result, ['a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4]), $result);
     }
 

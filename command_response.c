@@ -352,7 +352,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
         ZVAL_STRINGL(output, response->string_value, response->string_value_len);
         return 1;
     case Array:
-
+        printf("Converting Array response to zval\n");
         array_init(output);
         for (int64_t i = 0; i < response->array_value_len; i++)
         {
@@ -365,7 +365,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
         return 1;
 #if 1
     case Map:
-
+        printf("Converting Map response to zval\n");
         array_init(output);
         for (int i = 0; i < response->array_value_len; i++)
         {

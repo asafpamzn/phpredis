@@ -131,7 +131,11 @@ int execute_zrandmember_command(const void *glide_client, const char *key, size_
     }
 
     /* Process the result */
-    int success = command_response_to_zval(result->response, return_value, withscores);
+    int success = command_response_to_zval(result->response, return_value, 0);
+    if (withscores && success)
+    {
+        // TODO flatten the array.
+    }
 
     /* Free the result */
     free_command_result(result);
