@@ -10,7 +10,7 @@ SHLIB_SUFFIX_NAME = dylib
 SHLIB_DL_SUFFIX_NAME = so
 AWK = awk
 REDIS_SHARED_LIBADD = ../ffi/target/release/libglide_ffi.a -lresolv -lSystem
-shared_objects_redis = redis.lo redis_new.lo redis_new1.lo redis_new2.lo redis_new3.lo redis_new4.lo redis_new5.lo redis_new6.lo redis_new7.lo redis_new10.lo redis_new11.lo redis_new12.lo redis_new13.lo redis_new14.lo redis_new16.lo redis_new20.lo redis_new21.lo redis_new22.lo redis_new32.lo redis_commands.lo library.lo redis_session.lo redis_array.lo redis_array_impl.lo redis_cluster.lo cluster_library.lo  redis_glide.lo redis_glide_var.lo redis_glide_var2.lo redis_glide_var4.lo redis_glide_var5.lo redis_glide_var6.lo redis_glide_var10.lo redis_expire_glide.lo lcs_command.lo rpush_command.lo command_response.lo redis_hash_glide.lo redis_geo_glide.lo redis_glide_commands.lo redis_glide_z.lo redis_glide_z1.lo redis_newz.lo redis_glide_keys.lo redis_glide_list.lo redis_glide_list1.lo redis_glide_s1.lo redis_glide_s2.lo redis_glide_str.lo redis_glide_x1.lo redis_glide_x2.lo redis_glide_x3.lo redis_glide_zadd.lo redis_glide_zadd2.lo redis_glide_zadd3.lo redis_glide_zadd4.lo src/connection_request.pb-c.lo src/command_request.pb-c.lo src/response.pb-c.lo
+shared_objects_redis = redis.lo redis_new.lo redis_new1.lo redis_new2.lo redis_new3.lo redis_new4.lo redis_new5.lo redis_new6.lo redis_new7.lo redis_new10.lo redis_new11.lo redis_new12.lo redis_new13.lo redis_new14.lo redis_new16.lo redis_new20.lo redis_new21.lo redis_new22.lo redis_new32.lo redis_commands.lo library.lo redis_session.lo redis_cluster.lo cluster_library.lo  redis_glide.lo redis_glide_var.lo redis_glide_var2.lo redis_glide_var4.lo redis_glide_var5.lo redis_glide_var6.lo redis_glide_var10.lo redis_expire_glide.lo lcs_command.lo rpush_command.lo command_response.lo redis_hash_glide.lo redis_geo_glide.lo redis_glide_commands.lo redis_glide_z.lo redis_glide_z1.lo redis_newz.lo redis_glide_keys.lo redis_glide_list.lo redis_glide_list1.lo redis_glide_s1.lo redis_glide_s2.lo redis_glide_str.lo redis_glide_x1.lo redis_glide_x2.lo redis_glide_x3.lo redis_glide_zadd.lo redis_glide_zadd2.lo redis_glide_zadd3.lo redis_glide_zadd4.lo src/connection_request.pb-c.lo src/command_request.pb-c.lo src/response.pb-c.lo
 PHP_PECL_EXTENSION = redis
 PHP_MODULES = $(phplibdir)/redis.la
 PHP_ZEND_EX =
@@ -275,12 +275,6 @@ library.lo: /Users/asafp/work/valkey-glide-php/phpredis/library.c
 -include redis_session.dep
 redis_session.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_session.c
 	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_session.c -o redis_session.lo  -MMD -MF redis_session.dep -MT redis_session.lo
--include redis_array.dep
-redis_array.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_array.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_array.c -o redis_array.lo  -MMD -MF redis_array.dep -MT redis_array.lo
--include redis_array_impl.dep
-redis_array_impl.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_array_impl.c
-	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_array_impl.c -o redis_array_impl.lo  -MMD -MF redis_array_impl.dep -MT redis_array_impl.lo
 
 -include redis_new32.dep
 redis_new32.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_new32.c

@@ -22,7 +22,7 @@
 #endif
 
 #include "php_redis.h"
-#include "redis_array.h"
+
 #include "redis_cluster.h"
 #include "redis_commands.h"
 #include "redis_glide.h"

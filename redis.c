@@ -23,7 +23,7 @@
 #endif
 
 #include "php_redis.h"
-#include "redis_array.h"
+
 #include "redis_cluster.h"
 #include "redis_commands.h"
 #include "redis_glide.h"
@@ -430,9 +430,6 @@ PHP_MINIT_FUNCTION(redis)
     /* Redis class */
     redis_ce = register_class_Redis();
     redis_ce->create_object = create_redis_object;
-
-    /* RedisArray class */
-    ZEND_MINIT(redis_array)(INIT_FUNC_ARGS_PASSTHRU);
 
     /* RedisCluster class */
     ZEND_MINIT(redis_cluster)(INIT_FUNC_ARGS_PASSTHRU);
