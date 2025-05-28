@@ -424,7 +424,7 @@ redis_check_eof(RedisSock *redis_sock, zend_bool no_retry, zend_bool no_throw)
     else
     {
         errmsg = "Connection lost";
-        redis_backoff_reset(&redis_sock->backoff);
+
         for (retry_index = 0; !no_retry && retry_index < redis_sock->max_retries; ++retry_index)
         {
             /* close existing stream before reconnecting */
@@ -433,10 +433,6 @@ redis_check_eof(RedisSock *redis_sock, zend_bool no_retry, zend_bool no_throw)
                 /* reconnect no need to reset mode, it will cause pipeline mode socket exception */
                 redis_sock_disconnect(redis_sock, 1, 0);
             }
-            /* Sleep based on our backoff algorithm */
-            zend_ulong delay = redis_backoff_compute(&redis_sock->backoff, retry_index);
-            if (delay != 0)
-                usleep(delay);
 
             /* reconnect */
             if (redis_sock_connect(redis_sock) == 0)
@@ -3237,14 +3233,7 @@ redis_sock_configure(RedisSock *redis_sock, HashTable *opts)
             }
             redis_sock->dbNumber = Z_LVAL_P(val);
         }
-        else if (zend_string_equals_literal_ci(zkey, "backoff"))
-        {
-            if (redis_sock_set_backoff(redis_sock, val) != SUCCESS)
-            {
-                REDIS_VALUE_EXCEPTION("Invalid backoff options");
-                return FAILURE;
-            }
-        }
+
         else
         {
             php_error_docref(NULL, E_WARNING, "Skip unknown option '%s'", ZSTR_VAL(zkey));
@@ -3271,7 +3260,6 @@ redis_sock_create(char *host, int host_len, int port,
     redis_sock->status = REDIS_SOCK_STATUS_DISCONNECTED;
     redis_sock->retry_interval = retry_interval * 1000;
     redis_sock->max_retries = 10;
-    redis_initialize_backoff(&redis_sock->backoff, redis_sock->retry_interval);
     redis_sock->persistent = persistent;
 
     if (persistent && persistent_id != NULL)
@@ -3472,7 +3460,7 @@ redis_sock_check_liveness(RedisSock *redis_sock)
         }
     }
 
-       return SUCCESS;
+    return SUCCESS;
 failure:
     redis_sock->status = REDIS_SOCK_STATUS_DISCONNECTED;
     if (redis_sock->stream)
@@ -3764,51 +3752,6 @@ redis_sock_set_stream_context(RedisSock *redis_sock, zval *options)
 PHP_REDIS_API int
 redis_sock_set_backoff(RedisSock *redis_sock, zval *options)
 {
-    zend_string *zkey;
-    zend_long val;
-    zval *z_ele;
-
-    if (!redis_sock || Z_TYPE_P(options) != IS_ARRAY)
-    {
-        return FAILURE;
-    }
-
-    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(options), zkey, z_ele)
-    {
-        if (zkey != NULL)
-        {
-            ZVAL_DEREF(z_ele);
-            if (zend_string_equals_literal_ci(zkey, "algorithm"))
-            {
-                if ((val = zval_get_long(z_ele)) < 0 || val >= REDIS_BACKOFF_ALGORITHMS)
-                {
-                    return FAILURE;
-                }
-                redis_sock->backoff.algorithm = val;
-            }
-            else if (zend_string_equals_literal_ci(zkey, "base"))
-            {
-                if ((val = zval_get_long(z_ele)) < 0)
-                {
-                    return FAILURE;
-                }
-                redis_sock->backoff.base = val * 1000;
-            }
-            else if (zend_string_equals_literal_ci(zkey, "cap"))
-            {
-                if ((val = zval_get_long(z_ele)) < 0)
-                {
-                    return FAILURE;
-                }
-                redis_sock->backoff.cap = val * 1000;
-            }
-            else
-            {
-                php_error_docref(NULL, E_WARNING, "Skip unknown backoff option '%s'", ZSTR_VAL(zkey));
-            }
-        }
-    }
-    ZEND_HASH_FOREACH_END();
 
     return SUCCESS;
 }

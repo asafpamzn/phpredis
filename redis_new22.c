@@ -17,6 +17,7 @@
 #include "php_redis.h"
 #include "redis_commands.h"
 #include "redis_glide.h"
+#include <stdio.h>
 
 /* Forward declarations for the Glide execute functions */
 extern int execute_select_command(const void *glide_client, long database);
@@ -151,7 +152,7 @@ PHP_METHOD(Redis, bzPopMax)
     int argc = 0;
     double timeout = 0.0;
     zend_bool is_array_arg = 0;
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* Try the variadic format first */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O+d",
                                      &object, redis_ce, &z_args, &argc, &timeout) == SUCCESS)
@@ -159,12 +160,14 @@ PHP_METHOD(Redis, bzPopMax)
         /* Need at least one key */
         if (argc < 1)
         {
+            printf("bzPopMax requires at least one key\n");
             RETURN_FALSE;
         }
 
         /* Get Redis object */
         redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
         is_array_arg = 0;
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
     }
     /* Try array format if variadic format fails */
     else
@@ -176,6 +179,7 @@ PHP_METHOD(Redis, bzPopMax)
         if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ozz",
                                          &object, redis_ce, &z_keys, &z_timeout) == FAILURE)
         {
+            printf("bzPopMax requires an array of keys and a timeout\n");
             RETURN_FALSE;
         }
 
@@ -183,9 +187,10 @@ PHP_METHOD(Redis, bzPopMax)
         if (Z_TYPE_P(z_keys) != IS_ARRAY)
         {
             php_error_docref(NULL, E_WARNING, "First argument should be an array if using two-argument form");
+            printf("bzPopMax requires an array of keys\n");
             RETURN_FALSE;
         }
-
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         ht_keys = Z_ARRVAL_P(z_keys);
 
         /* Extract timeout */
@@ -200,6 +205,7 @@ PHP_METHOD(Redis, bzPopMax)
         else
         {
             php_error_docref(NULL, E_WARNING, "Timeout must be a numeric value");
+            printf("bzPopMax requires at least one key\n");
             RETURN_FALSE;
         }
 
@@ -227,7 +233,7 @@ PHP_METHOD(Redis, bzPopMax)
             }
         }
         ZEND_HASH_FOREACH_END();
-
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         /* Update arguments count */
         argc = zend_hash_num_elements(Z_ARRVAL(z_processed_keys));
         z_args = NULL;
@@ -236,36 +242,39 @@ PHP_METHOD(Redis, bzPopMax)
         redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
         is_array_arg = 1;
     }
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
+        printf("Executing bzPopMax with %d keys and timeout %.2f\n", argc, timeout);
         /* Execute the BZPOPMAX command using the Glide client */
         int success;
 
         /* Handle different argument formats */
         if (is_array_arg)
         {
-            /* We need to extract the keys from the array into a format that the execute function expects */
+            /* Create a temporary array for the keys with proper zval format */
+            zval *temp_args = ecalloc(argc, sizeof(zval));
+
+            /* Copy values from the processed keys array */
             int i = 0;
-            zval *temp_args = emalloc(sizeof(zval) * argc);
-
-            /* Iterate through the hash table and extract the values */
-            HashTable *ht = Z_ARRVAL(z_processed_keys);
             zval *entry;
-
-            ZEND_HASH_FOREACH_VAL(ht, entry)
+            ZEND_HASH_FOREACH_VAL(Z_ARRVAL(z_processed_keys), entry)
             {
-                /* Copy each array element to our temp array */
-                ZVAL_COPY_VALUE(&temp_args[i], entry);
+                /* Use proper reference copying */
+                ZVAL_COPY(&temp_args[i], entry);
                 i++;
             }
             ZEND_HASH_FOREACH_END();
 
-            /* Call the execution function with the properly formatted array */
+            /* Call the execution function with properly referenced arguments */
             success = execute_bzpopmax_command(redis->glide_client, temp_args, argc, timeout, return_value);
 
-            /* Clean up our temporary array */
+            /* Clean up the temporary array and its elements */
+            for (i = 0; i < argc; i++)
+            {
+                zval_ptr_dtor(&temp_args[i]);
+            }
             efree(temp_args);
         }
         else
@@ -282,10 +291,11 @@ PHP_METHOD(Redis, bzPopMax)
         if (success)
         {
             /* Return value already set by execute_bzpopmax_command */
+            printf("here\n");
             return;
         }
     }
-
+    printf("bzPopMax failed\n");
     RETURN_FALSE;
 }
 /* }}} */
@@ -394,26 +404,28 @@ PHP_METHOD(Redis, bzPopMin)
         /* Handle different argument formats */
         if (is_array_arg)
         {
-            /* We need to extract the keys from the array into a format that the execute function expects */
+            /* Create a temporary array for the keys with proper zval format */
+            zval *temp_args = ecalloc(argc, sizeof(zval));
+
+            /* Copy values from the processed keys array */
             int i = 0;
-            zval *temp_args = emalloc(sizeof(zval) * argc);
-
-            /* Iterate through the hash table and extract the values */
-            HashTable *ht = Z_ARRVAL(z_processed_keys);
             zval *entry;
-
-            ZEND_HASH_FOREACH_VAL(ht, entry)
+            ZEND_HASH_FOREACH_VAL(Z_ARRVAL(z_processed_keys), entry)
             {
-                /* Copy each array element to our temp array */
-                ZVAL_COPY_VALUE(&temp_args[i], entry);
+                /* Use proper reference copying */
+                ZVAL_COPY(&temp_args[i], entry);
                 i++;
             }
             ZEND_HASH_FOREACH_END();
 
-            /* Call the execution function with the properly formatted array */
+            /* Call the execution function with properly referenced arguments */
             success = execute_bzpopmin_command(redis->glide_client, temp_args, argc, timeout, return_value);
 
-            /* Clean up our temporary array */
+            /* Clean up the temporary array and its elements */
+            for (i = 0; i < argc; i++)
+            {
+                zval_ptr_dtor(&temp_args[i]);
+            }
             efree(temp_args);
         }
         else

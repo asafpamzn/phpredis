@@ -12,6 +12,7 @@
 #include <ext/standard/php_math.h>
 #include <zend_smart_str.h>
 #include <ext/standard/php_smart_string.h>
+#include <stdio.h>
 
 #define PHPREDIS_GET_OBJECT(class_entry, o) (class_entry *)((char *)o - XtOffsetOf(class_entry, std))
 #define PHPREDIS_ZVAL_GET_OBJECT(class_entry, z) PHPREDIS_GET_OBJECT(class_entry, Z_OBJ_P(z))
@@ -33,8 +34,6 @@
 #ifndef NULL
 #define NULL ((void *)0)
 #endif
-
-#include "backoff.h"
 
 typedef enum
 {
@@ -109,9 +108,6 @@ typedef enum _PUBSUB_TYPE
 #define REDIS_OPT_COMPRESSION_LEVEL 9
 #define REDIS_OPT_NULL_MBULK_AS_NULL 10
 #define REDIS_OPT_MAX_RETRIES 11
-#define REDIS_OPT_BACKOFF_ALGORITHM 12
-#define REDIS_OPT_BACKOFF_BASE 13
-#define REDIS_OPT_BACKOFF_CAP 14
 #define REDIS_OPT_PACK_IGNORE_NUMBERS 15
 
 /* cluster options */
@@ -139,16 +135,6 @@ typedef enum
 #define REDIS_SCAN_RETRY 1
 #define REDIS_SCAN_PREFIX 2
 #define REDIS_SCAN_NOPREFIX 3
-
-/* BACKOFF_ALGORITHM options */
-#define REDIS_BACKOFF_ALGORITHMS 7
-#define REDIS_BACKOFF_ALGORITHM_DEFAULT 0
-#define REDIS_BACKOFF_ALGORITHM_DECORRELATED_JITTER 1
-#define REDIS_BACKOFF_ALGORITHM_FULL_JITTER 2
-#define REDIS_BACKOFF_ALGORITHM_EQUAL_JITTER 3
-#define REDIS_BACKOFF_ALGORITHM_EXPONENTIAL 4
-#define REDIS_BACKOFF_ALGORITHM_UNIFORM 5
-#define REDIS_BACKOFF_ALGORITHM_CONSTANT 6
 
 /* GETBIT/SETBIT offset range limits */
 #define BITOP_MIN_OFFSET 0
@@ -339,7 +325,7 @@ typedef struct
     double read_timeout;
     long retry_interval;
     int max_retries;
-    struct RedisBackoff backoff;
+
     redis_sock_status status;
     int persistent;
     int watching;
