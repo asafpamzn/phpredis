@@ -131,25 +131,7 @@ int execute_zrandmember_command(const void *glide_client, const char *key, size_
     }
 
     /* Process the result */
-    int success = 0;
-    if (result->response && result->response->response_type == Array)
-    {
-        /* Convert array response to PHP array */
-        size_t i;
-        for (i = 0; i < result->response->array_value_len; i++)
-        {
-            struct CommandResponse *element = &result->response->array_value[i];
-            if (element->response_type == String)
-            {
-                add_next_index_stringl(return_value, element->string_value, element->string_value_len);
-            }
-            else if (element->response_type == Null)
-            {
-                add_next_index_null(return_value);
-            }
-        }
-        success = 1;
-    }
+    int success = command_response_to_zval(result->response, return_value, withscores);
 
     /* Free the result */
     free_command_result(result);
