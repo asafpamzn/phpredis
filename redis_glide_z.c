@@ -132,9 +132,46 @@ int execute_zrandmember_command(const void *glide_client, const char *key, size_
 
     /* Process the result */
     int success = command_response_to_zval(result->response, return_value, 0);
-    if (withscores && success)
+    if (withscores && success && Z_TYPE_P(return_value) == IS_ARRAY)
     {
-        // TODO flatten the array.
+        /* Flatten the array - convert from:
+         * [[member1, score1], [member2, score2], ...]
+         * to associative array format:
+         * [member1 => score1, member2 => score2, ...]
+         */
+        zval tmp_arr;
+        array_init(&tmp_arr);
+
+        HashTable *ht = Z_ARRVAL_P(return_value);
+        zval *entry;
+
+        ZEND_HASH_FOREACH_VAL(ht, entry)
+        {
+            if (Z_TYPE_P(entry) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(entry)) == 2)
+            {
+                zval *z_member = zend_hash_index_find(Z_ARRVAL_P(entry), 0);
+                zval *z_score = zend_hash_index_find(Z_ARRVAL_P(entry), 1);
+
+                if (z_member && z_score)
+                {
+                    /* Convert any scalar member to string as it will be used as key */
+                    zval z_member_str;
+                    if (Z_TYPE_P(z_member) != IS_STRING)
+                    {
+                        convert_to_string_ex(z_member);
+                    }
+
+                    /* Add to associative array: member => score */
+                    Z_TRY_ADDREF_P(z_score);
+                    add_assoc_zval(&tmp_arr, Z_STRVAL_P(z_member), z_score);
+                }
+            }
+        }
+        ZEND_HASH_FOREACH_END();
+
+        /* Replace the original array with our flattened array */
+        zval_ptr_dtor(return_value);
+        ZVAL_COPY_VALUE(return_value, &tmp_arr);
     }
 
     /* Free the result */

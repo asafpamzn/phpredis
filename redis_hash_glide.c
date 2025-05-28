@@ -184,20 +184,7 @@ int execute_hsetnx_command(const void *glide_client, const char *key, size_t key
     }
 
     /* Process the result (0 or 1) */
-    int ret_val = 0;
-    if (result->response)
-    {
-        if (result->response->response_type == Int)
-        {
-            *output_value = result->response->int_value;
-            ret_val = 1;
-        }
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    return handle_bool_response(result);
 }
 
 /* Execute an HINCRBY command using the Valkey Glide client */
@@ -1255,6 +1242,7 @@ int execute_hgetall_command(const void *glide_client, const char *key, size_t ke
     args_len[0] = key_len;
 
     /* Execute the command */
+
     CommandResult *result = execute_command(
         glide_client,
         HGetAll,   /* command type */
@@ -1277,25 +1265,8 @@ int execute_hgetall_command(const void *glide_client, const char *key, size_t ke
     }
 
     /* Process the result (array of field/value pairs) */
-    int ret_val = 0;
-    if (result->response && result->response->response_type == Array)
-    {
-        size_t i;
-        for (i = 0; i < result->response->array_value_len; i += 2)
-        {
-            if (i + 1 < result->response->array_value_len)
-            {
-                struct CommandResponse *field = &result->response->array_value[i];
-                struct CommandResponse *value = &result->response->array_value[i + 1];
 
-                if (field->response_type == String && value->response_type == String)
-                {
-                    add_assoc_stringl_ex(return_value, field->string_value, field->string_value_len, value->string_value, value->string_value_len);
-                }
-            }
-        }
-        ret_val = 1;
-    }
+    int ret_val = command_response_to_zval(result->response, return_value, 1);
 
     /* Free the result */
     free_command_result(result);

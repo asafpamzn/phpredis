@@ -3241,11 +3241,11 @@ class Redis_Test extends TestSuite {
         
         $this->assertEquals(3, count($result));
         $this->assertEquals(array_intersect($result, ['a', 'b', 'c', 'd', 'e']), $result);
-        print_r("Result: test zRandMember\n"); 
+        
         $result = $this->redis->zRandMember('key', ['count' => 2, 'withscores' => true]);
         $this->assertEquals(2, count($result));
-        print_r($result);
-        print_r(['a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4]);
+        
+        
         $this->assertEquals(array_intersect_key($result, ['a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4]), $result);
     }
 
@@ -3274,7 +3274,8 @@ class Redis_Test extends TestSuite {
 
         // hDel
         $this->assertEquals(1, $this->redis->hDel('h', 'a')); // 1 on success
-        $this->assertEquals(0, $this->redis-hDel('h', 'a')); // 0 on failure
+        
+        $this->assertEquals(0, $this->redis->hDel('h', 'a')); // 0 on failure
         
         $this->redis->del('h');
         $this->redis->hSet('h', 'x', 'a');
@@ -3283,32 +3284,35 @@ class Redis_Test extends TestSuite {
 
         // hsetnx
         $this->redis->del('h');
+        
         $this->assertTrue($this->redis->hSetNx('h', 'x', 'a'));
+        
         $this->assertTrue($this->redis->hSetNx('h', 'y', 'b'));
         $this->assertFalse($this->redis->hSetNx('h', 'x', '?'));
         $this->assertFalse($this->redis->hSetNx('h', 'y', '?'));
         $this->assertEquals('a', $this->redis->hGet('h', 'x'));
         $this->assertEquals('b', $this->redis->hGet('h', 'y'));
-
+        
         // keys
         $keys = $this->redis->hKeys('h');
         $this->assertEqualsCanonicalizing(['x', 'y'], $keys);
-
+        
         // values
         $values = $this->redis->hVals('h');
         $this->assertEqualsCanonicalizing(['a', 'b'], $values);
 
         // keys + values
         $all = $this->redis->hGetAll('h');
+        
         $this->assertEqualsCanonicalizing(['x' => 'a', 'y' => 'b'], $all, true);
-
+        
         // hExists
         $this->assertTrue($this->redis->hExists('h', 'x'));
         $this->assertTrue($this->redis->hExists('h', 'y'));
         $this->assertFalse($this->redis->hExists('h', 'w'));
         $this->redis->del('h');
         $this->assertFalse($this->redis->hExists('h', 'x'));
-
+    
         // hIncrBy
         $this->redis->del('h');
         $this->assertEquals(2, $this->redis->hIncrBy('h', 'x', 2));

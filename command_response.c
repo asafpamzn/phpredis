@@ -328,18 +328,21 @@ int handle_double_response(CommandResult *result, double *output)
  */
 int command_response_to_zval(CommandResponse *response, zval *output, int use_associative_array)
 {
+
     if (!response)
     {
         ZVAL_NULL(output);
         return 0;
     }
-
+    printf("file = %s, line = %d, response_type = %d\n", __FILE__, __LINE__, response->response_type);
     switch (response->response_type)
     {
     case Null:
+        printf("CommandResponse is NULL\n");
         ZVAL_NULL(output);
         return 0;
     case Int:
+        printf("CommandResponse is Int: %ld\n", response->int_value);
         ZVAL_LONG(output, response->int_value);
         return 1;
     case Float:
@@ -352,7 +355,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
         ZVAL_STRINGL(output, response->string_value, response->string_value_len);
         return 1;
     case Array:
-        printf("Converting Array response to zval\n");
+        printf("CommandResponse is Array with length: %ld\n", response->array_value_len);
         array_init(output);
         for (int64_t i = 0; i < response->array_value_len; i++)
         {
@@ -365,7 +368,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
         return 1;
 #if 1
     case Map:
-        printf("Converting Map response to zval\n");
+        printf("CommandResponse is Map with length: %ld\n", response->array_value_len);
         array_init(output);
         for (int i = 0; i < response->array_value_len; i++)
         {

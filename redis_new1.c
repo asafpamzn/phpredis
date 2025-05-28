@@ -297,7 +297,7 @@ PHP_METHOD(Redis, hGet)
         else if (result == 0)
         {
             /* Key didn't exist */
-            RETURN_NULL();
+            RETURN_FALSE;
         }
         else
         {
@@ -523,7 +523,7 @@ PHP_METHOD(Redis, hGetAll)
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
