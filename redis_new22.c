@@ -17,7 +17,6 @@
 #include "php_redis.h"
 #include "redis_commands.h"
 #include "redis_glide.h"
-#include <stdio.h>
 
 /* Forward declarations for the Glide execute functions */
 extern int execute_select_command(const void *glide_client, long database);
@@ -148,133 +147,126 @@ PHP_METHOD(Redis, bzPopMax)
 {
     zval *object;
     redis_object *redis;
-    zval *z_args = NULL, z_processed_keys;
+    zval *z_keys = NULL, *z_timeout = NULL, z_processed_keys;
+    zval *z_args = NULL;
     int argc = 0;
     double timeout = 0.0;
     zend_bool is_array_arg = 0;
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
-    /* Try the variadic format first */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O+d",
-                                     &object, redis_ce, &z_args, &argc, &timeout) == SUCCESS)
+    int num_args = ZEND_NUM_ARGS();
+
+    /* Check if we have exactly 2 arguments (could be array + timeout) */
+    if (num_args == 2)
     {
+        /* Parse as array + timeout */
+        if (zend_parse_method_parameters(num_args, getThis(), "Ozz",
+                                         &object, redis_ce, &z_keys, &z_timeout) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Check if first parameter is an array */
+        if (Z_TYPE_P(z_keys) == IS_ARRAY)
+        {
+            HashTable *ht_keys = Z_ARRVAL_P(z_keys);
+
+            /* Get timeout value */
+            if (Z_TYPE_P(z_timeout) == IS_LONG)
+            {
+                timeout = (double)Z_LVAL_P(z_timeout);
+            }
+            else if (Z_TYPE_P(z_timeout) == IS_DOUBLE)
+            {
+                timeout = Z_DVAL_P(z_timeout);
+            }
+            else
+            {
+                php_error_docref(NULL, E_WARNING, "Timeout must be a numeric value");
+                RETURN_FALSE;
+            }
+
+            /* Create a new array for processed keys */
+            array_init(&z_processed_keys);
+
+            /* Copy all keys to the new array */
+            zval *key_entry;
+            ZEND_HASH_FOREACH_VAL(ht_keys, key_entry)
+            {
+                if (Z_TYPE_P(key_entry) != IS_STRING)
+                {
+                    /* Convert to string if possible */
+                    zval tmp;
+                    ZVAL_COPY(&tmp, key_entry);
+                    convert_to_string(&tmp);
+                    add_next_index_zval(&z_processed_keys, &tmp);
+                }
+                else
+                {
+                    /* Add as-is if already string */
+                    zval tmp;
+                    ZVAL_COPY(&tmp, key_entry);
+                    add_next_index_zval(&z_processed_keys, &tmp);
+                }
+            }
+            ZEND_HASH_FOREACH_END();
+
+            /* Get Redis object */
+            redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+            is_array_arg = 1;
+            argc = zend_hash_num_elements(Z_ARRVAL(z_processed_keys));
+        }
+        else
+        {
+            /* Not an array, fall through to variadic format */
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Use variadic format */
+        if (zend_parse_method_parameters(num_args, getThis(), "O+d",
+                                         &object, redis_ce, &z_args, &argc, &timeout) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+
         /* Need at least one key */
         if (argc < 1)
         {
-            printf("bzPopMax requires at least one key\n");
             RETURN_FALSE;
         }
 
         /* Get Redis object */
         redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
         is_array_arg = 0;
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
     }
-    /* Try array format if variadic format fails */
-    else
-    {
-        zval *z_keys = NULL, *z_timeout = NULL;
-        HashTable *ht_keys = NULL;
 
-        /* Parse as array + timeout */
-        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ozz",
-                                         &object, redis_ce, &z_keys, &z_timeout) == FAILURE)
-        {
-            printf("bzPopMax requires an array of keys and a timeout\n");
-            RETURN_FALSE;
-        }
-
-        /* Make sure first argument is an array */
-        if (Z_TYPE_P(z_keys) != IS_ARRAY)
-        {
-            php_error_docref(NULL, E_WARNING, "First argument should be an array if using two-argument form");
-            printf("bzPopMax requires an array of keys\n");
-            RETURN_FALSE;
-        }
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
-        ht_keys = Z_ARRVAL_P(z_keys);
-
-        /* Extract timeout */
-        if (Z_TYPE_P(z_timeout) == IS_LONG)
-        {
-            timeout = (double)Z_LVAL_P(z_timeout);
-        }
-        else if (Z_TYPE_P(z_timeout) == IS_DOUBLE)
-        {
-            timeout = Z_DVAL_P(z_timeout);
-        }
-        else
-        {
-            php_error_docref(NULL, E_WARNING, "Timeout must be a numeric value");
-            printf("bzPopMax requires at least one key\n");
-            RETURN_FALSE;
-        }
-
-        /* Create a new array for processed keys */
-        array_init(&z_processed_keys);
-
-        /* Copy all keys to the new array */
-        zval *key_entry;
-        ZEND_HASH_FOREACH_VAL(ht_keys, key_entry)
-        {
-            if (Z_TYPE_P(key_entry) != IS_STRING)
-            {
-                /* Convert to string if possible */
-                zval tmp;
-                ZVAL_COPY(&tmp, key_entry);
-                convert_to_string(&tmp);
-                add_next_index_zval(&z_processed_keys, &tmp);
-            }
-            else
-            {
-                /* Add as-is if already string */
-                zval tmp;
-                ZVAL_COPY(&tmp, key_entry);
-                add_next_index_zval(&z_processed_keys, &tmp);
-            }
-        }
-        ZEND_HASH_FOREACH_END();
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
-        /* Update arguments count */
-        argc = zend_hash_num_elements(Z_ARRVAL(z_processed_keys));
-        z_args = NULL;
-
-        /* Get Redis object */
-        redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-        is_array_arg = 1;
-    }
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        printf("Executing bzPopMax with %d keys and timeout %.2f\n", argc, timeout);
-        /* Execute the BZPOPMAX command using the Glide client */
         int success;
 
         /* Handle different argument formats */
         if (is_array_arg)
         {
-            /* Create a temporary array for the keys with proper zval format */
-            zval *temp_args = ecalloc(argc, sizeof(zval));
+            /* Create a temporary array for keys with proper format */
+            zval *temp_args = emalloc(sizeof(zval) * argc);
 
-            /* Copy values from the processed keys array */
+            /* Copy the values from processed keys */
+            HashTable *ht = Z_ARRVAL(z_processed_keys);
             int i = 0;
             zval *entry;
-            ZEND_HASH_FOREACH_VAL(Z_ARRVAL(z_processed_keys), entry)
+
+            ZEND_HASH_FOREACH_VAL(ht, entry)
             {
-                /* Use proper reference copying */
-                ZVAL_COPY(&temp_args[i], entry);
+                ZVAL_COPY_VALUE(&temp_args[i], entry);
                 i++;
             }
             ZEND_HASH_FOREACH_END();
 
-            /* Call the execution function with properly referenced arguments */
+            /* Execute command */
             success = execute_bzpopmax_command(redis->glide_client, temp_args, argc, timeout, return_value);
 
-            /* Clean up the temporary array and its elements */
-            for (i = 0; i < argc; i++)
-            {
-                zval_ptr_dtor(&temp_args[i]);
-            }
+            /* Clean up */
             efree(temp_args);
         }
         else
@@ -291,11 +283,10 @@ PHP_METHOD(Redis, bzPopMax)
         if (success)
         {
             /* Return value already set by execute_bzpopmax_command */
-            printf("here\n");
             return;
         }
     }
-    printf("bzPopMax failed\n");
+
     RETURN_FALSE;
 }
 /* }}} */
@@ -305,15 +296,88 @@ PHP_METHOD(Redis, bzPopMin)
 {
     zval *object;
     redis_object *redis;
-    zval *z_args = NULL, z_processed_keys;
+    zval *z_keys = NULL, *z_timeout = NULL, z_processed_keys;
+    zval *z_args = NULL;
     int argc = 0;
     double timeout = 0.0;
     zend_bool is_array_arg = 0;
+    int num_args = ZEND_NUM_ARGS();
 
-    /* Try the variadic format first */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O+d",
-                                     &object, redis_ce, &z_args, &argc, &timeout) == SUCCESS)
+    /* Check if we have exactly 2 arguments (could be array + timeout) */
+    if (num_args == 2)
     {
+        /* Parse as array + timeout */
+        if (zend_parse_method_parameters(num_args, getThis(), "Ozz",
+                                         &object, redis_ce, &z_keys, &z_timeout) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Check if first parameter is an array */
+        if (Z_TYPE_P(z_keys) == IS_ARRAY)
+        {
+            HashTable *ht_keys = Z_ARRVAL_P(z_keys);
+
+            /* Get timeout value */
+            if (Z_TYPE_P(z_timeout) == IS_LONG)
+            {
+                timeout = (double)Z_LVAL_P(z_timeout);
+            }
+            else if (Z_TYPE_P(z_timeout) == IS_DOUBLE)
+            {
+                timeout = Z_DVAL_P(z_timeout);
+            }
+            else
+            {
+                php_error_docref(NULL, E_WARNING, "Timeout must be a numeric value");
+                RETURN_FALSE;
+            }
+
+            /* Create a new array for processed keys */
+            array_init(&z_processed_keys);
+
+            /* Copy all keys to the new array */
+            zval *key_entry;
+            ZEND_HASH_FOREACH_VAL(ht_keys, key_entry)
+            {
+                if (Z_TYPE_P(key_entry) != IS_STRING)
+                {
+                    /* Convert to string if possible */
+                    zval tmp;
+                    ZVAL_COPY(&tmp, key_entry);
+                    convert_to_string(&tmp);
+                    add_next_index_zval(&z_processed_keys, &tmp);
+                }
+                else
+                {
+                    /* Add as-is if already string */
+                    zval tmp;
+                    ZVAL_COPY(&tmp, key_entry);
+                    add_next_index_zval(&z_processed_keys, &tmp);
+                }
+            }
+            ZEND_HASH_FOREACH_END();
+
+            /* Get Redis object */
+            redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+            is_array_arg = 1;
+            argc = zend_hash_num_elements(Z_ARRVAL(z_processed_keys));
+        }
+        else
+        {
+            /* Not an array, fall through to variadic format */
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        /* Use variadic format */
+        if (zend_parse_method_parameters(num_args, getThis(), "O+d",
+                                         &object, redis_ce, &z_args, &argc, &timeout) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+
         /* Need at least one key */
         if (argc < 1)
         {
@@ -324,108 +388,34 @@ PHP_METHOD(Redis, bzPopMin)
         redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
         is_array_arg = 0;
     }
-    /* Try array format if variadic format fails */
-    else
-    {
-        zval *z_keys = NULL, *z_timeout = NULL;
-        HashTable *ht_keys = NULL;
-
-        /* Parse as array + timeout */
-        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ozz",
-                                         &object, redis_ce, &z_keys, &z_timeout) == FAILURE)
-        {
-            RETURN_FALSE;
-        }
-
-        /* Make sure first argument is an array */
-        if (Z_TYPE_P(z_keys) != IS_ARRAY)
-        {
-            php_error_docref(NULL, E_WARNING, "First argument should be an array if using two-argument form");
-            RETURN_FALSE;
-        }
-
-        ht_keys = Z_ARRVAL_P(z_keys);
-
-        /* Extract timeout */
-        if (Z_TYPE_P(z_timeout) == IS_LONG)
-        {
-            timeout = (double)Z_LVAL_P(z_timeout);
-        }
-        else if (Z_TYPE_P(z_timeout) == IS_DOUBLE)
-        {
-            timeout = Z_DVAL_P(z_timeout);
-        }
-        else
-        {
-            php_error_docref(NULL, E_WARNING, "Timeout must be a numeric value");
-            RETURN_FALSE;
-        }
-
-        /* Create a new array for processed keys */
-        array_init(&z_processed_keys);
-
-        /* Copy all keys to the new array */
-        zval *key_entry;
-        ZEND_HASH_FOREACH_VAL(ht_keys, key_entry)
-        {
-            if (Z_TYPE_P(key_entry) != IS_STRING)
-            {
-                /* Convert to string if possible */
-                zval tmp;
-                ZVAL_COPY(&tmp, key_entry);
-                convert_to_string(&tmp);
-                add_next_index_zval(&z_processed_keys, &tmp);
-            }
-            else
-            {
-                /* Add as-is if already string */
-                zval tmp;
-                ZVAL_COPY(&tmp, key_entry);
-                add_next_index_zval(&z_processed_keys, &tmp);
-            }
-        }
-        ZEND_HASH_FOREACH_END();
-
-        /* Update arguments count */
-        argc = zend_hash_num_elements(Z_ARRVAL(z_processed_keys));
-        z_args = NULL;
-
-        /* Get Redis object */
-        redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-        is_array_arg = 1;
-    }
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the BZPOPMIN command using the Glide client */
         int success;
 
         /* Handle different argument formats */
         if (is_array_arg)
         {
-            /* Create a temporary array for the keys with proper zval format */
-            zval *temp_args = ecalloc(argc, sizeof(zval));
+            /* Create a temporary array for keys with proper format */
+            zval *temp_args = emalloc(sizeof(zval) * argc);
 
-            /* Copy values from the processed keys array */
+            /* Copy the values from processed keys */
+            HashTable *ht = Z_ARRVAL(z_processed_keys);
             int i = 0;
             zval *entry;
-            ZEND_HASH_FOREACH_VAL(Z_ARRVAL(z_processed_keys), entry)
+
+            ZEND_HASH_FOREACH_VAL(ht, entry)
             {
-                /* Use proper reference copying */
-                ZVAL_COPY(&temp_args[i], entry);
+                ZVAL_COPY_VALUE(&temp_args[i], entry);
                 i++;
             }
             ZEND_HASH_FOREACH_END();
 
-            /* Call the execution function with properly referenced arguments */
+            /* Execute command */
             success = execute_bzpopmin_command(redis->glide_client, temp_args, argc, timeout, return_value);
 
-            /* Clean up the temporary array and its elements */
-            for (i = 0; i < argc; i++)
-            {
-                zval_ptr_dtor(&temp_args[i]);
-            }
+            /* Clean up */
             efree(temp_args);
         }
         else
