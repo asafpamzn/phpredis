@@ -504,27 +504,9 @@ PHP_MINFO_FUNCTION(redis)
     php_info_print_table_start();
     php_info_print_table_header(2, "Redis Support", "enabled");
     php_info_print_table_row(2, "Redis Version", PHP_REDIS_VERSION);
-#ifdef GIT_REVISION
-    php_info_print_table_row(2, "Git revision", "$Id: " GIT_REVISION " $");
-#endif
+
     php_info_print_table_row(2, "Available serializers", get_available_serializers());
-#ifdef HAVE_REDIS_LZF
-    smart_str_appends(&names, "lzf");
-#endif
-#ifdef HAVE_REDIS_ZSTD
-    if (names.s)
-    {
-        smart_str_appends(&names, ", ");
-    }
-    smart_str_appends(&names, "zstd");
-#endif
-#ifdef HAVE_REDIS_LZ4
-    if (names.s)
-    {
-        smart_str_appends(&names, ", ");
-    }
-    smart_str_appends(&names, "lz4");
-#endif
+
     if (names.s)
     {
         smart_str_0(&names);
@@ -549,13 +531,6 @@ PHP_METHOD(Redis, __construct)
     ZEND_PARSE_PARAMETERS_END_EX(RETURN_THROWS());
 
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, getThis());
-#if 0
-   redis->sock = redis_sock_create(ZEND_STRL("127.0.0.1"), 6379, 0, 0, 0, NULL, 0);
-    if (opts != NULL && redis_sock_configure(redis->sock, opts) != SUCCESS)
-    {
-        RETURN_THROWS();
-    }
-#endif
 }
 /* }}} */
 
@@ -568,25 +543,6 @@ PHP_METHOD(Redis, __destruct)
     {
         RETURN_FALSE;
     }
-
-    // Grab our socket
-    RedisSock *redis_sock;
-    if ((redis_sock = redis_sock_get_instance(getThis(), 1)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-
-    // If we think we're in MULTI mode, send a discard
-    if (IS_MULTI(redis_sock))
-    {
-        if (!IS_PIPELINE(redis_sock) && redis_sock->stream)
-        {
-            // Discard any multi commands, and free any callbacks that have been
-            // queued
-            redis_send_discard(redis_sock);
-        }
-        redis_free_reply_callbacks(redis_sock);
-    }
 }
 
 /* {{{ proto boolean Redis::connect(string host, int port [, double timeout [, long retry_interval]])
@@ -594,14 +550,7 @@ PHP_METHOD(Redis, __destruct)
 PHP_METHOD(Redis, connect)
 {
     printf("file = %s, line = %d\n", __FILE__, __LINE__);
-    /* if (redis_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE)
-     {
-         RETURN_FALSE;
-     }
-     else
-     {
-         RETURN_TRUE;
-     }*/
+
     RETURN_TRUE;
 }
 /* }}} */
@@ -610,16 +559,7 @@ PHP_METHOD(Redis, connect)
  */
 PHP_METHOD(Redis, pconnect)
 {
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
-    /*if (redis_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-    else
-    {
-        RETURN_TRUE;
-    }*/
     RETURN_TRUE;
 }
 /* }}} */
@@ -628,114 +568,6 @@ PHP_REDIS_API int
 redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
     return 0;
-    zval *object, *context = NULL, *ele;
-    char *host = NULL, *persistent_id = NULL;
-    zend_long port = -1, retry_interval = 0;
-    size_t host_len, persistent_id_len;
-    double timeout = 0.0, read_timeout = 0.0;
-    redis_object *redis;
-    int af_unix;
-
-#ifdef ZTS
-    /* not sure how in threaded mode this works so disabled persistence at
-     * first */
-    persistent = 0;
-#endif
-
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-                                     "Os|lds!lda!", &object, redis_ce, &host,
-                                     &host_len, &port, &timeout, &persistent_id,
-                                     &persistent_id_len, &retry_interval,
-                                     &read_timeout, &context) == FAILURE)
-    {
-        return FAILURE;
-    }
-
-    /* Disregard persistent_id if we're not opening a persistent connection */
-    if (!persistent)
-    {
-        persistent_id = NULL;
-    }
-
-    if (timeout > INT_MAX)
-    {
-        REDIS_VALUE_EXCEPTION("Invalid connect timeout");
-        return FAILURE;
-    }
-
-    if (read_timeout > INT_MAX)
-    {
-        REDIS_VALUE_EXCEPTION("Invalid read timeout");
-        return FAILURE;
-    }
-
-    if (retry_interval < 0L || retry_interval > INT_MAX)
-    {
-        REDIS_VALUE_EXCEPTION("Invalid retry interval");
-        return FAILURE;
-    }
-
-    /* Does the host look like a unix socket */
-    af_unix = (host_len > 0 && host[0] == '/') ||
-              (host_len > 6 && (!strncasecmp(host, "unix://", sizeof("unix://") - 1) ||
-                                !strncasecmp(host, "file://", sizeof("file://") - 1)));
-
-    /* If it's not a unix socket, set to default */
-    if (port == -1 && !af_unix)
-    {
-        port = 6379;
-    }
-
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* if there is a redis sock already we have to remove it */
-    if (redis->sock)
-    {
-        redis_sock_disconnect(redis->sock, 0, 1);
-        redis_free_socket(redis->sock);
-    }
-
-    /*  redis->sock = redis_sock_create(host, host_len, port, timeout, read_timeout, persistent,
-                                      persistent_id, retry_interval);
-      printf("file = %s, line = %d\n", __FILE__, __LINE__);
-  */
-    /* Initialize the Valkey Glide client */
-    /* We don't initialize the Glide client here, it will be initialized in redis_sock_get_instance */
-
-    if (context)
-    {
-#if 0
-        /* Stream context (e.g. TLS) */
-        if ((ele = REDIS_HASH_STR_FIND_STATIC(Z_ARRVAL_P(context), "stream")))
-        {
-            redis_sock_set_stream_context(redis->sock, ele);
-        }
-#endif
-        /* AUTH */
-        if ((ele = REDIS_HASH_STR_FIND_STATIC(Z_ARRVAL_P(context), "auth")))
-        {
-            //    redis_sock_set_auth_zval(redis->sock, ele);
-
-            /* If we have auth credentials and a Glide client, update the Glide client */
-            if (redis->glide_client && redis->sock->pass)
-            {
-                /* In a real implementation, we would update the Glide client with the auth credentials */
-                /* For now, we'll just leave it as is */
-            }
-        }
-    }
-#if 0
-    if (redis_sock_connect(redis->sock) != SUCCESS)
-    {
-        if (redis->sock->err)
-        {
-            REDIS_THROW_EXCEPTION(ZSTR_VAL(redis->sock->err), 0);
-        }
-        redis_free_socket(redis->sock);
-        redis->sock = NULL;
-        return FAILURE;
-    }
-#endif
 
     return SUCCESS;
 }
@@ -772,97 +604,22 @@ PHP_REDIS_API int redis_sock_read_multibulk_multi_reply(INTERNAL_FUNCTION_PARAME
                                                         RedisSock *redis_sock, zval *z_tab)
 {
 
-    char inbuf[4096];
-    size_t len;
-
-    if (redis_sock_gets(redis_sock, inbuf, sizeof(inbuf) - 1, &len) < 0 ||
-        *inbuf != TYPE_MULTIBULK || atoi(inbuf + 1) < 0)
-    {
-        return FAILURE;
-    }
-
-    // No command issued, return empty immutable array
-    if (redis_sock->reply_callback == NULL)
-    {
-        ZVAL_EMPTY_ARRAY(z_tab);
-        return SUCCESS;
-    }
-
-    array_init(z_tab);
-
-    return redis_sock_read_multibulk_multi_reply_loop(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-                                                      redis_sock, z_tab);
+    return 0; // redis_sock_read_multibulk_multi_reply_loop(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+              //                                        redis_sock, z_tab);
 }
 
 PHP_REDIS_API int
 redis_response_enqueued(RedisSock *redis_sock)
 {
-    char *resp;
-    int resp_len, ret = FAILURE;
 
-    if ((resp = redis_sock_read(redis_sock, &resp_len)) != NULL)
-    {
-        if (redis_strncmp(resp, ZEND_STRL("+QUEUED")) == 0)
-        {
-            ret = SUCCESS;
-        }
-        efree(resp);
-    }
-    return ret;
+    return 0;
 }
 
 PHP_REDIS_API int
 redis_sock_read_multibulk_multi_reply_loop(INTERNAL_FUNCTION_PARAMETERS,
                                            RedisSock *redis_sock, zval *z_tab)
 {
-    fold_item *fi;
-    uint8_t flags;
-    size_t i;
 
-    flags = redis_sock->flags;
-    for (i = 0; i < redis_sock->reply_callback_count; i++)
-    {
-        fi = &redis_sock->reply_callback[i];
-        if (fi->fun)
-        {
-            redis_sock->flags = fi->flags;
-            fi->fun(INTERNAL_FUNCTION_PARAM_PASSTHRU, redis_sock, z_tab, fi->ctx);
-            redis_sock->flags = flags;
-            continue;
-        }
-        size_t len;
-        char inbuf[255];
-
-        if (redis_sock_gets(redis_sock, inbuf, sizeof(inbuf) - 1, &len) < 0 ||
-            redis_strncmp(inbuf, ZEND_STRL("+OK")) != 0)
-        {
-            return FAILURE;
-        }
-
-        while (redis_sock->reply_callback[++i].fun)
-        {
-            if (redis_response_enqueued(redis_sock) != SUCCESS)
-            {
-                return FAILURE;
-            }
-        }
-
-        if (redis_sock_gets(redis_sock, inbuf, sizeof(inbuf) - 1, &len) < 0)
-        {
-            return FAILURE;
-        }
-
-        zval z_ret;
-        array_init(&z_ret);
-        add_next_index_zval(z_tab, &z_ret);
-
-        int num = atol(inbuf + 1);
-
-        if (num > 0 && redis_read_multibulk_recursive(redis_sock, num, 0, &z_ret) < 0)
-        {
-            return FAILURE;
-        }
-    }
     return SUCCESS;
 }
 

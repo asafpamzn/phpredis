@@ -31,7 +31,7 @@
 #define REDIS_SALT_SIZE ((2 * REDIS_SALT_BYTES) + 1)
 
 ZEND_BEGIN_MODULE_GLOBALS(redis)
-	char salt[REDIS_SALT_SIZE];
+char salt[REDIS_SALT_SIZE];
 ZEND_END_MODULE_GLOBALS(redis)
 
 ZEND_EXTERN_MODULE_GLOBALS(redis)
@@ -48,9 +48,6 @@ PHP_MINFO_FUNCTION(redis);
 PHP_REDIS_API int redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
 PHP_REDIS_API int redis_response_enqueued(RedisSock *redis_sock);
-
-PHP_REDIS_API int redis_sock_read_multibulk_multi_reply_loop(
-    INTERNAL_FUNCTION_PARAMETERS, RedisSock *redis_sock, zval *z_tab);
 
 extern zend_module_entry redis_module_entry;
 
