@@ -283,15 +283,7 @@ int execute_hincrbyfloat_command(const void *glide_client, const char *key, size
     }
 
     /* Process the result (a string representing a double) */
-    int ret_val = 0;
-    if (result->response)
-    {
-        if (result->response->response_type == String)
-        {
-            *output_value = atof(result->response->string_value);
-            ret_val = 1;
-        }
-    }
+    int ret_val = command_response_to_zval(result->response, output_value, 0);
 
     /* Free the result */
     free_command_result(result);
@@ -421,7 +413,9 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
     }
 
     /* Process the result (array of values for each field) */
-    int ret_val = 0;
+
+    int ret_val = command_response_to_zval(result->response, return_value, 1);
+#if 0
     if (result->response && result->response->response_type == Array)
     {
         size_t i;
@@ -493,7 +487,7 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
         }
         ret_val = 1;
     }
-
+#endif
     /* Free the result */
     free_command_result(result);
 
@@ -1082,21 +1076,7 @@ int execute_hexists_command(const void *glide_client, const char *key, size_t ke
         return 0;
     }
 
-    /* Process the result (0 or 1) */
-    int ret_val = 0;
-    if (result->response)
-    {
-        if (result->response->response_type == Int)
-        {
-            *output_value = result->response->int_value;
-            ret_val = 1;
-        }
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    return handle_bool_response(result);
 }
 
 /* Execute an HKEYS command using the Valkey Glide client */
