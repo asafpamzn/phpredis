@@ -180,7 +180,7 @@ PHP_METHOD(Redis, reset)
 /* {{{ proto long Redis::hSet(string key, string field, string value) */
 PHP_METHOD(Redis, hSet)
 {
-    zval *object, *z_args;
+    zval *object, *z_args, *z_array = NULL;
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
@@ -200,9 +200,17 @@ PHP_METHOD(Redis, hSet)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
+        /* Check if we have a single array argument */
+        int is_array_arg = 0;
+        if (argc == 1 && Z_TYPE(z_args[0]) == IS_ARRAY)
+        {
+            z_array = &z_args[0];
+            is_array_arg = 1;
+        }
+
         /* Execute the HSET command using the Glide client */
         long result_value;
-        if (execute_hset_command(redis->glide_client, key, key_len, z_args, argc, &result_value))
+        if (execute_hset_command(redis->glide_client, key, key_len, z_args, argc, &result_value, is_array_arg))
         {
             /* Command succeeded, return the value */
             RETURN_LONG(result_value);
@@ -658,23 +666,33 @@ PHP_METHOD(Redis, hMget)
 
         /* First, count how many valid fields we have */
         int valid_fields_count = 0;
-        zval *data;
+        zval *data, *real_data;
         zend_string *hash_key;
         zend_ulong num_idx;
 
         ZEND_HASH_FOREACH_KEY_VAL(fields_hash, num_idx, hash_key, data)
         {
+            /* Handle references - if data is a reference, get the referenced value */
+            if (Z_ISREF_P(data))
+            {
+                real_data = Z_REFVAL_P(data);
+            }
+            else
+            {
+                real_data = data;
+            }
+
             if (hash_key)
             {
                 /* Associative array, use the keys */
                 valid_fields_count++;
             }
-            else if (Z_TYPE_P(data) == IS_STRING && Z_STRLEN_P(data) > 0)
+            else if (Z_TYPE_P(real_data) == IS_STRING && Z_STRLEN_P(real_data) > 0)
             {
                 valid_fields_count++;
             }
-            else if (Z_TYPE_P(data) == IS_LONG || Z_TYPE_P(data) == IS_DOUBLE ||
-                     Z_TYPE_P(data) == IS_TRUE)
+            else if (Z_TYPE_P(real_data) == IS_LONG || Z_TYPE_P(real_data) == IS_DOUBLE ||
+                     Z_TYPE_P(real_data) == IS_TRUE)
             {
                 valid_fields_count++;
             }
@@ -701,6 +719,13 @@ PHP_METHOD(Redis, hMget)
         int i = 0;
         ZEND_HASH_FOREACH_KEY_VAL(fields_hash, num_idx, hash_key, data)
         {
+            /* Handle references - dereference if needed */
+            zval *real_data = data;
+            if (Z_ISREF_P(data))
+            {
+                real_data = Z_REFVAL_P(data);
+            }
+
             if (hash_key)
             {
                 /* Associative array, use the keys */
@@ -710,17 +735,17 @@ PHP_METHOD(Redis, hMget)
             else
             {
                 /* Indexed array, use the values if they're valid */
-                if (Z_TYPE_P(data) == IS_STRING && Z_STRLEN_P(data) > 0)
+                if (Z_TYPE_P(real_data) == IS_STRING && Z_STRLEN_P(real_data) > 0)
                 {
                     /* Valid string field */
-                    ZVAL_COPY(&field_array[i], data);
+                    ZVAL_COPY(&field_array[i], real_data);
                     i++;
                 }
-                else if (Z_TYPE_P(data) == IS_LONG || Z_TYPE_P(data) == IS_DOUBLE ||
-                         Z_TYPE_P(data) == IS_TRUE)
+                else if (Z_TYPE_P(real_data) == IS_LONG || Z_TYPE_P(real_data) == IS_DOUBLE ||
+                         Z_TYPE_P(real_data) == IS_TRUE)
                 {
                     /* Other valid types */
-                    ZVAL_COPY(&field_array[i], data);
+                    ZVAL_COPY(&field_array[i], real_data);
                     i++;
                 }
                 /* Skip invalid fields (NULL, false, empty string) */
@@ -730,7 +755,6 @@ PHP_METHOD(Redis, hMget)
 
         /* Execute the HMGET command with valid fields */
         int result = execute_hmget_command(redis->glide_client, key, key_len, field_array, i, return_value);
-
         /* Free the field array regardless of result */
         for (int j = 0; j < i; j++)
         {

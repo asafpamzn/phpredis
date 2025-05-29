@@ -24,114 +24,272 @@
 #include <stdio.h>
 
 /* Execute an HSET command using the Valkey Glide client */
-int execute_hset_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, long *output_value)
+int execute_hset_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, long *output_value, int is_array_arg)
 {
-    /* Check if client, key, and args are valid */
-    if (!glide_client || !key || !z_args || argc < 2 || argc % 2 != 0)
+    /* Check if client and key are valid */
+    if (!glide_client || !key || !z_args)
     {
         return 0;
     }
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1 + argc; /* key + field/value pairs */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
+    /* Handle the case when we get a single associative array argument */
+    if (is_array_arg)
     {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Add field/value pairs */
-    int i;
-    for (i = 0; i < argc; i++)
-    {
-        zval *value = &z_args[i];
-
-        if (Z_TYPE_P(value) == IS_STRING)
+        if (argc != 1 || Z_TYPE(z_args[0]) != IS_ARRAY)
         {
-            args[i + 1] = (uintptr_t)Z_STRVAL_P(value);
-            args_len[i + 1] = Z_STRLEN_P(value);
+            return 0;
         }
-        else
-        {
-            /* Convert non-string values to string */
-            char *str_val = NULL;
-            size_t str_len = 0;
 
-            if (Z_TYPE_P(value) == IS_LONG)
+        zval *z_array = &z_args[0];
+        HashTable *ht = Z_ARRVAL_P(z_array);
+        int pairs_count = zend_hash_num_elements(ht);
+
+        if (pairs_count == 0)
+        {
+            return 0;
+        }
+
+        /* Prepare command arguments - key + field-value pairs */
+        unsigned long arg_count = 1 + (pairs_count * 2);
+        uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+        unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+        char **allocated_strings = (char **)emalloc((pairs_count * 2) * sizeof(char *));
+        int allocated_count = 0;
+
+        if (!args || !args_len || !allocated_strings)
+        {
+            if (args)
+                efree(args);
+            if (args_len)
+                efree(args_len);
+            if (allocated_strings)
+                efree(allocated_strings);
+            return 0;
+        }
+
+        /* First argument: key */
+        args[0] = (uintptr_t)key;
+        args_len[0] = key_len;
+
+        /* Add field-value pairs as arguments */
+        zval *data;
+        zend_string *hash_key;
+        zend_ulong num_idx;
+        int arg_idx = 1;
+
+        ZEND_HASH_FOREACH_KEY_VAL(ht, num_idx, hash_key, data)
+        {
+            /* Add field */
+            if (hash_key)
             {
-                str_val = long_to_string(Z_LVAL_P(value), &str_len);
-            }
-            else if (Z_TYPE_P(value) == IS_DOUBLE)
-            {
-                str_val = double_to_string(Z_DVAL_P(value), &str_len);
-            }
-            else if (Z_TYPE_P(value) == IS_TRUE)
-            {
-                str_val = estrdup("1");
-                str_len = 1;
-            }
-            else if (Z_TYPE_P(value) == IS_FALSE)
-            {
-                str_val = estrdup("0");
-                str_len = 1;
+                /* Associative array: key is the field */
+                args[arg_idx] = (uintptr_t)ZSTR_VAL(hash_key);
+                args_len[arg_idx] = ZSTR_LEN(hash_key);
             }
             else
             {
-                /* Handle other types or error */
-                efree(args);
-                efree(args_len);
-                return 0;
+                /* Numeric index - convert to string */
+                char *field_str = long_to_string(num_idx, &args_len[arg_idx]);
+                args[arg_idx] = (uintptr_t)field_str;
+                allocated_strings[allocated_count++] = field_str;
             }
+            arg_idx++;
 
-            if (str_val)
+            /* Add value */
+            if (Z_TYPE_P(data) == IS_STRING)
             {
-                args[i + 1] = (uintptr_t)str_val;
-                args_len[i + 1] = str_len;
+                args[arg_idx] = (uintptr_t)Z_STRVAL_P(data);
+                args_len[arg_idx] = Z_STRLEN_P(data);
             }
             else
             {
+                /* Convert non-string values to string */
+                char *str_val = NULL;
+                size_t str_len = 0;
+
+                if (Z_TYPE_P(data) == IS_LONG)
+                {
+                    str_val = long_to_string(Z_LVAL_P(data), &str_len);
+                }
+                else if (Z_TYPE_P(data) == IS_DOUBLE)
+                {
+                    str_val = double_to_string(Z_DVAL_P(data), &str_len);
+                }
+                else if (Z_TYPE_P(data) == IS_TRUE)
+                {
+                    str_val = estrdup("1");
+                    str_len = 1;
+                }
+                else if (Z_TYPE_P(data) == IS_FALSE)
+                {
+                    str_val = estrdup("0");
+                    str_len = 1;
+                }
+                else if (Z_TYPE_P(data) == IS_NULL)
+                {
+                    str_val = estrdup("");
+                    str_len = 0;
+                }
+                else
+                {
+                    /* Handle other types as empty string */
+                    str_val = estrdup("");
+                    str_len = 0;
+                }
+
+                if (str_val)
+                {
+                    args[arg_idx] = (uintptr_t)str_val;
+                    args_len[arg_idx] = str_len;
+                    allocated_strings[allocated_count++] = str_val;
+                }
+                else
+                {
+                    /* Free already allocated strings */
+                    for (int i = 0; i < allocated_count; i++)
+                    {
+                        efree(allocated_strings[i]);
+                    }
+                    efree(allocated_strings);
+                    efree(args);
+                    efree(args_len);
+                    return 0;
+                }
+            }
+            arg_idx++;
+        }
+        ZEND_HASH_FOREACH_END();
+
+        /* Execute the command */
+        CommandResult *result = execute_command(
+            glide_client,
+            HSet,      /* command type */
+            arg_count, /* number of arguments */
+            args,      /* arguments */
+            args_len   /* argument lengths */
+        );
+
+        /* Free allocated strings */
+        for (int i = 0; i < allocated_count; i++)
+        {
+            efree(allocated_strings[i]);
+        }
+        efree(allocated_strings);
+        efree(args);
+        efree(args_len);
+
+        /* Use the generic handler to process the result */
+        return handle_int_response(result, output_value);
+    }
+    else
+    {
+        /* Original variadic usage - check if arguments are valid */
+        if (argc < 2 || argc % 2 != 0)
+        {
+            return 0;
+        }
+
+        /* Prepare command arguments */
+        unsigned long arg_count = 1 + argc; /* key + field/value pairs */
+        uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+        unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+        if (!args || !args_len)
+        {
+            if (args)
                 efree(args);
+            if (args_len)
                 efree(args_len);
-                return 0;
+            return 0;
+        }
+
+        /* First argument: key */
+        args[0] = (uintptr_t)key;
+        args_len[0] = key_len;
+
+        /* Add field/value pairs */
+        int i;
+        for (i = 0; i < argc; i++)
+        {
+            zval *value = &z_args[i];
+
+            if (Z_TYPE_P(value) == IS_STRING)
+            {
+                args[i + 1] = (uintptr_t)Z_STRVAL_P(value);
+                args_len[i + 1] = Z_STRLEN_P(value);
+            }
+            else
+            {
+                /* Convert non-string values to string */
+                char *str_val = NULL;
+                size_t str_len = 0;
+
+                if (Z_TYPE_P(value) == IS_LONG)
+                {
+                    str_val = long_to_string(Z_LVAL_P(value), &str_len);
+                }
+                else if (Z_TYPE_P(value) == IS_DOUBLE)
+                {
+                    str_val = double_to_string(Z_DVAL_P(value), &str_len);
+                }
+                else if (Z_TYPE_P(value) == IS_TRUE)
+                {
+                    str_val = estrdup("1");
+                    str_len = 1;
+                }
+                else if (Z_TYPE_P(value) == IS_FALSE)
+                {
+                    str_val = estrdup("0");
+                    str_len = 1;
+                }
+                else
+                {
+                    /* Handle other types or error */
+                    efree(args);
+                    efree(args_len);
+                    return 0;
+                }
+
+                if (str_val)
+                {
+                    args[i + 1] = (uintptr_t)str_val;
+                    args_len[i + 1] = str_len;
+                }
+                else
+                {
+                    efree(args);
+                    efree(args_len);
+                    return 0;
+                }
             }
         }
-    }
 
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        HSet,      /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
+        /* Execute the command */
+        CommandResult *result = execute_command(
+            glide_client,
+            HSet,      /* command type */
+            arg_count, /* number of arguments */
+            args,      /* arguments */
+            args_len   /* argument lengths */
+        );
 
-    /* Free allocated strings for non-string arguments */
-    for (i = 0; i < argc; i++)
-    {
-        zval *value = &z_args[i];
-        if (Z_TYPE_P(value) != IS_STRING)
+        /* Free allocated strings for non-string arguments */
+        for (i = 0; i < argc; i++)
         {
-            efree((void *)args[i + 1]);
+            zval *value = &z_args[i];
+            if (Z_TYPE_P(value) != IS_STRING)
+            {
+                efree((void *)args[i + 1]);
+            }
         }
+
+        /* Free the argument arrays */
+        efree(args);
+        efree(args_len);
+
+        /* Use the generic handler to process the result */
+        return handle_int_response(result, output_value);
     }
-
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
 }
 
 /* Execute an HSETNX command using the Valkey Glide client */

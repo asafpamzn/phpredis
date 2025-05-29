@@ -173,7 +173,7 @@ extern int execute_zrandmember_command(const void *glide_client, const char *key
 extern int execute_zrange_command(const void *glide_client, const char *key, size_t key_len, zval *z_start, zval *z_end, zval *options, zval *return_value);
 
 /* Hash operations */
-extern int execute_hset_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, long *output_value);
+extern int execute_hset_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, long *output_value, int is_arg_array);
 extern int execute_hsetnx_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, char *value, size_t value_len, int *output_value);
 extern int execute_hget_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, char **result, size_t *result_len);
 extern int execute_hlen_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
