@@ -5859,9 +5859,10 @@ class Redis_Test extends TestSuite {
     public function testConfig() {
         /* GET */
         $cfg = $this->redis->config('GET', 'timeout');
+        
         $this->assertArrayKey($cfg, 'timeout');
         $sec = $cfg['timeout'];
-
+       
         /* SET */
         foreach ([$sec + 30, $sec] as $val) {
             $this->assertTrue($this->redis->config('SET', 'timeout', $val));
@@ -5875,6 +5876,7 @@ class Redis_Test extends TestSuite {
         $c1 = count($this->redis->info('commandstats'));
         $this->assertTrue($this->redis->config('resetstat'));
         $this->assertLT($c1, count($this->redis->info('commandstats')));
+        
 
         /* Ensure invalid calls are handled by PhpRedis */
         foreach (['notacommand', 'get', 'set'] as $cmd) {
@@ -5913,10 +5915,11 @@ class Redis_Test extends TestSuite {
 
         foreach ($updates as $update) {
             $this->assertTrue($this->redis->config('set', $update));
+       
             $vals = $this->redis->config('get', array_keys($update));
             $this->assertEqualsWeak($vals, $update, true);
         }
-
+  
         /* Make sure PhpRedis catches malformed multiple get/set calls */
         $this->assertFalse(@$this->redis->config('get', []));
         $this->assertFalse(@$this->redis->config('set', []));
