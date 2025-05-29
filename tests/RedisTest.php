@@ -3378,6 +3378,8 @@ class Redis_Test extends TestSuite {
         // references
         $keys = [123, 'y'];
         foreach ($keys as &$key) {}
+        var_dump(this->redis->hMget('h', $keys));
+        var_dump([123 => 'x', 'y' => '456']);
         $this->assertEquals([123 => 'x', 'y' => '456'], $this->redis->hMget('h', $keys));
           return;
         // check non-string types.
