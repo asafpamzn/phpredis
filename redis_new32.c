@@ -32,7 +32,7 @@ extern int execute_dump_command(const void *glide_client, const char *key, size_
                                 char **output, size_t *output_len);
 extern int execute_restore_command(const void *glide_client, const char *key, size_t key_len,
                                    long ttl, const char *serialized, size_t serialized_len,
-                                   int replace);
+                                   zval *options);
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
@@ -356,7 +356,7 @@ PHP_METHOD(Redis, dump)
 }
 /* }}} */
 
-/* {{{ proto bool Redis::restore(string key, int ttl, string serialized_value [, bool replace]) */
+/* {{{ proto bool Redis::restore(string key, int ttl, string serialized_value [, array options]) */
 PHP_METHOD(Redis, restore)
 {
     zval *object;
@@ -364,12 +364,12 @@ PHP_METHOD(Redis, restore)
     char *key = NULL, *serialized = NULL;
     size_t key_len, serialized_len;
     long ttl;
-    zend_bool replace = 0;
+    zval *options = NULL;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osls|b",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osls|a",
                                      &object, redis_ce, &key, &key_len, &ttl,
-                                     &serialized, &serialized_len, &replace) == FAILURE)
+                                     &serialized, &serialized_len, &options) == FAILURE)
     {
         RETURN_FALSE;
     }
@@ -382,7 +382,7 @@ PHP_METHOD(Redis, restore)
     {
         /* Execute the RESTORE command using the Glide client */
         if (execute_restore_command(redis->glide_client, key, key_len, ttl,
-                                    serialized, serialized_len, replace))
+                                    serialized, serialized_len, options))
         {
             RETURN_TRUE;
         }

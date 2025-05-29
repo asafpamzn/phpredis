@@ -497,7 +497,7 @@ int execute_dump_command(const void *glide_client, const char *key, size_t key_l
 /* Execute a RESTORE command using the Valkey Glide client */
 int execute_restore_command(const void *glide_client, const char *key, size_t key_len,
                             long ttl, const char *serialized, size_t serialized_len,
-                            int replace)
+                            zval *options)
 {
     /* Check if client, key and serialized value are valid */
     if (!glide_client || !key || key_len <= 0 || !serialized || serialized_len <= 0)
@@ -509,10 +509,11 @@ int execute_restore_command(const void *glide_client, const char *key, size_t ke
     char ttl_str[32];
     snprintf(ttl_str, sizeof(ttl_str), "%ld", ttl);
 
-    /* Calculate command arguments: key + ttl + serialized + [replace] */
-    unsigned long arg_count = replace ? 4 : 3;
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    /* Start with basic arguments: key + ttl + serialized */
+    unsigned long base_arg_count = 3;
+    unsigned long max_args = 10; /* Maximum possible arguments */
+    uintptr_t *args = (uintptr_t *)emalloc(max_args * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(max_args * sizeof(unsigned long));
 
     if (!args || !args_len)
     {
@@ -523,7 +524,7 @@ int execute_restore_command(const void *glide_client, const char *key, size_t ke
         return 0;
     }
 
-    /* Set up arguments */
+    /* Set up base arguments */
     args[0] = (uintptr_t)key;
     args_len[0] = key_len;
     args[1] = (uintptr_t)ttl_str;
@@ -531,12 +532,111 @@ int execute_restore_command(const void *glide_client, const char *key, size_t ke
     args[2] = (uintptr_t)serialized;
     args_len[2] = serialized_len;
 
-    /* Add REPLACE if needed */
-    if (replace)
+    unsigned long arg_count = base_arg_count;
+
+    /* Process options if provided */
+    if (options && Z_TYPE_P(options) == IS_ARRAY)
     {
-        const char *replace_str = "REPLACE";
-        args[3] = (uintptr_t)replace_str;
-        args_len[3] = strlen(replace_str);
+        HashTable *ht = Z_ARRVAL_P(options);
+        zval *val;
+        zend_string *key_str;
+        zend_ulong num_key;
+
+        /* Variables for option values */
+        zend_bool has_replace = 0;
+        zend_bool has_absttl = 0;
+        long idletime = -1;
+        long freq = -1;
+
+        /* Parse the array */
+        ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, key_str, val)
+        {
+            /* Handle indexed array elements (like ['REPLACE', 'ABSTTL']) */
+            if (!key_str && Z_TYPE_P(val) == IS_STRING)
+            {
+                const char *flag = Z_STRVAL_P(val);
+                if (strcmp(flag, "REPLACE") == 0)
+                {
+                    has_replace = 1;
+                }
+                else if (strcmp(flag, "ABSTTL") == 0)
+                {
+                    has_absttl = 1;
+                }
+            }
+            /* Handle associative array elements (like ['IDLETIME' => 200]) */
+            else if (key_str)
+            {
+                const char *opt_name = ZSTR_VAL(key_str);
+                if (strcmp(opt_name, "REPLACE") == 0)
+                {
+                    has_replace = 1;
+                }
+                else if (strcmp(opt_name, "ABSTTL") == 0)
+                {
+                    has_absttl = 1;
+                }
+                else if (strcmp(opt_name, "IDLETIME") == 0 && Z_TYPE_P(val) == IS_LONG)
+                {
+                    idletime = Z_LVAL_P(val);
+                }
+                else if (strcmp(opt_name, "FREQ") == 0 && Z_TYPE_P(val) == IS_LONG)
+                {
+                    freq = Z_LVAL_P(val);
+                }
+            }
+        }
+        ZEND_HASH_FOREACH_END();
+
+        /* Add REPLACE if needed */
+        if (has_replace && arg_count < max_args)
+        {
+            const char *replace_str = "REPLACE";
+            args[arg_count] = (uintptr_t)replace_str;
+            args_len[arg_count] = strlen(replace_str);
+            arg_count++;
+        }
+
+        /* Add ABSTTL if needed */
+        if (has_absttl && arg_count < max_args)
+        {
+            const char *absttl_str = "ABSTTL";
+            args[arg_count] = (uintptr_t)absttl_str;
+            args_len[arg_count] = strlen(absttl_str);
+            arg_count++;
+        }
+
+        /* Add IDLETIME if provided */
+        if (idletime >= 0 && arg_count + 1 < max_args)
+        {
+            const char *idletime_str = "IDLETIME";
+            args[arg_count] = (uintptr_t)idletime_str;
+            args_len[arg_count] = strlen(idletime_str);
+            arg_count++;
+
+            /* Convert idletime to string */
+            char *idletime_val = (char *)emalloc(32);
+            snprintf(idletime_val, 32, "%ld", idletime);
+            args[arg_count] = (uintptr_t)idletime_val;
+            args_len[arg_count] = strlen(idletime_val);
+            arg_count++;
+        }
+
+        /* Add FREQ if provided */
+        if (freq >= 0 && arg_count + 1 < max_args)
+        {
+            const char *freq_str = "FREQ";
+            args[arg_count] = (uintptr_t)freq_str;
+            args_len[arg_count] = strlen(freq_str);
+            arg_count++;
+
+            /* Convert freq to string */
+            char *freq_val = (char *)emalloc(32);
+            snprintf(freq_val, 32, "%ld", freq);
+            args[arg_count] = (uintptr_t)freq_val;
+            args_len[arg_count] = strlen(freq_val);
+            arg_count++;
+        }
     }
 
     /* Execute the command */
@@ -547,6 +647,18 @@ int execute_restore_command(const void *glide_client, const char *key, size_t ke
         args,      /* arguments */
         args_len   /* argument lengths */
     );
+
+    /* Free any dynamically allocated option values */
+    int i;
+    for (i = base_arg_count; i < arg_count; i++)
+    {
+        /* Check if this is a dynamically allocated string (IDLETIME/FREQ values) */
+        char *str = (char *)args[i];
+        if (str && str[0] >= '0' && str[0] <= '9')
+        {
+            efree(str);
+        }
+    }
 
     /* Free the argument arrays */
     efree(args);
