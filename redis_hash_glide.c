@@ -942,7 +942,7 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
         args,       /* arguments */
         args_len    /* argument lengths */
     );
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* Free the argument arrays */
     efree(args);
     efree(args_len);
@@ -969,11 +969,13 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
         {
             if (result->response->response_type == String)
             {
+                printf("file = %s, line = %d\n", __FILE__, __LINE__);
                 add_next_index_stringl(return_value, result->response->string_value, result->response->string_value_len);
                 ret_val = 1;
             }
             else if (result->response->response_type == Null)
             {
+                printf("file = %s, line = %d\n", __FILE__, __LINE__);
                 add_next_index_null(return_value);
                 ret_val = 1;
             }
@@ -981,6 +983,7 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
         /* Multiple fields without values */
         else if (count != 1 && !withvalues && result->response->response_type == Array)
         {
+            printf("file = %s, line = %d\n", __FILE__, __LINE__);
             size_t i;
             for (i = 0; i < result->response->array_value_len; i++)
             {
@@ -1000,25 +1003,49 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
         else if (count != 1 && withvalues && result->response->response_type == Array)
         {
             size_t i;
-            for (i = 0; i + 1 < result->response->array_value_len; i += 2)
+            for (i = 0; i < result->response->array_value_len; i++)
             {
-                struct CommandResponse *field = &result->response->array_value[i];
-                struct CommandResponse *value = &result->response->array_value[i + 1];
+                struct CommandResponse *element = &result->response->array_value[i];
 
-                if (field->response_type == String && value->response_type == String)
+                // Each element should be an array with a field and value
+                if (element->response_type == Array && element->array_value_len == 2)
                 {
-                    add_assoc_stringl_ex(return_value, field->string_value, field->string_value_len,
-                                         value->string_value, value->string_value_len);
-                }
-                else if (field->response_type == String && value->response_type == Null)
-                {
-                    add_assoc_null_ex(return_value, field->string_value, field->string_value_len);
+                    struct CommandResponse *field = &element->array_value[0];
+                    struct CommandResponse *value = &element->array_value[1];
+
+                    if (field->response_type == String)
+                    {
+                        if (value->response_type == String)
+                        {
+                            add_assoc_stringl_ex(return_value, field->string_value, field->string_value_len,
+                                                 value->string_value, value->string_value_len);
+                        }
+                        else if (value->response_type == Null)
+                        {
+                            add_assoc_null_ex(return_value, field->string_value, field->string_value_len);
+                        }
+                        else if (value->response_type == Int)
+                        {
+                            add_assoc_long_ex(return_value, field->string_value, field->string_value_len,
+                                              value->int_value);
+                        }
+                        else if (value->response_type == Float)
+                        {
+                            add_assoc_double_ex(return_value, field->string_value, field->string_value_len,
+                                                value->float_value);
+                        }
+                        else if (value->response_type == Bool)
+                        {
+                            add_assoc_bool_ex(return_value, field->string_value, field->string_value_len,
+                                              value->bool_value);
+                        }
+                    }
                 }
             }
             ret_val = 1;
         }
     }
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* Free the result */
     free_command_result(result);
 
