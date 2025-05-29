@@ -33,6 +33,8 @@ extern int execute_dump_command(const void *glide_client, const char *key, size_
 extern int execute_restore_command(const void *glide_client, const char *key, size_t key_len,
                                    long ttl, const char *serialized, size_t serialized_len,
                                    zval *options);
+extern int execute_config_command(const void *glide_client, const char *operation, size_t operation_len,
+                                  zval *key, zval *value, zval *return_value);
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
@@ -63,6 +65,48 @@ PHP_METHOD(Redis, wait)
         {
             /* Return the number of replicas that acknowledged the write */
             RETURN_LONG(result_value);
+        }
+        else
+        {
+            RETURN_FALSE;
+        }
+    }
+
+    /* If we don't have a Glide client, fall back to standard implementation */
+    RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto mixed Redis::config(string operation, mixed key [, mixed value]) */
+PHP_METHOD(Redis, config)
+{
+    zval *object;
+    redis_object *redis;
+    char *operation = NULL;
+    size_t operation_len;
+    zval *key = NULL, *value = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|z!z!",
+                                     &object, redis_ce, &operation, &operation_len,
+                                     &key, &value) == FAILURE)
+    {
+        printf("Failed to parse parameters for Redis::config\n");
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the CONFIG command using the Glide client */
+        if (execute_config_command(redis->glide_client, operation, operation_len,
+                                   key, value, return_value))
+        {
+            /* Return value already set in execute_config_command */
+            return;
         }
         else
         {

@@ -754,15 +754,6 @@ PHP_METHOD(Redis, getOption)
 }
 /* }}} */
 
-/* {{{ proto boolean Redis::config(string op, string key [, mixed value]) */
-/* {{{ proto public function config(string $op, string ...$args) }}} */
-// CONFIG SET/GET
-PHP_METHOD(Redis, config)
-{
-    REDIS_PROCESS_CMD(config, redis_config_response);
-}
-/* }}} */
-
 /* {{{ proto boolean Redis::slowlog(string arg, [int option]) */
 PHP_METHOD(Redis, slowlog)
 {
