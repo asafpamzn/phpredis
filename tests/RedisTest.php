@@ -3428,6 +3428,7 @@ class Redis_Test extends TestSuite {
         echo "Testing hRandField1\n";
         $this->redis->del('key');
         $this->redis->hMSet('key', ['a' => 0, 'b' => 1, 'c' => 'foo', 'd' => 'bar', 'e' => null]);
+        echo "Testing hRandField1\n";
         $this->assertInArray($this->redis->hRandField('key'), ['a', 'b', 'c', 'd', 'e']);
 echo "Testing hRandField1\n";
         $result = $this->redis->hRandField('key', ['count' => 3]);
