@@ -649,61 +649,62 @@ PHP_METHOD(Redis, hMget)
         array_init(return_value);
         fields_hash = Z_ARRVAL_P(fields);
 
-        /* Convert hash table to array of zvals */
-        zval *field_array;
+        /* Get field count */
         int fields_count = zend_hash_num_elements(fields_hash);
-
-        if (fields_count > 0)
-        {
-            field_array = emalloc(fields_count * sizeof(zval));
-
-            zval *data;
-            zend_string *key;
-            int i = 0;
-
-            ZEND_HASH_FOREACH_STR_KEY_VAL(fields_hash, key, data)
-            {
-                if (key)
-                {
-                    /* Associative array, use the keys */
-                    ZVAL_STR_COPY(&field_array[i], key);
-                }
-                else
-                {
-                    /* Indexed array, use the values */
-                    ZVAL_COPY(&field_array[i], data);
-                }
-                i++;
-            }
-            ZEND_HASH_FOREACH_END();
-
-            if (execute_hmget_command(redis->glide_client, key, key_len, field_array, fields_count, return_value))
-            {
-                /* Free the field array */
-                for (i = 0; i < fields_count; i++)
-                {
-                    zval_ptr_dtor(&field_array[i]);
-                }
-                efree(field_array);
-
-                /* Command succeeded, return_value is already set */
-                return;
-            }
-
-            /* Command failed, clean up */
-            for (i = 0; i < fields_count; i++)
-            {
-                zval_ptr_dtor(&field_array[i]);
-            }
-            efree(field_array);
-            zval_dtor(return_value);
-            RETURN_FALSE;
-        }
-        else
+        if (fields_count == 0)
         {
             /* No fields provided */
             RETURN_FALSE;
         }
+
+        /* Create array for field values */
+        zval *field_array = ecalloc(fields_count, sizeof(zval));
+        if (!field_array)
+        {
+            zval_dtor(return_value);
+            RETURN_FALSE;
+        }
+
+        /* Fill the field array from hash table */
+        zval *data;
+        zend_string *hash_key;
+        zend_ulong num_idx;
+        int i = 0;
+
+        ZEND_HASH_FOREACH_KEY_VAL(fields_hash, num_idx, hash_key, data)
+        {
+            if (hash_key)
+            {
+                /* Associative array, use the keys */
+                ZVAL_STR_COPY(&field_array[i], hash_key);
+            }
+            else
+            {
+                /* Indexed array, use the values */
+                ZVAL_COPY(&field_array[i], data);
+            }
+            i++;
+        }
+        ZEND_HASH_FOREACH_END();
+
+        /* Execute the HMGET command */
+        int result = execute_hmget_command(redis->glide_client, key, key_len, field_array, fields_count, return_value);
+
+        /* Free the field array regardless of result */
+        for (i = 0; i < fields_count; i++)
+        {
+            zval_ptr_dtor(&field_array[i]);
+        }
+        efree(field_array);
+
+        if (!result)
+        {
+            zval_dtor(return_value);
+            RETURN_FALSE;
+        }
+
+        /* Command succeeded, return_value is already set */
+        return;
     }
 }
 /* }}} */

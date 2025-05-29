@@ -3351,7 +3351,7 @@ class Redis_Test extends TestSuite {
         
         // hmget
         $this->assertEquals(['x' => '123', 'y' => '456'], $this->redis->hMget('h', ['x', 'y']));
-        return;
+      
         $this->assertEquals(['z' => 'abc'], $this->redis->hMget('h', ['z']));
         $this->assertEquals(['x' => '123', 't' => FALSE, 'y' => '456'], $this->redis->hMget('h', ['x', 't', 'y']));
         $this->assertEquals(['x' => '123', 't' => FALSE, 'y' => '456'], $this->redis->hMget('h', ['x', 't', 'y']));

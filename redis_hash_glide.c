@@ -295,43 +295,55 @@ int execute_hincrbyfloat_command(const void *glide_client, const char *key, size
 int execute_hmget_command(const void *glide_client, const char *key, size_t key_len,
                           zval *fields, int fields_count, zval *return_value)
 {
-    printf("DEBUG: Entering execute_hmget_command\n");
-
     /* Check if client and key are valid */
-    if (!glide_client || !key || !fields || fields_count <= 0)
+    if (!glide_client || !key)
     {
-        printf("DEBUG: Invalid parameters in execute_hmget_command\n");
         return 0;
     }
 
-    printf("DEBUG: HMGET for key '%s' with %d fields\n", key, fields_count);
-
-    /* Prepare command arguments - simpler version */
+    /* Prepare command arguments */
     unsigned long arg_count = 1 + fields_count; /* key + fields */
     uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
     unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-    char **allocated_strings = (char **)emalloc(fields_count * sizeof(char *));
+    char **allocated_strings = NULL;
     int allocated_count = 0;
 
-    if (!args || !args_len || !allocated_strings)
+    if (!args || !args_len)
     {
-        printf("DEBUG: Failed to allocate memory for command arguments\n");
         if (args)
             efree(args);
         if (args_len)
             efree(args_len);
-        if (allocated_strings)
-            efree(allocated_strings);
         return 0;
+    }
+
+    /* Count how many fields might need string conversion */
+    int conversion_needed = 0;
+    for (int i = 0; i < fields_count; i++)
+    {
+        if (Z_TYPE_P(&fields[i]) != IS_STRING)
+        {
+            conversion_needed++;
+        }
+    }
+
+    if (conversion_needed > 0)
+    {
+        allocated_strings = (char **)emalloc(conversion_needed * sizeof(char *));
+        if (!allocated_strings)
+        {
+            efree(args);
+            efree(args_len);
+            return 0;
+        }
     }
 
     /* First argument: key */
     args[0] = (uintptr_t)key;
     args_len[0] = key_len;
 
-    /* Add fields as arguments - with better memory management */
-    int i;
-    for (i = 0; i < fields_count; i++)
+    /* Add fields as arguments */
+    for (int i = 0; i < fields_count; i++)
     {
         zval *field = &fields[i];
 
@@ -339,8 +351,6 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
         {
             args[i + 1] = (uintptr_t)Z_STRVAL_P(field);
             args_len[i + 1] = Z_STRLEN_P(field);
-            allocated_strings[i] = NULL; // Not allocated
-            printf("DEBUG: Field %d: '%s'\n", i, Z_STRVAL_P(field));
         }
         else
         {
@@ -351,60 +361,43 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
             if (Z_TYPE_P(field) == IS_LONG)
             {
                 str_val = long_to_string(Z_LVAL_P(field), &str_len);
-                printf("DEBUG: Field %d: %ld (converted to string)\n", i, Z_LVAL_P(field));
             }
             else if (Z_TYPE_P(field) == IS_DOUBLE)
             {
                 str_val = double_to_string(Z_DVAL_P(field), &str_len);
-                printf("DEBUG: Field %d: %f (converted to string)\n", i, Z_DVAL_P(field));
             }
             else if (Z_TYPE_P(field) == IS_TRUE)
             {
                 str_val = estrdup("1");
                 str_len = 1;
-                printf("DEBUG: Field %d: TRUE (converted to '1')\n", i);
             }
             else if (Z_TYPE_P(field) == IS_FALSE)
             {
                 str_val = estrdup("0");
                 str_len = 1;
-                printf("DEBUG: Field %d: FALSE (converted to '0')\n", i);
             }
             else
             {
-                printf("DEBUG: Field %d has unsupported type %d\n", i, Z_TYPE_P(field));
-                /* Clean up already allocated strings */
-                for (int j = 0; j < i; j++)
-                {
-                    if (allocated_strings[j])
-                    {
-                        efree(allocated_strings[j]);
-                    }
-                }
-                efree(allocated_strings);
-                efree(args);
-                efree(args_len);
-                return 0;
+                /* Use empty string for unsupported types */
+                str_val = estrdup("");
+                str_len = 0;
             }
 
             if (str_val)
             {
                 args[i + 1] = (uintptr_t)str_val;
                 args_len[i + 1] = str_len;
-                allocated_strings[i] = str_val;
+                allocated_strings[allocated_count++] = str_val;
             }
             else
             {
-                printf("DEBUG: Failed to convert field %d to string\n", i);
-                /* Clean up already allocated strings */
-                for (int j = 0; j < i; j++)
+                /* Clean up on failure */
+                for (int j = 0; j < allocated_count; j++)
                 {
-                    if (allocated_strings[j])
-                    {
-                        efree(allocated_strings[j]);
-                    }
+                    efree(allocated_strings[j]);
                 }
-                efree(allocated_strings);
+                if (allocated_strings)
+                    efree(allocated_strings);
                 efree(args);
                 efree(args_len);
                 return 0;
@@ -412,59 +405,43 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
         }
     }
 
-    /* Debug print the command */
-    printf("DEBUG: Executing HMGET command with arguments:\n");
-    printf("DEBUG: Key: '%.*s'\n", (int)args_len[0], (char *)args[0]);
-    for (i = 1; i < arg_count; i++)
-    {
-        printf("DEBUG: Field %d: '%.*s'\n", i - 1, (int)args_len[i], (char *)args[i]);
-    }
-
-    /* Execute the command - explicit cast and enum value */
-    printf("DEBUG: Calling execute_command with HMGet=%d\n", (int)HMGet);
+    /* Execute the command */
     CommandResult *result = execute_command(
         glide_client,
-        HMGet,     /* command type - ensure this enum value is correct */
+        HMGet,     /* command type */
         arg_count, /* number of arguments */
         args,      /* arguments */
         args_len   /* argument lengths */
     );
 
     /* Clean up allocated strings */
-    for (i = 0; i < fields_count; i++)
+    for (int i = 0; i < allocated_count; i++)
     {
-        if (allocated_strings[i])
-        {
-            efree(allocated_strings[i]);
-        }
+        efree(allocated_strings[i]);
     }
-    efree(allocated_strings);
+    if (allocated_strings)
+        efree(allocated_strings);
     efree(args);
     efree(args_len);
 
     /* Check if the command was successful */
     if (!result)
     {
-        printf("DEBUG: execute_command returned NULL\n");
         return 0;
     }
 
     /* Check if there was an error */
     if (result->command_error)
     {
-        printf("DEBUG: Command error: %s\n", result->command_error);
         free_command_result(result);
         return 0;
     }
 
-    printf("DEBUG: Command successful, processing response\n");
-
-    /* Process the result - direct implementation instead of using command_response_to_zval */
+    /* Process the result */
     int ret_val = 0;
 
     if (result->response && result->response->response_type == Array)
     {
-        printf("DEBUG: Response is array with %zu elements\n", result->response->array_value_len);
         size_t i;
         for (i = 0; i < fields_count && i < result->response->array_value_len; i++)
         {
@@ -472,6 +449,7 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
             zval field_value;
             char *field_str = NULL;
             size_t field_len = 0;
+            int need_to_free = 0;
 
             /* Convert field to string for associative array key */
             if (Z_TYPE_P(field) == IS_STRING)
@@ -485,41 +463,47 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
                 if (Z_TYPE_P(field) == IS_LONG)
                 {
                     field_str = long_to_string(Z_LVAL_P(field), &field_len);
+                    need_to_free = 1;
                 }
                 else if (Z_TYPE_P(field) == IS_DOUBLE)
                 {
                     field_str = double_to_string(Z_DVAL_P(field), &field_len);
+                    need_to_free = 1;
                 }
                 else if (Z_TYPE_P(field) == IS_TRUE)
                 {
                     field_str = estrdup("1");
                     field_len = 1;
+                    need_to_free = 1;
                 }
                 else if (Z_TYPE_P(field) == IS_FALSE)
                 {
                     field_str = estrdup("0");
                     field_len = 1;
+                    need_to_free = 1;
+                }
+                else
+                {
+                    field_str = estrdup("");
+                    field_len = 0;
+                    need_to_free = 1;
                 }
             }
 
             /* Set value in result array */
             struct CommandResponse *element = &result->response->array_value[i];
-            printf("DEBUG: Field '%.*s' has response type %d\n", (int)field_len, field_str, element->response_type);
 
             if (element->response_type == String)
             {
                 ZVAL_STRINGL(&field_value, element->string_value, element->string_value_len);
-                printf("DEBUG: Value: '%.*s'\n", (int)element->string_value_len, element->string_value);
             }
             else if (element->response_type == Null)
             {
                 ZVAL_NULL(&field_value);
-                printf("DEBUG: Value: NULL\n");
             }
             else
             {
                 ZVAL_NULL(&field_value);
-                printf("DEBUG: Value: NULL (unknown response type)\n");
             }
 
             if (field_str)
@@ -527,7 +511,7 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
                 add_assoc_zval_ex(return_value, field_str, field_len, &field_value);
 
                 /* Free the field string if we allocated it */
-                if (Z_TYPE_P(field) != IS_STRING)
+                if (need_to_free)
                 {
                     efree(field_str);
                 }
@@ -539,14 +523,9 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
         }
         ret_val = 1;
     }
-    else
-    {
-        printf("DEBUG: Response is not an array or is NULL\n");
-    }
 
     /* Free the result */
     free_command_result(result);
-    printf("DEBUG: Exiting execute_hmget_command with status %d\n", ret_val);
 
     return ret_val;
 }
