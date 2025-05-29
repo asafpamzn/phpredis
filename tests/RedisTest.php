@@ -3425,31 +3425,28 @@ class Redis_Test extends TestSuite {
     public function testHRandField() {
         if (version_compare($this->version, '6.2.0') < 0)
             $this->MarkTestSkipped();
-        echo "Testing hRandField1\n";
+        
         $this->redis->del('key');
         $this->redis->hMSet('key', ['a' => 0, 'b' => 1, 'c' => 'foo', 'd' => 'bar', 'e' => null]);
-        echo "Testing hRandField1\n";
+        
         $this->assertInArray($this->redis->hRandField('key'), ['a', 'b', 'c', 'd', 'e']);
-echo "Testing hRandField1\n";
+
         $result = $this->redis->hRandField('key', ['count' => 3]);
         $this->assertEquals(3, count($result));
         $this->assertEquals(array_intersect($result, ['a', 'b', 'c', 'd', 'e']), $result);
-echo "Testing hRandField1\n";
+
         $result = $this->redis->hRandField('key', ['count' => 2, 'withvalues' => true]);
         $this->assertEquals(2, count($result));
         $xx = ['a' => 0, 'b' => 1, 'c' => 'foo', 'd' => 'bar', 'e' => null];
         $this->assertEquals(array_intersect_key($result, $xx), $result);
-        echo "Testing hRandField1\n";
         /* Make sure PhpRedis sends COUNt (1) when `WITHVALUES` is set */
         $result = $this->redis->hRandField('key', ['withvalues' => true]);
-        echo "Testing hRandField1\n";
         $this->assertNull($this->redis->getLastError());
         
         $this->assertIsArray($result);
         
         $this->assertEquals(1, count($result));
         
-echo "Testing hRandField1\n";
         /* We can return false if the key doesn't exist */
         $this->assertIsInt($this->redis->del('notahash'));
         $this->assertFalse($this->redis->hRandField('notahash'));

@@ -86,6 +86,7 @@ PHP_METHOD(Redis, object)
         {
             return;
         }
+        RETURN_FALSE;
     }
 }
 /* }}} */

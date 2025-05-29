@@ -87,7 +87,7 @@ int execute_object_command(const void *glide_client,
         else if (result->response && result->response->response_type == Null)
         {
             /* Key doesn't exist */
-            ZVAL_NULL(return_value);
+            ZVAL_FALSE(return_value);
             ret_val = 0;
         }
     }
@@ -103,7 +103,7 @@ int execute_object_command(const void *glide_client,
         else if (result->response && result->response->response_type == Null)
         {
             /* Key doesn't exist */
-            ZVAL_NULL(return_value);
+            ZVAL_FALSE(return_value);
             ret_val = 0;
         }
     }
