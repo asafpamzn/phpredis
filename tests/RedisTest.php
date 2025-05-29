@@ -3357,10 +3357,10 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(['x' => '123', 't' => FALSE, 'y' => '456'], $this->redis->hMget('h', ['x', 't', 'y']));
         $this->assertNotEquals([123 => 'x'], $this->redis->hMget('h', [123]));
         $this->assertEquals([123 => FALSE], $this->redis->hMget('h', [123]));
-        return;
+        
         // Test with an array populated with things we can't use as keys
         $this->assertFalse($this->redis->hmget('h', [false,NULL,false]));
-
+        return;
         // Test with some invalid keys mixed in (which should just be ignored)
         $this->assertEquals(
             ['x' => '123', 'y' => '456', 'z' => 'abc'],

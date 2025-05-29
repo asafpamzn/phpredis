@@ -439,7 +439,7 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
 
     /* Process the result */
     int ret_val = 0;
-
+#if 1
     if (result->response && result->response->response_type == Array)
     {
         size_t i;
@@ -499,7 +499,7 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
             }
             else if (element->response_type == Null)
             {
-                ZVAL_NULL(&field_value);
+                ZVAL_FALSE(&field_value);
             }
             else
             {
@@ -523,6 +523,8 @@ int execute_hmget_command(const void *glide_client, const char *key, size_t key_
         }
         ret_val = 1;
     }
+#endif
+    //   ret_val = command_response_to_zval(result->response, return_value, 1);
 
     /* Free the result */
     free_command_result(result);
