@@ -3360,13 +3360,13 @@ class Redis_Test extends TestSuite {
         
         // Test with an array populated with things we can't use as keys
         $this->assertFalse($this->redis->hmget('h', [false,NULL,false]));
-        return;
+       
         // Test with some invalid keys mixed in (which should just be ignored)
         $this->assertEquals(
             ['x' => '123', 'y' => '456', 'z' => 'abc'],
             $this->redis->hMget('h', ['x', null, 'y', '', 'z', false])
         );
-
+       
         // hmget/hmset with numeric fields
         $this->redis->del('h');
         $this->assertTrue($this->redis->hMset('h', [123 => 'x', 'y' => 456]));
@@ -3379,7 +3379,7 @@ class Redis_Test extends TestSuite {
         $keys = [123, 'y'];
         foreach ($keys as &$key) {}
         $this->assertEquals([123 => 'x', 'y' => '456'], $this->redis->hMget('h', $keys));
-
+          return;
         // check non-string types.
         $this->redis->del('h1');
         $this->assertTrue($this->redis->hMSet('h1', ['x' => 0, 'y' => [], 'z' => new stdclass(), 't' => NULL]));
