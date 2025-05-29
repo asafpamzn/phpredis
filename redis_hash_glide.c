@@ -1002,6 +1002,8 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
         /* Multiple fields with values (field-value pairs) */
         else if (count != 1 && withvalues && result->response->response_type == Array)
         {
+            printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
             size_t i;
             for (i = 0; i < result->response->array_value_len; i++)
             {
