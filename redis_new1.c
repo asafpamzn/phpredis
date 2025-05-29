@@ -840,7 +840,6 @@ PHP_METHOD(Redis, hRandField)
                                      &object, redis_ce, &key, &key_len,
                                      &z_opts) == FAILURE)
     {
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         RETURN_FALSE;
     }
 
@@ -865,21 +864,18 @@ PHP_METHOD(Redis, hRandField)
         }
     }
 
-    printf("file = %s, line = %d\n", __FILE__, __LINE__); /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
         /* Execute the HRANDFIELD command using the Glide client */
         array_init(return_value);
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
         if (execute_hrandfield_command(redis->glide_client, key, key_len, count, withvalues, return_value))
         {
             /* Command succeeded, return_value is already set */
             /* If count is 1 and not withvalues, return the single string value */
-            printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
             if (count == 1 && !withvalues && zend_hash_num_elements(Z_ARRVAL_P(return_value)) == 1)
             {
-                printf("file = %s, line = %d\n", __FILE__, __LINE__);
                 zval *z_ele, z_copy;
                 zend_hash_internal_pointer_reset(Z_ARRVAL_P(return_value));
                 z_ele = zend_hash_get_current_data(Z_ARRVAL_P(return_value));
@@ -896,7 +892,6 @@ PHP_METHOD(Redis, hRandField)
         {
             /* Command failed */
             zval_dtor(return_value);
-            printf("file = %s, line = %d\n", __FILE__, __LINE__);
             RETURN_FALSE;
         }
     }

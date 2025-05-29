@@ -1,4 +1,3 @@
-
 /*
   +----------------------------------------------------------------------+
   | Redis Glide FFI integration for phpredis - Hash Commands             |
@@ -897,10 +896,10 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
         arg_count = 2;
         count_str_len = snprintf(count_str, sizeof(count_str), "%ld", count);
     }
-
-    if (withvalues && count != 1)
+    if (withvalues)
     {
         arg_count = 3;
+        count_str_len = snprintf(count_str, sizeof(count_str), "%ld", count);
     }
 
     uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
@@ -920,14 +919,12 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
     args_len[0] = key_len;
 
     /* Second argument (optional): count */
-    if (count != 1)
-    {
-        args[1] = (uintptr_t)count_str;
-        args_len[1] = count_str_len;
-    }
+
+    args[1] = (uintptr_t)count_str;
+    args_len[1] = count_str_len;
 
     /* Third argument (optional): WITHVALUES */
-    if (withvalues && count != 1)
+    if (withvalues)
     {
         const char *withvalues_str = "WITHVALUES";
         args[2] = (uintptr_t)withvalues_str;
@@ -942,7 +939,7 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
         args,       /* arguments */
         args_len    /* argument lengths */
     );
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
     /* Free the argument arrays */
     efree(args);
     efree(args_len);
@@ -969,21 +966,21 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
         {
             if (result->response->response_type == String)
             {
-                printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
                 add_next_index_stringl(return_value, result->response->string_value, result->response->string_value_len);
                 ret_val = 1;
             }
             else if (result->response->response_type == Null)
             {
-                printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
                 add_next_index_null(return_value);
-                ret_val = 1;
+                ret_val = 0;
             }
         }
         /* Multiple fields without values */
         else if (count != 1 && !withvalues && result->response->response_type == Array)
         {
-            printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
             size_t i;
             for (i = 0; i < result->response->array_value_len; i++)
             {
@@ -1000,13 +997,13 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
             ret_val = 1;
         }
         /* Multiple fields with values (field-value pairs) */
-        else if (count != 1 && withvalues && result->response->response_type == Array)
+        else if (withvalues && result->response->response_type == Array)
         {
-            printf("file = %s, line = %d\n", __FILE__, __LINE__);
 
             size_t i;
             for (i = 0; i < result->response->array_value_len; i++)
             {
+                ret_val = 1;
                 struct CommandResponse *element = &result->response->array_value[i];
 
                 // Each element should be an array with a field and value
@@ -1044,10 +1041,9 @@ int execute_hrandfield_command(const void *glide_client, const char *key, size_t
                     }
                 }
             }
-            ret_val = 1;
         }
     }
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
     /* Free the result */
     free_command_result(result);
 

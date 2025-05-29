@@ -3445,13 +3445,15 @@ class Redis_Test extends TestSuite {
         $this->assertNull($this->redis->getLastError());
         
         $this->assertIsArray($result);
-        return;
+        
         $this->assertEquals(1, count($result));
         
 
         /* We can return false if the key doesn't exist */
         $this->assertIsInt($this->redis->del('notahash'));
         $this->assertFalse($this->redis->hRandField('notahash'));
+        $this->assertFalse($this->redis->hRandField('notahash', ['count' => 2, 'withvalues' => true]));
+        $this->assertFalse($this->redis->hRandField('notahash', ['withvalues' => true]));
     }
 
     public function testSetRange() {
