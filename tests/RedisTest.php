@@ -6571,6 +6571,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(['Chico'], $this->redis->geosearch('gk', 'Chico', 1, 'm'));
         
         $this->assertValidate($this->redis->geosearch('gk', 'Chico', 1, 'm', ['withcoord', 'withdist', 'withhash']), function ($v) {
+           // var_dump($v);
             $this->assertArrayKey($v, 'Chico', 'is_array');
             return;
             $this->assertEquals(count($v['Chico']), 3);

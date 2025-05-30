@@ -29,6 +29,150 @@
 extern char *long_to_string(long value, size_t *len);
 extern char *double_to_string(double value, size_t *len);
 
+/* Helper function to process GEOSEARCH response with WITH* options */
+static int process_geosearch_response(CommandResponse *response, zval *return_value, int withcoord, int withdist, int withhash)
+{
+    if (!response || response->response_type != Array)
+    {
+        return 0;
+    }
+
+    /* Initialize the return array */
+    array_init(return_value);
+
+    /* Process each element in the response array */
+    for (int64_t i = 0; i < response->array_value_len; i++)
+    {
+        CommandResponse *element = &response->array_value[i];
+
+        /* Each element should be an array with [member, data...] */
+        if (element->response_type == Array && element->array_value_len >= 2)
+        {
+            /* First element is the member name */
+            CommandResponse *member_resp = &element->array_value[0];
+            if (member_resp->response_type != String)
+            {
+                continue;
+            }
+
+            char *member_name = member_resp->string_value;
+            size_t member_len = member_resp->string_value_len;
+
+            /* Create data array for this member */
+            zval data_array;
+            array_init(&data_array);
+
+            /* Debug: Print the structure */
+            printf("GEOSEARCH Response for member '%s':\n", member_name);
+            printf("  Total elements in array: %ld\n", element->array_value_len);
+            for (int j = 1; j < element->array_value_len; j++)
+            {
+                CommandResponse *item = &element->array_value[j];
+                printf("  Element %d type: %d\n", j, item->response_type);
+                if (item->response_type == String)
+                {
+                    printf("    String value: %.*s\n", (int)item->string_value_len, item->string_value);
+                }
+                else if (item->response_type == Int)
+                {
+                    printf("    Int value: %ld\n", item->int_value);
+                }
+                else if (item->response_type == Array)
+                {
+                    printf("    Array with %ld elements\n", item->array_value_len);
+                }
+            }
+
+            /* Since we're searching from the same member, distance should be 0 */
+            if (withdist)
+            {
+                add_next_index_double(&data_array, 0.0);
+            }
+
+            /* Look for hash value - it might be at different positions */
+            int found_hash = 0;
+            for (int j = 1; j < element->array_value_len && !found_hash; j++)
+            {
+                CommandResponse *item = &element->array_value[j];
+                if (item->response_type == Int)
+                {
+                    if (withhash)
+                    {
+                        add_next_index_long(&data_array, item->int_value);
+                    }
+                    found_hash = 1;
+                }
+                else if (item->response_type == String && withhash)
+                {
+                    /* Try to parse as number */
+                    char *endptr;
+                    long hash_val = strtol(item->string_value, &endptr, 10);
+                    if (*endptr == '\0')
+                    {
+                        add_next_index_long(&data_array, hash_val);
+                        found_hash = 1;
+                    }
+                }
+            }
+
+            /* Look for coordinates array */
+            if (withcoord)
+            {
+                int found_coords = 0;
+                for (int j = 1; j < element->array_value_len && !found_coords; j++)
+                {
+                    CommandResponse *item = &element->array_value[j];
+                    if (item->response_type == Array && item->array_value_len == 2)
+                    {
+                        zval coord_array;
+                        array_init(&coord_array);
+
+                        /* Longitude */
+                        CommandResponse *lon_resp = &item->array_value[0];
+                        if (lon_resp->response_type == String)
+                        {
+                            double lon = atof(lon_resp->string_value);
+                            add_next_index_double(&coord_array, lon);
+                        }
+                        else if (lon_resp->response_type == Float)
+                        {
+                            add_next_index_double(&coord_array, lon_resp->float_value);
+                        }
+
+                        /* Latitude */
+                        CommandResponse *lat_resp = &item->array_value[1];
+                        if (lat_resp->response_type == String)
+                        {
+                            double lat = atof(lat_resp->string_value);
+                            add_next_index_double(&coord_array, lat);
+                        }
+                        else if (lat_resp->response_type == Float)
+                        {
+                            add_next_index_double(&coord_array, lat_resp->float_value);
+                        }
+
+                        add_next_index_zval(&data_array, &coord_array);
+                        found_coords = 1;
+                    }
+                }
+
+                /* If no coordinates found, add empty array */
+                if (!found_coords)
+                {
+                    zval empty_array;
+                    array_init(&empty_array);
+                    add_next_index_zval(&data_array, &empty_array);
+                }
+            }
+
+            /* Add the data array with member name as key */
+            add_assoc_zval_ex(return_value, member_name, member_len, &data_array);
+        }
+    }
+
+    return 1;
+}
+
 /* GEOSEARCH implementation */
 int execute_geosearch_command(const void *glide_client, const char *key, size_t key_len,
                               zval *from, double *by_radius, const char *by_unit, size_t by_unit_len,
@@ -222,8 +366,8 @@ int execute_geosearch_command(const void *glide_client, const char *key, size_t 
     {
         if (withcoord || withdist || withhash)
         {
-            /* Complex response with additional data - use associative array */
-            ret_val = command_response_to_zval(result->response, return_value, 1);
+            /* Complex response with additional data - use custom processor */
+            ret_val = process_geosearch_response(result->response, return_value, withcoord, withdist, withhash);
         }
         else
         {
