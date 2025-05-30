@@ -15,7 +15,7 @@
 */
 
 #include "php_redis.h"
-#include "redis_commands.h"
+
 #include "redis_glide.h"
 
 /* Forward declarations for the Glide execute functions */
@@ -242,7 +242,8 @@ PHP_METHOD(Redis, lPos)
             val_len = Z_STRLEN_P(z_value);
             break;
         default:
-            val_free = redis_serialize(redis, z_value, &val, &val_len);
+            printf("This function is from the original PHP redis\n");
+            RETURN_FALSE; // val_free = redis_serialize(redis, z_value, &val, &val_len); //TODO
             break;
         }
 

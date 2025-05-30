@@ -25,7 +25,7 @@
 #include "php_redis.h"
 
 #include "redis_cluster.h"
-#include "redis_commands.h"
+
 #include "redis_glide.h"
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
@@ -42,8 +42,6 @@
 #ifdef PHP_SESSION
 #include <ext/session/php_session.h>
 #endif
-
-#include "library.h"
 
 /* Import the string conversion functions from command_response.c */
 extern char *long_to_string(long value, size_t *len);

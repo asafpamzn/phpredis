@@ -25,7 +25,7 @@
 #include "php_redis.h"
 
 #include "redis_cluster.h"
-#include "redis_commands.h"
+
 #include "redis_glide.h"
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
@@ -42,8 +42,6 @@
 #ifdef PHP_SESSION
 #include <ext/session/php_session.h>
 #endif
-
-#include "library.h"
 
 /* Import the string conversion functions from command_response.c */
 extern char *long_to_string(long value, size_t *len);
@@ -130,50 +128,8 @@ PHP_METHOD(Redis, ping)
  */
 PHP_METHOD(Redis, reset)
 {
-    char *response;
-    int response_len;
-    RedisSock *redis_sock;
-    smart_string cmd = {0};
-    zend_bool ret = 0;
-
-    if ((redis_sock = redis_sock_get(getThis(), 0)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-
-    if (IS_PIPELINE(redis_sock))
-    {
-        php_error_docref(NULL, E_ERROR, "Reset isn't allowed in pipeline mode!");
-        RETURN_FALSE;
-    }
-
-    redis_cmd_init_sstr(&cmd, 0, "RESET", 5);
-
-    REDIS_PROCESS_REQUEST(redis_sock, cmd.c, cmd.len);
-
-    if ((response = redis_sock_read(redis_sock, &response_len)) != NULL)
-    {
-        ret = REDIS_STRCMP_STATIC(response, response_len, "+RESET");
-        efree(response);
-    }
-
-    if (!ret)
-    {
-        if (IS_ATOMIC(redis_sock))
-        {
-            RETURN_FALSE;
-        }
-        REDIS_THROW_EXCEPTION("Reset failed in multi mode!", 0);
-        RETURN_ZVAL(getThis(), 1, 0);
-    }
-
-    redis_free_reply_callbacks(redis_sock);
-    redis_sock->status = REDIS_SOCK_STATUS_CONNECTED;
-    redis_sock->mode = ATOMIC;
-    redis_sock->dbNumber = 0;
-    redis_sock->watching = 0;
-
-    RETURN_TRUE;
+    RETURN_FALSE;
+    // TODO
 }
 /* }}} */
 

@@ -15,7 +15,7 @@
 */
 
 #include "php_redis.h"
-#include "redis_commands.h"
+
 #include "redis_glide.h"
 
 /* Forward declarations for the Glide execute functions */
@@ -149,6 +149,9 @@ PHP_METHOD(Redis, scan)
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
+    /* Dereference if it's a reference */
+    ZVAL_DEREF(z_iter);
+
     /* Convert iterator */
     convert_to_long(z_iter);
     long iter = Z_LVAL_P(z_iter);
@@ -209,6 +212,9 @@ PHP_METHOD(Redis, sscan)
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* Dereference if it's a reference */
+    ZVAL_DEREF(z_iter);
 
     /* Convert iterator */
     convert_to_long(z_iter);

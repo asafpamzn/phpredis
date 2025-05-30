@@ -25,7 +25,7 @@
 #include "php_redis.h"
 
 #include "redis_cluster.h"
-#include "redis_commands.h"
+
 #include "redis_glide.h"
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
@@ -42,8 +42,6 @@
 #ifdef PHP_SESSION
 #include <ext/session/php_session.h>
 #endif
-
-#include "library.h"
 
 /* Import the string conversion functions from command_response.c */
 extern char *long_to_string(long value, size_t *len);
@@ -357,9 +355,6 @@ PHP_METHOD(Redis, bitpos)
             RETURN_FALSE;
         }
     }
-
-    /* If no Glide client, pass through to original implementation */
-    REDIS_PROCESS_CMD(bitpos, redis_long_response);
 }
 /* }}} */
 
@@ -1100,6 +1095,46 @@ PHP_METHOD(Redis, zmpop)
 }
 /* }}} */
 
+static void
+redis_parse_info_response(char *response, zval *z_ret)
+{
+    char *p1, *s1 = NULL;
+
+    ZVAL_FALSE(z_ret);
+    if ((p1 = php_strtok_r(response, _NL, &s1)) != NULL)
+    {
+        array_init(z_ret);
+        do
+        {
+            if (*p1 == '#')
+                continue;
+            char *p;
+            zend_uchar type;
+            zend_long lval;
+            double dval;
+            if ((p = strchr(p1, ':')) != NULL)
+            {
+                type = is_numeric_string(p + 1, strlen(p + 1), &lval, &dval, 0);
+                switch (type)
+                {
+                case IS_LONG:
+                    add_assoc_long_ex(z_ret, p1, p - p1, lval);
+                    break;
+                case IS_DOUBLE:
+                    add_assoc_double_ex(z_ret, p1, p - p1, dval);
+                    break;
+                default:
+                    add_assoc_string_ex(z_ret, p1, p - p1, p + 1);
+                }
+            }
+            else
+            {
+                add_next_index_string(z_ret, p1);
+            }
+        } while ((p1 = php_strtok_r(NULL, _NL, &s1)) != NULL);
+    }
+}
+
 /* {{{ proto array Redis::info([string section [, string section...]]) */
 PHP_METHOD(Redis, info)
 {
@@ -1158,11 +1193,6 @@ PHP_METHOD(Redis, info)
             /* Error or empty response */
             RETURN_FALSE;
         }
-    }
-    else
-    {
-        /* Fall back to the original implementation */
-        REDIS_PROCESS_CMD(info, redis_info_response);
     }
 }
 /* }}} */

@@ -112,6 +112,7 @@ foreach ($classes as $class) {
         }
     } else {
         echo TestSuite::make_bold($class) . "\n";
+        
         if (TestSuite::run("$class", $filter, $host, $port, $auth))
             exit(1);
     }

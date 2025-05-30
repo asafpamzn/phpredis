@@ -754,6 +754,7 @@ int execute_scan_command(const void *glide_client, long *it, const char *pattern
     /* First argument is the cursor */
     char cursor_str[32];
     snprintf(cursor_str, sizeof(cursor_str), "%ld", *it);
+    printf("Cursor: %s\n", cursor_str); // Debugging output
     args[0] = (uintptr_t)cursor_str;
     args_len[0] = strlen(cursor_str);
 
@@ -810,6 +811,7 @@ int execute_scan_command(const void *glide_client, long *it, const char *pattern
 
         if (result->response && result->response->response_type == Array)
         {
+            printf("Response array length: %ld\n", result->response->array_value_len); // Debugging output
             /* SCAN returns an array with [cursor, [elements]] */
             if (result->response->array_value_len >= 2)
             {
@@ -819,34 +821,25 @@ int execute_scan_command(const void *glide_client, long *it, const char *pattern
                 {
                     /* Convert cursor string to long */
                     *it = atol(cursor_resp->string_value);
+                    printf("New cursor: %ld\n", *it); // Debugging output
                 }
-
-                /* Initialize return array */
-                array_init(return_value);
-
-                /* Add cursor to return array */
-                add_next_index_long(return_value, *it);
 
                 /* Get the elements array */
                 CommandResponse *elements_resp = &result->response->array_value[1];
                 if (elements_resp->response_type == Array)
                 {
-                    /* Add elements to return array */
-                    zval elements_array;
-                    array_init(&elements_array);
+                    /* Initialize return array with the keys directly */
+                    array_init(return_value);
                     for (int i = 0; i < elements_resp->array_value_len; i++)
                     {
                         CommandResponse *element = &elements_resp->array_value[i];
                         if (element->response_type == String)
                         {
-                            add_next_index_stringl(&elements_array,
+                            add_next_index_stringl(return_value,
                                                    element->string_value,
                                                    element->string_value_len);
                         }
                     }
-
-                    /* Add the elements array to return value */
-                    add_next_index_zval(return_value, &elements_array);
                 }
 
                 status = 1;

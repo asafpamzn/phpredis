@@ -15,7 +15,7 @@
 */
 
 #include "php_redis.h"
-#include "redis_commands.h"
+
 #include "redis_glide.h"
 
 /* Forward declarations for the Glide execute functions */
