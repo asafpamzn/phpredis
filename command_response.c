@@ -589,6 +589,78 @@ char *double_to_string(double value, size_t *len)
     return str;
 }
 
+/* Helper function to convert a CommandResponse to a PHP stream format
+ * This is specifically for XRANGE/XREVRANGE commands that return stream entries
+ * Stream entries are in format: [stream_id, [[field1, value1], [field2, value2], ...]]
+ * We want to convert this to: ["stream_id" => ["field1" => "value1", "field2" => "value2", ...]]
+ */
+int command_response_to_stream_zval(CommandResponse *response, zval *output)
+{
+    if (!response)
+    {
+        ZVAL_NULL(output);
+        return 0;
+    }
+
+    if (response->response_type != Array)
+    {
+        ZVAL_NULL(output);
+        return 0;
+    }
+
+    array_init(output);
+
+    /* Process each stream entry */
+    for (int64_t i = 0; i < response->array_value_len; i += 2)
+    {
+        /* Each stream entry consists of 2 elements: stream_id and field_value_pairs */
+        if (i + 1 >= response->array_value_len)
+            break;
+
+        CommandResponse *stream_id_resp = &response->array_value[i];
+        CommandResponse *field_values_resp = &response->array_value[i + 1];
+
+        /* Extract stream ID */
+        if (stream_id_resp->response_type != String)
+            continue;
+
+        char *stream_id = stream_id_resp->string_value;
+        size_t stream_id_len = stream_id_resp->string_value_len;
+
+        /* Create associative array for field-value pairs */
+        zval field_array;
+        array_init(&field_array);
+
+        /* Process field-value pairs */
+        if (field_values_resp->response_type == Array)
+        {
+            for (int64_t j = 0; j < field_values_resp->array_value_len; j += 2)
+            {
+                /* Each field-value pair consists of 2 elements: field_name and field_value */
+                if (j + 1 >= field_values_resp->array_value_len)
+                    break;
+
+                CommandResponse *field_resp = &field_values_resp->array_value[j];
+                CommandResponse *value_resp = &field_values_resp->array_value[j + 1];
+
+                /* Extract field name and value */
+                if (field_resp->response_type == String && value_resp->response_type == String)
+                {
+                    add_assoc_stringl(&field_array,
+                                      field_resp->string_value,
+                                      value_resp->string_value,
+                                      value_resp->string_value_len);
+                }
+            }
+        }
+
+        /* Add the stream entry to the output array */
+        add_assoc_zval_ex(output, stream_id, stream_id_len, &field_array);
+    }
+
+    return 1;
+}
+
 /* Process array response for ZRANGE-like commands */
 int process_zrange_response(CommandResult *result, zval *return_value, int has_withscores)
 {

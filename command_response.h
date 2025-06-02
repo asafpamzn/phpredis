@@ -133,4 +133,12 @@ char *long_to_string(long value, size_t *len);
  */
 char *double_to_string(double value, size_t *len);
 
+/*
+ * Helper function to convert a CommandResponse to a PHP stream format
+ * This is specifically for XRANGE/XREVRANGE commands that return stream entries
+ * Returns 1 on success, 0 if null, -1 on error
+ * The output parameter is set to a PHP associative array with stream IDs as keys
+ */
+int command_response_to_stream_zval(CommandResponse *response, zval *output);
+
 #endif /* COMMAND_RESPONSE_H */

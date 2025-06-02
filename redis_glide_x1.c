@@ -599,8 +599,8 @@ int execute_xrange_command(const void *glide_client, const char *key, size_t key
 
         if (result->response)
         {
-            /* XRANGE returns array of entries */
-            status = command_response_to_zval(result->response, return_value, 0);
+            /* XRANGE returns array of entries, use stream-specific handler */
+            status = command_response_to_stream_zval(result->response, return_value);
             free_command_result(result);
             return status;
         }
@@ -699,8 +699,8 @@ int execute_xrevrange_command(const void *glide_client, const char *key, size_t 
 
         if (result->response)
         {
-            /* XREVRANGE returns array of entries */
-            status = command_response_to_zval(result->response, return_value, 0);
+            /* XREVRANGE returns array of entries, use stream-specific handler */
+            status = command_response_to_stream_zval(result->response, return_value);
             free_command_result(result);
             return status;
         }
