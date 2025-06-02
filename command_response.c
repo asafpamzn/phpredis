@@ -598,12 +598,14 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
 {
     if (!response)
     {
+        printf("file = %s, line = %d, response is NULL\n", __FILE__, __LINE__);
         ZVAL_NULL(output);
         return 0;
     }
 
     if (response->response_type != Array)
     {
+        printf("file = %s, line = %d, response is response_type = %d\n", __FILE__, __LINE__, response->response_type);
         ZVAL_NULL(output);
         return 0;
     }
@@ -621,6 +623,7 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
         CommandResponse *field_values_resp = &response->array_value[i + 1];
 
         /* Extract stream ID */
+        printf("file = %s, line = %d, stream_id_resp->response_type = %d\n", __FILE__, __LINE__, stream_id_resp->response_type);
         if (stream_id_resp->response_type != String)
             continue;
 
@@ -632,6 +635,7 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
         array_init(&field_array);
 
         /* Process field-value pairs */
+        printf("file = %s, line = %d, field_values_resp->response_type = %d\n", __FILE__, __LINE__, field_values_resp->response_type);
         if (field_values_resp->response_type == Array)
         {
             for (int64_t j = 0; j < field_values_resp->array_value_len; j += 2)
@@ -646,6 +650,7 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
                 /* Extract field name and value */
                 if (field_resp->response_type == String && value_resp->response_type == String)
                 {
+                    printf("file = %s, line = %d, field_resp->string_value = %s\n", __FILE__, __LINE__, field_resp->string_value);
                     add_assoc_stringl(&field_array,
                                       field_resp->string_value,
                                       value_resp->string_value,
