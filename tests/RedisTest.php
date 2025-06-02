@@ -6682,7 +6682,7 @@ class Redis_Test extends TestSuite {
         $messages = $this->redis->$cmd($key, $a1, $a2);
         var_dump($messages);
         $this->assertEquals(count($messages), 3);
-        return;
+        
         $i = $reverse ? 2 : 0;
         foreach ($messages as $seq => $v) {
             $this->assertEquals(count(explode('-', $seq)), 2);
