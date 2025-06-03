@@ -366,9 +366,11 @@ int execute_xreadgroup_command(const void *glide_client, const char *group, size
                                const char *consumer, size_t consumer_len, zval *streams, zval *ids,
                                zval *options, zval *return_value)
 {
+
     /* Check if client and arguments are valid */
     if (!glide_client || !group || group_len <= 0 || !consumer || consumer_len <= 0 || !streams || !ids)
     {
+        printf("DEBUG: XREADGROUP validation failed\n");
         return 0;
     }
 
@@ -381,6 +383,7 @@ int execute_xreadgroup_command(const void *glide_client, const char *group, size
     /* Check counts match */
     if (streams_count <= 0 || streams_count != ids_count)
     {
+        printf("DEBUG: XREADGROUP stream/ID count mismatch\n");
         return 0;
     }
 
@@ -548,27 +551,6 @@ int execute_xreadgroup_command(const void *glide_client, const char *group, size
 
         if (result->response)
         {
-            /* XREADGROUP returns streams data or NULL if timeout */
-            printf("DEBUG: XREADGROUP response received with type: %d\n", result->response->response_type);
-
-            /* Debug the response structure */
-            if (result->response->response_type == Array)
-            {
-                printf("DEBUG: Response is Array with %ld elements\n", result->response->array_value_len);
-                if (result->response->array_value_len > 0)
-                {
-                    printf("DEBUG: First element type: %d\n", result->response->array_value[0].response_type);
-                }
-            }
-            else if (result->response->response_type == Map)
-            {
-                printf("DEBUG: Response is Map with %ld elements\n", result->response->array_value_len);
-                if (result->response->array_value_len > 0)
-                {
-                    printf("DEBUG: First map key type: %d\n", result->response->array_value[0].map_key ? result->response->array_value[0].map_key->response_type : -1);
-                    printf("DEBUG: First map value type: %d\n", result->response->array_value[0].map_value ? result->response->array_value[0].map_value->response_type : -1);
-                }
-            }
 
             /* We need to create a specific format for XREADGROUP responses:
              * [stream_name => [id1 => [field=>value, ...], id2 => [...]], ...]
@@ -577,99 +559,31 @@ int execute_xreadgroup_command(const void *glide_client, const char *group, size
 
             if (result->response->response_type == Map && result->response->array_value_len > 0)
             {
-                printf("DEBUG: Processing XREADGROUP Map response correctly\n");
-
                 /* First element has the stream name and entries */
-                CommandResponse *element = &result->response->array_value[0];
-
-                if (element->map_key && element->map_key->response_type == String && element->map_value)
+                for (int jj = 0; jj < result->response->array_value_len; jj++)
                 {
-                    char *stream_name = element->map_key->string_value;
-                    size_t stream_name_len = element->map_key->string_value_len;
+                    CommandResponse *element = &result->response->array_value[jj];
 
-                    /* Create associative array for stream entries */
-                    zval stream_entries;
-                    array_init(&stream_entries);
-
-                    /* Process the entries - they're in an array format with alternating ID and data */
-                    if (element->map_value->response_type == Array)
+                    if (element->map_key && element->map_key->response_type == String && element->map_value)
                     {
-                        int entries_count = element->map_value->array_value_len / 2;
-                        printf("DEBUG: Found %d message entries\n", entries_count);
+                        zval stream_name;
+                        command_response_to_zval(element->map_key, &stream_name, 0);
 
-                        /* Process each entry pair (ID + data) */
-                        for (int i = 0; i < entries_count; i++)
-                        {
-                            int id_idx = i * 2;
-                            int data_idx = id_idx + 1;
+                        /* Create associative array for stream entries */
 
-                            if (id_idx < element->map_value->array_value_len &&
-                                data_idx < element->map_value->array_value_len)
-                            {
-                                CommandResponse *id_resp = &element->map_value->array_value[id_idx];
-                                CommandResponse *data_resp = &element->map_value->array_value[data_idx];
+                        /* Process the entries - they're in an array format with alternating ID and data */
 
-                                /* Only process if ID is a string */
-                                if (id_resp->response_type == String)
-                                {
-                                    char *id = id_resp->string_value;
-                                    size_t id_len = id_resp->string_value_len;
-                                    printf("DEBUG: Processing message ID: %.*s\n", (int)id_len, id);
+                        zval stream_entries;
+                        command_response_to_stream_zval(element->map_value, &stream_entries);
 
-                                    /* Create message fields array */
-                                    zval message_fields;
-                                    array_init(&message_fields);
-
-                                    /* Process fields */
-                                    if (data_resp->response_type == Array && data_resp->array_value_len > 0)
-                                    {
-                                        /* First element should contain field-value pairs */
-                                        if (data_resp->array_value[0].response_type == Array)
-                                        {
-                                            CommandResponse *fields = &data_resp->array_value[0];
-
-                                            /* Process field-value pairs */
-                                            for (int j = 0; j < fields->array_value_len; j += 2)
-                                            {
-                                                if (j + 1 < fields->array_value_len)
-                                                {
-                                                    CommandResponse *field = &fields->array_value[j];
-                                                    CommandResponse *value = &fields->array_value[j + 1];
-
-                                                    if (field->response_type == String && value->response_type == String)
-                                                    {
-                                                        add_assoc_stringl(&message_fields,
-                                                                          field->string_value,
-                                                                          value->string_value,
-                                                                          value->string_value_len);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    /* Add message fields to stream entries */
-                                    add_assoc_zval_ex(&stream_entries, id, id_len, &message_fields);
-                                }
-                            }
-                        }
+                        /* Add stream entries to output as an associative array */
+                        add_assoc_zval(return_value, Z_STRVAL(stream_name), &stream_entries);
+                        zval_dtor(&stream_name); // Clean up stream name after adding
+                        status = 1;
                     }
+                }
+            }
 
-                    /* Add stream entries to output as an associative array */
-                    add_assoc_zval_ex(return_value, stream_name, stream_name_len, &stream_entries);
-                    status = 1;
-                }
-                else
-                {
-                    printf("DEBUG: XREADGROUP response has invalid structure\n");
-                    status = command_response_to_zval(result->response, return_value, 1); /* Fall back to normal conversion */
-                }
-            }
-            else
-            {
-                printf("DEBUG: Falling back to standard conversion for unexpected response type\n");
-                status = command_response_to_zval(result->response, return_value, 1);
-            }
             free_command_result(result);
             return status;
         }

@@ -118,9 +118,21 @@ int execute_xack_command(const void *glide_client, const char *key, size_t key_l
                          const char *group, size_t group_len, zval *ids, int id_count,
                          long *output_value)
 {
+
+    /* Set a default value for output in case of early return */
+    *output_value = 0;
+
     /* Check if client and arguments are valid */
-    if (!glide_client || !key || key_len <= 0 || !group || group_len <= 0 || !ids || id_count <= 0)
+    if (!glide_client || !key || key_len <= 0 || !group || group_len <= 0)
     {
+        printf("DEBUG: XACK validation failed for client/key/group\n");
+        return 0;
+    }
+
+    /* Special case: empty IDs array should return false as per phpredis behavior */
+    if (!ids || id_count <= 0)
+    {
+        printf("DEBUG: XACK empty IDs array - returning false as expected\n");
         return 0;
     }
 
@@ -135,6 +147,7 @@ int execute_xack_command(const void *glide_client, const char *key, size_t key_l
             efree(args);
         if (args_len)
             efree(args_len);
+        printf("DEBUG: XACK memory allocation failed\n");
         return 0;
     }
 
@@ -172,8 +185,38 @@ int execute_xack_command(const void *glide_client, const char *key, size_t key_l
     efree(args);
     efree(args_len);
 
-    /* Use the proper handler for integer response */
-    return handle_int_response(result, output_value);
+    /* Check the result directly for debugging */
+    if (result)
+    {
+
+        if (result->command_error)
+        {
+            printf("DEBUG: XACK command error: %s\n", result->command_error->command_error_message);
+            free_command_result(result);
+            return 0;
+        }
+
+        if (result->response)
+        {
+
+            /* For Redis XACK command, integer response is the number of messages successfully acknowledged */
+            if (result->response->response_type == Int)
+            {
+                /* Store the count in output_value */
+                *output_value = result->response->int_value;
+
+                /* Free the result - we don't need it anymore */
+                free_command_result(result);
+
+                /* Always return success (1) even if count is 0 - let PHP code decide how to handle it */
+                return 1;
+            }
+        }
+
+        free_command_result(result);
+    }
+
+    return 0;
 }
 
 /* Execute an XADD command using the Valkey Glide client */

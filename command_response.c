@@ -617,116 +617,18 @@ void extract_stream_field_values(CommandResponse *response, zval *field_array)
  */
 int command_response_to_stream_zval(CommandResponse *response, zval *output)
 {
-    printf("DEBUG: Entering command_response_to_stream_zval\n");
-
     if (!response)
     {
         printf("DEBUG: Response is NULL\n");
         ZVAL_NULL(output);
         return 0;
     }
-
-    printf("DEBUG: Response type: %d\n", response->response_type);
-
     array_init(output);
 
     /* Handle different response types */
     switch (response->response_type)
     {
-    case Array:
-        printf("DEBUG: Processing Array response with %ld elements\n", response->array_value_len);
-        /* For XREADGROUP, response might be an array */
-        /* Format: [stream_name => [id1 => [field1 => value1, ...], id2 => [...]], ...] */
-        if (response->array_value_len > 0)
-        {
-            for (int i = 0; i < response->array_value_len; i++)
-            {
-                CommandResponse *stream_element = &response->array_value[i];
-                printf("DEBUG: Stream element %d type: %d\n", i, stream_element->response_type);
-
-                /* Skip non-array elements */
-                if (stream_element->response_type != Array)
-                    continue;
-
-                if (stream_element->array_value_len >= 2)
-                {
-                    /* First element should be stream name, second should be entries */
-                    CommandResponse *stream_name = &stream_element->array_value[0];
-                    CommandResponse *entries = &stream_element->array_value[1];
-
-                    /* Log stream name info */
-                    if (stream_name->response_type == String)
-                    {
-                        printf("DEBUG: Stream name: %.*s\n", (int)stream_name->string_value_len, stream_name->string_value);
-                    }
-
-                    /* Process entries if they exist */
-                    if (entries->response_type == Array)
-                    {
-                        printf("DEBUG: Stream has %ld entries\n", entries->array_value_len);
-                        /* Create stream entries array */
-                        zval stream_entries;
-                        array_init(&stream_entries);
-
-                        /* Process each entry in this stream */
-                        for (int j = 0; j < entries->array_value_len; j++)
-                        {
-                            CommandResponse *entry = &entries->array_value[j];
-                            if (entry->response_type == Array && entry->array_value_len >= 2)
-                            {
-                                /* Entry should have ID and fields */
-                                CommandResponse *id = &entry->array_value[0];
-                                CommandResponse *fields = &entry->array_value[1];
-
-                                if (id->response_type == String)
-                                {
-                                    printf("DEBUG: Entry ID: %.*s\n", (int)id->string_value_len, id->string_value);
-
-                                    /* Process fields */
-                                    if (fields->response_type == Array)
-                                    {
-                                        printf("DEBUG: Entry has %ld fields\n", fields->array_value_len);
-                                        /* Create fields array */
-                                        zval entry_fields;
-                                        array_init(&entry_fields);
-
-                                        /* Process field-value pairs */
-                                        for (int k = 0; k < fields->array_value_len; k += 2)
-                                        {
-                                            if (k + 1 < fields->array_value_len)
-                                            {
-                                                CommandResponse *field = &fields->array_value[k];
-                                                CommandResponse *value = &fields->array_value[k + 1];
-
-                                                if (field->response_type == String && value->response_type == String)
-                                                {
-                                                    zval zvalue;
-                                                    ZVAL_STRINGL(&zvalue, value->string_value, value->string_value_len);
-                                                    add_assoc_zval_ex(&entry_fields, field->string_value, field->string_value_len, &zvalue);
-                                                }
-                                            }
-                                        }
-
-                                        /* Add entry to stream entries */
-                                        add_assoc_zval_ex(&stream_entries, id->string_value, id->string_value_len, &entry_fields);
-                                    }
-                                }
-                            }
-                        }
-
-                        /* Add stream entries to output */
-                        if (stream_name->response_type == String)
-                        {
-                            add_assoc_zval_ex(output, stream_name->string_value, stream_name->string_value_len, &stream_entries);
-                        }
-                    }
-                }
-            }
-        }
-        break;
-
     case Map:
-        printf("DEBUG: Processing Map response with %ld elements\n", response->array_value_len);
         /* Process map response where keys are stream IDs and values are field-value pairs */
         for (int i = 0; i < response->array_value_len; i++)
         {
@@ -735,36 +637,30 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
             /* Skip if we don't have both key and value */
             if (!element->map_key || !element->map_value)
             {
-                printf("DEBUG: Map element %d missing key or value\n", i);
                 continue;
             }
 
             /* Extract stream ID from key */
             if (element->map_key->response_type != String)
             {
-                printf("DEBUG: Map key type is not String but %d\n", element->map_key->response_type);
                 continue;
             }
 
             char *stream_id = element->map_key->string_value;
             size_t stream_id_len = element->map_key->string_value_len;
-            printf("DEBUG: Processing stream ID: %.*s\n", (int)stream_id_len, stream_id);
 
             /* Create associative array for field-value pairs */
             zval field_array;
             array_init(&field_array);
 
             /* Process nested field-value pairs - add safety check */
-            printf("DEBUG: Map value type: %d\n", element->map_value->response_type);
             if (element->map_value->response_type == Array)
             {
-                printf("DEBUG: Map value array length: %ld\n", element->map_value->array_value_len);
 
                 /* Safe version that checks array bounds */
                 if (element->map_value->array_value_len > 0)
                 {
                     CommandResponse *field_resp1 = &element->map_value->array_value[0];
-                    printf("DEBUG: Field response type: %d\n", field_resp1->response_type);
 
                     if (field_resp1->response_type == Array && field_resp1->array_value_len >= 2)
                     {
@@ -774,7 +670,6 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
 
                         if (Z_TYPE(field) == IS_STRING)
                         {
-                            printf("DEBUG: Field: %s\n", Z_STRVAL(field));
                             add_assoc_zval(&field_array, Z_STRVAL(field), &value);
                             zval_dtor(&field);
                         }
@@ -793,13 +688,11 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
         break;
 
     default:
-        printf("DEBUG: Unsupported response type: %d\n", response->response_type);
         zval_dtor(output); /* Clean up the initialized array */
         ZVAL_NULL(output);
         return 0;
     }
 
-    printf("DEBUG: Successfully processed stream response\n");
     return 1;
 }
 
