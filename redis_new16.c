@@ -755,16 +755,17 @@ PHP_METHOD(Redis, xrange)
 }
 /* }}} */
 
-/* {{{ proto array Redis::xread([array options, ]array streams) */
+/* {{{ proto array Redis::xread(array streams_and_ids [, int count [, int block]]) */
 PHP_METHOD(Redis, xread)
 {
     zval *object;
     redis_object *redis;
-    zval *z_streams, *z_ids, *z_options = NULL;
+    zval *z_streams_and_ids, *z_options = NULL;
+    long count = -1, block = -1;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oaa|a",
-                                     &object, redis_ce, &z_streams, &z_ids, &z_options) == FAILURE)
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa|ll",
+                                     &object, redis_ce, &z_streams_and_ids, &count, &block) == FAILURE)
     {
         RETURN_FALSE;
     }
@@ -775,8 +776,56 @@ PHP_METHOD(Redis, xread)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
+        /* Convert associative array to separate streams and ids arrays */
+        zval z_streams, z_ids;
+        array_init(&z_streams);
+        array_init(&z_ids);
+
+        zend_string *stream_key;
+        zval *stream_id;
+        ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(z_streams_and_ids), stream_key, stream_id)
+        {
+            if (stream_key)
+            {
+                add_next_index_str(&z_streams, zend_string_copy(stream_key));
+                if (Z_TYPE_P(stream_id) != IS_STRING)
+                {
+                    convert_to_string(stream_id);
+                }
+                add_next_index_str(&z_ids, zend_string_copy(Z_STR_P(stream_id)));
+            }
+        }
+        ZEND_HASH_FOREACH_END();
+
+        /* Create options array if count or block were specified */
+        if (count >= 0 || block >= 0)
+        {
+            z_options = emalloc(sizeof(zval));
+            array_init(z_options);
+
+            if (count >= 0)
+            {
+                add_assoc_long(z_options, "COUNT", count);
+            }
+            if (block >= 0)
+            {
+                add_assoc_long(z_options, "BLOCK", block);
+            }
+        }
+
         /* Execute the XREAD command using the Glide client */
-        if (execute_xread_command(redis->glide_client, z_streams, z_ids, z_options, return_value))
+        int result = execute_xread_command(redis->glide_client, &z_streams, &z_ids, z_options, return_value);
+
+        /* Clean up */
+        zval_dtor(&z_streams);
+        zval_dtor(&z_ids);
+        if (z_options)
+        {
+            zval_dtor(z_options);
+            efree(z_options);
+        }
+
+        if (result)
         {
             /* Return value already set in execute_xread_command */
             return;
@@ -785,11 +834,6 @@ PHP_METHOD(Redis, xread)
         {
             RETURN_FALSE;
         }
-    }
-    else
-    {
-        /* Fall back to the original implementation if Glide isn't available */
-        RETURN_FALSE;
     }
 }
 /* }}} */

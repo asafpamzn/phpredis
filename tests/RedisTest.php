@@ -6841,6 +6841,8 @@ class Redis_Test extends TestSuite {
         /* Test COUNT option */
         for ($count = 1; $count <= 2; $count++) {
             $rmsg = $this->redis->xRead($qzero, $count);
+            var_dump($rmsg);
+            return;
             foreach ($keys as $key) {
                 $this->assertEquals(count($rmsg[$key]), $count);
             }

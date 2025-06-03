@@ -351,7 +351,7 @@ int execute_xread_command(const void *glide_client, zval *streams, zval *ids,
         if (result->response)
         {
             /* XREAD returns streams data or NULL if timeout */
-            status = command_response_to_zval(result->response, return_value, 0);
+            status = command_response_to_stream_zval(result->response, return_value);
             free_command_result(result);
             return status;
         }
