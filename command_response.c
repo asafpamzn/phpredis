@@ -352,10 +352,11 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
         ZVAL_BOOL(output, response->bool_value);
         return 1;
     case String:
+        // printf("CommandResponse is String with length: %ld\n", response->string_value_len);
         ZVAL_STRINGL(output, response->string_value, response->string_value_len);
         return 1;
     case Array:
-        //   printf("CommandResponse is Array with length: %ld\n", response->array_value_len);
+        // printf("CommandResponse is Array with length: %ld\n", response->array_value_len);
         array_init(output);
         for (int64_t i = 0; i < response->array_value_len; i++)
         {
@@ -368,7 +369,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
         return 1;
 #if 1
     case Map:
-        //   printf("CommandResponse is Map with length: %ld\n", response->array_value_len);
+        // printf("CommandResponse is Map with length: %ld\n", response->array_value_len);
         array_init(output);
         for (int i = 0; i < response->array_value_len; i++)
         {
@@ -592,15 +593,17 @@ char *double_to_string(double value, size_t *len)
 /* Helper function to recursively extract field-value pairs from a stream entry */
 void extract_stream_field_values(CommandResponse *response, zval *field_array, int depth)
 {
-    printf("file = %s, line = %d, response_type = %d, depth = %d\n", __FILE__, __LINE__, response->response_type, depth);
+
     if (!response)
     {
         return;
     }
     CommandResponse *field_resp1 = &response->array_value[0];
-    printf("response->array_value_len = %ld\n", response->array_value_len);
-    printf("file = %s, line = %d, response_type = Array, depth = %ld, field_resp1_type = %d\n", __FILE__, __LINE__, depth, field_resp1->response_type);
-    command_response_to_zval(field_resp1, field_array, 1);
+    zval field, value;
+    command_response_to_zval(&field_resp1->array_value[0], &field, 0);
+    command_response_to_zval(&field_resp1->array_value[1], &value, 0);
+    add_assoc_zval(field_array, Z_STRVAL(field), &value);
+    zval_dtor(&field); // Clean up the field since we're using it as an index
 }
 
 /* Helper function to convert a CommandResponse to a PHP stream format

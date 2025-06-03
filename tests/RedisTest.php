@@ -6665,7 +6665,7 @@ class Redis_Test extends TestSuite {
 
     protected function doXRangeTest($reverse) {
         $key = '{stream}';
-        var_dump($reverse);
+        
         if ($reverse) {
             list($cmd,$a1,$a2) = ['xRevRange', '+', 0];
         } else {
@@ -6680,13 +6680,13 @@ class Redis_Test extends TestSuite {
         }
 
         $messages = $this->redis->$cmd($key, $a1, $a2);
-        var_dump($messages);
+        
         $this->assertEquals(count($messages), 3);
         
         $i = $reverse ? 2 : 0;
         foreach ($messages as $seq => $v) {
             $this->assertEquals(count(explode('-', $seq)), 2);
-            $this->assertEquals($v, ['field' => "value:$i"]);
+            $this->assertEquals($v, ['field' => "value:$i"]);            
             $i += $reverse ? -1 : 1;
         }
 
@@ -6695,7 +6695,7 @@ class Redis_Test extends TestSuite {
             $messages = $this->redis->$cmd($key, $a1, $a2, $count);
             $this->assertEquals(count($messages), $count);
         }
-        return;
+        
     }
 
     public function testXRange() {

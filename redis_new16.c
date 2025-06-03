@@ -515,7 +515,7 @@ PHP_METHOD(Redis, xpending)
 }
 /* }}} */
 
-/* {{{ proto array Redis::xrange(string key, string start, string end [, array options]) */
+/* {{{ proto array Redis::xrange(string key, string start, string end [, int count [, array options]]) */
 PHP_METHOD(Redis, xrange)
 {
     zval *object;
@@ -523,13 +523,59 @@ PHP_METHOD(Redis, xrange)
     char *key = NULL, *start = NULL, *end = NULL;
     size_t key_len = 0, start_len = 0, end_len = 0;
     zval *z_options = NULL;
+    long count = 0;
+    int argc = ZEND_NUM_ARGS();
+    int options_created = 0;
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss|a",
-                                     &object, redis_ce, &key, &key_len,
-                                     &start, &start_len, &end, &end_len, &z_options) == FAILURE)
+    /* Parse parameters - try different combinations based on argument count */
+    if (argc == 4)
     {
-        RETURN_FALSE;
+        /* xrange(key, start, end, count) */
+        if (zend_parse_method_parameters(argc, getThis(), "Osssl",
+                                         &object, redis_ce, &key, &key_len,
+                                         &start, &start_len, &end, &end_len, &count) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Create options array with COUNT */
+        z_options = emalloc(sizeof(zval));
+        array_init(z_options);
+        add_assoc_long(z_options, "COUNT", count);
+        options_created = 1;
+    }
+    else if (argc == 5)
+    {
+        /* xrange(key, start, end, count, options) */
+        if (zend_parse_method_parameters(argc, getThis(), "Ossla",
+                                         &object, redis_ce, &key, &key_len,
+                                         &start, &start_len, &end, &end_len, &count, &z_options) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Add COUNT to existing options array or create new one */
+        if (z_options && Z_TYPE_P(z_options) == IS_ARRAY)
+        {
+            add_assoc_long(z_options, "COUNT", count);
+        }
+        else
+        {
+            z_options = emalloc(sizeof(zval));
+            array_init(z_options);
+            add_assoc_long(z_options, "COUNT", count);
+            options_created = 1;
+        }
+    }
+    else
+    {
+        /* xrange(key, start, end [, options]) - original format for backward compatibility */
+        if (zend_parse_method_parameters(argc, getThis(), "Osss|a",
+                                         &object, redis_ce, &key, &key_len,
+                                         &start, &start_len, &end, &end_len, &z_options) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
     }
 
     /* Get Redis object */
@@ -542,11 +588,25 @@ PHP_METHOD(Redis, xrange)
         if (execute_xrange_command(redis->glide_client, key, key_len, start, start_len,
                                    end, end_len, z_options, return_value))
         {
+            /* Clean up if we created options array */
+            if (options_created)
+            {
+                zval_dtor(z_options);
+                efree(z_options);
+            }
+
             /* Return value already set in execute_xrange_command */
             return;
         }
         else
         {
+            /* Clean up if we created options array */
+            if (options_created)
+            {
+                zval_dtor(z_options);
+                efree(z_options);
+            }
+
             RETURN_FALSE;
         }
     }
@@ -640,7 +700,7 @@ PHP_METHOD(Redis, xreadgroup)
 }
 /* }}} */
 
-/* {{{ proto array Redis::xrevrange(string key, string end, string start [, array options]) */
+/* {{{ proto array Redis::xrevrange(string key, string end, string start [, int count [, array options]]) */
 PHP_METHOD(Redis, xrevrange)
 {
     zval *object;
@@ -648,13 +708,59 @@ PHP_METHOD(Redis, xrevrange)
     char *key = NULL, *start = NULL, *end = NULL;
     size_t key_len = 0, start_len = 0, end_len = 0;
     zval *z_options = NULL;
+    long count = 0;
+    int argc = ZEND_NUM_ARGS();
+    int options_created = 0;
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss|a",
-                                     &object, redis_ce, &key, &key_len,
-                                     &end, &end_len, &start, &start_len, &z_options) == FAILURE)
+    /* Parse parameters - try different combinations based on argument count */
+    if (argc == 4)
     {
-        RETURN_FALSE;
+        /* xrevrange(key, end, start, count) */
+        if (zend_parse_method_parameters(argc, getThis(), "Osssl",
+                                         &object, redis_ce, &key, &key_len,
+                                         &end, &end_len, &start, &start_len, &count) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Create options array with COUNT */
+        z_options = emalloc(sizeof(zval));
+        array_init(z_options);
+        add_assoc_long(z_options, "COUNT", count);
+        options_created = 1;
+    }
+    else if (argc == 5)
+    {
+        /* xrevrange(key, end, start, count, options) */
+        if (zend_parse_method_parameters(argc, getThis(), "Ossla",
+                                         &object, redis_ce, &key, &key_len,
+                                         &end, &end_len, &start, &start_len, &count, &z_options) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Add COUNT to existing options array or create new one */
+        if (z_options && Z_TYPE_P(z_options) == IS_ARRAY)
+        {
+            add_assoc_long(z_options, "COUNT", count);
+        }
+        else
+        {
+            z_options = emalloc(sizeof(zval));
+            array_init(z_options);
+            add_assoc_long(z_options, "COUNT", count);
+            options_created = 1;
+        }
+    }
+    else
+    {
+        /* xrevrange(key, end, start [, options]) - original format for backward compatibility */
+        if (zend_parse_method_parameters(argc, getThis(), "Osss|a",
+                                         &object, redis_ce, &key, &key_len,
+                                         &end, &end_len, &start, &start_len, &z_options) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
     }
 
     /* Get Redis object */
@@ -667,11 +773,25 @@ PHP_METHOD(Redis, xrevrange)
         if (execute_xrevrange_command(redis->glide_client, key, key_len, end, end_len,
                                       start, start_len, z_options, return_value))
         {
+            /* Clean up if we created options array */
+            if (options_created)
+            {
+                zval_dtor(z_options);
+                efree(z_options);
+            }
+
             /* Return value already set in execute_xrevrange_command */
             return;
         }
         else
         {
+            /* Clean up if we created options array */
+            if (options_created)
+            {
+                zval_dtor(z_options);
+                efree(z_options);
+            }
+
             RETURN_FALSE;
         }
     }
