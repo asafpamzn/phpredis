@@ -229,12 +229,7 @@ int execute_renamenx_command(const void *glide_client, const char *src, size_t s
 
     /* Use the generic handler to process the result */
     long output_value = 0;
-    int ret = handle_int_response(result, &output_value);
-    if (ret == 1)
-    {
-        return (output_value == 1) ? 1 : 0;
-    }
-    return 0;
+    return handle_bool_response(result);
 }
 
 /* Execute a GETWITHMETA command using the Valkey Glide client */
