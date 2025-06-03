@@ -6695,6 +6695,7 @@ class Redis_Test extends TestSuite {
             $messages = $this->redis->$cmd($key, $a1, $a2, $count);
             $this->assertEquals(count($messages), $count);
         }
+        return;
     }
 
     public function testXRange() {

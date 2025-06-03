@@ -589,6 +589,20 @@ char *double_to_string(double value, size_t *len)
     return str;
 }
 
+/* Helper function to recursively extract field-value pairs from a stream entry */
+void extract_stream_field_values(CommandResponse *response, zval *field_array, int depth)
+{
+    printf("file = %s, line = %d, response_type = %d, depth = %d\n", __FILE__, __LINE__, response->response_type, depth);
+    if (!response)
+    {
+        return;
+    }
+    CommandResponse *field_resp1 = &response->array_value[0];
+    printf("response->array_value_len = %ld\n", response->array_value_len);
+    printf("file = %s, line = %d, response_type = Array, depth = %ld, field_resp1_type = %d\n", __FILE__, __LINE__, depth, field_resp1->response_type);
+    command_response_to_zval(field_resp1, field_array, 1);
+}
+
 /* Helper function to convert a CommandResponse to a PHP stream format
  * This is specifically for XRANGE/XREVRANGE commands that return stream entries
  * We need to handle both Array and Map response types
@@ -607,59 +621,8 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
     /* Handle different response types */
     switch (response->response_type)
     {
-    case Array:
-        /* Process each stream entry in array format [id1, [field, value], id2, [field, value], ...] */
-        for (int64_t i = 0; i < response->array_value_len; i += 2)
-        {
-            /* Each stream entry consists of 2 elements: stream_id and field_value_pairs */
-            if (i + 1 >= response->array_value_len)
-                break;
-
-            CommandResponse *stream_id_resp = &response->array_value[i];
-            CommandResponse *field_values_resp = &response->array_value[i + 1];
-
-            /* Extract stream ID */
-            if (stream_id_resp->response_type != String)
-                continue;
-
-            char *stream_id = stream_id_resp->string_value;
-            size_t stream_id_len = stream_id_resp->string_value_len;
-
-            /* Create associative array for field-value pairs */
-            zval field_array;
-            array_init(&field_array);
-
-            /* Process field-value pairs */
-            if (field_values_resp->response_type == Array)
-            {
-                for (int64_t j = 0; j < field_values_resp->array_value_len; j += 2)
-                {
-                    /* Each field-value pair consists of 2 elements: field_name and field_value */
-                    if (j + 1 >= field_values_resp->array_value_len)
-                        break;
-
-                    CommandResponse *field_resp = &field_values_resp->array_value[j];
-                    CommandResponse *value_resp = &field_values_resp->array_value[j + 1];
-
-                    /* Extract field name and value */
-                    if (field_resp->response_type == String && value_resp->response_type == String)
-                    {
-                        add_assoc_stringl(&field_array,
-                                          field_resp->string_value,
-                                          value_resp->string_value,
-                                          value_resp->string_value_len);
-                    }
-                }
-            }
-
-            /* Add the stream entry to the output array */
-            add_assoc_zval_ex(output, stream_id, stream_id_len, &field_array);
-        }
-        break;
-
     case Map:
         /* Process map response where keys are stream IDs and values are field-value pairs */
-        printf("Processing Map response for streams = response->array_value_len = %d\n", response->array_value_len);
         for (int i = 0; i < response->array_value_len; i++)
         {
             CommandResponse *element = &response->array_value[i];
@@ -669,7 +632,6 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
                 continue;
 
             /* Extract stream ID from key */
-            printf("file = %s, line = %d, map_key response_type = %d\n", __FILE__, __LINE__, element->map_key->response_type);
             if (element->map_key->response_type != String)
                 continue;
 
@@ -680,56 +642,8 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
             zval field_array;
             array_init(&field_array);
 
-            /* Process field-value pairs from map value */
-            printf("file = %s, line = %d, map_value response_type = %d\n", __FILE__, __LINE__, element->map_value->response_type);
-            if (element->map_value->response_type == Array)
-            {
-
-                CommandResponse *fields_array = element->map_value;
-                printf("file = %s, line = %d, fields_array response_type = %d\n", __FILE__, __LINE__, fields_array->response_type);
-                for (int j = 0; j < fields_array->array_value_len; j += 2)
-                {
-                    printf("file = %s, line = %d, j = %d, array_value_len = %ld\n", __FILE__, __LINE__, j, fields_array->array_value_len);
-                    CommandResponse *field_resp = &fields_array->array_value[j];
-                    printf("file = %s, line = %d, field_resp response_type = %d\n", __FILE__, __LINE__, field_resp->response_type);
-                    if (j + 1 >= fields_array->array_value_len)
-                        break;
-
-                                        CommandResponse *value_resp = &fields_array->array_value[j + 1];
-
-                    printf("file = %s, line = %d, field_resp response_type = %d\n", __FILE__, __LINE__, field_resp->response_type);
-                    printf("file = %s, line = %d, value_resp response_type = %d\n", __FILE__, __LINE__, value_resp->response_type);
-                    if (field_resp->response_type == String && value_resp->response_type == String)
-                    {
-                        add_assoc_stringl(&field_array,
-                                          field_resp->string_value,
-                                          value_resp->string_value,
-                                          value_resp->string_value_len);
-                    }
-                }
-            }
-            else if (element->map_value->response_type == Map)
-            {
-                /* Handle case where field-value pairs are in map format */
-                CommandResponse *fields_map = element->map_value;
-
-                for (int j = 0; j < fields_map->array_value_len; j++)
-                {
-                    CommandResponse *field_element = &fields_map->array_value[j];
-
-                    if (!field_element->map_key || !field_element->map_value)
-                        continue;
-
-                    if (field_element->map_key->response_type == String &&
-                        field_element->map_value->response_type == String)
-                    {
-                        add_assoc_stringl(&field_array,
-                                          field_element->map_key->string_value,
-                                          field_element->map_value->string_value,
-                                          field_element->map_value->string_value_len);
-                    }
-                }
-            }
+            /* Process nested field-value pairs with our recursive function */
+            extract_stream_field_values(element->map_value, &field_array, 0);
 
             /* Add the stream entry to the output array */
             add_assoc_zval_ex(output, stream_id, stream_id_len, &field_array);

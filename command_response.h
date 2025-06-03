@@ -134,6 +134,13 @@ char *long_to_string(long value, size_t *len);
 char *double_to_string(double value, size_t *len);
 
 /*
+ * Helper function to recursively extract field-value pairs from a stream entry
+ * This function traverses the nested structure of Redis stream entries
+ * and populates the provided PHP array with the field-value pairs
+ */
+void extract_stream_field_values(CommandResponse *response, zval *field_array, int depth);
+
+/*
  * Helper function to convert a CommandResponse to a PHP stream format
  * This is specifically for XRANGE/XREVRANGE commands that return stream entries
  * Returns 1 on success, 0 if null, -1 on error
