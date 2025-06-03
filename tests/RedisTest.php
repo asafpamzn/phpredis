@@ -6797,14 +6797,17 @@ class Redis_Test extends TestSuite {
 
         for ($n = 1; $n <= 3; $n++) {
             $this->addStreamsAndGroups(['{s}'], 3, ['g1' => 0]);
+            
             $msg = $this->redis->xReadGroup('g1', 'c1', ['{s}' => '>']);
-
+            var_dump($msg);
             /* Extract IDs */
             $smsg = array_shift($msg);
+            var_dump($smsg);
             $ids = array_keys($smsg);
-
+            
             /* Now ACK $n messages */
             $ids = array_slice($ids, 0, $n);
+            
             $this->assertEquals($n, $this->redis->xAck('{s}', 'g1', $ids));
         }
 

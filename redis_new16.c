@@ -794,19 +794,19 @@ PHP_METHOD(Redis, xread)
 }
 /* }}} */
 
-/* {{{ proto array Redis::xreadgroup(string group, string consumer, array streams, array ids [, array options]) */
+/* {{{ proto array Redis::xreadgroup(string group, string consumer, array streams [, array options]) */
 PHP_METHOD(Redis, xreadgroup)
 {
     zval *object;
     redis_object *redis;
     char *group = NULL, *consumer = NULL;
     size_t group_len = 0, consumer_len = 0;
-    zval *z_streams, *z_ids, *z_options = NULL;
+    zval *z_streams_and_ids, *z_options = NULL;
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ossaa|a",
+    /* Parse parameters - expecting streams to be a combined array like ['{s}' => '>'] */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ossa|a",
                                      &object, redis_ce, &group, &group_len,
-                                     &consumer, &consumer_len, &z_streams, &z_ids, &z_options) == FAILURE)
+                                     &consumer, &consumer_len, &z_streams_and_ids, &z_options) == FAILURE)
     {
         RETURN_FALSE;
     }
@@ -817,9 +817,33 @@ PHP_METHOD(Redis, xreadgroup)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
+        /* For the combined format, we need to separate streams and IDs */
+        zval z_streams, z_ids;
+        array_init(&z_streams);
+        array_init(&z_ids);
+
+        /* Extract streams and IDs from the combined array */
+        zend_string *stream_key;
+        zval *stream_id;
+        ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(z_streams_and_ids), stream_key, stream_id)
+        {
+            if (stream_key && Z_TYPE_P(stream_id) == IS_STRING)
+            {
+                add_next_index_str(&z_streams, zend_string_copy(stream_key));
+                add_next_index_str(&z_ids, zend_string_copy(Z_STR_P(stream_id)));
+            }
+        }
+        ZEND_HASH_FOREACH_END();
+
         /* Execute the XREADGROUP command using the Glide client */
-        if (execute_xreadgroup_command(redis->glide_client, group, group_len, consumer, consumer_len,
-                                       z_streams, z_ids, z_options, return_value))
+        int result = execute_xreadgroup_command(redis->glide_client, group, group_len, consumer, consumer_len,
+                                                &z_streams, &z_ids, z_options, return_value);
+
+        /* Clean up temporary arrays */
+        zval_dtor(&z_streams);
+        zval_dtor(&z_ids);
+
+        if (result)
         {
             /* Return value already set in execute_xreadgroup_command */
             return;
