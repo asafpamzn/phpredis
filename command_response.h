@@ -138,7 +138,7 @@ char *double_to_string(double value, size_t *len);
  * This function traverses the nested structure of Redis stream entries
  * and populates the provided PHP array with the field-value pairs
  */
-void extract_stream_field_values(CommandResponse *response, zval *field_array, int depth);
+void extract_stream_field_values(CommandResponse *response, zval *field_array);
 
 /*
  * Helper function to convert a CommandResponse to a PHP stream format

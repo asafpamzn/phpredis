@@ -456,7 +456,7 @@ int execute_xgroup_command(const void *glide_client, const char *subcommand, siz
             return status;
         }
 
-         free_command_result(result);
+        free_command_result(result);
     }
 
     return 0;
@@ -540,7 +540,7 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
         if (result->response)
         {
             /* XINFO returns information about the stream or consumers */
-            status = command_response_to_zval(result->response, return_value, 0);
+            status = command_response_to_zval(result->response, return_value, 1);
             free_command_result(result);
             return status;
         }

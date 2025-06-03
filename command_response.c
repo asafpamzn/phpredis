@@ -338,21 +338,24 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
     switch (response->response_type)
     {
     case Null:
-        //   printf("CommandResponse is NULL\n");
+        printf("CommandResponse is NULL\n");
         ZVAL_NULL(output);
         return 0;
     case Int:
-        // printf("CommandResponse is Int: %ld\n", response->int_value);
+        printf("CommandResponse is Int: %ld\n", response->int_value);
         ZVAL_LONG(output, response->int_value);
         return 1;
     case Float:
+        printf("CommandResponse is Float: %f\n", response->float_value);
         ZVAL_DOUBLE(output, response->float_value);
+        printf("Converted CommandResponse to double: %f\n", Z_DVAL_P(output));
         return 1;
     case Bool:
+        printf("CommandResponse is Bool: %d\n", response->bool_value);
         ZVAL_BOOL(output, response->bool_value);
         return 1;
     case String:
-        // printf("CommandResponse is String with length: %ld\n", response->string_value_len);
+        printf("CommandResponse is String with length: %ld\n", response->string_value_len);
         ZVAL_STRINGL(output, response->string_value, response->string_value_len);
         return 1;
     case Array:
@@ -427,7 +430,8 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
         }
         return 1;
     case Ok:
-        ZVAL_STRING(output, "OK");
+        // ZVAL_STRING(output, "OK");
+        ZVAL_BOOL(output, true);
         return 1;
     default:
         ZVAL_NULL(output);
@@ -591,7 +595,7 @@ char *double_to_string(double value, size_t *len)
 }
 
 /* Helper function to recursively extract field-value pairs from a stream entry */
-void extract_stream_field_values(CommandResponse *response, zval *field_array, int depth)
+void extract_stream_field_values(CommandResponse *response, zval *field_array)
 {
 
     if (!response)
@@ -646,7 +650,7 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
             array_init(&field_array);
 
             /* Process nested field-value pairs with our recursive function */
-            extract_stream_field_values(element->map_value, &field_array, 0);
+            extract_stream_field_values(element->map_value, &field_array);
 
             /* Add the stream entry to the output array */
             add_assoc_zval_ex(output, stream_id, stream_id_len, &field_array);

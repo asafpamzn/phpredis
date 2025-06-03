@@ -367,19 +367,92 @@ PHP_METHOD(Redis, xgroup)
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
+    printf("Redis::xgroup called with op: %s, argc: %d\n", op, argc);
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the XGROUP command using the Glide client */
-        if (execute_xgroup_command(redis->glide_client, op, op_len, z_args, argc, return_value))
+        /* Special handling for CREATE subcommand */
+        if (op_len == 6 && strncasecmp(op, "CREATE", 6) == 0)
         {
-            /* Return value already set in execute_xgroup_command */
-            return;
+            /* CREATE subcommand expects: key, group, id, [mkstream_bool], [entries_read] */
+            if (argc < 3)
+            {
+                RETURN_FALSE;
+            }
+
+            /* Calculate the maximum number of processed arguments we might need */
+            int max_processed_args = argc + 2; /* Extra space for MKSTREAM and ENTRIESREAD keywords */
+            zval *processed_args = (zval *)emalloc(sizeof(zval) * max_processed_args);
+            int processed_argc = 0;
+
+            /* Copy the first 3 arguments (key, group, id) */
+            for (int i = 0; i < 3 && i < argc; i++)
+            {
+                processed_args[processed_argc++] = z_args[i];
+            }
+
+            /* Process optional parameters */
+            if (argc > 3)
+            {
+                /* 4th argument: MKSTREAM boolean */
+                zval *mkstream_arg = &z_args[3];
+                if (zval_is_true(mkstream_arg))
+                {
+                    /* Add MKSTREAM keyword */
+                    ZVAL_STRING(&processed_args[processed_argc], "MKSTREAM");
+                    processed_argc++;
+                }
+            }
+
+            if (argc > 4)
+            {
+                /* 5th argument: ENTRIESREAD value */
+                zval *entries_read_arg = &z_args[4];
+
+                /* Add ENTRIESREAD keyword */
+                ZVAL_STRING(&processed_args[processed_argc], "ENTRIESREAD");
+                processed_argc++;
+
+                /* Add the entries read value */
+                processed_args[processed_argc++] = *entries_read_arg;
+            }
+
+            /* Execute the XGROUP CREATE command */
+            int result = execute_xgroup_command(redis->glide_client, op, op_len, processed_args, processed_argc, return_value);
+
+            /* Clean up allocated ZVAL strings */
+            for (int i = 3; i < processed_argc; i++)
+            {
+                if (Z_TYPE(processed_args[i]) == IS_STRING &&
+                    (strcmp(Z_STRVAL(processed_args[i]), "MKSTREAM") == 0 ||
+                     strcmp(Z_STRVAL(processed_args[i]), "ENTRIESREAD") == 0))
+                {
+                    zval_ptr_dtor(&processed_args[i]);
+                }
+            }
+            efree(processed_args);
+
+            if (result)
+            {
+                return;
+            }
+            else
+            {
+                RETURN_FALSE;
+            }
         }
         else
         {
-            RETURN_FALSE;
+            /* For all other subcommands, use the original approach */
+            if (execute_xgroup_command(redis->glide_client, op, op_len, z_args, argc, return_value))
+            {
+                /* Return value already set in execute_xgroup_command */
+                return;
+            }
+            else
+            {
+                RETURN_FALSE;
+            }
         }
     }
     else
