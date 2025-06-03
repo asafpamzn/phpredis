@@ -338,24 +338,24 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
     switch (response->response_type)
     {
     case Null:
-        printf("CommandResponse is NULL\n");
+        // printf("CommandResponse is NULL\n");
         ZVAL_NULL(output);
         return 0;
     case Int:
-        printf("CommandResponse is Int: %ld\n", response->int_value);
+        // printf("CommandResponse is Int: %ld\n", response->int_value);
         ZVAL_LONG(output, response->int_value);
         return 1;
     case Float:
-        printf("CommandResponse is Float: %f\n", response->float_value);
+        // printf("CommandResponse is Float: %f\n", response->float_value);
         ZVAL_DOUBLE(output, response->float_value);
-        printf("Converted CommandResponse to double: %f\n", Z_DVAL_P(output));
+        //  printf("Converted CommandResponse to double: %f\n", Z_DVAL_P(output));
         return 1;
     case Bool:
-        printf("CommandResponse is Bool: %d\n", response->bool_value);
+        //  printf("CommandResponse is Bool: %d\n", response->bool_value);
         ZVAL_BOOL(output, response->bool_value);
         return 1;
     case String:
-        printf("CommandResponse is String with length: %ld\n", response->string_value_len);
+        // printf("CommandResponse is String with length: %ld\n", response->string_value_len);
         ZVAL_STRINGL(output, response->string_value, response->string_value_len);
         return 1;
     case Array:

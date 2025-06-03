@@ -367,26 +367,26 @@ PHP_METHOD(Redis, xgroup)
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-    printf("Redis::xgroup called with op: %s, argc: %d\n", op, argc);
+
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Special handling for CREATE subcommand */
+        /* Validate arguments based on subcommand before any processing */
         if (op_len == 6 && strncasecmp(op, "CREATE", 6) == 0)
         {
             /* CREATE subcommand expects: key, group, id, [mkstream_bool], [entries_read] */
-            if (argc < 3)
+            if (argc < 3 || argc > 5)
             {
                 RETURN_FALSE;
             }
 
             /* Calculate the maximum number of processed arguments we might need */
-            int max_processed_args = argc + 2; /* Extra space for MKSTREAM and ENTRIESREAD keywords */
+            int max_processed_args = 3 + 2 + 1; /* key, group, id + MKSTREAM + ENTRIESREAD + value */
             zval *processed_args = (zval *)emalloc(sizeof(zval) * max_processed_args);
             int processed_argc = 0;
 
             /* Copy the first 3 arguments (key, group, id) */
-            for (int i = 0; i < 3 && i < argc; i++)
+            for (int i = 0; i < 3; i++)
             {
                 processed_args[processed_argc++] = z_args[i];
             }
@@ -441,18 +441,82 @@ PHP_METHOD(Redis, xgroup)
                 RETURN_FALSE;
             }
         }
-        else
+        else if (op_len == 14 && strncasecmp(op, "CREATECONSUMER", 14) == 0)
         {
-            /* For all other subcommands, use the original approach */
+            /* CREATECONSUMER expects exactly: key, group, consumer */
+            if (argc != 3)
+            {
+                RETURN_FALSE;
+            }
+
+            /* Use the arguments as-is for CREATECONSUMER */
             if (execute_xgroup_command(redis->glide_client, op, op_len, z_args, argc, return_value))
             {
-                /* Return value already set in execute_xgroup_command */
                 return;
             }
             else
             {
                 RETURN_FALSE;
             }
+        }
+        else if (op_len == 7 && strncasecmp(op, "DESTROY", 7) == 0)
+        {
+            /* DESTROY expects exactly: key, group */
+            if (argc != 2)
+            {
+                RETURN_FALSE;
+            }
+
+            /* Use the arguments as-is for DESTROY */
+            if (execute_xgroup_command(redis->glide_client, op, op_len, z_args, argc, return_value))
+            {
+                return;
+            }
+            else
+            {
+                RETURN_FALSE;
+            }
+        }
+        else if (op_len == 5 && strncasecmp(op, "SETID", 5) == 0)
+        {
+            /* SETID expects exactly: key, group, id */
+            if (argc != 3)
+            {
+                RETURN_FALSE;
+            }
+
+            /* Use the arguments as-is for SETID */
+            if (execute_xgroup_command(redis->glide_client, op, op_len, z_args, argc, return_value))
+            {
+                return;
+            }
+            else
+            {
+                RETURN_FALSE;
+            }
+        }
+        else if (op_len == 11 && strncasecmp(op, "DELCONSUMER", 11) == 0)
+        {
+            /* DELCONSUMER expects exactly: key, group, consumer */
+            if (argc != 3)
+            {
+                RETURN_FALSE;
+            }
+
+            /* Use the arguments as-is for DELCONSUMER */
+            if (execute_xgroup_command(redis->glide_client, op, op_len, z_args, argc, return_value))
+            {
+                return;
+            }
+            else
+            {
+                RETURN_FALSE;
+            }
+        }
+        else
+        {
+            /* Unknown subcommand - don't send to Redis */
+            RETURN_FALSE;
         }
     }
     else

@@ -6776,7 +6776,7 @@ class Redis_Test extends TestSuite {
         /* Make sure we handle the case where the user doesn't send enough arguments */
         //$this->redis->clearLastError();
         $this->assertFalse(@$this->redis->xGroup('CREATECONSUMER'));
-        return;
+        
         //$this->assertNull($this->redis->getLastError());
         $this->assertFalse(@$this->redis->xGroup('create'));
         //$this->assertNull($this->redis->getLastError());
