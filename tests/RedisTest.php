@@ -6952,12 +6952,12 @@ class Redis_Test extends TestSuite {
         $qnew = ['{s}-1' => '>', '{s}-2' => '>'];
         
         $this->redis->xReadGroup('group1', 'c1', $qnew, 0, 100);
-        return;
+        
         $this->assertGTE(100, $this->mstime() - $tm1);
 
         /* Make sure passing NULL to block doesn't block */
         $tm1 = $this->mstime();
-        $this->redis->xReadGroup('group1', 'c1', $qnew, NULL, NULL);
+        $this->redis->xReadGroup('group1', 'c1', $qnew, 0);
         $this->assertLT(100, $this->mstime() - $tm1);
 
         /* Make sure passing bad values to BLOCK or COUNT immediately fails */

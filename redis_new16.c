@@ -877,25 +877,42 @@ PHP_METHOD(Redis, xreadgroup)
     }
     else if (argc == 5)
     {
-        /* Parse as (group, consumer, streams, count, options) */
-        if (zend_parse_method_parameters(argc, getThis(), "Ossala",
-                                         &object, redis_ce, &group, &group_len,
-                                         &consumer, &consumer_len, &z_streams_and_ids, &count, &z_options) == FAILURE)
-        {
-            RETURN_FALSE;
-        }
+        long block = -1;
 
-        /* Add COUNT to existing options array or create new one */
-        if (z_options && Z_TYPE_P(z_options) == IS_ARRAY)
+        /* First try parsing as (group, consumer, streams, count, block) */
+        if (zend_parse_method_parameters(argc, getThis(), "Ossall",
+                                         &object, redis_ce, &group, &group_len,
+                                         &consumer, &consumer_len, &z_streams_and_ids, &count, &block) == SUCCESS)
         {
-            add_assoc_long(z_options, "COUNT", count);
-        }
-        else
-        {
+            /* Create options array with both COUNT and BLOCK */
             z_options = emalloc(sizeof(zval));
             array_init(z_options);
             add_assoc_long(z_options, "COUNT", count);
+            add_assoc_long(z_options, "BLOCK", block);
             options_created = 1;
+        }
+        else
+        {
+            /* Fallback to parsing as (group, consumer, streams, count, options) */
+            if (zend_parse_method_parameters(argc, getThis(), "Ossala",
+                                             &object, redis_ce, &group, &group_len,
+                                             &consumer, &consumer_len, &z_streams_and_ids, &count, &z_options) == FAILURE)
+            {
+                RETURN_FALSE;
+            }
+
+            /* Add COUNT to existing options array or create new one */
+            if (z_options && Z_TYPE_P(z_options) == IS_ARRAY)
+            {
+                add_assoc_long(z_options, "COUNT", count);
+            }
+            else
+            {
+                z_options = emalloc(sizeof(zval));
+                array_init(z_options);
+                add_assoc_long(z_options, "COUNT", count);
+                options_created = 1;
+            }
         }
     }
     else
