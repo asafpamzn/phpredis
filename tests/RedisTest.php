@@ -6227,8 +6227,7 @@ class Redis_Test extends TestSuite {
 
         for ($maxlen = 0; $maxlen <= 50; $maxlen += 10) {
             $this->addStreamEntries('stream', 100);
-            $trimmed = $this->redis->xTrim('stream', 'maxlen', $maxlen);
-            
+            $trimmed = $this->redis->xTrim('stream', $maxlen);
             $this->assertEquals(100 - $maxlen, $trimmed);
         }
 
@@ -6236,7 +6235,7 @@ class Redis_Test extends TestSuite {
            can call it with the flag */
         $this->addStreamEntries('stream', 100);
         $this->assertEquals(0, $this->redis->xTrim('stream', 1, true));
-
+      
         /* We need Redis >= 6.2.0 for MINID and LIMIT options */
         if ( ! $this->minVersionCheck('6.2.0'))
             return;
@@ -6249,14 +6248,15 @@ class Redis_Test extends TestSuite {
                 $this->redis->xadd('stream', "$i-$j", ['foo' => 'bar']);
             }
         }
-
+  
         /* MINID of 2-0 */
         $this->assertEquals(3, $this->redis->xtrim('stream', 2, false, true));
         $this->assertEquals(['2-0', '2-1', '2-2'], array_keys($this->redis->xrange('stream', '0', '+')));
 
         /* TODO:  Figure oiut how to test LIMIT deterministically.  For now just
                   send a LIMIT and verify we don't get a failure from Redis. */
-        $this->assertIsInt(@$this->redis->xtrim('stream', 2, false, false, 3));
+        $this->assertIsInt(@$this->redis->xtrim('stream', 2, true, false, 3));
+       
     }
 
     /* XCLAIM is one of the most complicated commands, with a great deal of different options
@@ -6423,7 +6423,7 @@ class Redis_Test extends TestSuite {
         /* XINFO STREAM FULL [COUNT N] Requires >= 6.0.0 */
         if ( ! $this->minVersionCheck('6.0'))
             return;
-
+        
         /* Add some items to the stream so we can test COUNT */
         for ($i = 0; $i < 5; $i++) {
             $this->redis->xAdd($stream, '*', ['foo' => 'bar']);

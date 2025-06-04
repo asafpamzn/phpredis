@@ -56,8 +56,8 @@ extern int execute_xrevrange_command(const void *glide_client, const char *key, 
                                      const char *end, size_t end_len, const char *start, size_t start_len,
                                      zval *options, zval *return_value);
 extern int execute_xtrim_command(const void *glide_client, const char *key, size_t key_len,
-                                 const char *strategy, size_t strategy_len, long threshold,
-                                 zval *options, long *output_value);
+                                 const char *strategy, size_t strategy_len, const char *threshold,
+                                 size_t threshold_len, zval *options, long *output_value);
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
@@ -1157,20 +1157,22 @@ PHP_METHOD(Redis, xrevrange)
 }
 /* }}} */
 
-/* {{{ proto long Redis::xtrim(string key, string strategy, int threshold [, array options]) */
+/* {{{ proto long Redis::xtrim(string key, string threshold, bool approx = false, bool minid = false, int limit = -1) */
 PHP_METHOD(Redis, xtrim)
 {
     zval *object;
     redis_object *redis;
-    char *key = NULL, *strategy = NULL;
-    size_t key_len = 0, strategy_len = 0;
-    long threshold = 0, count = 0;
+    char *key = NULL, *threshold = NULL;
+    size_t key_len = 0, threshold_len = 0;
+    zend_bool approx = 0, minid = 0;
+    zend_long limit = -1;
+    long count = 0;
     zval *z_options = NULL;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ossl|a",
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss|bbl",
                                      &object, redis_ce, &key, &key_len,
-                                     &strategy, &strategy_len, &threshold, &z_options) == FAILURE)
+                                     &threshold, &threshold_len, &approx, &minid, &limit) == FAILURE)
     {
         RETURN_FALSE;
     }
@@ -1181,9 +1183,39 @@ PHP_METHOD(Redis, xtrim)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
+        /* Determine strategy based on minid flag */
+        const char *strategy = minid ? "MINID" : "MAXLEN";
+        size_t strategy_len = minid ? sizeof("MINID") - 1 : sizeof("MAXLEN") - 1;
+
+        /* Create options array if we have approx or limit */
+        if (approx || limit >= 0)
+        {
+            z_options = emalloc(sizeof(zval));
+            array_init(z_options);
+
+            if (approx)
+            {
+                add_assoc_bool(z_options, "APPROXIMATE", 1);
+            }
+
+            if (limit >= 0)
+            {
+                add_assoc_long(z_options, "LIMIT", limit);
+            }
+        }
+
         /* Execute the XTRIM command using the Glide client */
-        if (execute_xtrim_command(redis->glide_client, key, key_len, strategy, strategy_len,
-                                  threshold, z_options, &count))
+        int result = execute_xtrim_command(redis->glide_client, key, key_len, strategy, strategy_len,
+                                           threshold, threshold_len, z_options, &count);
+
+        /* Clean up if we created options array */
+        if (z_options)
+        {
+            zval_dtor(z_options);
+            efree(z_options);
+        }
+
+        if (result)
         {
             RETURN_LONG(count);
         }

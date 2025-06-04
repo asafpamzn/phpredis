@@ -441,11 +441,11 @@ int execute_xadd_command(const void *glide_client, const char *key, size_t key_l
 
 /* Execute an XTRIM command using the Valkey Glide client */
 int execute_xtrim_command(const void *glide_client, const char *key, size_t key_len,
-                          const char *strategy, size_t strategy_len, long threshold,
-                          zval *options, long *output_value)
+                          const char *strategy, size_t strategy_len, const char *threshold,
+                          size_t threshold_len, zval *options, long *output_value)
 {
     /* Check if client and arguments are valid */
-    if (!glide_client || !key || key_len <= 0 || !strategy || strategy_len <= 0)
+    if (!glide_client || !key || key_len <= 0 || !strategy || strategy_len <= 0 || !threshold)
     {
         return 0;
     }
@@ -517,11 +517,9 @@ int execute_xtrim_command(const void *glide_client, const char *key, size_t key_
         arg_idx++;
     }
 
-    /* Add threshold value as string */
-    char threshold_str[32];
-    unsigned long threshold_str_len = snprintf(threshold_str, sizeof(threshold_str), "%ld", threshold);
-    args[arg_idx] = (uintptr_t)threshold_str;
-    args_len[arg_idx] = threshold_str_len;
+    /* Add threshold value as string - use the provided threshold directly now */
+    args[arg_idx] = (uintptr_t)threshold;
+    args_len[arg_idx] = threshold_len;
     arg_idx++;
 
     /* Add LIMIT if specified */
