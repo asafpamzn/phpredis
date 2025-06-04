@@ -396,7 +396,6 @@ int execute_xreadgroup_command(const void *glide_client, const char *group, size
                                const char *consumer, size_t consumer_len, zval *streams, zval *ids,
                                zval *options, zval *return_value)
 {
-
     /* Check if client and arguments are valid */
     if (!glide_client || !group || group_len <= 0 || !consumer || consumer_len <= 0 || !streams || !ids)
     {
@@ -581,7 +580,6 @@ int execute_xreadgroup_command(const void *glide_client, const char *group, size
 
         if (result->response)
         {
-
             /* We need to create a specific format for XREADGROUP responses:
              * [stream_name => [id1 => [field=>value, ...], id2 => [...]], ...]
              */

@@ -644,11 +644,6 @@ PHP_METHOD(Redis, xpending)
             RETURN_FALSE;
         }
     }
-    else
-    {
-        /* Fall back to the original implementation if Glide isn't available */
-        RETURN_FALSE;
-    }
 }
 /* }}} */
 
