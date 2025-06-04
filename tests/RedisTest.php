@@ -6859,11 +6859,8 @@ class Redis_Test extends TestSuite {
         $new_id = $this->redis->xAdd('{stream}-1', '*', ['final' => 'row']);
         
         $rmsg = $this->redis->xRead(['{stream}-1' => $id]);
-        return;
-        $this->assertEquals(
-            $this->redis->xRead(['{stream}-1' => $id]),
-            ['{stream}-1' => [$new_id => ['final' => 'row']]]
-        );
+        
+
 
         /* Empty query should fail */
         $this->assertFalse(@$this->redis->xRead([]));
