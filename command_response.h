@@ -23,6 +23,12 @@
 #include <string.h>
 #include <stdio.h>
 
+enum CommandResponseToZvalFlags
+{
+  COMMAND_RESPONSE_NOT_ASSOSIATIVE = 0,
+  COMMAND_RESPONSE_ASSOSIATIVE_ARRAY = 1,        // Use associative array format for Map elements
+  COMMAND_RESPONSE_STREAM_ARRAY_ASSOCIATIVE = 2, // Use associative array format for stream entries
+};
 /* No need to forward declare zval or ClientConfig as they are already defined in php.h and redis_glide.h */
 
 /*

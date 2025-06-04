@@ -355,24 +355,49 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
         ZVAL_BOOL(output, response->bool_value);
         return 1;
     case String:
-        // printf("CommandResponse is String with length: %ld\n", response->string_value_len);
+        printf("CommandResponse is String with length: %ld string = %s\n", response->string_value_len, response->string_value);
         ZVAL_STRINGL(output, response->string_value, response->string_value_len);
         return 1;
     case Array:
-        // printf("CommandResponse is Array with length: %ld\n", response->array_value_len);
+        printf("CommandResponse is Array with length: %ld, use_associative_array = %d\n", response->array_value_len, use_associative_array);
         array_init(output);
-        for (int64_t i = 0; i < response->array_value_len; i++)
+        if (response->array_value_len == 2 && use_associative_array == COMMAND_RESPONSE_STREAM_ARRAY_ASSOCIATIVE)
         {
-            zval value;
+            zval field, value;
+            printf("response->array_value[0]->command_response_type = %d, response->array_value[1]->command_response_type = %d\n",
+                   response->array_value[0].response_type, response->array_value[1].response_type);
+            command_response_to_zval(&response->array_value[0], &field, use_associative_array);
+            command_response_to_zval(&response->array_value[1], &value, use_associative_array);
 
-            command_response_to_zval(&response->array_value[i], &value, use_associative_array);
+            if (Z_TYPE(field) == IS_STRING)
+            {
+                printf("DEBUG: Adding field %s with value %s\n", Z_STRVAL(field), Z_STRVAL(value));
+                add_assoc_zval(output, Z_STRVAL(field), &value);
+                zval_dtor(&field);
+            }
+            else
+            {
+                zval_dtor(&field);
+                zval_dtor(&value);
+            }
+            php_var_dump(output, 2);
+        }
+        else
+        {
+            for (int64_t i = 0; i < response->array_value_len; i++)
+            {
 
-            add_next_index_zval(output, &value);
+                zval value;
+
+                command_response_to_zval(&response->array_value[i], &value, use_associative_array);
+
+                add_next_index_zval(output, &value);
+            }
         }
         return 1;
 #if 1
     case Map:
-        // printf("CommandResponse is Map with length: %ld\n", response->array_value_len);
+        printf("CommandResponse is Map with length: %ld\n", response->array_value_len);
         array_init(output);
         for (int i = 0; i < response->array_value_len; i++)
         {
@@ -382,7 +407,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             // Process the key
             if (element->map_key != NULL)
             {
-                command_response_to_zval(element->map_key, &key, 0);
+                command_response_to_zval(element->map_key, &key, use_associative_array);
             }
             else
             {
@@ -392,16 +417,18 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             // Process the value
             if (element->map_value != NULL)
             {
-                command_response_to_zval(element->map_value, &value, 0);
+                printf("DEBUG: Processing map value %d\n", i);
+                command_response_to_zval(element->map_value, &value, use_associative_array);
             }
             else
             {
                 ZVAL_NULL(&value);
             }
 
-            if (use_associative_array && Z_TYPE(key) == IS_STRING)
+            if (use_associative_array != COMMAND_RESPONSE_NOT_ASSOSIATIVE && Z_TYPE(key) == IS_STRING)
             {
-
+                printf("DEBUG: Adding key %s \n", Z_STRVAL(key));
+                php_var_dump(&value, 2);
                 add_assoc_zval(output, Z_STRVAL(key), &value);
                 zval_dtor(&key); // Clean up the key since we're using it as an index
             }
@@ -413,6 +440,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
                 add_next_index_zval(output, &value);
             }
         }
+        php_var_dump(output, 2);
         return 1;
 #endif
     case Sets:
@@ -467,7 +495,7 @@ int handle_array_response(CommandResult *result, zval *output)
         }
         else if (result->response->response_type == Array)
         {
-            ret_val = command_response_to_zval(result->response, output, 0);
+            ret_val = command_response_to_zval(result->response, output, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
         }
         else
         {
@@ -509,7 +537,7 @@ int handle_map_response(CommandResult *result, zval *output)
         }
         else if (result->response->response_type == Map)
         {
-            ret_val = command_response_to_zval(result->response, output, 0);
+            ret_val = command_response_to_zval(result->response, output, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
         }
         else
         {
@@ -551,7 +579,7 @@ int handle_set_response(CommandResult *result, zval *output)
         }
         else if (result->response->response_type == Sets)
         {
-            ret_val = command_response_to_zval(result->response, output, 0);
+            ret_val = command_response_to_zval(result->response, output, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
         }
         else
         {
@@ -604,8 +632,8 @@ void extract_stream_field_values(CommandResponse *response, zval *field_array)
     }
     CommandResponse *field_resp1 = &response->array_value[0];
     zval field, value;
-    command_response_to_zval(&field_resp1->array_value[0], &field, 0);
-    command_response_to_zval(&field_resp1->array_value[1], &value, 0);
+    command_response_to_zval(&field_resp1->array_value[0], &field, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+    command_response_to_zval(&field_resp1->array_value[1], &value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
     add_assoc_zval(field_array, Z_STRVAL(field), &value);
     zval_dtor(&field); // Clean up the field since we're using it as an index
 }
@@ -617,6 +645,7 @@ void extract_stream_field_values(CommandResponse *response, zval *field_array)
  */
 int command_response_to_stream_zval(CommandResponse *response, zval *output)
 {
+    printf("------------------------------------------------\n");
     if (!response)
     {
         printf("DEBUG: Response is NULL\n");
@@ -648,28 +677,31 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
 
             char *stream_id = element->map_key->string_value;
             size_t stream_id_len = element->map_key->string_value_len;
+            printf("NEW STREAM ID: %.*s\n", (int)stream_id_len, stream_id);
 
             /* Create associative array for field-value pairs */
             zval field_array;
             array_init(&field_array);
-
+            printf("DEBUG: Processing stream ID: %.*s, element->map_value->response_type = %d\n", (int)stream_id_len, stream_id, element->map_value->response_type);
             /* Process nested field-value pairs - add safety check */
             if (element->map_value->response_type == Array)
             {
-
                 /* Safe version that checks array bounds */
                 if (element->map_value->array_value_len > 0)
                 {
+                    printf("DEBUG: Processing Array response for stream ID: %.*s, array_value_len = %ld\n", (int)stream_id_len, stream_id, element->map_value->array_value_len);
                     CommandResponse *field_resp1 = &element->map_value->array_value[0];
 
-                    if (field_resp1->response_type == Array && field_resp1->array_value_len >= 2)
+                    if (field_resp1->response_type == Array && field_resp1->array_value_len == 2)
                     {
+
                         zval field, value;
-                        command_response_to_zval(&field_resp1->array_value[0], &field, 0);
-                        command_response_to_zval(&field_resp1->array_value[1], &value, 0);
+                        command_response_to_zval(&field_resp1->array_value[0], &field, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+                        command_response_to_zval(&field_resp1->array_value[1], &value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
 
                         if (Z_TYPE(field) == IS_STRING)
                         {
+                            printf("DEBUG: Adding field %s with value %s\n", Z_STRVAL(field), Z_STRVAL(value));
                             add_assoc_zval(&field_array, Z_STRVAL(field), &value);
                             zval_dtor(&field);
                         }
@@ -680,11 +712,24 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
                         }
                     }
                 }
+                /* Add the stream entry to the output array */
+                add_assoc_zval_ex(output, stream_id, stream_id_len, &field_array);
             }
-
-            /* Add the stream entry to the output array */
-            add_assoc_zval_ex(output, stream_id, stream_id_len, &field_array);
+            else if (element->map_value->response_type == Map)
+            {
+                CommandResponse *map = element->map_value;
+                printf("DEBUG: Processing Map response for stream ID: %.*s, map->array_value_len = %ld\n", (int)stream_id_len, stream_id, map->array_value_len);
+                printf("DEBUG: Map response type = %d\n", map->response_type);
+                zval output1;
+                command_response_to_zval(map, &output1, COMMAND_RESPONSE_STREAM_ARRAY_ASSOCIATIVE);
+                add_assoc_zval_ex(output, stream_id, stream_id_len, &output1);
+            }
+            else
+            {
+                printf("DEBUG: Unexpected response type for stream fields: %d\n", element->map_value->response_type);
+            }
         }
+
         break;
 
     default:
@@ -706,7 +751,7 @@ int process_zrange_response(CommandResult *result, zval *return_value, int has_w
         return 0;
     }
 
-    int res = command_response_to_zval(result->response, return_value, has_withscores ? 1 : 0);
+    int res = command_response_to_zval(result->response, return_value, has_withscores ? COMMAND_RESPONSE_ASSOSIATIVE_ARRAY : COMMAND_RESPONSE_NOT_ASSOSIATIVE);
 
     free_command_result(result);
     return res;

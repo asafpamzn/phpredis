@@ -372,7 +372,7 @@ int execute_geosearch_command(const void *glide_client, const char *key, size_t 
         else
         {
             /* Simple array of member names */
-            ret_val = command_response_to_zval(result->response, return_value, 0);
+            ret_val = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
         }
     }
 

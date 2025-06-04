@@ -429,7 +429,7 @@ int execute_spop_command(const void *glide_client, const char *key, size_t key_l
         if (result->response)
         {
             /* SPOP returns a string (one element) or array (multiple elements) */
-            status = command_response_to_zval(result->response, return_value, 0);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
             free_command_result(result);
             return status;
         }
@@ -503,7 +503,7 @@ int execute_srandmember_command(const void *glide_client, const char *key, size_
         if (result->response)
         {
             /* SRANDMEMBER returns a string (one element) or array (multiple elements) */
-            status = command_response_to_zval(result->response, return_value, 0);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
             free_command_result(result);
             return status;
         }
@@ -680,7 +680,7 @@ int execute_smismember_command(const void *glide_client, const char *key, size_t
         if (result->response)
         {
             /* SMISMEMBER returns an array of 0/1 integers */
-            status = command_response_to_zval(result->response, return_value, 0);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
             free_command_result(result);
             return status;
         }

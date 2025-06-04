@@ -440,7 +440,7 @@ int execute_hincrbyfloat_command(const void *glide_client, const char *key, size
     }
 
     /* Process the result (a string representing a double) */
-    int ret_val = command_response_to_zval(result->response, output_value, 0);
+    int ret_val = command_response_to_zval(result->response, output_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
 
     /* Free the result */
     free_command_result(result);
@@ -1481,7 +1481,7 @@ int execute_hgetall_command(const void *glide_client, const char *key, size_t ke
 
     /* Process the result (array of field/value pairs) */
 
-    int ret_val = command_response_to_zval(result->response, return_value, 1);
+    int ret_val = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
 
     /* Free the result */
     free_command_result(result);

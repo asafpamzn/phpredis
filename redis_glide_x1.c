@@ -429,7 +429,7 @@ int execute_xadd_command(const void *glide_client, const char *key, size_t key_l
         if (result->response)
         {
             /* XADD returns the ID string, convert to proper output */
-            status = command_response_to_zval(result->response, return_value, 0);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
             free_command_result(result);
             return status;
         }

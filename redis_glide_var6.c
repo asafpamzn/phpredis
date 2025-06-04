@@ -396,7 +396,7 @@ int execute_bzpopmax_command(const void *glide_client, zval *keys, int keys_coun
                 {
 
                     /* Convert the response array to PHP array */
-                    status = command_response_to_zval(result->response, return_value, 0);
+                    status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
 
                     /* Get the score element (should be index 2) */
                     zval *score = NULL;
@@ -416,7 +416,7 @@ int execute_bzpopmax_command(const void *glide_client, zval *keys, int keys_coun
                 else
                 {
                     /* Regular array conversion */
-                    status = command_response_to_zval(result->response, return_value, 0);
+                    status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
                 }
             }
         }
@@ -523,7 +523,7 @@ int execute_bzpopmin_command(const void *glide_client, zval *keys, int keys_coun
                 {
 
                     /* Convert the response array to PHP array */
-                    status = command_response_to_zval(result->response, return_value, 0);
+                    status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
 
                     /* Get the score element (should be index 2) */
                     zval *score = NULL;
@@ -543,7 +543,7 @@ int execute_bzpopmin_command(const void *glide_client, zval *keys, int keys_coun
                 else
                 {
                     /* Regular array conversion */
-                    status = command_response_to_zval(result->response, return_value, 0);
+                    status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
                 }
             }
         }

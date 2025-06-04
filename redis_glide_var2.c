@@ -513,7 +513,7 @@ int execute_role_command(const void *glide_client, zval *return_value)
     if (result->response)
     {
         /* Convert response to PHP array */
-        ret_val = command_response_to_zval(result->response, return_value, 0);
+        ret_val = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
     }
 
     /* Free the result */

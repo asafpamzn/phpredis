@@ -155,7 +155,7 @@ int execute_xautoclaim_command(const void *glide_client, const char *key, size_t
         if (result->response)
         {
             /* XAUTOCLAIM returns array with [next-id, claimed-entries] */
-            status = command_response_to_zval(result->response, return_value, 0);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
             free_command_result(result);
             return status;
         }
@@ -366,7 +366,7 @@ int execute_xclaim_command(const void *glide_client, const char *key, size_t key
         if (result->response)
         {
             /* XCLAIM returns the claimed entries */
-            status = command_response_to_zval(result->response, return_value, 0);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
             free_command_result(result);
             return status;
         }
@@ -451,7 +451,7 @@ int execute_xgroup_command(const void *glide_client, const char *subcommand, siz
         if (result->response)
         {
             /* XGROUP response depends on subcommand */
-            status = command_response_to_zval(result->response, return_value, 0);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
             free_command_result(result);
             return status;
         }
@@ -540,7 +540,7 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
         if (result->response)
         {
             /* XINFO returns information about the stream or consumers */
-            status = command_response_to_zval(result->response, return_value, 1);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
             free_command_result(result);
             return status;
         }
