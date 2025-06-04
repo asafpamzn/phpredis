@@ -6836,21 +6836,21 @@ class Redis_Test extends TestSuite {
 
         /* Everything from both streams */
         $rmsg = $this->redis->xRead($qzero);
-        var_dump($rmsg);
+        
         
         $this->assertEquals($rmsg, $qresult);
 
         /* Test COUNT option */
         for ($count = 1; $count <= 2; $count++) {
             $rmsg = $this->redis->xRead($qzero, $count);
-            var_dump($rmsg);
+            
             
             foreach ($keys as $key) {
                 $this->assertEquals(count($rmsg[$key]), $count);
             }
         }
         $out = $this->redis->xRead($qnew);
-        var_dump($out);
+        
         /* Should be empty (no new entries) */
         $this->assertEquals(count($out),0);
         
@@ -6870,12 +6870,8 @@ class Redis_Test extends TestSuite {
         if ( ! $this->minVersionCheck('5.0'))
             $this->markTestSkipped();
 
-        foreach ($this->getSerializers() as $serializer) {
-            $this->redis->setOption(Redis::OPT_SERIALIZER, $serializer);
-            $this->doXReadTest();
-            return;
-        }
-
+        $this->doXReadTest();
+        
         /* Don't need to test BLOCK multiple times */
         $m1 = round(microtime(true)*1000);
         $this->redis->xRead(['somestream' => '$'], -1, 100);

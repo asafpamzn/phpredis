@@ -369,9 +369,9 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             command_response_to_zval(&response->array_value[0], &field, use_associative_array);
             command_response_to_zval(&response->array_value[1], &value, use_associative_array);
             // printf("%s:%d - DEBUG: Adding field \n", __FILE__, __LINE__);
-            php_var_dump(&field, 2);
+            // php_var_dump(&field, 2);
             // printf("%s:%d - DEBUG: Adding value \n", __FILE__, __LINE__);
-            php_var_dump(&value, 2);
+            // php_var_dump(&value, 2);
 
             if (Z_TYPE(field) == IS_STRING)
             {
@@ -417,7 +417,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
                 zval_dtor(&field);
                 zval_dtor(&value);
             }
-            php_var_dump(output, 2);
+            // php_var_dump(output, 2);
         }
         else
         {
@@ -428,11 +428,11 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
 
                 command_response_to_zval(&response->array_value[i], &value, use_associative_array);
                 // printf("%s:%d - DEBUG: Adding array value %d\n", __FILE__, __LINE__, i);
-                php_var_dump(&value, 2); // No need to modify this as it's not printf
+                // php_var_dump(&value, 2); // No need to modify this as it's not printf
 
                 add_next_index_zval(output, &value);
                 // printf("%s:%d - DEBUG: Added array value %d\n", __FILE__, __LINE__, i);
-                php_var_dump(output, 2); // No need to modify this as it's not printf
+                // php_var_dump(output, 2); // No need to modify this as it's not printf
             }
         }
         // printf("%s:%d - DEBUG: Finished processing array response\n", __FILE__, __LINE__);
@@ -471,7 +471,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             if (use_associative_array != COMMAND_RESPONSE_NOT_ASSOSIATIVE && Z_TYPE(key) == IS_STRING)
             {
                 // printf("%s:%d - DEBUG: Adding key %s \n", __FILE__, __LINE__, Z_STRVAL(key));
-                php_var_dump(&value, 2); // No need to modify this as it's not printf
+                // php_var_dump(&value, 2); // No need to modify this as it's not printf
                 add_assoc_zval(output, Z_STRVAL(key), &value);
                 zval_dtor(&key); // Clean up the key since we're using it as an index
             }
@@ -483,7 +483,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
                 add_next_index_zval(output, &value);
             }
         }
-        php_var_dump(output, 2); // No need to modify this as it's not printf
+        // php_var_dump(output, 2); // No need to modify this as it's not printf
         return 1;
 #endif
     case Sets:
