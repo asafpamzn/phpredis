@@ -59,12 +59,30 @@ int execute_xautoclaim_command(const void *glide_client, const char *key, size_t
             }
         }
 
-        /* Check for JUSTID option */
+        /* Check for JUSTID option - first check associative key */
         if ((z_justid = zend_hash_str_find(ht, "JUSTID", sizeof("JUSTID") - 1)) != NULL)
         {
             has_justid = zval_is_true(z_justid);
             if (has_justid)
                 extra_args += 1; /* JUSTID */
+        }
+        /* If not found as associative key, check array values */
+        else
+        {
+            zval *z_val;
+            ZEND_HASH_FOREACH_VAL(ht, z_val)
+            {
+                if (Z_TYPE_P(z_val) == IS_STRING)
+                {
+                    if (Z_STRLEN_P(z_val) == 6 && strcasecmp(Z_STRVAL_P(z_val), "JUSTID") == 0)
+                    {
+                        has_justid = 1;
+                        extra_args += 1; /* JUSTID */
+                        break;
+                    }
+                }
+            }
+            ZEND_HASH_FOREACH_END();
         }
     }
 
@@ -189,6 +207,7 @@ int execute_xclaim_command(const void *glide_client, const char *key, size_t key
     {
         HashTable *ht = Z_ARRVAL_P(options);
         zval *z_idle, *z_time, *z_retry, *z_force, *z_justid;
+        php_var_dump(options, 2);
 
         /* Check for IDLE option */
         if ((z_idle = zend_hash_str_find(ht, "IDLE", sizeof("IDLE") - 1)) != NULL)
@@ -226,20 +245,58 @@ int execute_xclaim_command(const void *glide_client, const char *key, size_t key
             }
         }
 
-        /* Check for FORCE option */
+        /* Check for FORCE option - first check associative key */
+        printf("DEBUG: Checking FORCE option\n");
         if ((z_force = zend_hash_str_find(ht, "FORCE", sizeof("FORCE") - 1)) != NULL)
         {
+            printf("DEBUG: Found FORCE option\n");
             has_force = zval_is_true(z_force);
             if (has_force)
                 extra_args += 1; /* FORCE */
         }
+        /* If not found as associative key, check array values */
+        else
+        {
+            zval *z_val;
+            ZEND_HASH_FOREACH_VAL(ht, z_val)
+            {
+                if (Z_TYPE_P(z_val) == IS_STRING)
+                {
+                    if (Z_STRLEN_P(z_val) == 5 && strcasecmp(Z_STRVAL_P(z_val), "FORCE") == 0)
+                    {
+                        has_force = 1;
+                        extra_args += 1; /* FORCE */
+                        break;
+                    }
+                }
+            }
+            ZEND_HASH_FOREACH_END();
+        }
 
-        /* Check for JUSTID option */
+        /* Check for JUSTID option - first check associative key */
         if ((z_justid = zend_hash_str_find(ht, "JUSTID", sizeof("JUSTID") - 1)) != NULL)
         {
             has_justid = zval_is_true(z_justid);
             if (has_justid)
                 extra_args += 1; /* JUSTID */
+        }
+        /* If not found as associative key, check array values */
+        else
+        {
+            zval *z_val;
+            ZEND_HASH_FOREACH_VAL(ht, z_val)
+            {
+                if (Z_TYPE_P(z_val) == IS_STRING)
+                {
+                    if (Z_STRLEN_P(z_val) == 6 && strcasecmp(Z_STRVAL_P(z_val), "JUSTID") == 0)
+                    {
+                        has_justid = 1;
+                        extra_args += 1; /* JUSTID */
+                        break;
+                    }
+                }
+            }
+            ZEND_HASH_FOREACH_END();
         }
     }
 
