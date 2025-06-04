@@ -620,17 +620,48 @@ PHP_METHOD(Redis, xpending)
     size_t start_len = 0, end_len = 0, consumer_len = 0;
     zend_long count = 0;
     zend_bool options_created = 0;
+    int argc = ZEND_NUM_ARGS();
 
-    /* Parse parameters with a single call for all possible formats:
-     * - key, group, options_array
-     * - key, group, start, end, count, [consumer]
-     */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss|a/sslz",
-                                     &object, redis_ce, &key, &key_len,
-                                     &group, &group_len, &z_options,
-                                     &start, &start_len, &end, &end_len,
-                                     &count, &consumer, &consumer_len) == FAILURE)
+    /* Handle different parameter formats based on argument count */
+    if (argc == 3 || argc == 2)
     {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+        /* Format: xpending(key, group, options_array) */
+        if (zend_parse_method_parameters(argc, getThis(), "Oss|a",
+                                         &object, redis_ce, &key, &key_len,
+                                         &group, &group_len, &z_options) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+    }
+    else if (argc == 5)
+    {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+        /* Format: xpending(key, group, start, end, count) */
+        if (zend_parse_method_parameters(argc, getThis(), "Osssl",
+                                         &object, redis_ce, &key, &key_len,
+                                         &group, &group_len, &start, &start_len,
+                                         &end, &end_len, &count) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+    }
+    else if (argc == 6)
+    {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+        /* Format: xpending(key, group, start, end, count, consumer) */
+        if (zend_parse_method_parameters(argc, getThis(), "Ossssls",
+                                         &object, redis_ce, &key, &key_len,
+                                         &group, &group_len, &start, &start_len,
+                                         &end, &end_len, &count, &consumer, &consumer_len) == FAILURE)
+        {
+            RETURN_FALSE;
+        }
+    }
+    else
+    {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+        /* Invalid number of arguments */
         RETURN_FALSE;
     }
 
@@ -658,7 +689,7 @@ PHP_METHOD(Redis, xpending)
                 add_assoc_stringl(z_options, "CONSUMER", consumer, consumer_len);
             }
         }
-
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         /* Execute the XPENDING command using the Glide client */
         int result = execute_xpending_command(redis->glide_client, key, key_len,
                                               group, group_len, z_options, return_value);
@@ -679,6 +710,11 @@ PHP_METHOD(Redis, xpending)
         {
             RETURN_FALSE;
         }
+    }
+    else
+    {
+        /* Fall back to the original implementation if Glide isn't available */
+        RETURN_FALSE;
     }
 }
 /* }}} */
