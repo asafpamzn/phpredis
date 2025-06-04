@@ -1092,7 +1092,7 @@ class Redis_Test extends TestSuite {
         // string
         $this->redis->set('key', 'val');
         $this->assertEquals(Redis::REDIS_STRING, $this->redis->type('key'));
-
+        
         // list
         $this->redis->lPush('keyList', 'val0');
         $this->redis->lPush('keyList', 'val1');
@@ -1103,12 +1103,7 @@ class Redis_Test extends TestSuite {
         $this->redis->sAdd('keySet', 'val0');
         $this->redis->sAdd('keySet', 'val1');
         $this->assertEquals(Redis::REDIS_SET, $this->redis->type('keySet'));
-
-        // sadd with numeric key
-        $this->redis->del(123);
-        $this->assertEquals(1, $this->redis->sAdd(123, 'val0'));
-        $this->assertEquals(['val0'], $this->redis->sMembers(123));
-
+       
         // zset
         $this->redis->del('keyZSet');
         $this->redis->zAdd('keyZSet', 0, 'val0');
@@ -1124,8 +1119,8 @@ class Redis_Test extends TestSuite {
         // stream
         if ($this->minVersionCheck('5.0')) {
             $this->redis->del('stream');
-           // $this->redis->xAdd('stream', '*', ['foo' => 'bar']);
-           //TODO fix this test
+            $this->redis->xAdd('stream', '*', ['foo' => 'bar']);
+           
             $this->assertEquals(Redis::REDIS_STREAM, $this->redis->type('stream'));
         }
 

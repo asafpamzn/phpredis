@@ -57,31 +57,32 @@ int execute_type_command(const void *glide_client, const char *key, size_t key_l
     /* If we have a valid string response, map it to the appropriate constant */
     if (ret == 1 && type_str != NULL)
     {
-        if (strcmp(type_str, "string") == 0)
+
+        if (strncmp(type_str, "string", 6) == 0)
         {
             *result = 1; /* REDIS_STRING */
         }
-        else if (strcmp(type_str, "list") == 0)
+        else if (strncmp(type_str, "list", 4) == 0)
         {
             *result = 3; /* REDIS_LIST */
         }
-        else if (strcmp(type_str, "set") == 0)
+        else if (strncmp(type_str, "set", 3) == 0)
         {
             *result = 2; /* REDIS_SET */
         }
-        else if (strcmp(type_str, "zset") == 0)
+        else if (strncmp(type_str, "zset", 4) == 0)
         {
             *result = 4; /* REDIS_ZSET */
         }
-        else if (strcmp(type_str, "hash") == 0)
+        else if (strncmp(type_str, "hash", 4) == 0)
         {
             *result = 5; /* REDIS_HASH */
         }
-        else if (strcmp(type_str, "stream") == 0)
+        else if (strncmp(type_str, "stream", 6) == 0)
         {
             *result = 6; /* REDIS_STREAM */
         }
-        else if (strcmp(type_str, "none") == 0)
+        else if (strncmp(type_str, "none", 4) == 0)
         {
             *result = 0; /* REDIS_NOT_FOUND */
         }
