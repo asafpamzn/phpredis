@@ -942,9 +942,13 @@ PHP_METHOD(Redis, xreadgroup)
         zval *stream_id;
         ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(z_streams_and_ids), stream_key, stream_id)
         {
-            if (stream_key && Z_TYPE_P(stream_id) == IS_STRING)
+            if (stream_key)
             {
                 add_next_index_str(&z_streams, zend_string_copy(stream_key));
+                if (Z_TYPE_P(stream_id) != IS_STRING)
+                {
+                    convert_to_string(stream_id);
+                }
                 add_next_index_str(&z_ids, zend_string_copy(Z_STR_P(stream_id)));
             }
         }

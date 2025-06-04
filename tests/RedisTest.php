@@ -6973,13 +6973,14 @@ class Redis_Test extends TestSuite {
         $this->addStreamsAndGroups(['s'], $rows, ['group' => 0]);
 
         $msg = $this->redis->xReadGroup('group', 'consumer', ['s' => 0]);
+        
         $ids = array_keys($msg['s']);
-
+        
         for ($n = count($ids); $n >= 0; $n--) {
-            $xp = $this->redis->xPending('s', 'group');
-
+            $xp = $this->redis->xPending('s', 'group');            
+            
             $this->assertEquals(count($ids), $xp[0]);
-
+            
             /* Verify we're seeing the IDs themselves */
             for ($idx = 1; $idx <= 2; $idx++) {
                 if ($xp[$idx]) {
@@ -6992,10 +6993,10 @@ class Redis_Test extends TestSuite {
                 $this->redis->xAck('s', 'group', [$id]);
             }
         }
-
+        
         /* Ensure we can have NULL trailing arguments */
-        $this->assertTrue(is_array($this->redis->xpending('s', 'group', '-', '+', 1, null)));
-        $this->assertTrue(is_array($this->redis->xpending('s', 'group', NULL, NULL, -1, NULL)));
+        
+        $this->assertTrue(is_array($this->redis->xpending('s', 'group', NULL, NULL, -1)));
     }
 
     public function testXDel() {

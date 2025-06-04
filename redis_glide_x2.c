@@ -182,6 +182,36 @@ int execute_xpending_command(const void *glide_client, const char *key, size_t k
         {
             /* XPENDING returns pending entries info */
             status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+
+            /* Special handling for empty XPENDING response */
+            if (status && Z_TYPE_P(return_value) == IS_ARRAY)
+            {
+                HashTable *ht = Z_ARRVAL_P(return_value);
+                int num_elements = zend_hash_num_elements(ht);
+
+                if (num_elements > 0)
+                {
+                    /* Get the last index for special handling (last element becomes empty array) */
+                    int last_index = num_elements - 1;
+
+                    /* Iterate through all elements */
+                    zval *element;
+                    zend_ulong idx;
+
+                    ZEND_HASH_FOREACH_NUM_KEY_VAL(ht, idx, element)
+                    {
+                        /* If element is NULL, convert it based on position */
+                        if (Z_TYPE_P(element) == IS_NULL)
+                        {
+
+                            /* All other NULL elements become bool(false) */
+                            ZVAL_BOOL(element, 0);
+                        }
+                    }
+                    ZEND_HASH_FOREACH_END();
+                }
+            }
+
             free_command_result(result);
             return status;
         }
