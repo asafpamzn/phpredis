@@ -59,7 +59,7 @@ long handle_int_response(CommandResult *result, long *output_value)
     /* Check if there was an error */
     if (result->command_error)
     {
-        printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
+        // printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
         free_command_result(result);
         return 0; /* False - failure */
     }
@@ -75,7 +75,7 @@ long handle_int_response(CommandResult *result, long *output_value)
     }
     else
     {
-        printf("%s:%d - Unexpected response type for integer command\n", __FILE__, __LINE__);
+        // printf("%s:%d - Unexpected response type for integer command\n", __FILE__, __LINE__);
         assert(0); /* This should never happen */
     }
 
@@ -96,7 +96,7 @@ int handle_string_response(CommandResult *result, char **output, size_t *output_
     /* Check if there was an error */
     if (result->command_error)
     {
-        printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
+        // printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
         free_command_result(result);
         return -1;
     }
@@ -169,7 +169,7 @@ int handle_bool_response(CommandResult *result)
     /* Check if there was an error */
     if (result->command_error)
     {
-        printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
+        // printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
         free_command_result(result);
         return -1;
     }
@@ -199,7 +199,7 @@ int handle_ok_response(CommandResult *result)
     /* Check if there was an error */
     if (result->command_error)
     {
-        printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
+        // printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
         free_command_result(result);
         return -1;
     }
@@ -229,7 +229,7 @@ int handle_null_or_string_response(CommandResult *result, char **output, size_t 
     /* Check if there was an error */
     if (result->command_error)
     {
-        printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
+        // printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
         free_command_result(result);
         return -1;
     }
@@ -302,7 +302,7 @@ int handle_double_response(CommandResult *result, double *output)
     /* Check if there was an error */
     if (result->command_error)
     {
-        printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
+        // printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
         free_command_result(result);
         return -1;
     }
@@ -348,34 +348,34 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
     case Float:
         // printf("%s:%d - CommandResponse is Float: %f\n", __FILE__, __LINE__, response->float_value);
         ZVAL_DOUBLE(output, response->float_value);
-        //  printf("%s:%d - Converted CommandResponse to double: %f\n", __FILE__, __LINE__, Z_DVAL_P(output));
+        ////printf("%s:%d - Converted CommandResponse to double: %f\n", __FILE__, __LINE__, Z_DVAL_P(output));
         return 1;
     case Bool:
-        //  printf("%s:%d - CommandResponse is Bool: %d\n", __FILE__, __LINE__, response->bool_value);
+        ////printf("%s:%d - CommandResponse is Bool: %d\n", __FILE__, __LINE__, response->bool_value);
         ZVAL_BOOL(output, response->bool_value);
         return 1;
     case String:
-        printf("%s:%d - CommandResponse is String with length: %ld string = %s\n", __FILE__, __LINE__, response->string_value_len, response->string_value);
+        // printf("%s:%d - CommandResponse is String with length: %ld string = %s\n", __FILE__, __LINE__, response->string_value_len, response->string_value);
         ZVAL_STRINGL(output, response->string_value, response->string_value_len);
         return 1;
     case Array:
-        printf("%s:%d - CommandResponse is Array with length: %ld, use_associative_array = %d\n", __FILE__, __LINE__, response->array_value_len, use_associative_array);
+        // printf("%s:%d - CommandResponse is Array with length: %ld, use_associative_array = %d\n", __FILE__, __LINE__, response->array_value_len, use_associative_array);
         array_init(output);
         if (response->array_value_len == 2 && use_associative_array == COMMAND_RESPONSE_STREAM_ARRAY_ASSOCIATIVE)
         {
             zval field, value;
-            printf("%s:%d - response->array_value[0]->command_response_type = %d, response->array_value[1]->command_response_type = %d\n",
-                   __FILE__, __LINE__, response->array_value[0].response_type, response->array_value[1].response_type);
+            // printf("%s:%d - response->array_value[0]->command_response_type = %d, response->array_value[1]->command_response_type = %d\n",
+            //  __FILE__, __LINE__, response->array_value[0].response_type, response->array_value[1].response_type);
             command_response_to_zval(&response->array_value[0], &field, use_associative_array);
             command_response_to_zval(&response->array_value[1], &value, use_associative_array);
-            printf("%s:%d - DEBUG: Adding field \n", __FILE__, __LINE__);
+            // printf("%s:%d - DEBUG: Adding field \n", __FILE__, __LINE__);
             php_var_dump(&field, 2);
-            printf("%s:%d - DEBUG: Adding value \n", __FILE__, __LINE__);
+            // printf("%s:%d - DEBUG: Adding value \n", __FILE__, __LINE__);
             php_var_dump(&value, 2);
 
             if (Z_TYPE(field) == IS_STRING)
             {
-                printf("%s:%d - DEBUG: Adding field %s with value %s\n", __FILE__, __LINE__, Z_STRVAL(field), Z_STRVAL(value));
+                // printf("%s:%d - DEBUG: Adding field %s with value %s\n", __FILE__, __LINE__, Z_STRVAL(field), Z_STRVAL(value));
                 add_assoc_zval(output, Z_STRVAL(field), &value);
                 zval_dtor(&field);
             }
@@ -427,19 +427,19 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
                 zval value;
 
                 command_response_to_zval(&response->array_value[i], &value, use_associative_array);
-                printf("%s:%d - DEBUG: Adding array value %d\n", __FILE__, __LINE__, i);
+                // printf("%s:%d - DEBUG: Adding array value %d\n", __FILE__, __LINE__, i);
                 php_var_dump(&value, 2); // No need to modify this as it's not printf
 
                 add_next_index_zval(output, &value);
-                printf("%s:%d - DEBUG: Added array value %d\n", __FILE__, __LINE__, i);
+                // printf("%s:%d - DEBUG: Added array value %d\n", __FILE__, __LINE__, i);
                 php_var_dump(output, 2); // No need to modify this as it's not printf
             }
         }
-        printf("%s:%d - DEBUG: Finished processing array response\n", __FILE__, __LINE__);
+        // printf("%s:%d - DEBUG: Finished processing array response\n", __FILE__, __LINE__);
         return 1;
 #if 1
     case Map:
-        printf("%s:%d - CommandResponse is Map with length: %ld\n", __FILE__, __LINE__, response->array_value_len);
+        // printf("%s:%d - CommandResponse is Map with length: %ld\n", __FILE__, __LINE__, response->array_value_len);
         array_init(output);
         for (int i = 0; i < response->array_value_len; i++)
         {
@@ -459,9 +459,9 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             // Process the value
             if (element->map_value != NULL)
             {
-                printf("%s:%d - DEBUG: Processing map value %d\n", __FILE__, __LINE__, i);
+                // printf("%s:%d - DEBUG: Processing map value %d\n", __FILE__, __LINE__, i);
                 command_response_to_zval(element->map_value, &value, use_associative_array);
-                printf("%s:%d - DEBUG: Map value %d processed\n", __FILE__, __LINE__, i);
+                // printf("%s:%d - DEBUG: Map value %d processed\n", __FILE__, __LINE__, i);
             }
             else
             {
@@ -470,7 +470,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
 
             if (use_associative_array != COMMAND_RESPONSE_NOT_ASSOSIATIVE && Z_TYPE(key) == IS_STRING)
             {
-                printf("%s:%d - DEBUG: Adding key %s \n", __FILE__, __LINE__, Z_STRVAL(key));
+                // printf("%s:%d - DEBUG: Adding key %s \n", __FILE__, __LINE__, Z_STRVAL(key));
                 php_var_dump(&value, 2); // No need to modify this as it's not printf
                 add_assoc_zval(output, Z_STRVAL(key), &value);
                 zval_dtor(&key); // Clean up the key since we're using it as an index
@@ -522,7 +522,7 @@ int handle_array_response(CommandResult *result, zval *output)
     /* Check if there was an error */
     if (result->command_error)
     {
-        printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
+        // printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
         free_command_result(result);
         return -1;
     }
@@ -564,7 +564,7 @@ int handle_map_response(CommandResult *result, zval *output)
     /* Check if there was an error */
     if (result->command_error)
     {
-        printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
+        // printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
         free_command_result(result);
         return -1;
     }
@@ -606,7 +606,7 @@ int handle_set_response(CommandResult *result, zval *output)
     /* Check if there was an error */
     if (result->command_error)
     {
-        printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
+        // printf("%s:%d - Error executing command: %s\n", __FILE__, __LINE__, result->command_error->command_error_message);
         free_command_result(result);
         return -1;
     }
@@ -688,10 +688,10 @@ void extract_stream_field_values(CommandResponse *response, zval *field_array)
  */
 int command_response_to_stream_zval(CommandResponse *response, zval *output)
 {
-    printf("%s:%d - ------------------------------------------------\n", __FILE__, __LINE__);
+    // printf("%s:%d - ------------------------------------------------\n", __FILE__, __LINE__);
     if (!response)
     {
-        printf("%s:%d - DEBUG: Response is NULL\n", __FILE__, __LINE__);
+        // printf("%s:%d - DEBUG: Response is NULL\n", __FILE__, __LINE__);
         ZVAL_NULL(output);
         return 0;
     }
@@ -720,19 +720,19 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
 
             char *stream_id = element->map_key->string_value;
             size_t stream_id_len = element->map_key->string_value_len;
-            printf("%s:%d - NEW STREAM ID: %.*s\n", __FILE__, __LINE__, (int)stream_id_len, stream_id);
+            // printf("%s:%d - NEW STREAM ID: %.*s\n", __FILE__, __LINE__, (int)stream_id_len, stream_id);
 
             /* Create associative array for field-value pairs */
             zval field_array;
             array_init(&field_array);
-            printf("%s:%d - DEBUG: Processing stream ID: %.*s, element->map_value->response_type = %d\n", __FILE__, __LINE__, (int)stream_id_len, stream_id, element->map_value->response_type);
+            // printf("%s:%d - DEBUG: Processing stream ID: %.*s, element->map_value->response_type = %d\n", __FILE__, __LINE__, (int)stream_id_len, stream_id, element->map_value->response_type);
             /* Process nested field-value pairs - add safety check */
             if (element->map_value->response_type == Array)
             {
                 /* Safe version that checks array bounds */
                 if (element->map_value->array_value_len > 0)
                 {
-                    printf("%s:%d - DEBUG: Processing Array response for stream ID: %.*s, array_value_len = %ld\n", __FILE__, __LINE__, (int)stream_id_len, stream_id, element->map_value->array_value_len);
+                    // printf("%s:%d - DEBUG: Processing Array response for stream ID: %.*s, array_value_len = %ld\n", __FILE__, __LINE__, (int)stream_id_len, stream_id, element->map_value->array_value_len);
                     CommandResponse *field_resp1 = &element->map_value->array_value[0];
 
                     if (field_resp1->response_type == Array && field_resp1->array_value_len == 2)
@@ -744,7 +744,7 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
 
                         if (Z_TYPE(field) == IS_STRING)
                         {
-                            printf("%s:%d - DEBUG: Adding field %s with value %s\n", __FILE__, __LINE__, Z_STRVAL(field), Z_STRVAL(value));
+                            // printf("%s:%d - DEBUG: Adding field %s with value %s\n", __FILE__, __LINE__, Z_STRVAL(field), Z_STRVAL(value));
                             add_assoc_zval(&field_array, Z_STRVAL(field), &value);
                             zval_dtor(&field);
                         }
@@ -761,21 +761,21 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
             else if (element->map_value->response_type == Map)
             {
                 CommandResponse *map = element->map_value;
-                printf("%s:%d - DEBUG: Processing Map response for stream ID: %.*s, map->array_value_len = %ld\n", __FILE__, __LINE__, (int)stream_id_len, stream_id, map->array_value_len);
-                printf("%s:%d - DEBUG: Map response type = %d\n", __FILE__, __LINE__, map->response_type);
+                // printf("%s:%d - DEBUG: Processing Map response for stream ID: %.*s, map->array_value_len = %ld\n", __FILE__, __LINE__, (int)stream_id_len, stream_id, map->array_value_len);
+                // printf("%s:%d - DEBUG: Map response type = %d\n", __FILE__, __LINE__, map->response_type);
                 zval output1;
                 command_response_to_zval(map, &output1, COMMAND_RESPONSE_STREAM_ARRAY_ASSOCIATIVE);
                 add_assoc_zval_ex(output, stream_id, stream_id_len, &output1);
             }
             else
             {
-                printf("%s:%d - DEBUG: Unexpected response type for stream fields: %d\n", __FILE__, __LINE__, element->map_value->response_type);
+                // printf("%s:%d - DEBUG: Unexpected response type for stream fields: %d\n", __FILE__, __LINE__, element->map_value->response_type);
             }
         }
         break;
     case Null:
         /* If the response is Null, set output to NULL */
-        printf("%s:%d - DEBUG: Response is Null\n", __FILE__, __LINE__);
+        // printf("%s:%d - DEBUG: Response is Null\n", __FILE__, __LINE__);
         array_init(output);
         break;
 
