@@ -643,7 +643,7 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
         if (has_full)
             arg_count++;
         if (has_count)
-            arg_count++;
+            arg_count += 2; /* Need two slots: one for "COUNT" and one for the count value */
 
         uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
         unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
@@ -675,6 +675,12 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
         /* Add count if needed */
         if (has_count)
         {
+            /* First add the "COUNT" keyword */
+            cmd_args[arg_idx] = (uintptr_t)"COUNT";
+            args_len[arg_idx] = sizeof("COUNT") - 1;
+            arg_idx++;
+
+            /* Then add the count value */
             char count_str[32];
             size_t count_str_len = snprintf(count_str, sizeof(count_str), "%ld", count_value);
 
