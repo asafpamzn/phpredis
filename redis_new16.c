@@ -625,7 +625,7 @@ PHP_METHOD(Redis, xpending)
     /* Handle different parameter formats based on argument count */
     if (argc == 3 || argc == 2)
     {
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+        // printf("file = %s, line = %d\n", __FILE__, __LINE__);
         /* Format: xpending(key, group, options_array) */
         if (zend_parse_method_parameters(argc, getThis(), "Oss|a",
                                          &object, redis_ce, &key, &key_len,
@@ -636,7 +636,7 @@ PHP_METHOD(Redis, xpending)
     }
     else if (argc == 5)
     {
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+        // printf("file = %s, line = %d\n", __FILE__, __LINE__);
         /* Format: xpending(key, group, start, end, count) */
         if (zend_parse_method_parameters(argc, getThis(), "Osssl",
                                          &object, redis_ce, &key, &key_len,
@@ -648,7 +648,7 @@ PHP_METHOD(Redis, xpending)
     }
     else if (argc == 6)
     {
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+        // printf("file = %s, line = %d\n", __FILE__, __LINE__);
         /* Format: xpending(key, group, start, end, count, consumer) */
         if (zend_parse_method_parameters(argc, getThis(), "Ossssls",
                                          &object, redis_ce, &key, &key_len,
@@ -660,7 +660,7 @@ PHP_METHOD(Redis, xpending)
     }
     else
     {
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+        // printf("file = %s, line = %d\n", __FILE__, __LINE__);
         /* Invalid number of arguments */
         RETURN_FALSE;
     }
@@ -689,7 +689,7 @@ PHP_METHOD(Redis, xpending)
                 add_assoc_stringl(z_options, "CONSUMER", consumer, consumer_len);
             }
         }
-        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+        // printf("file = %s, line = %d\n", __FILE__, __LINE__);
         /* Execute the XPENDING command using the Glide client */
         int result = execute_xpending_command(redis->glide_client, key, key_len,
                                               group, group_len, z_options, return_value);

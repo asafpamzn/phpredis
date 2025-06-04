@@ -207,7 +207,7 @@ int execute_xclaim_command(const void *glide_client, const char *key, size_t key
     {
         HashTable *ht = Z_ARRVAL_P(options);
         zval *z_idle, *z_time, *z_retry, *z_force, *z_justid;
-        php_var_dump(options, 2);
+        // php_var_dump(options, 2);
 
         /* Check for IDLE option */
         if ((z_idle = zend_hash_str_find(ht, "IDLE", sizeof("IDLE") - 1)) != NULL)
@@ -246,10 +246,10 @@ int execute_xclaim_command(const void *glide_client, const char *key, size_t key
         }
 
         /* Check for FORCE option - first check associative key */
-        printf("DEBUG: Checking FORCE option\n");
+        // printf("DEBUG: Checking FORCE option\n");
         if ((z_force = zend_hash_str_find(ht, "FORCE", sizeof("FORCE") - 1)) != NULL)
         {
-            printf("DEBUG: Found FORCE option\n");
+            // printf("DEBUG: Found FORCE option\n");
             has_force = zval_is_true(z_force);
             if (has_force)
                 extra_args += 1; /* FORCE */
@@ -299,7 +299,7 @@ int execute_xclaim_command(const void *glide_client, const char *key, size_t key
             ZEND_HASH_FOREACH_END();
         }
     }
-
+    //("DEBUG: Extra args count: %lu has_justid=%d\n", extra_args, has_justid);
     /* Calculate total args: key + group + consumer + min_idle_time + options + ids */
     unsigned long arg_count = 4 + extra_args + id_count;
     uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
@@ -423,7 +423,18 @@ int execute_xclaim_command(const void *glide_client, const char *key, size_t key
         if (result->response)
         {
             /* XCLAIM returns the claimed entries */
-            status = command_response_to_stream_zval(result->response, return_value);
+            // printf("file = %s, line = %d, XCLAIM response received\n", __FILE__, __LINE__);
+            if (has_justid)
+            {
+                // printf("file = %s, line = %d, JUSTID was specified\n", __FILE__, __LINE__);
+                /* If JUSTID was specified, we return an array of IDs */
+                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            }
+            else
+            {
+                /* Otherwise, we return the full entries */
+                status = command_response_to_stream_zval(result->response, return_value);
+            }
             free_command_result(result);
             return status;
         }

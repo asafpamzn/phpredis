@@ -698,6 +698,7 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
     array_init(output);
 
     /* Handle different response types */
+    // printf("%s:%d - DEBUG: Processing command response of type %d\n", __FILE__, __LINE__, response->response_type);
     switch (response->response_type)
     {
     case Map:

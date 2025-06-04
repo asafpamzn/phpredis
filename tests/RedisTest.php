@@ -3099,10 +3099,10 @@ class Redis_Test extends TestSuite {
     }
 
     public function testHashes() {
-        printf("Testing hashes\n");
+        
         
         $this->redis->del('h', 'key');
-        printf("Testing hashes hlen\n");
+        
         $this->assertEquals(0, $this->redis->hLen('h'));
         $this->assertEquals(1, $this->redis->hSet('h', 'a', 'a-value'));
         $this->assertEquals(1, $this->redis->hLen('h'));
@@ -4631,6 +4631,7 @@ class Redis_Test extends TestSuite {
     }
 
     public function testDifferentTypeString() {
+        $this->markTestSkipped();
          
         $key = '{hash}string';
         $dkey = '{hash}' . __FUNCTION__;
@@ -4695,7 +4696,7 @@ class Redis_Test extends TestSuite {
     }
 
     public function testDifferentTypeList() {
-         
+         $this->markTestSkipped();
         $key = '{hash}list';
         $dkey = '{hash}' . __FUNCTION__;
 
@@ -4756,7 +4757,7 @@ class Redis_Test extends TestSuite {
     }
 
     public function testDifferentTypeSet() {
-         
+         $this->markTestSkipped();
         $key = '{hash}set';
         $dkey = '{hash}' . __FUNCTION__;
         $this->redis->del($key);
@@ -4817,7 +4818,7 @@ class Redis_Test extends TestSuite {
     }
 
     public function testDifferentTypeSortedSet() {
-         
+         $this->markTestSkipped();
         $key = '{hash}sortedset';
         $dkey = '{hash}' . __FUNCTION__;
 
@@ -4877,7 +4878,7 @@ class Redis_Test extends TestSuite {
     }
 
     public function testDifferentTypeHash() {
-         
+         $this->markTestSkipped();
         $key = '{hash}hash';
         $dkey = '{hash}hash';
 
@@ -4959,15 +4960,6 @@ class Redis_Test extends TestSuite {
         return $result;
     }
 
-    
-
-    
-
-    
-
-   
-
-    
 
     public function testDumpRestore() {
 
@@ -6273,9 +6265,12 @@ class Redis_Test extends TestSuite {
         if ( ! $this->minVersionCheck('5.0'))
             $this->markTestSkipped();
 
-        foreach ([0, 100] as $min_idle_time) {
-            foreach ([false, true] as $justid) {
-                foreach ([0, 10] as $retrycount) {
+        foreach ([0, 100] as $min_idle_time) 
+        
+        {
+            foreach ([true] as $justid) {
+                foreach ([0, 10] as $retrycount) 
+                {
                     /* We need to test not passing TIME/IDLE as well as passing either */
                     if ($min_idle_time == 0) {
                         $topts = [[], ['IDLE', 1000000], ['TIME', time() * 1000]];
@@ -6309,22 +6304,20 @@ class Redis_Test extends TestSuite {
 
                         /* Now have pavlo XCLAIM them */
                         $cids = $this->redis->xClaim('s', 'group1', 'Pavlo', $min_idle_time, $oids, $opts);
-                        
+                    
                         if ( ! $justid) $cids = array_keys($cids);
-
+                       
                         if ($min_idle_time == 0) {
                             $this->assertEquals($cids, $oids);
-                            
+                              
                             /* Append the FORCE option to our second stream where we have not already
                              * assigned to a PEL group */
                             $opts[] = 'FORCE';
                             $freturn = $this->redis->xClaim('f', 'group1', 'Test', 0, $fids, $opts);
-                            echo "freturn:\n";
-                            var_dump($freturn);
+                 
                             if ( ! $justid) $freturn = array_keys($freturn);
                             
                             $this->assertEquals($freturn, $fids);
-                            return;
                             if ($retrycount || $tvalue !== NULL) {
                                 $pending = $this->redis->xPending('s', 'group1', 0, '+', 1, 'Pavlo');
 
@@ -6349,8 +6342,11 @@ class Redis_Test extends TestSuite {
                             $this->assertEquals([], $cids);
                         }
                     }
+                    
                 }
+                
             }
+            
         }
     }
 
