@@ -366,7 +366,7 @@ int execute_xclaim_command(const void *glide_client, const char *key, size_t key
         if (result->response)
         {
             /* XCLAIM returns the claimed entries */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_stream_zval(result->response, return_value);
             free_command_result(result);
             return status;
         }
