@@ -6837,14 +6837,14 @@ class Redis_Test extends TestSuite {
         /* Everything from both streams */
         $rmsg = $this->redis->xRead($qzero);
         var_dump($rmsg);
-        return;
+        
         $this->assertEquals($rmsg, $qresult);
 
         /* Test COUNT option */
         for ($count = 1; $count <= 2; $count++) {
             $rmsg = $this->redis->xRead($qzero, $count);
             var_dump($rmsg);
-            return;
+            
             foreach ($keys as $key) {
                 $this->assertEquals(count($rmsg[$key]), $count);
             }
@@ -6852,7 +6852,7 @@ class Redis_Test extends TestSuite {
 
         /* Should be empty (no new entries) */
         $this->assertEquals(count($this->redis->xRead($qnew)),0);
-
+        return;
         /* Test against a specific ID */
         $id = $this->redis->xAdd('{stream}-1', '*', $row);
         $new_id = $this->redis->xAdd('{stream}-1', '*', ['final' => 'row']);

@@ -368,6 +368,10 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
                    __FILE__, __LINE__, response->array_value[0].response_type, response->array_value[1].response_type);
             command_response_to_zval(&response->array_value[0], &field, use_associative_array);
             command_response_to_zval(&response->array_value[1], &value, use_associative_array);
+            printf("%s:%d - DEBUG: Adding field \n", __FILE__, __LINE__);
+            php_var_dump(&field, 2);
+            printf("%s:%d - DEBUG: Adding value \n", __FILE__, __LINE__);
+            php_var_dump(&value, 2);
 
             if (Z_TYPE(field) == IS_STRING)
             {
@@ -375,8 +379,41 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
                 add_assoc_zval(output, Z_STRVAL(field), &value);
                 zval_dtor(&field);
             }
+            else if (Z_TYPE(value) == IS_ARRAY && Z_TYPE(field) == IS_ARRAY)
+            {
+
+                {
+                    // Iterate through the field array and add each key-value pair to output
+                    HashTable *field_ht = Z_ARRVAL(field);
+                    zend_string *key;
+                    zval *val;
+                    ZEND_HASH_FOREACH_STR_KEY_VAL(field_ht, key, val)
+                    {
+                        zval copy;
+                        ZVAL_COPY(&copy, val);
+                        add_assoc_str(output, ZSTR_VAL(key), Z_STR(copy));
+                    }
+                    ZEND_HASH_FOREACH_END();
+                }
+
+                // Do the same for the value array
+
+                {
+                    HashTable *value_ht = Z_ARRVAL(value);
+                    zend_string *key;
+                    zval *val;
+                    ZEND_HASH_FOREACH_STR_KEY_VAL(value_ht, key, val)
+                    {
+                        zval copy;
+                        ZVAL_COPY(&copy, val);
+                        add_assoc_str(output, ZSTR_VAL(key), Z_STR(copy));
+                    }
+                    ZEND_HASH_FOREACH_END();
+                }
+            }
             else
             {
+
                 zval_dtor(&field);
                 zval_dtor(&value);
             }
@@ -390,10 +427,15 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
                 zval value;
 
                 command_response_to_zval(&response->array_value[i], &value, use_associative_array);
+                printf("%s:%d - DEBUG: Adding array value %d\n", __FILE__, __LINE__, i);
+                php_var_dump(&value, 2); // No need to modify this as it's not printf
 
                 add_next_index_zval(output, &value);
+                printf("%s:%d - DEBUG: Added array value %d\n", __FILE__, __LINE__, i);
+                php_var_dump(output, 2); // No need to modify this as it's not printf
             }
         }
+        printf("%s:%d - DEBUG: Finished processing array response\n", __FILE__, __LINE__);
         return 1;
 #if 1
     case Map:
@@ -419,6 +461,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             {
                 printf("%s:%d - DEBUG: Processing map value %d\n", __FILE__, __LINE__, i);
                 command_response_to_zval(element->map_value, &value, use_associative_array);
+                printf("%s:%d - DEBUG: Map value %d processed\n", __FILE__, __LINE__, i);
             }
             else
             {
