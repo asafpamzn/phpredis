@@ -6387,7 +6387,7 @@ class Redis_Test extends TestSuite {
         $this->assertTrue(isset($pending[3][0][0]) && $pending[3][0][0] == 'Sisko');
     }
 
-    public function testXInfo() {
+    public function testXInfo11() {
         if ( ! $this->minVersionCheck('5.0'))
             $this->markTestSkipped();
 
@@ -6395,8 +6395,10 @@ class Redis_Test extends TestSuite {
         $stream = 's';
         $groups = ['g1' => 0, 'g2' => 0];
         $this->addStreamsAndGroups([$stream], 1, $groups);
-
+        
+        
         $info = $this->redis->xInfo('GROUPS', $stream);
+        
         $this->assertIsArray($info);
         $this->assertEquals(count($info), count($groups));
         foreach ($info as $group) {
@@ -6416,8 +6418,10 @@ class Redis_Test extends TestSuite {
 
         /* Ensure that default/NULL arguments are ignored */
         $info = $this->redis->xInfo('STREAM', $stream, NULL);
-        return;
+        var_dump($info);
+
         $this->assertIsArray($info);
+        return;
         $info = $this->redis->xInfo('STREAM', $stream, NULL, -1);
         $this->assertIsArray($info);
 

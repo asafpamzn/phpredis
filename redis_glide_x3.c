@@ -540,8 +540,9 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
         return 0;
     }
 
-    /* Calculate total args: XINFO + subcommand + args */
-    unsigned long arg_count = 2 + (args ? args_count : 0);
+    /* Calculate total args: subcommand + args */
+    printf("file = %s, line = %d, execute_xinfo_command args_count=%d\n", __FILE__, __LINE__, args_count);
+    unsigned long arg_count = (args ? args_count : 0);
     uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
     unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
@@ -553,61 +554,87 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
             efree(args_len);
         return 0;
     }
+    printf("file = %s, line = %d, execute_xinfo_command \n", __FILE__, __LINE__);
+    /* Determine which XINFO command to use based on subcommand */
+    enum RequestType command_type;
 
-    /* Set the first argument as "XINFO" and second as the subcommand */
-    const char *xinfo_cmd = "XINFO";
-    cmd_args[0] = (uintptr_t)xinfo_cmd;
-    args_len[0] = sizeof("XINFO") - 1;
-
-    cmd_args[1] = (uintptr_t)subcommand;
-    args_len[1] = subcommand_len;
-
-    /* Add all additional arguments if provided */
+    if (strcasecmp(subcommand, "CONSUMERS") == 0)
+    {
+        command_type = XInfoConsumers;
+    }
+    else if (strcasecmp(subcommand, "GROUPS") == 0)
+    {
+        command_type = XInfoGroups;
+    }
+    else if (strcasecmp(subcommand, "STREAM") == 0)
+    {
+        command_type = XInfoStream;
+    }
+    else
+    {
+        /* Unknown subcommand */
+        efree(cmd_args);
+        efree(args_len);
+        return 0;
+    }
+    printf("file = %s, line = %d, execute_xinfo_command \n", __FILE__, __LINE__);
+    /* Add all arguments if provided */
     if (args && args_count > 0)
     {
         int i;
         for (i = 0; i < args_count; i++)
         {
+            php_var_dump(args, 2);
             zval *arg = &args[i];
-
+            php_var_dump(arg, 2);
             /* Convert to string if not already a string */
             if (Z_TYPE_P(arg) != IS_STRING)
             {
                 convert_to_string(arg);
             }
+            else if (Z_TYPE_P(arg) == IS_NULL)
+            {
+                /* If the argument is NULL, we can skip it */
+                arg_count--;
+                continue;
+            }
 
-            cmd_args[i + 2] = (uintptr_t)Z_STRVAL_P(arg);
-            args_len[i + 2] = Z_STRLEN_P(arg);
+            cmd_args[i] = (uintptr_t)Z_STRVAL_P(arg);
+            printf("file = %s, line = %d, execute_xinfo_command md_args[%d] = %s \n", __FILE__, __LINE__, i, cmd_args[i]);
+            args_len[i] = Z_STRLEN_P(arg);
         }
     }
-
+    printf("file = %s, line = %d, execute_xinfo_command \n", __FILE__, __LINE__);
+    printf("file = %s, line = %d, execute_xinfo_command command_type = %d, arg_count = %d\n", __FILE__, __LINE__, command_type, arg_count);
     /* Execute the command */
     CommandResult *result = execute_command(
         glide_client,
-        CustomCommand, /* XINFO uses custom command type */
-        arg_count,     /* total arguments */
-        cmd_args,      /* arguments */
-        args_len       /* argument lengths */
+        command_type, /* Use specific XINFO command type */
+        arg_count,    /* total arguments */
+        cmd_args,     /* arguments */
+        args_len      /* argument lengths */
     );
 
     /* Free resources */
     efree(cmd_args);
     efree(args_len);
-
+    printf("file = %s, line = %d, execute_xinfo_command \n", __FILE__, __LINE__);
     /* Handle the response directly */
     int status = 0;
     if (result)
     {
+        printf("file = %s, line = %d, execute_xinfo_command \n", __FILE__, __LINE__);
         if (result->command_error)
         {
             /* Command failed */
             free_command_result(result);
             return 0;
         }
-
+        printf("file = %s, line = %d, execute_xinfo_command \n", __FILE__, __LINE__);
         if (result->response)
         {
             /* XINFO returns information about the stream or consumers */
+            printf("DEBUG: XINFO response received result->response->response_type = %d\n", result->response->response_type);
             status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
             free_command_result(result);
             return status;
