@@ -540,21 +540,6 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
         return 0;
     }
 
-    /* Calculate total args: subcommand + args */
-    printf("file = %s, line = %d, execute_xinfo_command args_count=%d\n", __FILE__, __LINE__, args_count);
-    unsigned long arg_count = (args ? args_count : 0);
-    uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!cmd_args || !args_len)
-    {
-        if (cmd_args)
-            efree(cmd_args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-    printf("file = %s, line = %d, execute_xinfo_command \n", __FILE__, __LINE__);
     /* Determine which XINFO command to use based on subcommand */
     enum RequestType command_type;
 
@@ -573,74 +558,290 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
     else
     {
         /* Unknown subcommand */
-        efree(cmd_args);
-        efree(args_len);
         return 0;
     }
-    printf("file = %s, line = %d, execute_xinfo_command \n", __FILE__, __LINE__);
-    /* Add all arguments if provided */
-    if (args && args_count > 0)
-    {
-        int i;
-        for (i = 0; i < args_count; i++)
-        {
-            php_var_dump(args, 2);
-            zval *arg = &args[i];
-            php_var_dump(arg, 2);
-            /* Convert to string if not already a string */
-            if (Z_TYPE_P(arg) != IS_STRING)
-            {
-                convert_to_string(arg);
-            }
-            else if (Z_TYPE_P(arg) == IS_NULL)
-            {
-                /* If the argument is NULL, we can skip it */
-                arg_count--;
-                continue;
-            }
 
-            cmd_args[i] = (uintptr_t)Z_STRVAL_P(arg);
-            printf("file = %s, line = %d, execute_xinfo_command md_args[%d] = %s \n", __FILE__, __LINE__, i, cmd_args[i]);
-            args_len[i] = Z_STRLEN_P(arg);
-        }
-    }
-    printf("file = %s, line = %d, execute_xinfo_command \n", __FILE__, __LINE__);
-    printf("file = %s, line = %d, execute_xinfo_command command_type = %d, arg_count = %d\n", __FILE__, __LINE__, command_type, arg_count);
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        command_type, /* Use specific XINFO command type */
-        arg_count,    /* total arguments */
-        cmd_args,     /* arguments */
-        args_len      /* argument lengths */
-    );
-
-    /* Free resources */
-    efree(cmd_args);
-    efree(args_len);
-    printf("file = %s, line = %d, execute_xinfo_command \n", __FILE__, __LINE__);
-    /* Handle the response directly */
-    int status = 0;
-    if (result)
+    /* For XINFO STREAM, we need special handling */
+    if (strcasecmp(subcommand, "STREAM") == 0)
     {
-        printf("file = %s, line = %d, execute_xinfo_command \n", __FILE__, __LINE__);
-        if (result->command_error)
+        /* We need at least the key argument */
+        if (!args || args_count < 1 || Z_TYPE(args[0]) == IS_NULL)
         {
-            /* Command failed */
-            free_command_result(result);
             return 0;
         }
-        printf("file = %s, line = %d, execute_xinfo_command \n", __FILE__, __LINE__);
-        if (result->response)
-        {
-            /* XINFO returns information about the stream or consumers */
-            printf("DEBUG: XINFO response received result->response->response_type = %d\n", result->response->response_type);
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
-            free_command_result(result);
-            return status;
-        }
-        free_command_result(result);
-    }
 
-    return 0;
+        /* Prepare the key argument (always needed) */
+        zval key_zval;
+        if (Z_TYPE(args[0]) == IS_STRING)
+        {
+            ZVAL_STRINGL(&key_zval, Z_STRVAL(args[0]), Z_STRLEN(args[0]));
+        }
+        else
+        {
+            /* Copy and convert to string */
+            ZVAL_COPY(&key_zval, &args[0]);
+            convert_to_string(&key_zval);
+        }
+
+        /* Check if we have the 'FULL' option (2nd argument) */
+        zend_bool has_full = 0;
+        if (args_count >= 2 && Z_TYPE(args[1]) != IS_NULL)
+        {
+            if (Z_TYPE(args[1]) == IS_STRING &&
+                strcasecmp(Z_STRVAL(args[1]), "FULL") == 0)
+            {
+                has_full = 1;
+            }
+        }
+
+        /* Check if we have a valid count parameter (not -1) */
+        zend_bool has_count = 0;
+        long count_value = 0;
+        if (has_full && args_count >= 3 && Z_TYPE(args[2]) != IS_NULL)
+        {
+            if (Z_TYPE(args[2]) == IS_LONG)
+            {
+                count_value = Z_LVAL(args[2]);
+                if (count_value != -1)
+                {
+                    has_count = 1;
+                }
+            }
+            else if (Z_TYPE(args[2]) == IS_STRING)
+            {
+                if (Z_STRLEN(args[2]) != 2 || strcmp(Z_STRVAL(args[2]), "-1") != 0)
+                {
+                    has_count = 1;
+                    count_value = atol(Z_STRVAL(args[2]));
+                }
+            }
+        }
+
+        /* Also filter out 4th argument if it's -1 */
+        if (!has_count && args_count >= 4 && Z_TYPE(args[3]) != IS_NULL)
+        {
+            if (Z_TYPE(args[3]) == IS_LONG)
+            {
+                count_value = Z_LVAL(args[3]);
+                if (count_value != -1)
+                {
+                    has_count = 1;
+                }
+            }
+            else if (Z_TYPE(args[3]) == IS_STRING)
+            {
+                if (Z_STRLEN(args[3]) != 2 || strcmp(Z_STRVAL(args[3]), "-1") != 0)
+                {
+                    has_count = 1;
+                    count_value = atol(Z_STRVAL(args[3]));
+                }
+            }
+        }
+
+        /* Create arrays for arguments */
+        unsigned long arg_count = 1; /* start with the key */
+        if (has_full)
+            arg_count++;
+        if (has_count)
+            arg_count++;
+
+        uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+        unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+        if (!cmd_args || !args_len)
+        {
+            zval_dtor(&key_zval);
+            if (cmd_args)
+                efree(cmd_args);
+            if (args_len)
+                efree(args_len);
+            return 0;
+        }
+
+        /* Add key */
+        unsigned long arg_idx = 0;
+        cmd_args[arg_idx] = (uintptr_t)Z_STRVAL(key_zval);
+        args_len[arg_idx] = Z_STRLEN(key_zval);
+        arg_idx++;
+
+        /* Add 'FULL' option if present */
+        if (has_full)
+        {
+            cmd_args[arg_idx] = (uintptr_t)"FULL";
+            args_len[arg_idx] = sizeof("FULL") - 1;
+            arg_idx++;
+        }
+
+        /* Add count if needed */
+        if (has_count)
+        {
+            char count_str[32];
+            size_t count_str_len = snprintf(count_str, sizeof(count_str), "%ld", count_value);
+
+            /* Allocate memory for the count string that will survive the function call */
+            char *allocated_count_str = emalloc(count_str_len + 1);
+            memcpy(allocated_count_str, count_str, count_str_len);
+            allocated_count_str[count_str_len] = '\0';
+
+            cmd_args[arg_idx] = (uintptr_t)allocated_count_str;
+            args_len[arg_idx] = count_str_len;
+            arg_idx++;
+        }
+
+        /* Execute the command */
+        CommandResult *result = execute_command(
+            glide_client,
+            command_type,
+            arg_count,
+            cmd_args,
+            args_len);
+
+        /* Free resources */
+        zval_dtor(&key_zval);
+        if (has_count)
+        {
+            /* Free the allocated count string */
+            efree((void *)cmd_args[arg_idx - 1]);
+        }
+        efree(cmd_args);
+        efree(args_len);
+
+        /* Handle the response */
+        int status = 0;
+        if (result)
+        {
+            if (result->command_error)
+            {
+                /* Command failed */
+                free_command_result(result);
+                return 0;
+            }
+
+            if (result->response)
+            {
+                /* XINFO returns information about the stream */
+                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
+                free_command_result(result);
+                return status;
+            }
+            free_command_result(result);
+        }
+
+        return 0;
+    }
+    else
+    {
+        /* For CONSUMERS and GROUPS, handle non-NULL arguments */
+        unsigned long valid_arg_count = 0;
+
+        /* Count valid args (not NULL) */
+        if (args && args_count > 0)
+        {
+            int i;
+            for (i = 0; i < args_count; i++)
+            {
+                if (Z_TYPE(args[i]) != IS_NULL)
+                {
+                    valid_arg_count++;
+                }
+            }
+        }
+
+        uintptr_t *cmd_args = NULL;
+        unsigned long *args_len = NULL;
+
+        if (valid_arg_count > 0)
+        {
+            cmd_args = (uintptr_t *)emalloc(valid_arg_count * sizeof(uintptr_t));
+            args_len = (unsigned long *)emalloc(valid_arg_count * sizeof(unsigned long));
+
+            if (!cmd_args || !args_len)
+            {
+                if (cmd_args)
+                    efree(cmd_args);
+                if (args_len)
+                    efree(args_len);
+                return 0;
+            }
+        }
+
+        /* Process and add non-NULL arguments */
+        unsigned long arg_idx = 0;
+
+        if (args && args_count > 0)
+        {
+            int i;
+            for (i = 0; i < args_count; i++)
+            {
+                /* Skip NULL arguments */
+                if (Z_TYPE(args[i]) == IS_NULL)
+                {
+                    continue;
+                }
+
+                /* Convert to string if not already */
+                if (Z_TYPE(args[i]) != IS_STRING)
+                {
+                    convert_to_string(&args[i]);
+                }
+
+                cmd_args[arg_idx] = (uintptr_t)Z_STRVAL(args[i]);
+                args_len[arg_idx] = Z_STRLEN(args[i]);
+                arg_idx++;
+            }
+        }
+
+        /* Execute the command */
+        CommandResult *result = NULL;
+        if (valid_arg_count > 0)
+        {
+            result = execute_command(
+                glide_client,
+                command_type,    /* Use specific XINFO command type */
+                valid_arg_count, /* total arguments */
+                cmd_args,        /* arguments */
+                args_len         /* argument lengths */
+            );
+        }
+        else
+        {
+            /* No arguments case */
+            result = execute_command(
+                glide_client,
+                command_type, /* Use specific XINFO command type */
+                0,            /* no arguments */
+                NULL,         /* no arguments */
+                NULL          /* no argument lengths */
+            );
+        }
+
+        /* Free resources if allocated */
+        if (cmd_args)
+            efree(cmd_args);
+        if (args_len)
+            efree(args_len);
+
+        /* Handle the response directly */
+        int status = 0;
+        if (result)
+        {
+            if (result->command_error)
+            {
+                /* Command failed */
+                free_command_result(result);
+                return 0;
+            }
+
+            if (result->response)
+            {
+                /* XINFO returns information about the stream or consumers */
+                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
+                free_command_result(result);
+                return status;
+            }
+            free_command_result(result);
+        }
+
+        return 0;
+    }
 }
