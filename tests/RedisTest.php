@@ -5786,9 +5786,9 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(['Chico'], $this->redis->geosearch('gk', 'Chico', 1, 'm'));
         
         $this->assertValidate($this->redis->geosearch('gk', 'Chico', 1, 'm', ['withcoord', 'withdist', 'withhash']), function ($v) {
-           // var_dump($v);
+           
             $this->assertArrayKey($v, 'Chico', 'is_array');
-            return;
+           
             $this->assertEquals(count($v['Chico']), 3);
             $this->assertArrayKey($v['Chico'], 0, 'is_float');
             $this->assertArrayKey($v['Chico'], 1, 'is_int');
@@ -6391,7 +6391,7 @@ class Redis_Test extends TestSuite {
         $this->assertTrue(isset($pending[3][0][0]) && $pending[3][0][0] == 'Sisko');
     }
 
-    public function testXInfo11() {
+    public function testXInfo() {
         if ( ! $this->minVersionCheck('5.0'))
             $this->markTestSkipped();
 
@@ -6444,11 +6444,11 @@ class Redis_Test extends TestSuite {
 
         for ($count = 1; $count < 5; $count++) {
             $info = $this->redis->xInfo('STREAM', $stream, 'full', $count);
-            var_dump($info);
+            
             $n = isset($info['entries']) ? count($info['entries']) : 0;
             $this->assertEquals($n, $count);
         }
-        return;
+        
         /* Count <= 0 should be ignored */
         foreach ([-1, 0] as $count) {
             $info = $this->redis->xInfo('STREAM', $stream, 'full', 0);
