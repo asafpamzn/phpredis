@@ -609,19 +609,27 @@ PHP_METHOD(Redis, xlen)
 }
 /* }}} */
 
-/* {{{ proto array Redis::xpending(string key, string group [, array options]) */
+/* {{{ proto array Redis::xpending(string key, string group [, array options OR string start, string end, int count [, string consumer]]) */
 PHP_METHOD(Redis, xpending)
 {
-    zval *object;
+    zval *object, *z_options = NULL;
     redis_object *redis;
     char *key = NULL, *group = NULL;
+    char *start = NULL, *end = NULL, *consumer = NULL;
     size_t key_len = 0, group_len = 0;
-    zval *z_options = NULL;
+    size_t start_len = 0, end_len = 0, consumer_len = 0;
+    zend_long count = 0;
+    zend_bool options_created = 0;
 
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss|a",
+    /* Parse parameters with a single call for all possible formats:
+     * - key, group, options_array
+     * - key, group, start, end, count, [consumer]
+     */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss|a/sslz",
                                      &object, redis_ce, &key, &key_len,
-                                     &group, &group_len, &z_options) == FAILURE)
+                                     &group, &group_len, &z_options,
+                                     &start, &start_len, &end, &end_len,
+                                     &count, &consumer, &consumer_len) == FAILURE)
     {
         RETURN_FALSE;
     }
@@ -632,9 +640,37 @@ PHP_METHOD(Redis, xpending)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
+        /* If we got the extended format (start, end, count), convert to options array */
+        if (z_options == NULL && start != NULL)
+        {
+            options_created = 1;
+            z_options = emalloc(sizeof(zval));
+            array_init(z_options);
+
+            /* Add START, END to options array */
+            add_assoc_stringl(z_options, "START", start, start_len);
+            add_assoc_stringl(z_options, "END", end, end_len);
+            add_assoc_long(z_options, "COUNT", count);
+
+            /* Add CONSUMER to options array if provided */
+            if (consumer)
+            {
+                add_assoc_stringl(z_options, "CONSUMER", consumer, consumer_len);
+            }
+        }
+
         /* Execute the XPENDING command using the Glide client */
-        if (execute_xpending_command(redis->glide_client, key, key_len,
-                                     group, group_len, z_options, return_value))
+        int result = execute_xpending_command(redis->glide_client, key, key_len,
+                                              group, group_len, z_options, return_value);
+
+        /* Clean up if we created options array */
+        if (options_created && z_options)
+        {
+            zval_dtor(z_options);
+            efree(z_options);
+        }
+
+        if (result)
         {
             /* Return value already set in execute_xpending_command */
             return;
