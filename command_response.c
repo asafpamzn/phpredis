@@ -772,7 +772,11 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
                 printf("%s:%d - DEBUG: Unexpected response type for stream fields: %d\n", __FILE__, __LINE__, element->map_value->response_type);
             }
         }
-
+        break;
+    case Null:
+        /* If the response is Null, set output to NULL */
+        printf("%s:%d - DEBUG: Response is Null\n", __FILE__, __LINE__);
+        array_init(output);
         break;
 
     default:

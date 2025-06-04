@@ -6849,14 +6849,17 @@ class Redis_Test extends TestSuite {
                 $this->assertEquals(count($rmsg[$key]), $count);
             }
         }
-
+        $out = $this->redis->xRead($qnew);
+        var_dump($out);
         /* Should be empty (no new entries) */
-        $this->assertEquals(count($this->redis->xRead($qnew)),0);
-        return;
+        $this->assertEquals(count($out),0);
+        
         /* Test against a specific ID */
         $id = $this->redis->xAdd('{stream}-1', '*', $row);
         $new_id = $this->redis->xAdd('{stream}-1', '*', ['final' => 'row']);
+        
         $rmsg = $this->redis->xRead(['{stream}-1' => $id]);
+        return;
         $this->assertEquals(
             $this->redis->xRead(['{stream}-1' => $id]),
             ['{stream}-1' => [$new_id => ['final' => 'row']]]
