@@ -173,7 +173,7 @@ int execute_xautoclaim_command(const void *glide_client, const char *key, size_t
         if (result->response)
         {
             /* XAUTOCLAIM returns array with [next-id, claimed-entries] */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_STREAM_ARRAY_ASSOCIATIVE);
             free_command_result(result);
             return status;
         }
