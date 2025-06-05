@@ -1,7 +1,7 @@
 <?php defined('PHPREDIS_TESTRUN') or die('Use TestRedis.php to run tests!\n');
 
 require_once __DIR__ . '/TestSuite.php';
-require_once __DIR__ . '/SessionHelpers.php';
+
 
 class Redis_Test extends TestSuite {
     /**
@@ -18,40 +18,12 @@ class Redis_Test extends TestSuite {
         'Cupertino'     => [-122.032182, 37.322998]
     ];
 
-    protected $serializers = [
-        Redis::SERIALIZER_NONE,
-        Redis::SERIALIZER_PHP,
-    ];
-
+  
     protected function getNilValue() {
         return FALSE;
     }
 
-    protected function getSerializers() {
-        $result = [Redis::SERIALIZER_NONE, Redis::SERIALIZER_PHP];
-
-        if (defined('Redis::SERIALIZER_IGBINARY'))
-            $result[] = Redis::SERIALIZER_IGBINARY;
-        if (defined('Redis::SERIALIZER_JSON'))
-            $result[] = Redis::SERIALIZER_JSON;
-        if (defined('Redis::SERIALIZER_MSGPACK'))
-            $result[] = Redis::SERIALIZER_MSGPACK;
-
-        return $result;
-    }
-
-    protected function getCompressors() {
-        $result['none'] = Redis::COMPRESSION_NONE;
-        if (defined('Redis::COMPRESSION_LZF'))
-            $result['lzf'] = Redis::COMPRESSION_LZF;
-        if (defined('Redis::COMPRESSION_LZ4'))
-            $result['lz4'] = Redis::COMPRESSION_LZ4;
-        if (defined('Redis::COMPRESSION_ZSTD'))
-            $result['zstd'] = Redis::COMPRESSION_ZSTD;
-
-        return $result;
-    }
-
+    
     /* Overridable left/right constants */
     protected function getLeftConstant() {
         return Redis::LEFT;
@@ -61,11 +33,6 @@ class Redis_Test extends TestSuite {
         return Redis::RIGHT;
     }
 
-    protected function detectKeyDB(array $info) {
-        return strpos($info['executable'] ?? '', 'keydb') !== false ||
-               isset($info['keydb']) ||
-               isset($info['mvcc_depth']);
-    }
 
     protected function detectValkey(array $info) {
         return isset($info['server_name']) && $info['server_name'] === 'valkey';
@@ -83,7 +50,7 @@ class Redis_Test extends TestSuite {
         $this->version = (isset($info['redis_version'])?$info['redis_version']:'0.0.0');
                 
 
-        $this->is_keydb = $this->detectKeyDB($info);
+        
                 
 
         $this->is_valkey = $this->detectValKey($info);
@@ -255,7 +222,7 @@ class Redis_Test extends TestSuite {
         $this->redis->set('bitcountkey', hex2bin('10eb8939e68bfdb640260f0629f3'));
         $this->assertEquals(1, $this->redis->bitcount('bitcountkey', 8, 8, false));
 
-        if ( ! $this->is_keydb && $this->minVersionCheck('7.0')) {
+        if ( !  $this->minVersionCheck('7.0')) {
             /* key, start, end, BIT */
             $this->redis->set('bitcountkey', hex2bin('cd0e4c80f9e4590d888a10'));
             $this->assertEquals(5, $this->redis->bitcount('bitcountkey', 0, 9, true));
@@ -323,7 +290,7 @@ class Redis_Test extends TestSuite {
     }
 
     public function testLcs() {
-        if ( ! $this->minVersionCheck('7.0.0') || $this->is_keydb)
+        if ( ! $this->minVersionCheck('7.0.0'))
             $this->markTestSkipped();
 
         $key1 = '{lcs}1'; $key2 = '{lcs}2';
@@ -5619,8 +5586,7 @@ class Redis_Test extends TestSuite {
         $key_count = 10;
 
         // Iterate prefixing/serialization options
-        foreach ($this->getSerializers() as $ser) {
-            foreach (['', 'hl-key-prefix:'] as $prefix) {
+
                 $keys = [];
 
                 // Now add for each key
@@ -5660,8 +5626,7 @@ class Redis_Test extends TestSuite {
 
                 // Clean up merge key
                 $this->redis->del('pf-merge-{key}');
-            }
-        }
+
     }
 
     //
