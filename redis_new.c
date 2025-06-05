@@ -1164,11 +1164,13 @@ PHP_METHOD(Redis, info)
         if (argc == 0)
         {
             /* No sections specified, call with NULL section */
+
             result = execute_info_command(redis->glide_client, NULL, 0, &response, &response_len);
         }
         else
         {
             /* One or more sections specified */
+
             result = execute_info_sections_command(redis->glide_client, sections, argc, &response, &response_len);
         }
 

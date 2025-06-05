@@ -121,7 +121,8 @@ int handle_string_response(CommandResult *result, char **output, size_t *output_
             else
             {
                 // Allocate exact size needed for binary data using PHP's memory manager
-                *output = emalloc(result->response->string_value_len);
+                *output = emalloc(result->response->string_value_len + 1);
+                (*output)[result->response->string_value_len] = '\0';
                 if (*output)
                 {
                     // Copy binary data without assuming null-termination
