@@ -832,6 +832,26 @@ int execute_z_generic_command(
                                        &allocated_strings, &allocated_count);
         break;
 
+    case ZRangeStore:
+        allocated_strings = (char **)emalloc(10 * sizeof(char *)); /* Enough for ZRANGESTORE */
+        if (!allocated_strings)
+        {
+            return 0;
+        }
+        arg_count = prepare_z_rangestore_args(args, &arg_values, &arg_lens,
+                                              &allocated_strings, &allocated_count);
+        break;
+
+    case ZAdd:
+        allocated_strings = (char **)emalloc(20 * sizeof(char *)); /* Enough for ZADD */
+        if (!allocated_strings)
+        {
+            return 0;
+        }
+        arg_count = prepare_z_zadd_args(args, &arg_values, &arg_lens,
+                                        &allocated_strings, &allocated_count);
+        break;
+
     default:
         /* Unsupported command type */
         return 0;
@@ -1769,6 +1789,264 @@ int prepare_z_union_args(z_command_args_t *args, uintptr_t **args_out,
     return arg_count;
 }
 
+/**
+ * Prepare ZRANGESTORE command arguments (dst + src + start + end + range options)
+ */
+int prepare_z_rangestore_args(z_command_args_t *args, uintptr_t **args_out,
+                              unsigned long **args_len_out,
+                              char ***allocated_strings, int *allocated_count)
+{
+    if (!args || !args->key || !args->member || !args->z_start || !args->z_end ||
+        !args_out || !args_len_out || !allocated_strings || !allocated_count)
+    {
+        return 0;
+    }
+
+    *allocated_count = 0;
+
+    /* Parse range options */
+    range_options_t range_opts = {0};
+    parse_range_options(args->options, &range_opts);
+
+    /* Calculate total arguments: dst + src + start + end + range options */
+    unsigned long arg_count = 4; /* dst + src + start + end */
+    if (range_opts.byscore)
+        arg_count++;
+    if (range_opts.bylex)
+        arg_count++;
+    if (range_opts.rev)
+        arg_count++;
+    if (range_opts.has_limit)
+        arg_count += 3; /* LIMIT + offset + count */
+
+    /* Allocate final args arrays */
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!(*args_out) || !(*args_len_out))
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Set dst and src (args->key is dst, args->member is src) */
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+    (*args_out)[1] = (uintptr_t)args->member;
+    (*args_len_out)[1] = args->member_len;
+
+    /* Add start and end using framework helper */
+    int need_free = 0;
+    size_t len = 0;
+    char *str = zval_to_string_safe(args->z_start, &len, &need_free);
+    if (!str)
+    {
+        efree(*args_out);
+        efree(*args_len_out);
+        return 0;
+    }
+    (*args_out)[2] = (uintptr_t)str;
+    (*args_len_out)[2] = len;
+    if (need_free)
+        (*allocated_strings)[(*allocated_count)++] = str;
+
+    str = zval_to_string_safe(args->z_end, &len, &need_free);
+    if (!str)
+    {
+        free_allocated_strings(*allocated_strings, *allocated_count);
+        efree(*args_out);
+        efree(*args_len_out);
+        return 0;
+    }
+    (*args_out)[3] = (uintptr_t)str;
+    (*args_len_out)[3] = len;
+    if (need_free)
+        (*allocated_strings)[(*allocated_count)++] = str;
+
+    /* Add range options */
+    unsigned int offset = 4;
+    if (range_opts.bylex)
+    {
+        (*args_out)[offset] = (uintptr_t)"BYLEX";
+        (*args_len_out)[offset] = 5;
+        offset++;
+    }
+    else if (range_opts.byscore)
+    {
+        (*args_out)[offset] = (uintptr_t)"BYSCORE";
+        (*args_len_out)[offset] = 7;
+        offset++;
+    }
+    if (range_opts.rev)
+    {
+        (*args_out)[offset] = (uintptr_t)"REV";
+        (*args_len_out)[offset] = 3;
+        offset++;
+    }
+    if (range_opts.has_limit)
+    {
+        offset += create_limit_args(&range_opts, *args_out, *args_len_out, offset, *allocated_strings, allocated_count);
+    }
+
+    return arg_count;
+}
+
+/**
+ * Prepare ZADD command arguments (key + options + score-member pairs)
+ */
+int prepare_z_zadd_args(z_command_args_t *args, uintptr_t **args_out,
+                        unsigned long **args_len_out,
+                        char ***allocated_strings, int *allocated_count)
+{
+    if (!args || !args->key || !args->members || args->member_count < 2 ||
+        !args_out || !args_len_out || !allocated_strings || !allocated_count)
+    {
+        return 0;
+    }
+
+    *allocated_count = 0;
+
+    /* Parse ZADD options from the first element if it's an array */
+    zadd_options_t zadd_opts = {0};
+    int first_score_idx = 0;
+
+    if (args->member_count > 0 && Z_TYPE(args->members[0]) == IS_ARRAY)
+    {
+        parse_zadd_options(&args->members[0], &zadd_opts);
+        first_score_idx = 1;
+    }
+
+    /* Calculate score-member pairs */
+    int remaining_args = args->member_count - first_score_idx;
+    if (remaining_args < 2 || remaining_args % 2 != 0)
+    {
+        return 0; /* Must have pairs */
+    }
+    int score_member_pairs = remaining_args / 2;
+
+    /* When INCR option is used, we can only have one score-member pair */
+    if (zadd_opts.incr && score_member_pairs > 1)
+    {
+        return 0;
+    }
+
+    /* Calculate number of option arguments */
+    int num_options = zadd_opts.xx + zadd_opts.nx + zadd_opts.lt +
+                      zadd_opts.gt + zadd_opts.ch + zadd_opts.incr;
+
+    /* Total arguments: key + options + score-member pairs */
+    unsigned long arg_count = 1 + num_options + (score_member_pairs * 2);
+
+    /* Allocate final args arrays */
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!(*args_out) || !(*args_len_out))
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Set key */
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+    int arg_idx = 1;
+
+    /* Add options using existing framework pattern */
+    if (zadd_opts.xx)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"XX";
+        (*args_len_out)[arg_idx++] = 2;
+    }
+    if (zadd_opts.nx)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"NX";
+        (*args_len_out)[arg_idx++] = 2;
+    }
+    if (zadd_opts.lt)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"LT";
+        (*args_len_out)[arg_idx++] = 2;
+    }
+    if (zadd_opts.gt)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"GT";
+        (*args_len_out)[arg_idx++] = 2;
+    }
+    if (zadd_opts.ch)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"CH";
+        (*args_len_out)[arg_idx++] = 2;
+    }
+    if (zadd_opts.incr)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"INCR";
+        (*args_len_out)[arg_idx++] = 4;
+    }
+
+    /* Add score-member pairs using existing framework helpers */
+    for (int i = first_score_idx; i < args->member_count; i += 2)
+    {
+        /* Score - use existing zval_to_string_safe */
+        zval *score = &args->members[i];
+        char *score_str = NULL;
+        size_t score_len = 0;
+        int need_free = 0;
+
+        if (Z_TYPE_P(score) == IS_DOUBLE)
+        {
+            score_str = double_to_string(Z_DVAL_P(score), &score_len);
+            need_free = 1;
+        }
+        else if (Z_TYPE_P(score) == IS_LONG)
+        {
+            score_str = long_to_string(Z_LVAL_P(score), &score_len);
+            need_free = 1;
+        }
+        else if (Z_TYPE_P(score) == IS_STRING)
+        {
+            score_str = Z_STRVAL_P(score);
+            score_len = Z_STRLEN_P(score);
+        }
+        else
+        {
+            /* Cleanup and return error */
+            free_allocated_strings(*allocated_strings, *allocated_count);
+            efree(*args_out);
+            efree(*args_len_out);
+            return 0;
+        }
+
+        (*args_out)[arg_idx] = (uintptr_t)score_str;
+        (*args_len_out)[arg_idx++] = score_len;
+        if (need_free)
+        {
+            (*allocated_strings)[(*allocated_count)++] = score_str;
+        }
+
+        /* Member - validate it's a string */
+        zval *member = &args->members[i + 1];
+        if (Z_TYPE_P(member) != IS_STRING)
+        {
+            /* Cleanup and return error */
+            free_allocated_strings(*allocated_strings, *allocated_count);
+            efree(*args_out);
+            efree(*args_len_out);
+            return 0;
+        }
+        (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL_P(member);
+        (*args_len_out)[arg_idx++] = Z_STRLEN_P(member);
+    }
+
+    return arg_count;
+}
+
 /* ====================================================================
  * RESULT PROCESSING FUNCTIONS
  * ===================================================================== */
@@ -1943,6 +2221,56 @@ int process_z_long_to_zval_result(CommandResult *result, void *output)
     {
         ZVAL_LONG(return_value, result->response->int_value);
         return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Process ZADD result with dual return types (long for count, double for INCR)
+ */
+int process_z_zadd_result(CommandResult *result, void *output)
+{
+    struct
+    {
+        long *output_value;
+        double *output_value_double;
+        int is_incr;
+    } *zadd_data = output;
+
+    if (!result || !result->response || !zadd_data)
+    {
+        return 0;
+    }
+
+    if (zadd_data->is_incr)
+    {
+        if (result->response->response_type == Float)
+        {
+            *zadd_data->output_value_double = result->response->float_value;
+            return 2;
+        }
+        else if (result->response->response_type == String)
+        {
+            char *str_end;
+            if (result->response->string_value && result->response->string_value_len > 0)
+            {
+                *zadd_data->output_value_double = strtod(result->response->string_value, &str_end);
+                return 2;
+            }
+        }
+        else if (result->response->response_type == Null)
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        if (result->response->response_type == Int)
+        {
+            *zadd_data->output_value = result->response->int_value;
+            return 1;
+        }
     }
 
     return 0;

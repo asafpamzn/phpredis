@@ -153,6 +153,11 @@ int process_z_array_result(CommandResult *result, void *output);
 int process_z_long_to_zval_result(CommandResult *result, void *output);
 
 /**
+ * Process ZADD result with dual return types (long for count, double for INCR)
+ */
+int process_z_zadd_result(CommandResult *result, void *output);
+
+/**
  * Process rank result with optional score
  */
 int process_z_rank_result(CommandResult *result, void *output);
@@ -221,6 +226,20 @@ int prepare_z_union_args(z_command_args_t *args, uintptr_t **args_out,
 int prepare_z_pop_args(z_command_args_t *args, uintptr_t **args_out,
                        unsigned long **args_len_out,
                        char ***allocated_strings, int *allocated_count);
+
+/**
+ * Prepare ZRANGESTORE command arguments (dst + src + start + end + range options)
+ */
+int prepare_z_rangestore_args(z_command_args_t *args, uintptr_t **args_out,
+                              unsigned long **args_len_out,
+                              char ***allocated_strings, int *allocated_count);
+
+/**
+ * Prepare ZADD command arguments (key + options + score-member pairs)
+ */
+int prepare_z_zadd_args(z_command_args_t *args, uintptr_t **args_out,
+                        unsigned long **args_len_out,
+                        char ***allocated_strings, int *allocated_count);
 
 /* ====================================================================
  * OPTIONS PARSING HELPERS
@@ -327,9 +346,7 @@ int execute_zunionstore_command(const void *glide_client, const char *dst, size_
 int execute_zpopmax_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value);
 int execute_zpopmin_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value);
 int execute_zscan_command(const void *glide_client, const char *key, size_t key_len, long *cursor, char *pattern, size_t pattern_len, long count, zval *return_value);
-void free_weights_strings(uintptr_t *args, int count);
-int prepare_aggregate_option(zval *options, uintptr_t *agg_arg, unsigned long *agg_len);
-int prepare_weights_array(zval *weights, int weights_count, uintptr_t **args, unsigned long **args_len);
+
 /* ====================================================================
  * UTILITY MACROS
  * ==================================================================== */
