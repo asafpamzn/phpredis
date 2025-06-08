@@ -2494,16 +2494,16 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(['val0', 'val1', 'val2'], $this->redis->zRange('key', 0, -1));
 
         // zGetReverseRange
-echo "zUnionStore with integer and float weights5\n";
+
         $this->assertEquals(1, $this->redis->zAdd('key', 3, 'val3'));
         $this->assertEquals(1, $this->redis->zAdd('key', 3, 'aal3'));
-echo "zUnionStore with integer and float weights6\n";
+
         $zero_to_three = $this->redis->zRangeByScore('key', 0, 3);
-        echo "zUnionStore with integer and float weights7\n";
+        
         $this->assertEquals(['val0', 'val1', 'val2', 'aal3', 'val3'], $zero_to_three);
 
         $three_to_zero = $this->redis->zRevRangeByScore('key', 3, 0);
-        echo "zUnionStore with integer and float weights8\n";
+        
         $this->assertEquals(array_reverse(['val0', 'val1', 'val2', 'aal3', 'val3']), $three_to_zero);
 
         $this->assertEquals(5, $this->redis->zCount('key', 0, 3));
@@ -2518,11 +2518,11 @@ echo "zUnionStore with integer and float weights6\n";
         $this->assertEquals(['val0' => 0.0, 'val1' => 1.0, 'val2' => 2.0, 'val3' => 3.0], $zero_to_three);
         
         $this->assertEquals(4, $this->redis->zCount('key', 0, 3));
-        echo "zUnionStore with integer and float weights4\n";
+        
         
         // limit
         $this->assertEquals(['val0'], $this->redis->zRangeByScore('key', 0, 3, ['limit' => [0, 1]]));
-        return;
+        
         $this->assertEquals(['val0', 'val1'],
                             $this->redis->zRangeByScore('key', 0, 3, ['limit' => [0, 2]]));
         $this->assertEquals(['val1', 'val2'],
@@ -2537,7 +2537,7 @@ echo "zUnionStore with integer and float weights6\n";
         $limit = [0, 100];
         foreach ($limit as &$val) {}
         $this->assertEquals(['val0', 'val1'], $this->redis->zRangeByScore('key', 0, 1, ['limit' => $limit]));
-echo "zUnionStore with integer and float weights3\n";
+
         $this->assertEquals(
             ['val3'], $this->redis->zRevRangeByScore('key', 3, 0, ['limit' => [0, 1]])
         );
@@ -2596,7 +2596,7 @@ echo "zUnionStore with integer and float weights3\n";
         $this->assertEquals(2, $this->redis->zCount('zset', 1, 2));
         $this->assertEquals(1, $this->redis->zCount('zset', '(1', 2));
         $this->assertEquals(0, $this->redis->zCount('zset', '(1', '(2'));
-echo "zUnionStore with integer and float weights2\n";
+
         // zincrby
         $this->redis->del('key');
         $this->assertEquals(1.0, $this->redis->zIncrBy('key', 1, 'val1'));
@@ -2640,7 +2640,7 @@ echo "zUnionStore with integer and float weights2\n";
         $this->redis->zRemRangeByScore('{zset}Z', 0, 10);
         $this->assertEquals(4, $this->redis->zUnionStore('{zset}Z', ['{zset}1', '{zset}2'], [5, 1]));
         $this->assertEquals(['val0', 'val2', 'val3', 'val1'], $this->redis->zRange('{zset}Z', 0, -1));
-        echo "zUnionStore with integer and float weights1\n";
+        
         $this->redis->del('{zset}1');
         $this->redis->del('{zset}2');
         $this->redis->del('{zset}3');
@@ -2667,7 +2667,7 @@ echo "zUnionStore with integer and float weights2\n";
         $this->redis->zadd('{zset}2', 1, 'one');
         $this->redis->zadd('{zset}2', 2, 'two');
         $this->redis->zadd('{zset}2', 3, 'three');
-        echo "zUnionStore with integer and float weights\n";
+        
         $this->assertEquals(3, $this->redis->zUnionStore('{zset}3', ['{zset}1', '{zset}2'], [2, 3.0]));
 
         $this->redis->del('{zset}1');
