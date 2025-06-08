@@ -75,13 +75,13 @@ enum TLSMode
 
 typedef struct
 {
-    //  std::vector<ClusterNode> cluster_nodes_;
     // Credential credential_;
     enum TLSMode tls_mode_;
     uint32_t database_;
     uint32_t request_timeout_;
     char *client_name_;
     enum ReadFrom read_from_;
+    bool is_cluster;
 } ClientConfig;
 /* Forward declaration for ClientAdapter */
 typedef struct ClientAdapter ClientAdapter;

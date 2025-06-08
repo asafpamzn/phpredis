@@ -203,8 +203,14 @@ create_redis_object(zend_class_entry *ce)
     redis_object *redis = ecalloc(1, sizeof(redis_object) + zend_object_properties_size(ce));
 
     redis->sock = NULL;
-
-    redis->glide_client = create_glide_client(NULL); /* Initialize Valkey Glide client pointer to NULL */
+    ClientConfig config;
+    config.tls_mode_ = false;
+    config.database_ = 0;
+    config.request_timeout_ = 250;
+    config.client_name_ = "stam";
+    config.read_from_ = Primary;
+    config.is_cluster = false;
+    redis->glide_client = create_glide_client(&config); /* Initialize Valkey Glide client pointer to NULL */
 
     zend_object_std_init(&redis->std, ce);
     object_properties_init(&redis->std, ce);

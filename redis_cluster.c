@@ -30,6 +30,7 @@
 
 #include <php_variables.h>
 #include <SAPI.h>
+#include "redis_glide.h"
 
 zend_class_entry *redis_cluster_ce;
 
@@ -46,7 +47,6 @@ zend_class_entry *redis_cluster_exception_ce;
 PHP_MINIT_FUNCTION(redis_cluster)
 {
     redis_cluster_ce = register_class_RedisCluster();
-    redis_cluster_ce->create_object = create_cluster_context;
 
     redis_cluster_exception_ce = register_class_RedisClusterException(spl_ce_RuntimeException);
 
@@ -55,194 +55,6 @@ PHP_MINIT_FUNCTION(redis_cluster)
 
 /* Handlers for RedisCluster */
 zend_object_handlers RedisCluster_handlers;
-
-/* Our context seeds will be a hash table with RedisSock* pointers */
-static void ht_free_seed(zval *data)
-{
-    RedisSock *redis_sock = *(RedisSock **)data;
-    if (redis_sock)
-        redis_free_socket(redis_sock);
-}
-
-/* Free redisClusterNode objects we've stored */
-static void ht_free_node(zval *data)
-{
-    redisClusterNode *node = *(redisClusterNode **)data;
-    cluster_free_node(node);
-}
-
-/* Create redisCluster context */
-zend_object *create_cluster_context(zend_class_entry *class_type)
-{
-    redisCluster *cluster;
-
-    // Allocate our actual struct
-    cluster = ecalloc(1, sizeof(redisCluster) + zend_object_properties_size(class_type));
-
-    // We're not currently subscribed anywhere
-    cluster->subscribed_slot = -1;
-
-    // Allocate our RedisSock we'll use to store prefix/serialization flags
-    cluster->flags = ecalloc(1, sizeof(RedisSock));
-
-    // Allocate our hash table for seeds
-    ALLOC_HASHTABLE(cluster->seeds);
-    zend_hash_init(cluster->seeds, 0, NULL, ht_free_seed, 0);
-
-    // Allocate our hash table for connected Redis objects
-    ALLOC_HASHTABLE(cluster->nodes);
-    zend_hash_init(cluster->nodes, 0, NULL, ht_free_node, 0);
-
-    // Initialize it
-    zend_object_std_init(&cluster->std, class_type);
-
-    object_properties_init(&cluster->std, class_type);
-    memcpy(&RedisCluster_handlers, zend_get_std_object_handlers(), sizeof(RedisCluster_handlers));
-    RedisCluster_handlers.offset = XtOffsetOf(redisCluster, std);
-    RedisCluster_handlers.free_obj = free_cluster_context;
-
-    cluster->std.handlers = &RedisCluster_handlers;
-
-    return &cluster->std;
-}
-
-/* Free redisCluster context */
-void free_cluster_context(zend_object *object)
-{
-    redisCluster *cluster = PHPREDIS_GET_OBJECT(redisCluster, object);
-
-    cluster_free(cluster, 0);
-    zend_object_std_dtor(&cluster->std);
-}
-
-/* Take user provided seeds and return unique and valid ones */
-/* Attempt to connect to a Redis cluster provided seeds and timeout options */
-static void redis_cluster_init(redisCluster *c, HashTable *ht_seeds, double timeout,
-                               double read_timeout, int persistent, zend_string *user,
-                               zend_string *pass, zval *context)
-{
-    zend_string *hash = NULL, **seeds;
-    redisCachedCluster *cc;
-    uint32_t nseeds;
-    char *err;
-
-    /* Validate our arguments and get a sanitized seed array */
-    seeds = cluster_validate_args(timeout, read_timeout, ht_seeds, &nseeds, &err);
-    if (seeds == NULL)
-    {
-        CLUSTER_THROW_EXCEPTION(err, 0);
-        return;
-    }
-
-    if (user && ZSTR_LEN(user))
-        c->flags->user = zend_string_copy(user);
-    if (pass && ZSTR_LEN(pass))
-        c->flags->pass = zend_string_copy(pass);
-    if (context)
-    {
-        redis_sock_set_stream_context(c->flags, context);
-    }
-
-    c->flags->timeout = timeout;
-    c->flags->read_timeout = read_timeout;
-    c->flags->persistent = persistent;
-    c->waitms = (long)(1000 * (timeout + read_timeout));
-
-    /* Attempt to load slots from cache if caching is enabled */
-    if (CLUSTER_CACHING_ENABLED())
-    {
-        /* Exit early if we can load from cache */
-        hash = cluster_hash_seeds(seeds, nseeds);
-        if ((cc = cluster_cache_load(hash)))
-        {
-            cluster_init_cache(c, cc);
-            goto cleanup;
-        }
-    }
-
-    /* Initialize seeds and attempt to map keyspace */
-    cluster_init_seeds(c, seeds, nseeds);
-    if (cluster_map_keyspace(c) == SUCCESS && hash)
-        cluster_cache_store(hash, c->nodes);
-
-cleanup:
-    if (hash)
-        zend_string_release(hash);
-    free_seed_array(seeds, nseeds);
-}
-
-/* Attempt to load a named cluster configured in php.ini */
-void redis_cluster_load(redisCluster *c, char *name, int name_len)
-{
-    zval z_seeds, z_tmp, *z_value;
-    zend_string *user = NULL, *pass = NULL;
-    double timeout = 0, read_timeout = 0;
-    int persistent = 0;
-    char *iptr;
-    HashTable *ht_seeds = NULL;
-
-    /* Seeds */
-    array_init(&z_seeds);
-    if ((iptr = INI_STR("redis.clusters.seeds")) != NULL)
-    {
-        sapi_module.treat_data(PARSE_STRING, estrdup(iptr), &z_seeds);
-    }
-    if ((z_value = zend_hash_str_find(Z_ARRVAL(z_seeds), name, name_len)) != NULL)
-    {
-        ht_seeds = Z_ARRVAL_P(z_value);
-    }
-    else
-    {
-        zval_dtor(&z_seeds);
-        CLUSTER_THROW_EXCEPTION("Couldn't find seeds for cluster", 0);
-        return;
-    }
-
-    /* Connection timeout */
-    if ((iptr = INI_STR("redis.clusters.timeout")) != NULL)
-    {
-        array_init(&z_tmp);
-        sapi_module.treat_data(PARSE_STRING, estrdup(iptr), &z_tmp);
-        redis_conf_double(Z_ARRVAL(z_tmp), name, name_len, &timeout);
-        zval_dtor(&z_tmp);
-    }
-
-    /* Read timeout */
-    if ((iptr = INI_STR("redis.clusters.read_timeout")) != NULL)
-    {
-        array_init(&z_tmp);
-        sapi_module.treat_data(PARSE_STRING, estrdup(iptr), &z_tmp);
-        redis_conf_double(Z_ARRVAL(z_tmp), name, name_len, &read_timeout);
-        zval_dtor(&z_tmp);
-    }
-
-    /* Persistent connections */
-    if ((iptr = INI_STR("redis.clusters.persistent")) != NULL)
-    {
-        array_init(&z_tmp);
-        sapi_module.treat_data(PARSE_STRING, estrdup(iptr), &z_tmp);
-        redis_conf_bool(Z_ARRVAL(z_tmp), name, name_len, &persistent);
-        zval_dtor(&z_tmp);
-    }
-
-    if ((iptr = INI_STR("redis.clusters.auth")))
-    {
-        array_init(&z_tmp);
-        sapi_module.treat_data(PARSE_STRING, estrdup(iptr), &z_tmp);
-        redis_conf_auth(Z_ARRVAL(z_tmp), name, name_len, &user, &pass);
-        zval_dtor(&z_tmp);
-    }
-
-    /* Attempt to create/connect to the cluster */
-    redis_cluster_init(c, ht_seeds, timeout, read_timeout, persistent, user, pass, NULL);
-
-    /* Clean up */
-    zval_dtor(&z_seeds);
-    if (user)
-        zend_string_release(user);
-    if (pass)
-        zend_string_release(pass);
-}
 
 /*
  * PHP Methods
@@ -268,26 +80,19 @@ PHP_METHOD(RedisCluster, __construct)
         RETURN_FALSE;
     }
 
-    /* If we've got a string try to load from INI */
-    if (ZEND_NUM_ARGS() < 2)
-    {
-        if (name_len == 0)
-        { // Require a name
-            CLUSTER_THROW_EXCEPTION("You must specify a name or pass seeds!", 0);
-        }
-        redis_cluster_load(c, name, name_len);
-        return;
-    }
-
     /* The normal case, loading from arguments */
-    redis_extract_auth_info(z_auth, &user, &pass);
-    redis_cluster_init(c, Z_ARRVAL_P(z_seeds), timeout, read_timeout,
-                       persistent, user, pass, context);
 
-    if (user)
-        zend_string_release(user);
-    if (pass)
-        zend_string_release(pass);
+    redis_object *redis = PHPREDIS_GET_OBJECT(redis_object, object);
+    ClientConfig config;
+
+    config.tls_mode_ = false;
+    config.database_ = 0;
+    config.request_timeout_ = 250;
+    config.client_name_ = "stam";
+    config.read_from_ = Primary;
+    config.is_cluster = false;
+
+    redis->glide_client = create_glide_client(&config);
 }
 
 /*
@@ -304,28 +109,28 @@ PHP_METHOD(RedisCluster, close)
 /* {{{ proto string RedisCluster::get(string key) */
 PHP_METHOD(RedisCluster, get)
 {
-    CLUSTER_PROCESS_KW_CMD("GET", redis_key_cmd, cluster_bulk_resp, 1);
+    redis_get_implementation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ proto string RedisCluster::getdel(string key) */
 PHP_METHOD(RedisCluster, getdel)
 {
-    CLUSTER_PROCESS_KW_CMD("GETDEL", redis_key_cmd, cluster_bulk_resp, 1);
+    redis_get_implementation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ proto array|false RedisCluster::getWithMeta(string key) */
 PHP_METHOD(RedisCluster, getWithMeta)
 {
-    CLUSTER_PROCESS_KW_CMD("GET", redis_key_cmd, cluster_bulk_withmeta_resp, 1);
+    redis_get_implementation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ proto bool RedisCluster::set(string key, string value) */
 PHP_METHOD(RedisCluster, set)
 {
-    CLUSTER_PROCESS_CMD(set, cluster_set_resp, 0);
+    redis_get_implementation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -3632,6 +3437,5 @@ PHP_METHOD(RedisCluster, copy)
 {
     CLUSTER_PROCESS_CMD(copy, cluster_1_resp, 0)
 }
-
+#endif /* PHP_REDIS_CLUSTER_C */
 /* vim: set tabstop=4 softtabstop=4 expandtab shiftwidth=4: */
-#endif

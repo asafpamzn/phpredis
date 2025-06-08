@@ -23,7 +23,7 @@
 #include <stdio.h>
 
 /* Create a connection request in protobuf format */
-static uint8_t *create_connection_request(const char *host, int port, const char *user, const char *pass, size_t *len)
+static uint8_t *create_connection_request(const char *host, int port, const char *user, const char *pass, size_t *len, ClientConfig *config)
 {
     /* Create a connection request */
     ConnectionRequest__ConnectionRequest conn_req = CONNECTION_REQUEST__CONNECTION_REQUEST__INIT;
@@ -49,7 +49,7 @@ static uint8_t *create_connection_request(const char *host, int port, const char
 
     /* Set default values */
     conn_req.tls_mode = CONNECTION_REQUEST__TLS_MODE__NoTls;
-    conn_req.cluster_mode_enabled = false;
+    conn_req.cluster_mode_enabled = config->is_cluster;
     conn_req.request_timeout = 5000; /* 5 seconds */
     conn_req.read_from = CONNECTION_REQUEST__READ_FROM__Primary;
     conn_req.database_id = 0;
@@ -85,7 +85,8 @@ const void *create_glide_client(ClientConfig *config)
         6379,        /* Default port */
         NULL,        /* No username by default */
         NULL,        /* No password by default */
-        &len);
+        &len,
+        config);
 
     if (!request_bytes)
     {
