@@ -200,308 +200,76 @@ int execute_zscore_command(const void *glide_client, const char *key, size_t key
 int execute_zmscore_command(const void *glide_client, const char *key, size_t key_len,
                             zval *members, int members_count, zval *return_value)
 {
-    /* Check if client, key, and members are valid */
-    if (!glide_client || !key || !members || members_count <= 0)
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.members = members;
+    args.member_count = members_count;
+
+    struct
     {
-        return 0;
-    }
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, 0}; /* ZMSCORE doesn't use withscores */
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1 + members_count; /* key + members */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-    char **allocated_strings = (char **)emalloc(members_count * sizeof(char *));
-
-    if (!args || !args_len || !allocated_strings)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        if (allocated_strings)
-            efree(allocated_strings);
-        return 0;
-    }
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Add members as arguments */
-    int i;
-    int allocated_count = 0;
-    for (i = 0; i < members_count; i++)
-    {
-        zval *z_member = &members[i];
-
-        if (Z_TYPE_P(z_member) == IS_STRING)
-        {
-            args[i + 1] = (uintptr_t)Z_STRVAL_P(z_member);
-            args_len[i + 1] = Z_STRLEN_P(z_member);
-        }
-        else
-        {
-            /* Convert non-string values to string */
-            char *str_val = NULL;
-            size_t str_len = 0;
-
-            if (Z_TYPE_P(z_member) == IS_LONG)
-            {
-                str_val = long_to_string(Z_LVAL_P(z_member), &str_len);
-            }
-            else if (Z_TYPE_P(z_member) == IS_DOUBLE)
-            {
-                str_val = double_to_string(Z_DVAL_P(z_member), &str_len);
-            }
-            else if (Z_TYPE_P(z_member) == IS_TRUE)
-            {
-                str_val = estrdup("1");
-                str_len = 1;
-            }
-            else if (Z_TYPE_P(z_member) == IS_FALSE)
-            {
-                str_val = estrdup("0");
-                str_len = 1;
-            }
-            else
-            {
-                /* Handle other types or error */
-                int j;
-                for (j = 0; j < allocated_count; j++)
-                {
-                    efree(allocated_strings[j]);
-                }
-                efree(allocated_strings);
-                efree(args);
-                efree(args_len);
-                return 0;
-            }
-
-            if (str_val)
-            {
-                args[i + 1] = (uintptr_t)str_val;
-                args_len[i + 1] = str_len;
-                allocated_strings[allocated_count++] = str_val;
-            }
-            else
-            {
-                int j;
-                for (j = 0; j < allocated_count; j++)
-                {
-                    efree(allocated_strings[j]);
-                }
-                efree(allocated_strings);
-                efree(args);
-                efree(args_len);
-                return 0;
-            }
-        }
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZMScore,   /* command type from RequestType enum */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free allocated strings */
-    for (i = 0; i < allocated_count; i++)
-    {
-        efree(allocated_strings[i]);
-    }
-    efree(allocated_strings);
-    efree(args);
-    efree(args_len);
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Process the result */
-    int success = 0;
-    if (result->response && result->response->response_type == Array)
-    {
-        /* Convert array response to PHP array */
-        size_t i;
-        for (i = 0; i < result->response->array_value_len; i++)
-        {
-            struct CommandResponse *element = &result->response->array_value[i];
-            if (element->response_type == String)
-            {
-                add_next_index_stringl(return_value, element->string_value, element->string_value_len);
-            }
-            else if (element->response_type == Null)
-            {
-                add_next_index_null(return_value);
-            }
-        }
-        success = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return success;
+        ZMScore,
+        &args,
+        &array_data,
+        process_z_array_result);
 }
 
 int execute_zrank_command(const void *glide_client, const char *key, size_t key_len,
                           const char *member, size_t member_len, int withscore,
                           long *rank_value, double *score_value)
 {
-    /* Check if client and parameters are valid */
-    if (!glide_client || !key || !member)
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.member = member;
+    args.member_len = member_len;
+    args.withscores = withscore;
+
+    struct
     {
-        return -1;
-    }
+        long *rank;
+        double *score;
+        int withscore;
+    } rank_data = {rank_value, score_value, withscore};
 
-    /* Prepare command arguments */
-    unsigned long arg_count = withscore ? 3 : 2; /* key + member + optional WITHSCORE */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return -1;
-    }
-
-    /* Set arguments */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    args[1] = (uintptr_t)member;
-    args_len[1] = member_len;
-
-    /* Add WITHSCORE if required */
-    if (withscore)
-    {
-        const char *withscore_str = "WITHSCORE";
-        args[2] = (uintptr_t)withscore_str;
-        args_len[2] = 9; /* length of "WITHSCORE" */
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZRank,     /* command type from RequestType enum */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        free_command_result(result);
-        return -1;
-    }
-
-    /* Use common helper to handle rank response */
-    int success = handle_rank_response(result, rank_value, score_value, withscore);
-
-    /* Free the result */
-    free_command_result(result);
-
-    return success;
+        ZRank,
+        &args,
+        &rank_data,
+        process_z_rank_result);
 }
 
 int execute_zrevrank_command(const void *glide_client, const char *key, size_t key_len,
                              const char *member, size_t member_len, int withscore,
                              long *rank_value, double *score_value)
 {
-    /* Check if client and parameters are valid */
-    if (!glide_client || !key || !member)
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.member = member;
+    args.member_len = member_len;
+    args.withscores = withscore;
+
+    struct
     {
-        return -1;
-    }
+        long *rank;
+        double *score;
+        int withscore;
+    } rank_data = {rank_value, score_value, withscore};
 
-    /* Prepare command arguments */
-    unsigned long arg_count = withscore ? 3 : 2; /* key + member + optional WITHSCORE */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return -1;
-    }
-
-    /* Set arguments */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    args[1] = (uintptr_t)member;
-    args_len[1] = member_len;
-
-    /* Add WITHSCORE if required */
-    if (withscore)
-    {
-        const char *withscore_str = "WITHSCORE";
-        args[2] = (uintptr_t)withscore_str;
-        args_len[2] = 9; /* length of "WITHSCORE" */
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZRevRank,  /* command type from RequestType enum */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return -1;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        free_command_result(result);
-        return -1;
-    }
-
-    /* Use common helper to handle rank response */
-    int success = handle_rank_response(result, rank_value, score_value, withscore);
-
-    /* Free the result */
-    free_command_result(result);
-
-    return success;
+        ZRevRank,
+        &args,
+        &rank_data,
+        process_z_rank_result);
 }
 
 int execute_zincrby_command(const void *glide_client, const char *key, size_t key_len,
