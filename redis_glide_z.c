@@ -902,66 +902,18 @@ int execute_zremrangebylex_command(const void *glide_client, const char *key, si
 int execute_zremrangebyrank_command(const void *glide_client, const char *key, size_t key_len,
                                     long start, long end, long *output_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        return 0;
-    }
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.start = start;
+    args.end = end;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 3; /* key + start + end */
-    uintptr_t args[3];
-    unsigned long args_len[3];
-
-    /* Set arguments */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Add start and end parameters */
-    char start_str[32], end_str[32];
-    int start_str_len = snprintf(start_str, sizeof(start_str), "%ld", start);
-    int end_str_len = snprintf(end_str, sizeof(end_str), "%ld", end);
-
-    args[1] = (uintptr_t)start_str;
-    args_len[1] = start_str_len;
-
-    args[2] = (uintptr_t)end_str;
-    args_len[2] = end_str_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZRemRangeByRank, /* command type from RequestType enum */
-        arg_count,       /* number of arguments */
-        args,            /* arguments */
-        args_len         /* argument lengths */
-    );
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Process the result */
-    int success = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        *output_value = result->response->int_value;
-        success = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return success;
+        ZRemRangeByRank,
+        &args,
+        output_value,
+        process_z_int_result);
 }
 
 int execute_zremrangebyscore_command(const void *glide_client, const char *key, size_t key_len,
