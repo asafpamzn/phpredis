@@ -65,6 +65,132 @@ typedef struct
     int withscores;    /* WITHSCORES option */
 } store_options_t;
 
+/**
+ * Generic Z-command arguments structure
+ */
+typedef struct
+{
+    /* Key arguments */
+    const char *key;
+    size_t key_len;
+
+    /* Member arguments */
+    const char *member;
+    size_t member_len;
+
+    /* Multiple members */
+    zval *members;
+    int member_count;
+
+    /* Range arguments */
+    const char *min;
+    size_t min_len;
+    const char *max;
+    size_t max_len;
+
+    /* Numeric range arguments */
+    long start;
+    long end;
+
+    /* Score/increment arguments */
+    double score;
+    double increment;
+
+    /* Options */
+    zval *z_start;
+    zval *z_end;
+    zval *options;
+    zval *weights;
+
+    /* Command-specific flags */
+    int withscores;
+
+    /* Result destinations */
+    long *long_result;
+    double *double_result;
+    zval *zval_result;
+} z_command_args_t;
+
+/**
+ * Result processing callback type
+ */
+typedef int (*z_result_processor_t)(CommandResult *result, void *output);
+
+/* ====================================================================
+ * COMMON EXECUTION FRAMEWORK
+ * ==================================================================== */
+
+/**
+ * Generic Z-command execution framework
+ */
+int execute_z_generic_command(
+    const void *glide_client,
+    enum RequestType cmd_type,
+    z_command_args_t *args,
+    void *result_ptr,
+    z_result_processor_t process_result);
+
+/**
+ * Process integer result (for commands returning count)
+ */
+int process_z_int_result(CommandResult *result, void *output);
+
+/**
+ * Process double result (for commands returning scores)
+ */
+int process_z_double_result(CommandResult *result, void *output);
+
+/**
+ * Process null/exists result (for exists-type commands)
+ */
+int process_z_exists_result(CommandResult *result, void *output);
+
+/**
+ * Process array result (for commands returning arrays)
+ */
+int process_z_array_result(CommandResult *result, void *output);
+
+/**
+ * Process rank result with optional score
+ */
+int process_z_rank_result(CommandResult *result, void *output);
+
+/* ====================================================================
+ * ARGUMENT PREPARATION UTILITIES
+ * ==================================================================== */
+
+/**
+ * Prepare basic Z-command arguments (just key)
+ */
+int prepare_z_key_args(z_command_args_t *args, uintptr_t **args_out,
+                       unsigned long **args_len_out);
+
+/**
+ * Prepare member-based Z-command arguments (key + member)
+ */
+int prepare_z_member_args(z_command_args_t *args, uintptr_t **args_out,
+                          unsigned long **args_len_out);
+
+/**
+ * Prepare range-based Z-command arguments (key + min + max)
+ */
+int prepare_z_range_args(z_command_args_t *args, uintptr_t **args_out,
+                         unsigned long **args_len_out);
+
+/**
+ * Prepare multi-member Z-command arguments (key + multiple members)
+ */
+int prepare_z_members_args(z_command_args_t *args, uintptr_t **args_out,
+                           unsigned long **args_len_out,
+                           char ***allocated_strings, int *allocated_count);
+
+/**
+ * Prepare complex range Z-command arguments with options
+ */
+int prepare_z_complex_range_args(z_command_args_t *args, uintptr_t **args_out,
+                                 unsigned long **args_len_out,
+                                 char ***allocated_strings, int *allocated_count);
+
 /* ====================================================================
  * OPTIONS PARSING HELPERS
  * ==================================================================== */

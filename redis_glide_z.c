@@ -1302,53 +1302,14 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
 
 int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        return 0;
-    }
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1; /* just key */
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* Set arguments */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZCard,     /* command type from RequestType enum */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Process the result */
-    int success = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        *output_value = result->response->int_value;
-        success = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return success;
+        ZCard,
+        &args,
+        output_value,
+        process_z_int_result);
 }

@@ -631,3 +631,757 @@ void free_allocated_strings(char **strings, int count)
         }
     }
 }
+
+/* ====================================================================
+ * COMMON EXECUTION FRAMEWORK IMPLEMENTATION
+ * ==================================================================== */
+
+/**
+ * Generic Z-command execution framework
+ */
+int execute_z_generic_command(
+    const void *glide_client,
+    enum RequestType cmd_type,
+    z_command_args_t *args,
+    void *result_ptr,
+    z_result_processor_t process_result)
+{
+    /* Check if client is valid */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    uintptr_t *arg_values = NULL;
+    unsigned long *arg_lens = NULL;
+    char **allocated_strings = NULL;
+    int allocated_count = 0;
+    int arg_count = 0;
+    int success = 0;
+
+    /* Determine argument preparation method based on command type */
+    switch (cmd_type)
+    {
+    case ZCard:
+        arg_count = prepare_z_key_args(args, &arg_values, &arg_lens);
+        break;
+
+    case ZScore:
+    case ZRank:
+    case ZRevRank:
+        arg_count = prepare_z_member_args(args, &arg_values, &arg_lens);
+        break;
+
+    case ZCount:
+    case ZLexCount:
+    case ZRemRangeByScore:
+    case ZRemRangeByLex:
+        arg_count = prepare_z_range_args(args, &arg_values, &arg_lens);
+        break;
+
+    case ZRem:
+    case ZMScore:
+        allocated_strings = (char **)emalloc(args->member_count * sizeof(char *));
+        if (!allocated_strings)
+        {
+            return 0;
+        }
+        arg_count = prepare_z_members_args(args, &arg_values, &arg_lens,
+                                           &allocated_strings, &allocated_count);
+        break;
+
+    case ZRange:
+    case ZRevRange:
+    case ZRangeByScore:
+    case ZRangeByLex:
+    case ZRevRangeByScore:
+    case ZRevRangeByLex:
+        allocated_strings = (char **)emalloc(10 * sizeof(char *)); /* Enough for typical options */
+        if (!allocated_strings)
+        {
+            return 0;
+        }
+        arg_count = prepare_z_complex_range_args(args, &arg_values, &arg_lens,
+                                                 &allocated_strings, &allocated_count);
+        break;
+
+    case ZIncrBy:
+        arg_count = 3; /* key + increment + member */
+        arg_values = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+        arg_lens = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+        allocated_strings = (char **)emalloc(1 * sizeof(char *));
+
+        if (!arg_values || !arg_lens || !allocated_strings)
+        {
+            if (arg_values)
+                efree(arg_values);
+            if (arg_lens)
+                efree(arg_lens);
+            if (allocated_strings)
+                efree(allocated_strings);
+            return 0;
+        }
+
+        /* Set arguments */
+        arg_values[0] = (uintptr_t)args->key;
+        arg_lens[0] = args->key_len;
+
+        /* Add increment parameter */
+        char increment_str[64];
+        int increment_str_len = snprintf(increment_str, sizeof(increment_str), "%.17g", args->increment);
+        char *increment_str_copy = estrndup(increment_str, increment_str_len);
+        if (!increment_str_copy)
+        {
+            efree(arg_values);
+            efree(arg_lens);
+            efree(allocated_strings);
+            return 0;
+        }
+
+        arg_values[1] = (uintptr_t)increment_str_copy;
+        arg_lens[1] = increment_str_len;
+        allocated_strings[0] = increment_str_copy;
+        allocated_count = 1;
+
+        /* Add member parameter */
+        arg_values[2] = (uintptr_t)args->member;
+        arg_lens[2] = args->member_len;
+        break;
+
+    case ZRemRangeByRank:
+        arg_count = 3; /* key + start + stop */
+        arg_values = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+        arg_lens = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+        allocated_strings = (char **)emalloc(2 * sizeof(char *));
+
+        if (!arg_values || !arg_lens || !allocated_strings)
+        {
+            if (arg_values)
+                efree(arg_values);
+            if (arg_lens)
+                efree(arg_lens);
+            if (allocated_strings)
+                efree(allocated_strings);
+            return 0;
+        }
+
+        /* Set arguments */
+        arg_values[0] = (uintptr_t)args->key;
+        arg_lens[0] = args->key_len;
+
+        /* Add start and end parameters */
+        char start_str[32], end_str[32];
+        int start_str_len = snprintf(start_str, sizeof(start_str), "%ld", args->start);
+        int end_str_len = snprintf(end_str, sizeof(end_str), "%ld", args->end);
+
+        char *start_str_copy = estrndup(start_str, start_str_len);
+        char *end_str_copy = estrndup(end_str, end_str_len);
+        if (!start_str_copy || !end_str_copy)
+        {
+            if (start_str_copy)
+                efree(start_str_copy);
+            efree(arg_values);
+            efree(arg_lens);
+            efree(allocated_strings);
+            return 0;
+        }
+
+        arg_values[1] = (uintptr_t)start_str_copy;
+        arg_lens[1] = start_str_len;
+        allocated_strings[0] = start_str_copy;
+
+        arg_values[2] = (uintptr_t)end_str_copy;
+        arg_lens[2] = end_str_len;
+        allocated_strings[1] = end_str_copy;
+        allocated_count = 2;
+        break;
+
+    default:
+        /* Unsupported command type */
+        return 0;
+    }
+
+    /* Check if argument preparation was successful */
+    if (arg_count <= 0)
+    {
+        if (arg_values)
+            efree(arg_values);
+        if (arg_lens)
+            efree(arg_lens);
+        if (allocated_strings)
+            efree(allocated_strings);
+        return 0;
+    }
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        cmd_type,
+        arg_count,
+        arg_values,
+        arg_lens);
+
+    /* Free allocated strings */
+    int i;
+    for (i = 0; i < allocated_count; i++)
+    {
+        if (allocated_strings[i])
+        {
+            efree(allocated_strings[i]);
+        }
+    }
+    if (allocated_strings)
+        efree(allocated_strings);
+    if (arg_values)
+        efree(arg_values);
+    if (arg_lens)
+        efree(arg_lens);
+
+    /* Check if the command was successful */
+    if (!result)
+    {
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        free_command_result(result);
+        return 0;
+    }
+
+    /* Process the result */
+    success = process_result(result, result_ptr);
+
+    /* Free the result */
+    free_command_result(result);
+
+    return success;
+}
+
+/* ====================================================================
+ * ARGUMENT PREPARATION UTILITIES IMPLEMENTATION
+ * ==================================================================== */
+
+/**
+ * Prepare basic Z-command arguments (just key)
+ */
+int prepare_z_key_args(z_command_args_t *args, uintptr_t **args_out,
+                       unsigned long **args_len_out)
+{
+    if (!args || !args->key || !args_out || !args_len_out)
+    {
+        return 0;
+    }
+
+    unsigned long arg_count = 1; /* just key */
+
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!(*args_out) || !(*args_len_out))
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Set arguments */
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+
+    return arg_count;
+}
+
+/**
+ * Prepare member-based Z-command arguments (key + member)
+ */
+int prepare_z_member_args(z_command_args_t *args, uintptr_t **args_out,
+                          unsigned long **args_len_out)
+{
+    if (!args || !args->key || !args->member || !args_out || !args_len_out)
+    {
+        return 0;
+    }
+
+    unsigned long arg_count = 2; /* key + member */
+
+    if (args->withscores)
+    {
+        arg_count++; /* Add WITHSCORE parameter */
+    }
+
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!(*args_out) || !(*args_len_out))
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Set arguments */
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+
+    (*args_out)[1] = (uintptr_t)args->member;
+    (*args_len_out)[1] = args->member_len;
+
+    /* Add WITHSCORE if required */
+    if (args->withscores)
+    {
+        const char *withscore_str = "WITHSCORE";
+        (*args_out)[2] = (uintptr_t)withscore_str;
+        (*args_len_out)[2] = 9; /* length of "WITHSCORE" */
+    }
+
+    return arg_count;
+}
+
+/**
+ * Prepare range-based Z-command arguments (key + min + max)
+ */
+int prepare_z_range_args(z_command_args_t *args, uintptr_t **args_out,
+                         unsigned long **args_len_out)
+{
+    if (!args || !args->key || !args->min || !args->max || !args_out || !args_len_out)
+    {
+        return 0;
+    }
+
+    unsigned long arg_count = 3; /* key + min + max */
+
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!(*args_out) || !(*args_len_out))
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Set arguments */
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+
+    (*args_out)[1] = (uintptr_t)args->min;
+    (*args_len_out)[1] = args->min_len;
+
+    (*args_out)[2] = (uintptr_t)args->max;
+    (*args_len_out)[2] = args->max_len;
+
+    return arg_count;
+}
+
+/**
+ * Prepare multi-member Z-command arguments (key + multiple members)
+ */
+int prepare_z_members_args(z_command_args_t *args, uintptr_t **args_out,
+                           unsigned long **args_len_out,
+                           char ***allocated_strings, int *allocated_count)
+{
+    if (!args || !args->key || !args->members || args->member_count <= 0 ||
+        !args_out || !args_len_out || !allocated_strings || !allocated_count)
+    {
+        return 0;
+    }
+
+    *allocated_count = 0;
+
+    /* Prepare command arguments */
+    unsigned long arg_count = 1 + args->member_count; /* key + members */
+
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!(*args_out) || !(*args_len_out))
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* First argument: key */
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+
+    /* Add members as arguments */
+    int i;
+    for (i = 0; i < args->member_count; i++)
+    {
+        zval *z_member = &args->members[i];
+
+        if (Z_TYPE_P(z_member) == IS_STRING)
+        {
+            (*args_out)[i + 1] = (uintptr_t)Z_STRVAL_P(z_member);
+            (*args_len_out)[i + 1] = Z_STRLEN_P(z_member);
+        }
+        else
+        {
+            /* Convert non-string values to string */
+            char *str_val = NULL;
+            size_t str_len = 0;
+            int need_free = 0;
+
+            str_val = zval_to_string_safe(z_member, &str_len, &need_free);
+
+            if (!str_val)
+            {
+                int j;
+                for (j = 0; j < *allocated_count; j++)
+                {
+                    efree((*allocated_strings)[j]);
+                }
+                efree(*args_out);
+                efree(*args_len_out);
+                return 0;
+            }
+
+            (*args_out)[i + 1] = (uintptr_t)str_val;
+            (*args_len_out)[i + 1] = str_len;
+
+            if (need_free)
+            {
+                (*allocated_strings)[(*allocated_count)++] = str_val;
+            }
+        }
+    }
+
+    return arg_count;
+}
+
+/**
+ * Convert a zval to a string argument
+ */
+static int convert_zval_to_string_arg(zval *z_value, uintptr_t *arg_ptr, unsigned long *arg_len_ptr,
+                                      char ***allocated_strings, int *allocated_count)
+{
+    if (Z_TYPE_P(z_value) == IS_STRING)
+    {
+        *arg_ptr = (uintptr_t)Z_STRVAL_P(z_value);
+        *arg_len_ptr = Z_STRLEN_P(z_value);
+        return 1;
+    }
+    else
+    {
+        /* Convert non-string values to string */
+        char *str_val = NULL;
+        size_t str_len = 0;
+        int need_free = 0;
+
+        str_val = zval_to_string_safe(z_value, &str_len, &need_free);
+
+        if (!str_val)
+        {
+            return 0;
+        }
+
+        *arg_ptr = (uintptr_t)str_val;
+        *arg_len_ptr = str_len;
+
+        if (need_free)
+        {
+            (*allocated_strings)[(*allocated_count)++] = str_val;
+        }
+
+        return 1;
+    }
+}
+
+/**
+ * Prepare complex range Z-command arguments with options
+ */
+int prepare_z_complex_range_args(z_command_args_t *args, uintptr_t **args_out,
+                                 unsigned long **args_len_out,
+                                 char ***allocated_strings, int *allocated_count)
+{
+    if (!args || !args->key || !args->z_start || !args->z_end ||
+        !args_out || !args_len_out || !allocated_strings || !allocated_count)
+    {
+        return 0;
+    }
+
+    *allocated_count = 0;
+
+    /* Parse range options */
+    range_options_t range_opts = {0};
+    if (!parse_range_options(args->options, &range_opts))
+    {
+        return 0;
+    }
+
+    /* Calculate argument count based on options */
+    unsigned long arg_count = 3; /* key + start + end */
+    if (range_opts.withscores)
+        arg_count++; /* Add WITHSCORES parameter */
+    if (range_opts.byscore)
+        arg_count++; /* Add BYSCORE parameter */
+    if (range_opts.bylex)
+        arg_count++; /* Add BYLEX parameter */
+    if (range_opts.rev)
+        arg_count++; /* Add REV parameter */
+    if (range_opts.has_limit)
+        arg_count += 3; /* Add LIMIT + offset + count parameters */
+
+    /* Allocate memory for arguments */
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!(*args_out) || !(*args_len_out))
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* First argument: key */
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+
+    /* Convert start and end to strings if needed */
+    if (!convert_zval_to_string_arg(args->z_start, &((*args_out)[1]), &((*args_len_out)[1]),
+                                    allocated_strings, allocated_count))
+    {
+        efree(*args_out);
+        efree(*args_len_out);
+        return 0;
+    }
+
+    if (!convert_zval_to_string_arg(args->z_end, &((*args_out)[2]), &((*args_len_out)[2]),
+                                    allocated_strings, allocated_count))
+    {
+        int i;
+        for (i = 0; i < *allocated_count; i++)
+        {
+            efree((*allocated_strings)[i]);
+        }
+        efree(*args_out);
+        efree(*args_len_out);
+        return 0;
+    }
+
+    /* Add optional parameters in the correct order */
+    int arg_idx = 3; /* Start after key, start, end */
+
+    /* Add BYSCORE parameter if required */
+    if (range_opts.byscore)
+    {
+        const char *byscore_str = "BYSCORE";
+        (*args_out)[arg_idx] = (uintptr_t)byscore_str;
+        (*args_len_out)[arg_idx] = 7; /* length of "BYSCORE" */
+        arg_idx++;
+    }
+
+    /* Add BYLEX parameter if required */
+    if (range_opts.bylex)
+    {
+        const char *bylex_str = "BYLEX";
+        (*args_out)[arg_idx] = (uintptr_t)bylex_str;
+        (*args_len_out)[arg_idx] = 5; /* length of "BYLEX" */
+        arg_idx++;
+    }
+
+    /* Add REV parameter if required */
+    if (range_opts.rev)
+    {
+        const char *rev_str = "REV";
+        (*args_out)[arg_idx] = (uintptr_t)rev_str;
+        (*args_len_out)[arg_idx] = 3; /* length of "REV" */
+        arg_idx++;
+    }
+
+    /* Add LIMIT parameter if required */
+    if (range_opts.has_limit)
+    {
+        /* Add LIMIT + offset + count using common helper */
+        arg_idx += create_limit_args(&range_opts, *args_out, *args_len_out,
+                                     arg_idx, *allocated_strings, allocated_count);
+    }
+
+    /* Add WITHSCORES if required - add it last as per Redis command syntax */
+    if (range_opts.withscores)
+    {
+        const char *withscores_str = "WITHSCORES";
+        (*args_out)[arg_idx] = (uintptr_t)withscores_str;
+        (*args_len_out)[arg_idx] = 10; /* length of "WITHSCORES" */
+        arg_idx++;
+    }
+
+    return arg_idx; /* Return actual number of arguments used */
+}
+
+/* ====================================================================
+ * RESULT PROCESSING FUNCTIONS
+ * ==================================================================== */
+
+/**
+ * Process integer result (for commands returning count)
+ */
+int process_z_int_result(CommandResult *result, void *output)
+{
+    long *output_value = (long *)output;
+
+    if (!result || !result->response || !output_value)
+    {
+        return 0;
+    }
+
+    if (result->response->response_type == Int)
+    {
+        *output_value = result->response->int_value;
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Process double result (for commands returning scores)
+ */
+int process_z_double_result(CommandResult *result, void *output)
+{
+    double *output_value = (double *)output;
+
+    if (!result || !result->response || !output_value)
+    {
+        return 0;
+    }
+
+    if (result->response->response_type == String)
+    {
+        /* Parse string as double */
+        char *endptr;
+        *output_value = strtod(result->response->string_value, &endptr);
+        if (*endptr == '\0' || endptr == result->response->string_value + result->response->string_value_len)
+        {
+            return 1;
+        }
+        return 0;
+    }
+
+    if (result->response->response_type == Float)
+    {
+        *output_value = result->response->float_value;
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Process null/exists result (for exists-type commands)
+ */
+int process_z_exists_result(CommandResult *result, void *output)
+{
+    if (!result || !result->response)
+    {
+        return -1;
+    }
+
+    if (result->response->response_type == Null)
+    {
+        return 0; /* Member doesn't exist */
+    }
+
+    return 1; /* Member exists */
+}
+
+/**
+ * Process rank result with optional score
+ */
+int process_z_rank_result(CommandResult *result, void *output)
+{
+    struct
+    {
+        long *rank;
+        double *score;
+        int withscore;
+    } *rank_data = output;
+
+    if (!result || !result->response || !rank_data || !rank_data->rank)
+    {
+        return -1;
+    }
+
+    if (result->response->response_type == Null)
+    {
+        return 0; /* Member doesn't exist */
+    }
+
+    if (result->response->response_type == Int)
+    {
+        *rank_data->rank = result->response->int_value;
+        return 1;
+    }
+
+    if (result->response->response_type == Array && rank_data->withscore && rank_data->score)
+    {
+        /* Array with rank and score [rank, score] */
+        if (result->response->array_value_len >= 2)
+        {
+            CommandResponse *rank_resp = &result->response->array_value[0];
+            CommandResponse *score_resp = &result->response->array_value[1];
+
+            if (rank_resp->response_type == Int &&
+                (score_resp->response_type == String || score_resp->response_type == Float))
+            {
+                *rank_data->rank = rank_resp->int_value;
+
+                if (score_resp->response_type == String)
+                {
+                    char *endptr;
+                    *rank_data->score = strtod(score_resp->string_value, &endptr);
+                }
+                else
+                {
+                    *rank_data->score = score_resp->float_value;
+                }
+
+                return 1;
+            }
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * Process array result (for commands returning arrays)
+ */
+int process_z_array_result(CommandResult *result, void *output)
+{
+    struct
+    {
+        zval *return_value;
+        int withscores;
+    } *array_data = output;
+
+    if (!result || !result->response || !array_data || !array_data->return_value)
+    {
+        return 0;
+    }
+
+    /* Process the result */
+    int success = command_response_to_zval(result->response, array_data->return_value,
+                                           COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+
+    if (array_data->withscores && success && Z_TYPE_P(array_data->return_value) == IS_ARRAY)
+    {
+        /* Use common helper to flatten withscores array */
+        flatten_withscores_array(array_data->return_value);
+    }
+
+    return success;
+}
