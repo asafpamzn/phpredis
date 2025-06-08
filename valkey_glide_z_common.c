@@ -575,6 +575,7 @@ int handle_rank_response(CommandResult *result, long *rank, double *score, int w
  */
 int flatten_withscores_array(zval *return_value)
 {
+
     if (!return_value || Z_TYPE_P(return_value) != IS_ARRAY)
     {
         return 0;
@@ -587,6 +588,7 @@ int flatten_withscores_array(zval *return_value)
     zval *entry;
     ZEND_HASH_FOREACH_VAL(ht, entry)
     {
+
         if (Z_TYPE_P(entry) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(entry)) == 2)
         {
             zval *z_member = zend_hash_index_find(Z_ARRVAL_P(entry), 0);
@@ -602,6 +604,7 @@ int flatten_withscores_array(zval *return_value)
 
                 /* Add to associative array: member => score */
                 Z_TRY_ADDREF_P(z_score);
+
                 add_assoc_zval(&tmp_arr, Z_STRVAL_P(z_member), z_score);
             }
         }
@@ -1375,13 +1378,16 @@ int process_z_array_result(CommandResult *result, void *output)
 
     /* Process the result */
     int success = command_response_to_zval(result->response, array_data->return_value,
-                                           COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+                                           COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
 
+#if 0
     if (array_data->withscores && success && Z_TYPE_P(array_data->return_value) == IS_ARRAY)
     {
         /* Use common helper to flatten withscores array */
+        printf("Flattening withscores array\n");
         flatten_withscores_array(array_data->return_value);
     }
+#endif
 
     return success;
 }

@@ -1028,276 +1028,29 @@ int execute_zremrangebyscore_command(const void *glide_client, const char *key, 
 int execute_zrange_command(const void *glide_client, const char *key, size_t key_len,
                            zval *z_start, zval *z_end, zval *options, zval *return_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        printf("Invalid glide client or key for ZRANGE command.\n");
-        return 0;
-    }
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.z_start = z_start;
+    args.z_end = z_end;
+    args.options = options;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 3; /* key + start + end */
-    uintptr_t *args = NULL;
-    unsigned long *args_len = NULL;
-    char **allocated_strings = NULL;
-    int allocated_count = 0;
-    int success = 0;
-
-    /* Parse range options using common helper */
+    /* Parse options to determine if withscores is set */
     range_options_t range_opts = {0};
-    if (!parse_range_options(options, &range_opts))
+    parse_range_options(options, &range_opts);
+
+    struct
     {
-        return 0;
-    }
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, range_opts.withscores};
 
-    /* Calculate argument count based on options */
-    if (range_opts.withscores)
-        arg_count++; /* Add WITHSCORES parameter */
-    if (range_opts.byscore)
-        arg_count++; /* Add BYSCORE parameter */
-    if (range_opts.bylex)
-        arg_count++; /* Add BYLEX parameter */
-    if (range_opts.rev)
-        arg_count++; /* Add REV parameter */
-    if (range_opts.has_limit)
-        arg_count += 3; /* Add LIMIT + offset + count parameters */
-    /* Allocate memory for arguments */
-    args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-    allocated_strings = (char **)emalloc((arg_count - 1) * sizeof(char *)); /* For potential string conversions */
-
-    if (!args || !args_len || !allocated_strings)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        if (allocated_strings)
-            efree(allocated_strings);
-
-        return 0;
-    }
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Convert start to string if needed */
-    if (Z_TYPE_P(z_start) == IS_STRING)
-    {
-        args[1] = (uintptr_t)Z_STRVAL_P(z_start);
-        args_len[1] = Z_STRLEN_P(z_start);
-    }
-    else
-    {
-        char *str_val = NULL;
-        size_t str_len = 0;
-
-        if (Z_TYPE_P(z_start) == IS_LONG)
-        {
-            str_val = long_to_string(Z_LVAL_P(z_start), &str_len);
-        }
-        else if (Z_TYPE_P(z_start) == IS_DOUBLE)
-        {
-            str_val = double_to_string(Z_DVAL_P(z_start), &str_len);
-        }
-
-        if (str_val)
-        {
-            args[1] = (uintptr_t)str_val;
-            args_len[1] = str_len;
-            allocated_strings[allocated_count++] = str_val;
-        }
-        else
-        {
-            /* Error handling */
-            int i;
-            for (i = 0; i < allocated_count; i++)
-            {
-                efree(allocated_strings[i]);
-            }
-            efree(allocated_strings);
-            efree(args);
-            efree(args_len);
-
-            return 0;
-        }
-    }
-    /* Convert end to string if needed */
-    if (Z_TYPE_P(z_end) == IS_STRING)
-    {
-        args[2] = (uintptr_t)Z_STRVAL_P(z_end);
-        args_len[2] = Z_STRLEN_P(z_end);
-    }
-    else
-    {
-        char *str_val = NULL;
-        size_t str_len = 0;
-
-        if (Z_TYPE_P(z_end) == IS_LONG)
-        {
-            str_val = long_to_string(Z_LVAL_P(z_end), &str_len);
-        }
-        else if (Z_TYPE_P(z_end) == IS_DOUBLE)
-        {
-            str_val = double_to_string(Z_DVAL_P(z_end), &str_len);
-        }
-
-        if (str_val)
-        {
-            args[2] = (uintptr_t)str_val;
-            args_len[2] = str_len;
-            allocated_strings[allocated_count++] = str_val;
-        }
-        else
-        {
-            /* Error handling */
-            int i;
-            for (i = 0; i < allocated_count; i++)
-            {
-                efree(allocated_strings[i]);
-            }
-            efree(allocated_strings);
-            efree(args);
-            efree(args_len);
-
-            return 0;
-        }
-    }
-    /* Add optional parameters in the correct order */
-    int arg_idx = 3; /* Start after key, start, end */
-
-    /* Add BYSCORE parameter if required */
-    if (range_opts.byscore)
-    {
-        const char *byscore_str = "BYSCORE";
-        args[arg_idx] = (uintptr_t)byscore_str;
-        args_len[arg_idx] = 7; /* length of "BYSCORE" */
-        arg_idx++;
-    }
-
-    /* Add BYLEX parameter if required */
-    if (range_opts.bylex)
-    {
-        const char *bylex_str = "BYLEX";
-        args[arg_idx] = (uintptr_t)bylex_str;
-        args_len[arg_idx] = 5; /* length of "BYLEX" */
-        arg_idx++;
-    }
-
-    /* Add REV parameter if required */
-    if (range_opts.rev)
-    {
-        const char *rev_str = "REV";
-        args[arg_idx] = (uintptr_t)rev_str;
-        args_len[arg_idx] = 3; /* length of "REV" */
-        arg_idx++;
-    }
-
-    /* Add LIMIT parameter if required */
-    if (range_opts.has_limit)
-    {
-        /* Add LIMIT keyword */
-        const char *limit_str = "LIMIT";
-        args[arg_idx] = (uintptr_t)limit_str;
-        args_len[arg_idx] = 5; /* length of "LIMIT" */
-        arg_idx++;
-
-        /* Add offset parameter */
-        char offset_str[32];
-        int offset_str_len = snprintf(offset_str, sizeof(offset_str), "%ld", range_opts.limit_offset);
-        char *offset_str_copy = estrndup(offset_str, offset_str_len);
-        if (!offset_str_copy)
-        {
-            /* Error handling */
-            int i;
-            for (i = 0; i < allocated_count; i++)
-            {
-                efree(allocated_strings[i]);
-            }
-            efree(allocated_strings);
-            efree(args);
-            efree(args_len);
-
-            return 0;
-        }
-        args[arg_idx] = (uintptr_t)offset_str_copy;
-        args_len[arg_idx] = offset_str_len;
-        allocated_strings[allocated_count++] = offset_str_copy;
-        arg_idx++;
-
-        /* Add count parameter */
-        char count_str[32];
-        int count_str_len = snprintf(count_str, sizeof(count_str), "%ld", range_opts.limit_count);
-        char *count_str_copy = estrndup(count_str, count_str_len);
-        if (!count_str_copy)
-        {
-            /* Error handling */
-            int i;
-            for (i = 0; i < allocated_count; i++)
-            {
-                efree(allocated_strings[i]);
-            }
-            efree(allocated_strings);
-            efree(args);
-            efree(args_len);
-
-            return 0;
-        }
-        args[arg_idx] = (uintptr_t)count_str_copy;
-        args_len[arg_idx] = count_str_len;
-        allocated_strings[allocated_count++] = count_str_copy;
-        arg_idx++;
-    }
-
-    /* Add WITHSCORES if required - add it last as per Redis command syntax */
-    if (range_opts.withscores)
-    {
-        const char *withscores_str = "WITHSCORES";
-        args[arg_idx] = (uintptr_t)withscores_str;
-        args_len[arg_idx] = 10; /* length of "WITHSCORES" */
-        arg_idx++;
-    }
-
-    /* Execute the command */
-
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZRange,    /* command type from RequestType enum */
-        arg_count, /* number of arguments */
-        args,      /* arguments array */
-        args_len   /* argument lengths array */
-    );
-    /* Free allocated strings */
-    int i;
-    for (i = 0; i < allocated_count; i++)
-    {
-        efree(allocated_strings[i]);
-    }
-    efree(allocated_strings);
-    efree(args);
-    efree(args_len);
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        free_command_result(result);
-
-        return 0;
-    }
-    /* Process the result */
-    success = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
-
-    free_command_result(result);
-
-    return success;
+        ZRange,
+        &args,
+        &array_data,
+        process_z_array_result);
 }
 
 int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
