@@ -788,6 +788,18 @@ int execute_z_generic_command(
         allocated_count = 2;
         break;
 
+    case ZDiffStore:
+    case ZInterStore:
+    case ZUnionStore:
+        allocated_strings = (char **)emalloc(20 * sizeof(char *)); /* Enough for store commands */
+        if (!allocated_strings)
+        {
+            return 0;
+        }
+        arg_count = prepare_z_store_args(args, &arg_values, &arg_lens,
+                                         &allocated_strings, &allocated_count);
+        break;
+
     default:
         /* Unsupported command type */
         return 0;
@@ -1212,6 +1224,163 @@ int prepare_z_complex_range_args(z_command_args_t *args, uintptr_t **args_out,
     }
 
     return arg_idx; /* Return actual number of arguments used */
+}
+
+/**
+ * Prepare store command arguments (destination + numkeys + keys + weights + aggregate)
+ */
+int prepare_z_store_args(z_command_args_t *args, uintptr_t **args_out,
+                         unsigned long **args_len_out,
+                         char ***allocated_strings, int *allocated_count)
+{
+    if (!args || !args->key || !args->members || args->member_count <= 0 ||
+        !args_out || !args_len_out || !allocated_strings || !allocated_count)
+    {
+        return 0;
+    }
+
+    *allocated_count = 0;
+
+    /* Parse store options */
+    store_options_t store_opts = {0};
+    parse_store_options(args->weights, args->options, &store_opts);
+
+    /* Calculate total arguments (destination + numkeys + keys + optional WEIGHTS + optional AGGREGATE) */
+    unsigned long arg_count = 2 + args->member_count; /* destination + numkeys + keys */
+    int weights_count = 0;
+
+    if (store_opts.has_weights)
+    {
+        weights_count = zend_hash_num_elements(Z_ARRVAL_P(store_opts.weights));
+        arg_count += 1 + weights_count; /* WEIGHTS + values */
+    }
+
+    if (store_opts.has_aggregate)
+    {
+        arg_count += 2; /* AGGREGATE + value */
+    }
+
+    /* Allocate final args arrays */
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!(*args_out) || !(*args_len_out))
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Set destination */
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+
+    /* Add numkeys as the second argument */
+    char numkeys_str[32];
+    snprintf(numkeys_str, sizeof(numkeys_str), "%d", args->member_count);
+    char *numkeys_str_copy = estrdup(numkeys_str);
+    if (!numkeys_str_copy)
+    {
+        efree(*args_out);
+        efree(*args_len_out);
+        return 0;
+    }
+    (*args_out)[1] = (uintptr_t)numkeys_str_copy;
+    (*args_len_out)[1] = strlen(numkeys_str);
+    (*allocated_strings)[(*allocated_count)++] = numkeys_str_copy;
+
+    /* Add keys starting from index 2 */
+    HashTable *keys_hash = Z_ARRVAL_P(args->members); /* members field is reused for keys */
+    zval *key;
+    int idx = 2;
+    ZEND_HASH_FOREACH_VAL(keys_hash, key)
+    {
+        if (Z_TYPE_P(key) != IS_STRING)
+        {
+            convert_to_string(key);
+        }
+        (*args_out)[idx] = (uintptr_t)Z_STRVAL_P(key);
+        (*args_len_out)[idx] = Z_STRLEN_P(key);
+        idx++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    unsigned int offset = 2 + args->member_count;
+
+    /* Add WEIGHTS if present */
+    if (store_opts.has_weights)
+    {
+        (*args_out)[offset] = (uintptr_t)"WEIGHTS";
+        (*args_len_out)[offset] = 7;
+        offset++;
+
+        /* Add weights values using framework helper */
+        HashTable *weights_hash = Z_ARRVAL_P(store_opts.weights);
+        zval *weight;
+        ZEND_HASH_FOREACH_VAL(weights_hash, weight)
+        {
+            char *weight_str = NULL;
+            size_t weight_len = 0;
+            int need_free = 0;
+
+            weight_str = zval_to_string_safe(weight, &weight_len, &need_free);
+
+            if (!weight_str)
+            {
+                /* Cleanup on error */
+                int j;
+                for (j = 0; j < *allocated_count; j++)
+                {
+                    efree((*allocated_strings)[j]);
+                }
+                efree(*args_out);
+                efree(*args_len_out);
+                return 0;
+            }
+
+            (*args_out)[offset] = (uintptr_t)weight_str;
+            (*args_len_out)[offset] = weight_len;
+
+            if (need_free)
+            {
+                (*allocated_strings)[(*allocated_count)++] = weight_str;
+            }
+
+            offset++;
+        }
+        ZEND_HASH_FOREACH_END();
+    }
+
+    /* Add AGGREGATE if present */
+    if (store_opts.has_aggregate)
+    {
+        (*args_out)[offset] = (uintptr_t)"AGGREGATE";
+        (*args_len_out)[offset] = 9;
+        offset++;
+
+        const char *agg_str = Z_STRVAL_P(store_opts.aggregate);
+        char *agg_str_copy = estrdup(agg_str);
+        if (!agg_str_copy)
+        {
+            /* Cleanup on error */
+            int j;
+            for (j = 0; j < *allocated_count; j++)
+            {
+                efree((*allocated_strings)[j]);
+            }
+            efree(*args_out);
+            efree(*args_len_out);
+            return 0;
+        }
+
+        (*args_out)[offset] = (uintptr_t)agg_str_copy;
+        (*args_len_out)[offset] = Z_STRLEN_P(store_opts.aggregate);
+        (*allocated_strings)[(*allocated_count)++] = agg_str_copy;
+    }
+
+    return arg_count;
 }
 
 /* ====================================================================

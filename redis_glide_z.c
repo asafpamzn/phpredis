@@ -411,159 +411,20 @@ int execute_zcard_command(const void *glide_client, const char *key, size_t key_
 int execute_zstore_command(const void *glide_client, enum RequestType cmd_type, const char *dst, size_t dst_len,
                            zval *keys, int keys_count, zval *weights, zval *options, long *output_value)
 {
-    /* Check if client and keys are valid */
-    if (!glide_client || !dst || dst_len <= 0 || !keys || keys_count <= 0)
-    {
-        return 0;
-    }
+    z_command_args_t args = {0};
+    args.key = dst; /* Store commands use destination as key */
+    args.key_len = dst_len;
+    args.members = keys; /* Reuse members field for keys array */
+    args.member_count = keys_count;
+    args.weights = weights;
+    args.options = options;
 
-    /* Prepare keys arguments */
-    uintptr_t *keys_args = NULL;
-    unsigned long *keys_len = NULL;
-
-    if (!prepare_keys_array(keys, keys_count, &keys_args, &keys_len))
-    {
-        return 0;
-    }
-
-    /* Calculate total arguments (destination + numkeys + keys + WEIGHTS + AGGREGATE if present) */
-    unsigned long arg_count = 2 + keys_count; /* destination + numkeys + keys */
-    int has_weights = 0;
-    int has_aggregate = 0;
-    uintptr_t *weights_args = NULL;
-    unsigned long *weights_len = NULL;
-    uintptr_t agg_type = 0;
-    unsigned long agg_len = 0;
-
-    /* Check for weights */
-    if (weights && Z_TYPE_P(weights) == IS_ARRAY)
-    {
-        int weights_count = zend_hash_num_elements(Z_ARRVAL_P(weights));
-        if (weights_count > 0)
-        {
-            has_weights = 1;
-            if (!prepare_weights_array(weights, weights_count, &weights_args, &weights_len))
-            {
-                efree(keys_args);
-                efree(keys_len);
-                return 0;
-            }
-            arg_count += 1 + weights_count; /* WEIGHTS + values */
-        }
-    }
-
-    /* Check for AGGREGATE option */
-    if (options && Z_TYPE_P(options) == IS_ARRAY)
-    {
-        /* Add aggregate if present */
-        if (prepare_aggregate_option(options, &agg_type, &agg_len))
-        {
-            has_aggregate = 1;
-            arg_count += 2; /* AGGREGATE + value */
-        }
-    }
-
-    /* Allocate final args arrays */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (keys_args)
-            efree(keys_args);
-        if (keys_len)
-            efree(keys_len);
-        if (weights_args)
-        {
-            free_weights_strings(weights_args, zend_hash_num_elements(Z_ARRVAL_P(weights)));
-            efree(weights_args);
-        }
-        if (weights_len)
-            efree(weights_len);
-        if (has_aggregate)
-            efree((void *)agg_type);
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Set destination */
-    args[0] = (uintptr_t)dst;
-    args_len[0] = dst_len;
-
-    /* Add numkeys as the second argument - required by the Redis command format */
-    char numkeys_str[32];
-    snprintf(numkeys_str, sizeof(numkeys_str), "%d", keys_count);
-    args[1] = (uintptr_t)estrdup(numkeys_str);
-    args_len[1] = strlen(numkeys_str);
-
-    /* Copy keys to args array starting from index 2 */
-    memcpy(args + 2, keys_args, keys_count * sizeof(uintptr_t));
-    memcpy(args_len + 2, keys_len, keys_count * sizeof(unsigned long));
-    unsigned int offset = 2 + keys_count;
-
-    /* Add WEIGHTS if present */
-    if (has_weights)
-    {
-        int weights_count = zend_hash_num_elements(Z_ARRVAL_P(weights));
-
-        /* Add WEIGHTS keyword */
-        args[offset] = (uintptr_t)"WEIGHTS";
-        args_len[offset] = 7;
-        offset++;
-
-        /* Add weights values */
-        memcpy(args + offset, weights_args, weights_count * sizeof(uintptr_t));
-        memcpy(args_len + offset, weights_len, weights_count * sizeof(unsigned long));
-        offset += weights_count;
-    }
-
-    /* Add AGGREGATE if present */
-    if (has_aggregate)
-    {
-        /* Add AGGREGATE keyword */
-        args[offset] = (uintptr_t)"AGGREGATE";
-        args_len[offset] = 9;
-        offset++;
-
-        /* Add aggregate value */
-        args[offset] = agg_type;
-        args_len[offset] = agg_len;
-        offset++;
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        cmd_type,  /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the numkeys string we allocated */
-    efree((void *)args[1]);
-
-    /* Free the argument arrays */
-    efree(keys_args);
-    efree(keys_len);
-    if (has_weights)
-    {
-        free_weights_strings(weights_args, zend_hash_num_elements(Z_ARRVAL_P(weights)));
-        efree(weights_args);
-        efree(weights_len);
-    }
-    if (has_aggregate)
-    {
-        efree((void *)agg_type);
-    }
-    efree(args);
-    efree(args_len);
-
-    /* Process the result */
-    return handle_int_response(result, output_value);
+        cmd_type,
+        &args,
+        output_value,
+        process_z_int_result);
 }
 
 /* Execute a ZDIFFSTORE command using the Valkey Glide client */

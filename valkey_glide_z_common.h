@@ -191,6 +191,13 @@ int prepare_z_complex_range_args(z_command_args_t *args, uintptr_t **args_out,
                                  unsigned long **args_len_out,
                                  char ***allocated_strings, int *allocated_count);
 
+/**
+ * Prepare store command arguments (destination + numkeys + keys + weights + aggregate)
+ */
+int prepare_z_store_args(z_command_args_t *args, uintptr_t **args_out,
+                         unsigned long **args_len_out,
+                         char ***allocated_strings, int *allocated_count);
+
 /* ====================================================================
  * OPTIONS PARSING HELPERS
  * ==================================================================== */
