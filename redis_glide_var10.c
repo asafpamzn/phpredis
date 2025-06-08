@@ -163,7 +163,7 @@ int execute_function_command(const void *glide_client, zval *args, int args_coun
         if (result->response)
         {
             /* FUNCTION can return various types based on subcommand */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
             free_command_result(result);
             return status;
         }
@@ -264,7 +264,7 @@ int execute_exec_command(const void *glide_client, zval *return_value)
         if (result->response)
         {
             /* EXEC returns an array of results */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
             free_command_result(result);
             return status;
         }
@@ -358,7 +358,7 @@ int execute_fcall_command(const void *glide_client, const char *name, size_t nam
         if (result->response)
         {
             /* FCALL can return various types */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
             free_command_result(result);
             return status;
         }
@@ -452,7 +452,7 @@ int execute_fcall_ro_command(const void *glide_client, const char *name, size_t 
         if (result->response)
         {
             /* FCALL_RO can return various types */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
             free_command_result(result);
             return status;
         }

@@ -281,7 +281,7 @@ int execute_zmpop_command(const void *glide_client, const char *cmd, double time
     /* Process the result */
     /* For ZMPOP, use associative array format for the values */
     int use_assoc = COMMAND_RESPONSE_ASSOSIATIVE_ARRAY; /* Always use associative arrays for sorted set responses */
-    int ret_val = command_response_to_zval(cmd_result->response, result, use_assoc);
+    int ret_val = command_response_to_zval(cmd_result->response, result, use_assoc, false);
 
     /* Free the result */
     free_command_result(cmd_result);
@@ -486,7 +486,7 @@ int execute_lmpop_command(const void *glide_client, const char *cmd, double time
     int ret_val = 0;
     /* For ZMPOP, use associative array format for the values */
     int use_assoc = (strncmp(cmd, "ZMPOP", 5) == 0 || strncmp(cmd, "BZMPOP", 6) == 0) ? COMMAND_RESPONSE_ASSOSIATIVE_ARRAY : COMMAND_RESPONSE_NOT_ASSOSIATIVE;
-    ret_val = command_response_to_zval(cmd_result->response, result, use_assoc);
+    ret_val = command_response_to_zval(cmd_result->response, result, use_assoc, false);
 
     /* Free the result */
     free_command_result(cmd_result);

@@ -173,7 +173,7 @@ int execute_xautoclaim_command(const void *glide_client, const char *key, size_t
         if (result->response)
         {
             /* XAUTOCLAIM returns array with [next-id, claimed-entries] */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_STREAM_ARRAY_ASSOCIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_STREAM_ARRAY_ASSOCIATIVE, false);
             free_command_result(result);
             return status;
         }
@@ -428,7 +428,7 @@ int execute_xclaim_command(const void *glide_client, const char *key, size_t key
             {
                 // printf("file = %s, line = %d, JUSTID was specified\n", __FILE__, __LINE__);
                 /* If JUSTID was specified, we return an array of IDs */
-                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
             }
             else
             {
@@ -519,7 +519,7 @@ int execute_xgroup_command(const void *glide_client, const char *subcommand, siz
         if (result->response)
         {
             /* XGROUP response depends on subcommand */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
             free_command_result(result);
             return status;
         }
@@ -726,7 +726,7 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
             if (result->response)
             {
                 /* XINFO returns information about the stream */
-                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
+                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
                 free_command_result(result);
                 return status;
             }
@@ -841,7 +841,7 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
             if (result->response)
             {
                 /* XINFO returns information about the stream or consumers */
-                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
+                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
                 free_command_result(result);
                 return status;
             }

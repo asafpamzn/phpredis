@@ -264,7 +264,7 @@ int execute_config_command(const void *glide_client, const char *operation, size
             if (command_type == ConfigGet)
             {
                 /* CONFIG GET returns a Map - convert to associative array */
-                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
+                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
             }
             else
             {

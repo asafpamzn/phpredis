@@ -250,7 +250,7 @@ int execute_client_command(const void *glide_client, zval *args, int args_count,
         if (result->response)
         {
             /* Convert the response to PHP value */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
         }
         free_command_result(result);
     }
@@ -353,7 +353,7 @@ int execute_rawcommand_command(const void *glide_client, zval *args, int args_co
         if (result->response)
         {
             /* Convert the response to PHP value */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
         }
         free_command_result(result);
     }
@@ -400,7 +400,7 @@ int execute_command_method(const void *glide_client, zval *args, int args_count,
             if (result->response)
             {
                 /* Convert the response to PHP value */
-                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
             }
             free_command_result(result);
         }
@@ -558,7 +558,7 @@ int execute_command_method(const void *glide_client, zval *args, int args_count,
         if (result->response)
         {
             /* Convert the response to PHP value */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
         }
         free_command_result(result);
     }

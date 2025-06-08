@@ -224,7 +224,7 @@ int execute_hscan_command(const void *glide_client, const char *key, size_t key_
         if (result->response && result->response->response_type == Array)
         {
             /* Convert the nested array result to PHP array */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
         }
         free_command_result(result);
     }

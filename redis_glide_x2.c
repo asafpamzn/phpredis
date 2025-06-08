@@ -181,7 +181,7 @@ int execute_xpending_command(const void *glide_client, const char *key, size_t k
         if (result->response)
         {
             /* XPENDING returns pending entries info */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
 
             /* Special handling for empty XPENDING response */
             if (status && Z_TYPE_P(return_value) == IS_ARRAY)
@@ -595,7 +595,7 @@ int execute_xreadgroup_command(const void *glide_client, const char *group, size
                     if (element->map_key && element->map_key->response_type == String && element->map_value)
                     {
                         zval stream_name;
-                        command_response_to_zval(element->map_key, &stream_name, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+                        command_response_to_zval(element->map_key, &stream_name, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
 
                         /* Create associative array for stream entries */
 

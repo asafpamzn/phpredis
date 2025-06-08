@@ -123,7 +123,7 @@ int handle_set_response(CommandResult *result, zval *output);
  * - 0: regular array processing
  * - 1: convert Map elements to associative array format (for ZMPOP/sorted sets)
  */
-int command_response_to_zval(CommandResponse *response, zval *output, int use_associative_array);
+int command_response_to_zval(CommandResponse *response, zval *output, int use_associative_array, bool use_false_if_null);
 
 /*
  * Helper function to convert a long value to a string

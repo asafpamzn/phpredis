@@ -211,7 +211,7 @@ int execute_acl_command(const void *glide_client, zval *args, int args_count, zv
         if (result->response)
         {
             /* ACL can return various types based on subcommand */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
             free_command_result(result);
             return status;
         }
@@ -394,7 +394,7 @@ int execute_lpos_command(const void *glide_client, const char *key, size_t key_l
         if (result->response)
         {
             /* LPOS returns position(s) of the element */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
             free_command_result(result);
             return status;
         }

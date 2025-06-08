@@ -188,7 +188,7 @@ int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_
             {
             case String:
                 /* If no options were specified, LCS returns the longest common substring as a string */
-                command_response_to_zval(cmd_result->response, result, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
+                command_response_to_zval(cmd_result->response, result, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
                 ret_val = 1;
                 break;
 

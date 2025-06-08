@@ -477,7 +477,7 @@ int execute_zunion_command(const void *glide_client, zval *keys, int keys_count,
         if (result->response)
         {
             /* ZUNION returns array of members with scores */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
             free_command_result(result);
             return status;
         }
@@ -717,7 +717,7 @@ int execute_zpopmax_command(const void *glide_client, const char *key, size_t ke
         if (result->response)
         {
             /* ZPOPMAX returns an array of member-score pairs */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
             free_command_result(result);
             return status;
         }
@@ -777,7 +777,7 @@ int execute_zpopmin_command(const void *glide_client, const char *key, size_t ke
         if (result->response)
         {
             /* ZPOPMIN returns an array of member-score pairs */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
             free_command_result(result);
             return status;
         }
@@ -911,7 +911,7 @@ int execute_zscan_command(const void *glide_client, const char *key, size_t key_
             CommandResponse *elements = &result->response->array_value[1];
             if (elements->response_type == Array)
             {
-                command_response_to_zval(elements, &z_elements, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY);
+                command_response_to_zval(elements, &z_elements, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
                 add_next_index_zval(return_value, &z_elements);
             }
             else
