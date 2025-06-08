@@ -123,7 +123,7 @@ extern int execute_info_command(const void *glide_client, const char *section, s
 extern int execute_info_sections_command(const void *glide_client, zval *sections, int sections_count, char **result, size_t *result_len);
 
 /* Increment operations */
-extern long execute_incr_command(const void *glide_client, const char *key, size_t key_len);
+long execute_incr_command(const void *glide_client, const char *key, size_t key_len);
 extern long execute_incrby_command(const void *glide_client, const char *key, size_t key_len, long value);
 extern int execute_incrbyfloat_command(const void *glide_client, const char *key, size_t key_len, double value, double *result);
 

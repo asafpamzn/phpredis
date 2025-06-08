@@ -358,13 +358,11 @@ int execute_zpopmax_command(const void *glide_client, const char *key, size_t ke
 int execute_zpopmin_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value);
 int execute_zscan_command(const void *glide_client, const char *key, size_t key_len, long *cursor, char *pattern, size_t pattern_len, long count, zval *return_value);
 
-/* Functions from redis_glide_zadd2.c */
 int execute_zrevrange_command(const void *glide_client, const char *key, size_t key_len, zval *z_start, zval *z_end, zval *options, zval *return_value);
 int execute_zrangebyscore_command(const void *glide_client, const char *key, size_t key_len, zval *z_min, zval *z_max, zval *options, zval *return_value);
 int execute_zrevrangebyscore_command(const void *glide_client, const char *key, size_t key_len, zval *z_max, zval *z_min, zval *options, zval *return_value);
 int execute_zrangebylex_command(const void *glide_client, const char *key, size_t key_len, zval *z_min, zval *z_max, zval *options, zval *return_value);
 
-/* Functions from redis_glide_zadd3.c */
 int execute_zrevrangebylex_command(const void *glide_client, const char *key, size_t key_len, zval *z_max, zval *z_min, zval *options, zval *return_value);
 int execute_zdiff_command(const void *glide_client, zval *keys, zval *options, zval *return_value);
 int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights, zval *options, zval *return_value);
