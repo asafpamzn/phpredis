@@ -508,64 +508,25 @@ int execute_zincrby_command(const void *glide_client, const char *key, size_t ke
                             double increment, const char *member, size_t member_len,
                             double *output_value)
 {
-    /* Check if client and parameters are valid */
-    if (!glide_client || !key || !member)
-    {
-        return 0;
-    }
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.increment = increment;
+    args.member = member;
+    args.member_len = member_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 3; /* key + increment + member */
-    uintptr_t args[3];
-    unsigned long args_len[3];
-
-    /* Set arguments */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Add increment parameter */
-    char increment_str[64];
-    int increment_str_len = snprintf(increment_str, sizeof(increment_str), "%.17g", increment);
-    args[1] = (uintptr_t)increment_str;
-    args_len[1] = increment_str_len;
-
-    /* Add member parameter */
-    args[2] = (uintptr_t)member;
-    args_len[2] = member_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    int success = execute_z_generic_command(
         glide_client,
-        ZIncrBy,   /* command type from RequestType enum */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Use common helper to handle score response */
-    int success = handle_score_response(result, output_value);
+        ZIncrBy,
+        &args,
+        output_value,
+        process_z_double_result);
 
     /* Convert result to expected format for ZINCRBY (0/1 instead of -1/0/1) */
     if (success == -1)
     {
         success = 0;
     }
-
-    /* Free the result */
-    free_command_result(result);
 
     return success;
 }
@@ -574,122 +535,40 @@ int execute_zcount_command(const void *glide_client, const char *key, size_t key
                            const char *min, size_t min_len, const char *max, size_t max_len,
                            long *output_value)
 {
-    /* Check if client and parameters are valid */
-    if (!glide_client || !key || !min || !max)
-    {
-        return 0;
-    }
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.min = min;
+    args.min_len = min_len;
+    args.max = max;
+    args.max_len = max_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 3; /* key + min + max */
-    uintptr_t args[3];
-    unsigned long args_len[3];
-
-    /* Set arguments */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    args[1] = (uintptr_t)min;
-    args_len[1] = min_len;
-
-    args[2] = (uintptr_t)max;
-    args_len[2] = max_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZCount,    /* command type from RequestType enum */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Process the result */
-    int success = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        *output_value = result->response->int_value;
-        success = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return success;
+        ZCount,
+        &args,
+        output_value,
+        process_z_int_result);
 }
 
 int execute_zlexcount_command(const void *glide_client, const char *key, size_t key_len,
                               const char *min, size_t min_len, const char *max, size_t max_len,
                               long *output_value)
 {
-    /* Check if client and parameters are valid */
-    if (!glide_client || !key || !min || !max)
-    {
-        return 0;
-    }
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.min = min;
+    args.min_len = min_len;
+    args.max = max;
+    args.max_len = max_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 3; /* key + min + max */
-    uintptr_t args[3];
-    unsigned long args_len[3];
-
-    /* Set arguments */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    args[1] = (uintptr_t)min;
-    args_len[1] = min_len;
-
-    args[2] = (uintptr_t)max;
-    args_len[2] = max_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZLexCount, /* command type from RequestType enum */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Process the result */
-    int success = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        *output_value = result->response->int_value;
-        success = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return success;
+        ZLexCount,
+        &args,
+        output_value,
+        process_z_int_result);
 }
 
 int execute_zrem_command(const void *glide_client, const char *key, size_t key_len,
