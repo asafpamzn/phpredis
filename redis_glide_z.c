@@ -695,208 +695,38 @@ int execute_zlexcount_command(const void *glide_client, const char *key, size_t 
 int execute_zrem_command(const void *glide_client, const char *key, size_t key_len,
                          zval *members, int members_count, long *output_value)
 {
-    /* Check if client, key, and members are valid */
-    if (!glide_client || !key || !members || members_count <= 0)
-    {
-        return 0;
-    }
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.members = members;
+    args.member_count = members_count;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1 + members_count; /* key + members */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-    char **allocated_strings = (char **)emalloc(members_count * sizeof(char *));
-
-    if (!args || !args_len || !allocated_strings)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        if (allocated_strings)
-            efree(allocated_strings);
-        return 0;
-    }
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Add members as arguments */
-    int i;
-    int allocated_count = 0;
-    for (i = 0; i < members_count; i++)
-    {
-        zval *z_member = &members[i];
-
-        if (Z_TYPE_P(z_member) == IS_STRING)
-        {
-            args[i + 1] = (uintptr_t)Z_STRVAL_P(z_member);
-            args_len[i + 1] = Z_STRLEN_P(z_member);
-        }
-        else
-        {
-            /* Convert non-string values to string */
-            char *str_val = NULL;
-            size_t str_len = 0;
-
-            if (Z_TYPE_P(z_member) == IS_LONG)
-            {
-                str_val = long_to_string(Z_LVAL_P(z_member), &str_len);
-            }
-            else if (Z_TYPE_P(z_member) == IS_DOUBLE)
-            {
-                str_val = double_to_string(Z_DVAL_P(z_member), &str_len);
-            }
-            else if (Z_TYPE_P(z_member) == IS_TRUE)
-            {
-                str_val = estrdup("1");
-                str_len = 1;
-            }
-            else if (Z_TYPE_P(z_member) == IS_FALSE)
-            {
-                str_val = estrdup("0");
-                str_len = 1;
-            }
-            else
-            {
-                /* Handle other types or error */
-                int j;
-                for (j = 0; j < allocated_count; j++)
-                {
-                    efree(allocated_strings[j]);
-                }
-                efree(allocated_strings);
-                efree(args);
-                efree(args_len);
-                return 0;
-            }
-
-            if (str_val)
-            {
-                args[i + 1] = (uintptr_t)str_val;
-                args_len[i + 1] = str_len;
-                allocated_strings[allocated_count++] = str_val;
-            }
-            else
-            {
-                int j;
-                for (j = 0; j < allocated_count; j++)
-                {
-                    efree(allocated_strings[j]);
-                }
-                efree(allocated_strings);
-                efree(args);
-                efree(args_len);
-                return 0;
-            }
-        }
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZRem,      /* command type from RequestType enum */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free allocated strings */
-    for (i = 0; i < allocated_count; i++)
-    {
-        efree(allocated_strings[i]);
-    }
-    efree(allocated_strings);
-    efree(args);
-    efree(args_len);
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Process the result */
-    int success = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        *output_value = result->response->int_value;
-        success = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return success;
+        ZRem,
+        &args,
+        output_value,
+        process_z_int_result);
 }
 
 int execute_zremrangebylex_command(const void *glide_client, const char *key, size_t key_len,
                                    const char *min, size_t min_len, const char *max, size_t max_len,
                                    long *output_value)
 {
-    /* Check if client and parameters are valid */
-    if (!glide_client || !key || !min || !max)
-    {
-        return 0;
-    }
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.min = min;
+    args.min_len = min_len;
+    args.max = max;
+    args.max_len = max_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 3; /* key + min + max */
-    uintptr_t args[3];
-    unsigned long args_len[3];
-
-    /* Set arguments */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    args[1] = (uintptr_t)min;
-    args_len[1] = min_len;
-
-    args[2] = (uintptr_t)max;
-    args_len[2] = max_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZRemRangeByLex, /* command type from RequestType enum */
-        arg_count,      /* number of arguments */
-        args,           /* arguments */
-        args_len        /* argument lengths */
-    );
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Process the result */
-    int success = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        *output_value = result->response->int_value;
-        success = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return success;
+        ZRemRangeByLex,
+        &args,
+        output_value,
+        process_z_int_result);
 }
 
 int execute_zremrangebyrank_command(const void *glide_client, const char *key, size_t key_len,
