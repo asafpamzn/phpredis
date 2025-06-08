@@ -693,8 +693,9 @@ int execute_z_generic_command(
         {
             return 0;
         }
-        arg_count = prepare_z_complex_range_args(args, &arg_values, &arg_lens,
+        arg_count = prepare_z_complex_range_args(args, &arg_values, cmd_type, &arg_lens,
                                                  &allocated_strings, &allocated_count);
+        cmd_type = ZRange;
         break;
 
     case ZIncrBy:
@@ -820,6 +821,17 @@ int execute_z_generic_command(
                                          &allocated_strings, &allocated_count);
         break;
 
+    case ZPopMax:
+    case ZPopMin:
+        allocated_strings = (char **)emalloc(2 * sizeof(char *)); /* Enough for ZPOP commands */
+        if (!allocated_strings)
+        {
+            return 0;
+        }
+        arg_count = prepare_z_pop_args(args, &arg_values, &arg_lens,
+                                       &allocated_strings, &allocated_count);
+        break;
+
     default:
         /* Unsupported command type */
         return 0;
@@ -915,6 +927,58 @@ int prepare_z_key_args(z_command_args_t *args, uintptr_t **args_out,
     /* Set arguments */
     (*args_out)[0] = (uintptr_t)args->key;
     (*args_len_out)[0] = args->key_len;
+
+    return arg_count;
+}
+
+int prepare_z_pop_args(z_command_args_t *args, uintptr_t **args_out,
+                       unsigned long **args_len_out,
+                       char ***allocated_strings, int *allocated_count)
+{
+    if (!args || !args->key || !args_out || !args_len_out ||
+        !allocated_strings || !allocated_count)
+    {
+        return 0;
+    }
+
+    *allocated_count = 0;
+
+    unsigned long arg_count = 1;
+    if (args->start > 1)
+    {
+        arg_count++;
+    }
+
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!(*args_out) || !(*args_len_out))
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+
+    if (args->start > 1)
+    {
+        char count_str[32];
+        snprintf(count_str, sizeof(count_str), "%ld", args->start);
+        char *count_str_copy = estrdup(count_str);
+        if (!count_str_copy)
+        {
+            efree(*args_out);
+            efree(*args_len_out);
+            return 0;
+        }
+        (*args_out)[1] = (uintptr_t)count_str_copy;
+        (*args_len_out)[1] = strlen(count_str);
+        (*allocated_strings)[(*allocated_count)++] = count_str_copy;
+    }
 
     return arg_count;
 }
@@ -1126,6 +1190,7 @@ static int convert_zval_to_string_arg(zval *z_value, uintptr_t *arg_ptr, unsigne
  * Prepare complex range Z-command arguments with options
  */
 int prepare_z_complex_range_args(z_command_args_t *args, uintptr_t **args_out,
+                                 enum RequestType cmd_type,
                                  unsigned long **args_len_out,
                                  char ***allocated_strings, int *allocated_count)
 {
@@ -1142,6 +1207,29 @@ int prepare_z_complex_range_args(z_command_args_t *args, uintptr_t **args_out,
     if (!parse_range_options(args->options, &range_opts))
     {
         return 0;
+    }
+    switch (cmd_type)
+    {
+
+    case ZRevRange:
+        range_opts.rev = 1; /* Reverse order */
+        break;
+    case ZRangeByScore:
+        range_opts.byscore = 1; /* By score */
+        break;
+    case ZRangeByLex:
+        range_opts.bylex = 1; /* By lexicographical order */
+        break;
+    case ZRevRangeByScore:
+        range_opts.byscore = 1; /* By score */
+        range_opts.rev = 1;     /* Reverse order */
+        break;
+    case ZRevRangeByLex:
+        range_opts.bylex = 1; /* By lexicographical order */
+        range_opts.rev = 1;   /* Reverse order */
+        break;
+    default:
+        break;
     }
 
     /* Calculate argument count based on options */

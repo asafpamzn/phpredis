@@ -190,6 +190,7 @@ int prepare_z_members_args(z_command_args_t *args, uintptr_t **args_out,
  * Prepare complex range Z-command arguments with options
  */
 int prepare_z_complex_range_args(z_command_args_t *args, uintptr_t **args_out,
+                                 enum RequestType cmd_type,
                                  unsigned long **args_len_out,
                                  char ***allocated_strings, int *allocated_count);
 
@@ -213,6 +214,13 @@ int prepare_z_intercard_args(z_command_args_t *args, uintptr_t **args_out,
 int prepare_z_union_args(z_command_args_t *args, uintptr_t **args_out,
                          unsigned long **args_len_out,
                          char ***allocated_strings, int *allocated_count);
+
+/**
+ * Prepare ZPOP command arguments (key + optional count)
+ */
+int prepare_z_pop_args(z_command_args_t *args, uintptr_t **args_out,
+                       unsigned long **args_len_out,
+                       char ***allocated_strings, int *allocated_count);
 
 /* ====================================================================
  * OPTIONS PARSING HELPERS

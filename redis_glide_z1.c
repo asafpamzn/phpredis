@@ -187,121 +187,45 @@ int execute_zunion_command(const void *glide_client, zval *keys, int keys_count,
 /* Execute a ZPOPMAX command using the Valkey Glide client */
 int execute_zpopmax_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key || key_len <= 0)
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.start = count; /* Reuse start field for count */
+
+    struct
     {
-        return 0;
-    }
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, 0};
 
-    /* Prepare command arguments */
-    unsigned long arg_count = count > 1 ? 2 : 1; /* key + count (optional) */
-    uintptr_t args[2];
-    unsigned long args_len[2];
-    char count_str[32];
-
-    /* Set key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Add count if needed */
-    if (count > 1)
-    {
-        snprintf(count_str, sizeof(count_str), "%ld", count);
-        args[1] = (uintptr_t)count_str;
-        args_len[1] = strlen(count_str);
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZPopMax,   /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Process the result */
-    int status = 0;
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
-            return 0;
-        }
-
-        if (result->response)
-        {
-            /* ZPOPMAX returns an array of member-score pairs */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
-            free_command_result(result);
-            return status;
-        }
-        free_command_result(result);
-    }
-
-    return 0;
+        ZPopMax,
+        &args,
+        &array_data,
+        process_z_array_result);
 }
 
 /* Execute a ZPOPMIN command using the Valkey Glide client */
 int execute_zpopmin_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key || key_len <= 0)
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.start = count; /* Reuse start field for count */
+
+    struct
     {
-        return 0;
-    }
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, 0};
 
-    /* Prepare command arguments */
-    unsigned long arg_count = count > 1 ? 2 : 1; /* key + count (optional) */
-    uintptr_t args[2];
-    unsigned long args_len[2];
-    char count_str[32];
-
-    /* Set key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Add count if needed */
-    if (count > 1)
-    {
-        snprintf(count_str, sizeof(count_str), "%ld", count);
-        args[1] = (uintptr_t)count_str;
-        args_len[1] = strlen(count_str);
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZPopMin,   /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Process the result */
-    int status = 0;
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
-            return 0;
-        }
-
-        if (result->response)
-        {
-            /* ZPOPMIN returns an array of member-score pairs */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
-            free_command_result(result);
-            return status;
-        }
-        free_command_result(result);
-    }
-
-    return 0;
+        ZPopMin,
+        &args,
+        &array_data,
+        process_z_array_result);
 }
 
 /* Execute a ZSCAN command using the Valkey Glide client */

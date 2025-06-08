@@ -17,6 +17,7 @@
 #include "php_redis.h"
 #include "redis_glide.h"
 #include "redis_glide_zadd.h"
+#include "valkey_glide_z_common.h"
 
 #include "command_response.h"
 #include "include/glide_bindings.h"
@@ -393,67 +394,60 @@ int execute_zrangestore_command(const void *glide_client, const char *dst, size_
                                 const char *src, size_t src_len, zval *z_start, zval *z_end,
                                 zval *options, long *output_value)
 {
-    /* Check if client and keys are valid */
+    /* ZRANGESTORE is a specialized store command with source and destination */
+    /* Due to its unique dst+src+range structure, we use custom implementation */
+    /* but leverage framework components for consistency */
+
     if (!glide_client || !dst || !src || !z_start || !z_end || !output_value)
     {
         return 0;
     }
 
-    /* Parse range options */
-    int has_withscores = 0, has_byscore = 0, has_bylex = 0, has_rev = 0;
-    int has_limit = 0;
-    long offset = 0, count = 0;
+    /* Use framework for option parsing */
+    range_options_t range_opts = {0};
+    parse_range_options(options, &range_opts);
 
-    if (options)
-    {
-        parse_range_options_old(options, &has_withscores, &has_byscore, &has_bylex, &has_rev,
-                                &has_limit, &offset, &count);
-    }
+    /* Calculate total arguments: dst + src + start + end + options */
+    unsigned long arg_count = 4; /* dst + src + start + end */
+    if (range_opts.byscore)
+        arg_count++;
+    if (range_opts.bylex)
+        arg_count++;
+    if (range_opts.rev)
+        arg_count++;
+    if (range_opts.has_limit)
+        arg_count += 3; /* LIMIT + offset + count */
 
-    /* Calculate the maximum number of arguments:
-     * 1 (dst) + 1 (src) + 2 (start/end) + 8 (all options) */
-    unsigned long max_args = 12;
-    uintptr_t *args = (uintptr_t *)emalloc(max_args * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(max_args * sizeof(unsigned long));
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    char **allocated_strings = (char **)emalloc(4 * sizeof(char *));
+    int allocated_count = 0;
 
-    if (!args || !args_len)
+    if (!args || !args_len || !allocated_strings)
     {
         if (args)
             efree(args);
         if (args_len)
             efree(args_len);
+        if (allocated_strings)
+            efree(allocated_strings);
         return 0;
     }
 
-    /* Track allocated strings that need to be freed after command execution */
-    char **allocated_strings = (char **)ecalloc(4, sizeof(char *));
-    int allocated_count = 0;
-
-    if (!allocated_strings)
-    {
-        efree(args);
-        efree(args_len);
-        return 0;
-    }
-
-    /* Add destination and source keys */
+    /* Build arguments: dst + src + start + end + options */
     unsigned long arg_idx = 0;
     args[arg_idx] = (uintptr_t)dst;
     args_len[arg_idx++] = dst_len;
     args[arg_idx] = (uintptr_t)src;
     args_len[arg_idx++] = src_len;
 
-    /* Add start and end parameters */
+    /* Add start and end using framework helper */
     int need_free = 0;
     size_t len = 0;
-    char *str = NULL;
-
-    /* Start parameter */
-    str = zval_to_string(z_start, &len, &need_free);
+    char *str = zval_to_string_safe(z_start, &len, &need_free);
     if (!str)
     {
-        for (int j = 0; j < allocated_count; j++)
-            efree(allocated_strings[j]);
+        free_allocated_strings(allocated_strings, allocated_count);
         efree(allocated_strings);
         efree(args);
         efree(args_len);
@@ -464,12 +458,10 @@ int execute_zrangestore_command(const void *glide_client, const char *dst, size_
     if (need_free)
         allocated_strings[allocated_count++] = str;
 
-    /* End parameter */
-    str = zval_to_string(z_end, &len, &need_free);
+    str = zval_to_string_safe(z_end, &len, &need_free);
     if (!str)
     {
-        for (int j = 0; j < allocated_count; j++)
-            efree(allocated_strings[j]);
+        free_allocated_strings(allocated_strings, allocated_count);
         efree(allocated_strings);
         efree(args);
         efree(args_len);
@@ -480,98 +472,39 @@ int execute_zrangestore_command(const void *glide_client, const char *dst, size_
     if (need_free)
         allocated_strings[allocated_count++] = str;
 
-    /* Add options */
-    if (has_bylex)
+    /* Add range options */
+    if (range_opts.bylex)
     {
         args[arg_idx] = (uintptr_t)"BYLEX";
         args_len[arg_idx++] = 5;
     }
-    else if (has_byscore)
+    else if (range_opts.byscore)
     {
         args[arg_idx] = (uintptr_t)"BYSCORE";
         args_len[arg_idx++] = 7;
     }
-
-    if (has_rev)
+    if (range_opts.rev)
     {
         args[arg_idx] = (uintptr_t)"REV";
         args_len[arg_idx++] = 3;
     }
-
-    if (has_limit)
+    if (range_opts.has_limit)
     {
-        args[arg_idx] = (uintptr_t)"LIMIT";
-        args_len[arg_idx++] = 5;
-
-        /* Add offset parameter */
-        str = long_to_string(offset, &len);
-        if (!str)
-        {
-            for (int j = 0; j < allocated_count; j++)
-                efree(allocated_strings[j]);
-            efree(allocated_strings);
-            efree(args);
-            efree(args_len);
-            return 0;
-        }
-        args[arg_idx] = (uintptr_t)str;
-        args_len[arg_idx++] = len;
-        allocated_strings[allocated_count++] = str;
-
-        /* Add count parameter */
-        str = long_to_string(count, &len);
-        if (!str)
-        {
-            for (int j = 0; j < allocated_count; j++)
-                efree(allocated_strings[j]);
-            efree(allocated_strings);
-            efree(args);
-            efree(args_len);
-            return 0;
-        }
-        args[arg_idx] = (uintptr_t)str;
-        args_len[arg_idx++] = len;
-        allocated_strings[allocated_count++] = str;
+        arg_idx += create_limit_args(&range_opts, args, args_len, arg_idx, allocated_strings, &allocated_count);
     }
 
-    /* Execute the ZRANGESTORE command */
-    CommandResult *result = execute_command(
-        glide_client,
-        ZRangeStore, /* command type */
-        arg_idx,     /* number of arguments */
-        args,        /* arguments */
-        args_len     /* argument lengths */
-    );
+    /* Execute command */
+    CommandResult *result = execute_command(glide_client, ZRangeStore, arg_idx, args, args_len);
 
-    /* Free allocated strings */
-    for (int j = 0; j < allocated_count; j++)
-    {
-        efree(allocated_strings[j]);
-    }
+    /* Cleanup */
+    free_allocated_strings(allocated_strings, allocated_count);
     efree(allocated_strings);
     efree(args);
     efree(args_len);
 
-    /* Process the result */
-    int success = 0;
-
-    /* Check if the command was successful */
-    if (!result || result->command_error)
-    {
-        if (result)
-            free_command_result(result);
-        return 0; /* False - failure */
-    }
-
-    /* Process the result based on type */
-    if (result->response && result->response->response_type == Int)
-    {
-        *output_value = result->response->int_value;
-        success = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
+    /* Process result using framework helper */
+    int success = process_z_int_result(result, output_value);
+    if (result)
+        free_command_result(result);
     return success;
 }
