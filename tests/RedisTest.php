@@ -2935,7 +2935,7 @@ class Redis_Test extends TestSuite {
         $scores = $this->redis->zMscore('key', 'a', 'notamember', 'c');
        
         $this->assertEquals([1.0, false, 1.0], $scores);
-        return;
+        
         $scores = $this->redis->zMscore('wrongkey', 'a', 'b', 'c');
         $this->assertEquals([false, false, false], $scores);
     }

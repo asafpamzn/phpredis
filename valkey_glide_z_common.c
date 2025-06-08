@@ -1378,7 +1378,7 @@ int process_z_array_result(CommandResult *result, void *output)
 
     /* Process the result */
     int success = command_response_to_zval(result->response, array_data->return_value,
-                                           COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
+                                           COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, true);
 
     return success;
 }

@@ -339,9 +339,10 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
     switch (response->response_type)
     {
     case Null:
-        //   printf("%s:%d - CommandResponse is NULL\n", __FILE__, __LINE__);
+        // printf("%s:%d - CommandResponse is NULL\n", __FILE__, __LINE__);
         if (use_false_if_null)
         {
+            // printf("%s:%d - CommandResponse is converted to false\n", __FILE__, __LINE__);
             ZVAL_FALSE(output);
         }
         else
@@ -351,7 +352,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
 
         return 0;
     case Int:
-        //    printf("%s:%d - CommandResponse is Int: %ld\n", __FILE__, __LINE__, response->int_value);
+        // printf("%s:%d - CommandResponse is Int: %ld\n", __FILE__, __LINE__, response->int_value);
         ZVAL_LONG(output, response->int_value);
         return 1;
     case Float:
@@ -368,13 +369,13 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
         ZVAL_STRINGL(output, response->string_value, response->string_value_len);
         return 1;
     case Array:
-        //   printf("%s:%d - CommandResponse is Array with length: %ld, use_associative_array = %d\n", __FILE__, __LINE__, response->array_value_len, use_associative_array);
+        // printf("%s:%d - CommandResponse is Array with length: %ld, use_associative_array = %d\n", __FILE__, __LINE__, response->array_value_len, use_associative_array);
         array_init(output);
         if (response->array_value_len == 2 && use_associative_array == COMMAND_RESPONSE_STREAM_ARRAY_ASSOCIATIVE)
         {
             zval field, value;
             // printf("%s:%d - response->array_value[0]->command_response_type = %d, response->array_value[1]->command_response_type = %d\n",
-            //  __FILE__, __LINE__, response->array_value[0].response_type, response->array_value[1].response_type);
+            //       __FILE__, __LINE__, response->array_value[0].response_type, response->array_value[1].response_type);
             command_response_to_zval(&response->array_value[0], &field, use_associative_array, use_false_if_null);
             command_response_to_zval(&response->array_value[1], &value, use_associative_array, use_false_if_null);
             // printf("%s:%d - DEBUG: Adding field \n", __FILE__, __LINE__);
@@ -390,7 +391,6 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             }
             else if (Z_TYPE(value) == IS_ARRAY && Z_TYPE(field) == IS_ARRAY)
             {
-
                 {
                     // Iterate through the field array and add each key-value pair to output
                     HashTable *field_ht = Z_ARRVAL(field);
@@ -422,7 +422,6 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             }
             else
             {
-
                 zval_dtor(&field);
                 zval_dtor(&value);
             }
@@ -435,8 +434,8 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
 
                 zval value;
 
-                command_response_to_zval(&response->array_value[i], &value, use_associative_array, false);
-                //          printf("%s:%d - DEBUG: Adding array value %d\n", __FILE__, __LINE__, i);
+                command_response_to_zval(&response->array_value[i], &value, use_associative_array, use_false_if_null);
+                // printf("%s:%d - DEBUG: Adding array value %d\n", __FILE__, __LINE__, i);
                 //  php_var_dump(&value, 2); // No need to modify this as it's not printf
 
                 add_next_index_zval(output, &value);
@@ -458,7 +457,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             // Process the key
             if (element->map_key != NULL)
             {
-                command_response_to_zval(element->map_key, &key, use_associative_array, false);
+                command_response_to_zval(element->map_key, &key, use_associative_array, use_false_if_null);
             }
             else
             {
@@ -469,7 +468,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
             if (element->map_value != NULL)
             {
                 // printf("%s:%d - DEBUG: Processing map value %d\n", __FILE__, __LINE__, i);
-                command_response_to_zval(element->map_value, &value, use_associative_array, false);
+                command_response_to_zval(element->map_value, &value, use_associative_array, use_false_if_null);
                 // printf("%s:%d - DEBUG: Map value %d processed\n", __FILE__, __LINE__, i);
             }
             else
