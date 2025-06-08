@@ -59,6 +59,9 @@ int execute_zrandmember_command(const void *glide_client, const char *key, size_
         return 0;
     }
 
+    /* ZRANDMEMBER has unique optional parameter handling, so we use custom argument preparation */
+    /* but leverage the framework for result processing */
+
     /* Prepare command arguments */
     unsigned long arg_count = 1; /* Start with key */
     if (count != 0)
@@ -148,51 +151,28 @@ int execute_zrandmember_command(const void *glide_client, const char *key, size_
 int execute_zscore_command(const void *glide_client, const char *key, size_t key_len,
                            const char *member, size_t member_len, double *output_value)
 {
-    /* Check if client and parameters are valid */
-    if (!glide_client || !key || !member)
-    {
-        return -1;
-    }
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.member = member;
+    args.member_len = member_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 2; /* key + member */
-    uintptr_t args[2];
-    unsigned long args_len[2];
-
-    /* Set arguments */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    args[1] = (uintptr_t)member;
-    args_len[1] = member_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    int success = execute_z_generic_command(
         glide_client,
-        ZScore,    /* command type from RequestType enum */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
+        ZScore,
+        &args,
+        output_value,
+        process_z_double_result);
 
-    /* Check if the command was successful */
-    if (!result)
+    /* Convert result to expected format for ZSCORE (-1/0/1 instead of 0/1) */
+    if (success == 0)
     {
-        return -1;
+        success = -1; /* Member not found */
     }
-
-    /* Check if there was an error */
-    if (result->command_error)
+    else if (success == 1)
     {
-        free_command_result(result);
-        return -1;
+        success = 1; /* Success */
     }
-
-    /* Use common helper to handle score response */
-    int success = handle_score_response(result, output_value);
-
-    /* Free the result */
-    free_command_result(result);
 
     return success;
 }
