@@ -228,7 +228,7 @@ char *zval_to_string_safe(zval *z, size_t *len, int *need_free);
  * Prepare keys array from zval for multi-key operations
  * Returns keys count on success, 0 on failure
  */
-int prepare_keys_array(zval *keys, uintptr_t **args, unsigned long **args_len);
+int prepare_keys_array(zval *keys, int keys_count, uintptr_t **args, unsigned long **args_len);
 
 /**
  * Create LIMIT arguments (offset, count)
@@ -283,42 +283,22 @@ int execute_zremrangebyrank_command(const void *glide_client, const char *key, s
 int execute_zrange_command(const void *glide_client, const char *key, size_t key_len, zval *z_start, zval *z_end, zval *z_options, zval *return_value);
 int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
 
-/* New thin wrapper signatures (for PHP_METHOD implementations) */
-int redis_zrandmember_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zscore_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zmscore_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zrank_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zrevrank_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zincrby_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zcount_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zlexcount_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zrem_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zremrangebylex_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zremrangebyrank_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zremrangebyscore_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zrange_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zcard_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zrevrange_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zrangebyscore_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zrevrangebyscore_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zrangebylex_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zrevrangebylex_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zadd_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int redis_zrangestore_cmd(const void *glide_client, int argc, zval *getThis, zval *return_value);
-
-/* Z command implementations from redis_new14.c */
-int execute_zintercard_command(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int execute_zunion_command(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int execute_zdiffstore_command(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int execute_zinterstore_command(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int execute_zunionstore_command(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int execute_zpopmax_command(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int execute_zpopmin_command(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int execute_zscan_command(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int execute_zdiff_command(const void *glide_client, int argc, zval *getThis, zval *return_value);
-int execute_zinter_command(const void *glide_client, int argc, zval *getThis, zval *return_value);
+int execute_zdiffstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count,
+                               zval *weights, zval *options, long *output_value);
+int execute_zinterstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count,
+                                zval *weights, zval *options, long *output_value);
 int execute_zmpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
+int execute_zintercard_command(const void *glide_client, zval *keys, int keys_count, zval *options, zval *return_value);
+int execute_zunion_command(const void *glide_client, zval *keys, int keys_count, zval *weights, zval *options, zval *return_value);
 
+int execute_zinterstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count, zval *weights, zval *options, long *output_value);
+int execute_zunionstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count, zval *weights, zval *options, long *output_value);
+int execute_zpopmax_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value);
+int execute_zpopmin_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value);
+int execute_zscan_command(const void *glide_client, const char *key, size_t key_len, long *cursor, char *pattern, size_t pattern_len, long count, zval *return_value);
+void free_weights_strings(uintptr_t *args, int count);
+int prepare_aggregate_option(zval *options, uintptr_t *agg_arg, unsigned long *agg_len);
+int prepare_weights_array(zval *weights, int weights_count, uintptr_t **args, unsigned long **args_len);
 /* ====================================================================
  * UTILITY MACROS
  * ==================================================================== */

@@ -387,21 +387,9 @@ char *zval_to_string_safe(zval *z, size_t *len, int *need_free)
  * Prepare keys array from zval for multi-key operations
  * Returns 1 on success, 0 on failure
  */
-int prepare_keys_array(zval *keys, uintptr_t **args, unsigned long **args_len)
+/* Helper function to prepare keys array from zval */
+int prepare_keys_array(zval *keys, int keys_count, uintptr_t **args, unsigned long **args_len)
 {
-    if (!keys || Z_TYPE_P(keys) != IS_ARRAY)
-    {
-        return 0;
-    }
-
-    HashTable *keys_hash = Z_ARRVAL_P(keys);
-    int keys_count = zend_hash_num_elements(keys_hash);
-
-    if (keys_count <= 0)
-    {
-        return 0;
-    }
-
     /* Allocate memory for arguments */
     *args = (uintptr_t *)emalloc(keys_count * sizeof(uintptr_t));
     *args_len = (unsigned long *)emalloc(keys_count * sizeof(unsigned long));
@@ -416,6 +404,7 @@ int prepare_keys_array(zval *keys, uintptr_t **args, unsigned long **args_len)
     }
 
     /* Populate arguments array */
+    HashTable *keys_hash = Z_ARRVAL_P(keys);
     zval *key;
     int idx = 0;
 
@@ -432,7 +421,7 @@ int prepare_keys_array(zval *keys, uintptr_t **args, unsigned long **args_len)
     }
     ZEND_HASH_FOREACH_END();
 
-    return keys_count;
+    return 1;
 }
 
 /**

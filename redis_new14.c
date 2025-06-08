@@ -17,16 +17,9 @@
 #include "php_redis.h"
 
 #include "redis_glide.h"
+#include "valkey_glide_z_common.h"
 
 /* Forward declarations for the Glide execute functions */
-extern int execute_zintercard_command(const void *glide_client, zval *keys, int keys_count, zval *options, zval *return_value);
-extern int execute_zunion_command(const void *glide_client, zval *keys, int keys_count, zval *weights, zval *options, zval *return_value);
-extern int execute_zdiffstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count, zval *weights, zval *options, long *output_value);
-extern int execute_zinterstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count, zval *weights, zval *options, long *output_value);
-extern int execute_zunionstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count, zval *weights, zval *options, long *output_value);
-extern int execute_zpopmax_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value);
-extern int execute_zpopmin_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value);
-extern int execute_zscan_command(const void *glide_client, const char *key, size_t key_len, long *cursor, char *pattern, size_t pattern_len, long count, zval *return_value);
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
