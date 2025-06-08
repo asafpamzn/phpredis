@@ -43,8 +43,8 @@ int execute_zrevrange_command(const void *glide_client, const char *key, size_t 
 
     if (options)
     {
-        parse_range_options(options, &has_withscores, &has_byscore, &has_bylex, NULL,
-                            &has_limit, &offset, &count);
+        parse_range_options_old(options, &has_withscores, &has_byscore, &has_bylex, NULL,
+                                &has_limit, &offset, &count);
     }
 
     /* Calculate the maximum number of arguments:
@@ -216,8 +216,8 @@ int execute_zrangebyscore_command(const void *glide_client, const char *key, siz
     if (options)
     {
 
-        parse_range_options(options, &has_withscores, NULL, &has_bylex, &has_rev,
-                            &has_limit, &offset, &count);
+        parse_range_options_old(options, &has_withscores, NULL, &has_bylex, &has_rev,
+                                &has_limit, &offset, &count);
     }
 
     /* Calculate the maximum number of arguments:
@@ -384,8 +384,8 @@ int execute_zrevrangebyscore_command(const void *glide_client, const char *key, 
 
     if (options)
     {
-        parse_range_options(options, &has_withscores, NULL, &has_bylex, NULL,
-                            &has_limit, &offset, &count);
+        parse_range_options_old(options, &has_withscores, NULL, &has_bylex, NULL,
+                                &has_limit, &offset, &count);
     }
 
     /* Calculate the maximum number of arguments:
@@ -548,8 +548,8 @@ int execute_zrangebylex_command(const void *glide_client, const char *key, size_
 
     if (options)
     {
-        parse_range_options(options, &has_withscores, &has_byscore, NULL, &has_rev,
-                            &has_limit, &offset, &count);
+        parse_range_options_old(options, &has_withscores, &has_byscore, NULL, &has_rev,
+                                &has_limit, &offset, &count);
     }
 
     /* Calculate the maximum number of arguments:

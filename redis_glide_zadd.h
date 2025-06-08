@@ -23,9 +23,9 @@
 char *zval_to_string(zval *z, size_t *len, int *need_free);
 
 /* Helper function to parse range options */
-int parse_range_options(zval *options, int *has_withscores,
-                        int *has_byscore, int *has_bylex, int *has_rev,
-                        int *has_limit, long *offset, long *count);
+int parse_range_options_old(zval *options, int *has_withscores,
+                            int *has_byscore, int *has_bylex, int *has_rev,
+                            int *has_limit, long *offset, long *count);
 
 /* Helper function to process ZRANGE-like responses */
 int process_zrange_response(CommandResult *result, zval *return_value, int has_withscores);

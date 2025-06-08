@@ -24,9 +24,9 @@
 #include <stdio.h>
 
 /* Helper function to parse range options */
-int parse_range_options(zval *options, int *has_withscores,
-                        int *has_byscore, int *has_bylex, int *has_rev,
-                        int *has_limit, long *offset, long *count)
+int parse_range_options_old(zval *options, int *has_withscores,
+                            int *has_byscore, int *has_bylex, int *has_rev,
+                            int *has_limit, long *offset, long *count)
 {
     if (!options || Z_TYPE_P(options) != IS_ARRAY)
     {

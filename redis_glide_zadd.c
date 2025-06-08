@@ -406,8 +406,8 @@ int execute_zrangestore_command(const void *glide_client, const char *dst, size_
 
     if (options)
     {
-        parse_range_options(options, &has_withscores, &has_byscore, &has_bylex, &has_rev,
-                            &has_limit, &offset, &count);
+        parse_range_options_old(options, &has_withscores, &has_byscore, &has_bylex, &has_rev,
+                                &has_limit, &offset, &count);
     }
 
     /* Calculate the maximum number of arguments:

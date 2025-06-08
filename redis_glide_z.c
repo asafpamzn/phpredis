@@ -16,6 +16,7 @@
 
 #include "php_redis.h"
 #include "redis_glide.h"
+#include "valkey_glide_z_common.h"
 #include "command_response.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
@@ -134,44 +135,8 @@ int execute_zrandmember_command(const void *glide_client, const char *key, size_
     int success = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE);
     if (withscores && success && Z_TYPE_P(return_value) == IS_ARRAY)
     {
-        /* Flatten the array - convert from:
-         * [[member1, score1], [member2, score2], ...]
-         * to associative array format:
-         * [member1 => score1, member2 => score2, ...]
-         */
-        zval tmp_arr;
-        array_init(&tmp_arr);
-
-        HashTable *ht = Z_ARRVAL_P(return_value);
-        zval *entry;
-
-        ZEND_HASH_FOREACH_VAL(ht, entry)
-        {
-            if (Z_TYPE_P(entry) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(entry)) == 2)
-            {
-                zval *z_member = zend_hash_index_find(Z_ARRVAL_P(entry), 0);
-                zval *z_score = zend_hash_index_find(Z_ARRVAL_P(entry), 1);
-
-                if (z_member && z_score)
-                {
-                    /* Convert any scalar member to string as it will be used as key */
-                    zval z_member_str;
-                    if (Z_TYPE_P(z_member) != IS_STRING)
-                    {
-                        convert_to_string_ex(z_member);
-                    }
-
-                    /* Add to associative array: member => score */
-                    Z_TRY_ADDREF_P(z_score);
-                    add_assoc_zval(&tmp_arr, Z_STRVAL_P(z_member), z_score);
-                }
-            }
-        }
-        ZEND_HASH_FOREACH_END();
-
-        /* Replace the original array with our flattened array */
-        zval_ptr_dtor(return_value);
-        ZVAL_COPY_VALUE(return_value, &tmp_arr);
+        /* Use common helper to flatten withscores array */
+        flatten_withscores_array(return_value);
     }
 
     /* Free the result */
@@ -223,29 +188,8 @@ int execute_zscore_command(const void *glide_client, const char *key, size_t key
         return -1;
     }
 
-    int success = 0;
-    if (result->response)
-    {
-        if (result->response->response_type == Null)
-        {
-            /* Member doesn't exist in the sorted set */
-            success = 0;
-        }
-        else if (result->response->response_type == String)
-        {
-            /* Parse string as double */
-            if (safe_strtod(result->response->string_value, result->response->string_value_len, output_value))
-            {
-                success = 1;
-            }
-        }
-        else if (result->response->response_type == Float)
-        {
-            /* Handle direct float response */
-            *output_value = result->response->float_value;
-            success = 1;
-        }
-    }
+    /* Use common helper to handle score response */
+    int success = handle_score_response(result, output_value);
 
     /* Free the result */
     free_command_result(result);
@@ -477,47 +421,8 @@ int execute_zrank_command(const void *glide_client, const char *key, size_t key_
         return -1;
     }
 
-    int success = 0;
-    if (result->response)
-    {
-        if (result->response->response_type == Null)
-        {
-            /* Member doesn't exist in the sorted set */
-            success = 0;
-        }
-        else if (result->response->response_type == Int)
-        {
-            /* Integer rank */
-            *rank_value = result->response->int_value;
-            success = 1;
-        }
-        else if (result->response->response_type == Array && withscore)
-        {
-            /* Array with rank and score [rank, score] */
-            if (result->response->array_value_len >= 2)
-            {
-                struct CommandResponse *rank = &result->response->array_value[0];
-                struct CommandResponse *score = &result->response->array_value[1];
-
-                if (rank->response_type == Int &&
-                    (score->response_type == String || score->response_type == Float))
-                {
-                    *rank_value = rank->int_value;
-
-                    if (score->response_type == String)
-                    {
-                        safe_strtod(score->string_value, score->string_value_len, score_value);
-                    }
-                    else
-                    {
-                        *score_value = score->float_value;
-                    }
-
-                    success = 1;
-                }
-            }
-        }
-    }
+    /* Use common helper to handle rank response */
+    int success = handle_rank_response(result, rank_value, score_value, withscore);
 
     /* Free the result */
     free_command_result(result);
@@ -590,47 +495,8 @@ int execute_zrevrank_command(const void *glide_client, const char *key, size_t k
         return -1;
     }
 
-    int success = 0;
-    if (result->response)
-    {
-        if (result->response->response_type == Null)
-        {
-            /* Member doesn't exist in the sorted set */
-            success = 0;
-        }
-        else if (result->response->response_type == Int)
-        {
-            /* Integer rank */
-            *rank_value = result->response->int_value;
-            success = 1;
-        }
-        else if (result->response->response_type == Array && withscore)
-        {
-            /* Array with rank and score [rank, score] */
-            if (result->response->array_value_len >= 2)
-            {
-                struct CommandResponse *rank = &result->response->array_value[0];
-                struct CommandResponse *score = &result->response->array_value[1];
-
-                if (rank->response_type == Int &&
-                    (score->response_type == String || score->response_type == Float))
-                {
-                    *rank_value = rank->int_value;
-
-                    if (score->response_type == String)
-                    {
-                        safe_strtod(score->string_value, score->string_value_len, score_value);
-                    }
-                    else
-                    {
-                        *score_value = score->float_value;
-                    }
-
-                    success = 1;
-                }
-            }
-        }
-    }
+    /* Use common helper to handle rank response */
+    int success = handle_rank_response(result, rank_value, score_value, withscore);
 
     /* Free the result */
     free_command_result(result);
@@ -689,20 +555,13 @@ int execute_zincrby_command(const void *glide_client, const char *key, size_t ke
         return 0;
     }
 
-    /* Process the result */
-    int success = 0;
-    if (result->response)
+    /* Use common helper to handle score response */
+    int success = handle_score_response(result, output_value);
+
+    /* Convert result to expected format for ZINCRBY (0/1 instead of -1/0/1) */
+    if (success == -1)
     {
-        if (result->response->response_type == String)
-        {
-            /* Parse string as double */
-            success = safe_strtod(result->response->string_value, result->response->string_value_len, output_value);
-        }
-        else if (result->response->response_type == Float)
-        {
-            *output_value = result->response->float_value;
-            success = 1;
-        }
+        success = 0;
     }
 
     /* Free the result */
@@ -1184,146 +1043,24 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     int allocated_count = 0;
     int success = 0;
 
-    /* Check if we have options that need to be added */
-    int withscores = 0;
-    int byscore = 0;
-    int has_bylex = 0;
-    int rev = 0;
-    int limit = 0;
-    long limit_offset = 0;
-    long limit_count = 0;
-
-    if (options != NULL)
+    /* Parse range options using common helper */
+    range_options_t range_opts = {0};
+    if (!parse_range_options(options, &range_opts))
     {
-
-        if (Z_TYPE_P(options) == IS_TRUE)
-        {
-
-            /* Direct boolean TRUE means WITHSCORES - this is expected behavior */
-            withscores = 1;
-            arg_count++; /* Add WITHSCORES parameter */
-        }
-        else if (Z_TYPE_P(options) == IS_ARRAY)
-        {
-
-            zval *z_withscores;
-            if ((z_withscores = zend_hash_str_find(Z_ARRVAL_P(options), "withscores", sizeof("withscores") - 1)) != NULL ||
-                (z_withscores = zend_hash_str_find(Z_ARRVAL_P(options), "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL)
-            {
-                if (z_withscores && Z_TYPE_P(z_withscores) == IS_TRUE)
-                {
-                    withscores = 1;
-                    arg_count++; /* Add WITHSCORES parameter */
-                }
-            }
-
-            /* Check for BYSCORE option */
-            /* Check for BYSCORE option */
-            zval *z_byscore;
-            if ((z_byscore = zend_hash_str_find(Z_ARRVAL_P(options), "byscore", sizeof("byscore") - 1)) != NULL ||
-                (z_byscore = zend_hash_str_find(Z_ARRVAL_P(options), "BYSCORE", sizeof("BYSCORE") - 1)) != NULL)
-            {
-                byscore = 1;
-                arg_count++; /* Add BYSCORE parameter */
-            }
-            else
-            {
-                /* Check if 'byscore' exists as a value in the array */
-                zval *entry;
-                ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(options), entry)
-                {
-                    if (Z_TYPE_P(entry) == IS_STRING &&
-                        (strncasecmp(Z_STRVAL_P(entry), "byscore", Z_STRLEN_P(entry)) == 0))
-                    {
-                        byscore = 1;
-                        arg_count++; /* Add BYSCORE parameter */
-
-                        break;
-                    }
-                }
-                ZEND_HASH_FOREACH_END();
-            }
-
-            /* Check for BYLEX option */
-            zval *z_bylex;
-            if ((z_bylex = zend_hash_str_find(Z_ARRVAL_P(options), "bylex", sizeof("bylex") - 1)) != NULL ||
-                (z_bylex = zend_hash_str_find(Z_ARRVAL_P(options), "BYLEX", sizeof("BYLEX") - 1)) != NULL)
-            {
-                has_bylex = 1;
-                arg_count++; /* Add BYLEX parameter */
-            }
-            else
-            {
-                /* Check if 'bylex' exists as a value in the array */
-                zval *entry;
-                ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(options), entry)
-                {
-                    if (Z_TYPE_P(entry) == IS_STRING &&
-                        (strncasecmp(Z_STRVAL_P(entry), "bylex", Z_STRLEN_P(entry)) == 0))
-                    {
-                        has_bylex = 1;
-                        arg_count++; /* Add BYLEX parameter */
-                        break;
-                    }
-                }
-                ZEND_HASH_FOREACH_END();
-            }
-
-            /* Check for REV option */
-            zval *z_rev;
-            if ((z_rev = zend_hash_str_find(Z_ARRVAL_P(options), "rev", sizeof("rev") - 1)) != NULL ||
-                (z_rev = zend_hash_str_find(Z_ARRVAL_P(options), "REV", sizeof("REV") - 1)) != NULL)
-            {
-                rev = 1;
-                arg_count++; /* Add REV parameter */
-            }
-            else
-            {
-                /* Check if 'rev' exists as a value in the array */
-                zval *entry;
-                ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(options), entry)
-                {
-                    if (Z_TYPE_P(entry) == IS_STRING &&
-                        (strncasecmp(Z_STRVAL_P(entry), "rev", Z_STRLEN_P(entry)) == 0))
-                    {
-                        rev = 1;
-                        arg_count++; /* Add REV parameter */
-
-                        break;
-                    }
-                }
-                ZEND_HASH_FOREACH_END();
-            }
-
-            /* Check for LIMIT option */
-            zval *z_limit;
-            if ((z_limit = zend_hash_str_find(Z_ARRVAL_P(options), "limit", sizeof("limit") - 1)) != NULL ||
-                (z_limit = zend_hash_str_find(Z_ARRVAL_P(options), "LIMIT", sizeof("LIMIT") - 1)) != NULL)
-            {
-                if (Z_TYPE_P(z_limit) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(z_limit)) >= 2)
-                {
-                    zval *z_offset, *z_count;
-                    HashTable *limit_ht = Z_ARRVAL_P(z_limit);
-
-                    /* Get offset (first element) */
-                    z_offset = zend_hash_index_find(limit_ht, 0);
-                    if (z_offset && Z_TYPE_P(z_offset) == IS_LONG)
-                    {
-                        limit_offset = Z_LVAL_P(z_offset);
-
-                        /* Get count (second element) */
-                        z_count = zend_hash_index_find(limit_ht, 1);
-                        if (z_count && Z_TYPE_P(z_count) == IS_LONG)
-                        {
-                            limit_count = Z_LVAL_P(z_count);
-                            limit = 1;
-                            arg_count += 3; /* Add LIMIT + offset + count parameters */
-                        }
-                    }
-                }
-            }
-        }
+        return 0;
     }
+
+    /* Calculate argument count based on options */
+    if (range_opts.withscores)
+        arg_count++; /* Add WITHSCORES parameter */
+    if (range_opts.byscore)
+        arg_count++; /* Add BYSCORE parameter */
+    if (range_opts.bylex)
+        arg_count++; /* Add BYLEX parameter */
+    if (range_opts.rev)
+        arg_count++; /* Add REV parameter */
+    if (range_opts.has_limit)
+        arg_count += 3; /* Add LIMIT + offset + count parameters */
     /* Allocate memory for arguments */
     args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
     args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
@@ -1431,7 +1168,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     int arg_idx = 3; /* Start after key, start, end */
 
     /* Add BYSCORE parameter if required */
-    if (byscore)
+    if (range_opts.byscore)
     {
         const char *byscore_str = "BYSCORE";
         args[arg_idx] = (uintptr_t)byscore_str;
@@ -1440,7 +1177,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     }
 
     /* Add BYLEX parameter if required */
-    if (has_bylex)
+    if (range_opts.bylex)
     {
         const char *bylex_str = "BYLEX";
         args[arg_idx] = (uintptr_t)bylex_str;
@@ -1449,7 +1186,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     }
 
     /* Add REV parameter if required */
-    if (rev)
+    if (range_opts.rev)
     {
         const char *rev_str = "REV";
         args[arg_idx] = (uintptr_t)rev_str;
@@ -1458,7 +1195,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     }
 
     /* Add LIMIT parameter if required */
-    if (limit)
+    if (range_opts.has_limit)
     {
         /* Add LIMIT keyword */
         const char *limit_str = "LIMIT";
@@ -1468,7 +1205,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
 
         /* Add offset parameter */
         char offset_str[32];
-        int offset_str_len = snprintf(offset_str, sizeof(offset_str), "%ld", limit_offset);
+        int offset_str_len = snprintf(offset_str, sizeof(offset_str), "%ld", range_opts.limit_offset);
         char *offset_str_copy = estrndup(offset_str, offset_str_len);
         if (!offset_str_copy)
         {
@@ -1491,7 +1228,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
 
         /* Add count parameter */
         char count_str[32];
-        int count_str_len = snprintf(count_str, sizeof(count_str), "%ld", limit_count);
+        int count_str_len = snprintf(count_str, sizeof(count_str), "%ld", range_opts.limit_count);
         char *count_str_copy = estrndup(count_str, count_str_len);
         if (!count_str_copy)
         {
@@ -1514,7 +1251,7 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
     }
 
     /* Add WITHSCORES if required - add it last as per Redis command syntax */
-    if (withscores)
+    if (range_opts.withscores)
     {
         const char *withscores_str = "WITHSCORES";
         args[arg_idx] = (uintptr_t)withscores_str;
