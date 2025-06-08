@@ -19,9 +19,6 @@
 
 #include "php.h"
 
-/* Helper function to convert a zval to a string */
-char *zval_to_string(zval *z, size_t *len, int *need_free);
-
 /* Helper function to process ZRANGE-like responses */
 int process_zrange_response(CommandResult *result, zval *return_value, int has_withscores);
 

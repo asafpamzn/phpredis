@@ -241,6 +241,13 @@ int prepare_z_zadd_args(z_command_args_t *args, uintptr_t **args_out,
                         unsigned long **args_len_out,
                         char ***allocated_strings, int *allocated_count);
 
+/**
+ * Prepare ZDIFF command arguments (numkeys + keys + optional WITHSCORES)
+ */
+int prepare_z_zdiff_args(z_command_args_t *args, uintptr_t **args_out,
+                         unsigned long **args_len_out,
+                         char ***allocated_strings, int *allocated_count);
+
 /* ====================================================================
  * OPTIONS PARSING HELPERS
  * ==================================================================== */

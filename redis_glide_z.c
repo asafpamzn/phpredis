@@ -447,3 +447,470 @@ int execute_zunionstore_command(const void *glide_client, const char *dst, size_
 {
     return execute_zstore_command(glide_client, ZUnionStore, dst, dst_len, keys, keys_count, weights, options, output_value);
 }
+
+/* Execute a ZREVRANGE command using the Valkey Glide client */
+int execute_zrevrange_command(const void *glide_client, const char *key, size_t key_len,
+                              zval *z_start, zval *z_end, zval *options, zval *return_value)
+{
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.z_start = z_start;
+    args.z_end = z_end;
+    args.options = options;
+
+    /* Parse options to determine if withscores is set */
+    range_options_t range_opts = {0};
+    parse_range_options(options, &range_opts);
+
+    struct
+    {
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, range_opts.withscores};
+
+    return execute_z_generic_command(
+        glide_client,
+        ZRevRange,
+        &args,
+        &array_data,
+        process_z_array_result);
+}
+
+/* Execute a ZRANGEBYSCORE command using the Valkey Glide client */
+int execute_zrangebyscore_command(const void *glide_client, const char *key, size_t key_len,
+                                  zval *z_min, zval *z_max, zval *options, zval *return_value)
+{
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.z_start = z_min;
+    args.z_end = z_max;
+    args.options = options;
+
+    /* Parse options to determine if withscores is set */
+    range_options_t range_opts = {0};
+    parse_range_options(options, &range_opts);
+
+    struct
+    {
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, range_opts.withscores};
+
+    return execute_z_generic_command(
+        glide_client,
+        ZRangeByScore,
+        &args,
+        &array_data,
+        process_z_array_result);
+}
+
+/* Execute a ZREVRANGEBYSCORE command using the Valkey Glide client */
+int execute_zrevrangebyscore_command(const void *glide_client, const char *key, size_t key_len,
+                                     zval *z_max, zval *z_min, zval *options, zval *return_value)
+{
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.z_start = z_max; /* For ZREVRANGEBYSCORE, start is max */
+    args.z_end = z_min;   /* For ZREVRANGEBYSCORE, end is min */
+    args.options = options;
+
+    /* Parse options to determine if withscores is set */
+    range_options_t range_opts = {0};
+    parse_range_options(options, &range_opts);
+
+    struct
+    {
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, range_opts.withscores};
+
+    return execute_z_generic_command(
+        glide_client,
+        ZRevRangeByScore,
+        &args,
+        &array_data,
+        process_z_array_result);
+}
+
+/* Execute a ZRANGEBYLEX command using the Valkey Glide client */
+int execute_zrangebylex_command(const void *glide_client, const char *key, size_t key_len,
+                                zval *z_min, zval *z_max, zval *options, zval *return_value)
+{
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.z_start = z_min;
+    args.z_end = z_max;
+    args.options = options;
+
+    /* Parse options to determine if withscores is set */
+    range_options_t range_opts = {0};
+    parse_range_options(options, &range_opts);
+    range_opts.bylex = 1; /* ZRANGEBYLEX always has BYLEX */
+
+    struct
+    {
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, range_opts.withscores};
+
+    return execute_z_generic_command(
+        glide_client,
+        ZRangeByLex,
+        &args,
+        &array_data,
+        process_z_array_result);
+}
+
+/* Execute a ZINTERCARD command using the Valkey Glide client */
+int execute_zintercard_command(const void *glide_client, zval *keys, int keys_count, zval *options, zval *return_value)
+{
+    z_command_args_t args = {0};
+    args.members = keys; /* Reuse members field for keys */
+    args.member_count = keys_count;
+    args.options = options;
+
+    return execute_z_generic_command(
+        glide_client,
+        ZInterCard,
+        &args,
+        return_value,
+        process_z_long_to_zval_result);
+}
+
+/* Execute a ZUNION command using the Valkey Glide client */
+int execute_zunion_command(const void *glide_client, zval *keys, int keys_count, zval *weights, zval *options, zval *return_value)
+{
+    z_command_args_t args = {0};
+    args.members = keys; /* Reuse members field for keys */
+    args.member_count = keys_count;
+    args.weights = weights;
+    args.options = options;
+
+    struct
+    {
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, 0}; /* withscores determined by options */
+
+    return execute_z_generic_command(
+        glide_client,
+        ZUnion,
+        &args,
+        &array_data,
+        process_z_array_result);
+}
+
+/* Execute a ZPOPMAX command using the Valkey Glide client */
+int execute_zpopmax_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value)
+{
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.start = count; /* Reuse start field for count */
+
+    struct
+    {
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, 0};
+
+    return execute_z_generic_command(
+        glide_client,
+        ZPopMax,
+        &args,
+        &array_data,
+        process_z_array_result);
+}
+
+/* Execute a ZPOPMIN command using the Valkey Glide client */
+int execute_zpopmin_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value)
+{
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.start = count; /* Reuse start field for count */
+
+    struct
+    {
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, 0};
+
+    return execute_z_generic_command(
+        glide_client,
+        ZPopMin,
+        &args,
+        &array_data,
+        process_z_array_result);
+}
+
+/* Execute a ZADD command using the Valkey Glide client */
+int execute_zadd_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, int flags, long *output_value, double *output_value_double)
+{
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.members = z_args;
+    args.member_count = argc;
+
+    /* Determine if INCR option is present by parsing first element if it's an array */
+    int has_incr = 0;
+    if (argc > 0 && Z_TYPE(z_args[0]) == IS_ARRAY)
+    {
+        zadd_options_t zadd_opts = {0};
+        parse_zadd_options(&z_args[0], &zadd_opts);
+        has_incr = zadd_opts.incr;
+    }
+
+    struct
+    {
+        long *output_value;
+        double *output_value_double;
+        int is_incr;
+    } zadd_data = {output_value, output_value_double, has_incr};
+
+    return execute_z_generic_command(
+        glide_client,
+        ZAdd,
+        &args,
+        &zadd_data,
+        process_z_zadd_result);
+}
+
+/* Execute a ZRANGESTORE command using the Valkey Glide client */
+int execute_zrangestore_command(const void *glide_client, const char *dst, size_t dst_len,
+                                const char *src, size_t src_len, zval *z_start, zval *z_end,
+                                zval *options, long *output_value)
+{
+    z_command_args_t args = {0};
+    args.key = dst; /* dst is the destination key */
+    args.key_len = dst_len;
+    args.member = src; /* src is the source key (reuse member field) */
+    args.member_len = src_len;
+    args.z_start = z_start;
+    args.z_end = z_end;
+    args.options = options;
+
+    return execute_z_generic_command(
+        glide_client,
+        ZRangeStore,
+        &args,
+        output_value,
+        process_z_int_result);
+}
+
+/* Execute a ZREVRANGEBYLEX command using the Valkey Glide client */
+int execute_zrevrangebylex_command(const void *glide_client, const char *key, size_t key_len,
+                                   zval *z_max, zval *z_min, zval *options, zval *return_value)
+{
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.z_start = z_max; /* For ZREVRANGEBYLEX, start is max */
+    args.z_end = z_min;   /* For ZREVRANGEBYLEX, end is min */
+    args.options = options;
+
+    struct
+    {
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, 0}; /* ZREVRANGEBYLEX never has withscores */
+
+    return execute_z_generic_command(
+        glide_client,
+        ZRevRangeByLex,
+        &args,
+        &array_data,
+        process_z_array_result);
+}
+
+/* Execute a ZDIFF command using the Valkey Glide client */
+int execute_zdiff_command(const void *glide_client, zval *keys, zval *options, zval *return_value)
+{
+    z_command_args_t args = {0};
+    args.members = keys; /* Reuse members field for keys */
+    args.member_count = zend_hash_num_elements(Z_ARRVAL_P(keys));
+    args.options = options;
+
+    struct
+    {
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, 0};
+
+    return execute_z_generic_command(
+        glide_client,
+        ZDiff,
+        &args,
+        &array_data,
+        process_z_array_result);
+}
+
+/* Execute a ZINTER command using the Valkey Glide client */
+int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights, zval *options, zval *return_value)
+{
+    z_command_args_t args = {0};
+    args.members = keys; /* Reuse members field for keys */
+    args.member_count = zend_hash_num_elements(Z_ARRVAL_P(keys));
+    args.weights = z_weights;
+    args.options = options;
+
+    struct
+    {
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, 0};
+
+    return execute_z_generic_command(
+        glide_client,
+        ZInter,
+        &args,
+        &array_data,
+        process_z_array_result);
+}
+
+/* Execute a ZSCAN command using the Valkey Glide client */
+int execute_zscan_command(const void *glide_client, const char *key, size_t key_len, long *cursor,
+                          char *pattern, size_t pattern_len, long count, zval *return_value)
+{
+    /* Check if client and key are valid */
+    if (!glide_client || !key || key_len <= 0 || !cursor)
+    {
+        return 0;
+    }
+
+    /* Calculate number of arguments */
+    unsigned long arg_count = 2; /* key + cursor */
+    if (pattern && pattern_len > 0)
+    {
+        arg_count += 2; /* MATCH + pattern */
+    }
+    if (count > 0)
+    {
+        arg_count += 2; /* COUNT + count */
+    }
+
+    /* Prepare command arguments */
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!args || !args_len)
+    {
+        if (args)
+            efree(args);
+        if (args_len)
+            efree(args_len);
+        return 0;
+    }
+
+    /* Convert cursor to string */
+    char cursor_str[32];
+    snprintf(cursor_str, sizeof(cursor_str), "%ld", *cursor);
+
+    /* Set key and cursor */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+    args[1] = (uintptr_t)cursor_str;
+    args_len[1] = strlen(cursor_str);
+
+    unsigned int offset = 2;
+
+    /* Add MATCH if needed */
+    if (pattern && pattern_len > 0)
+    {
+        args[offset] = (uintptr_t)"MATCH";
+        args_len[offset] = 5;
+        offset++;
+
+        args[offset] = (uintptr_t)pattern;
+        args_len[offset] = pattern_len;
+        offset++;
+    }
+
+    /* Add COUNT if needed */
+    if (count > 0)
+    {
+        args[offset] = (uintptr_t)"COUNT";
+        args_len[offset] = 5;
+        offset++;
+
+        char count_str[32];
+        snprintf(count_str, sizeof(count_str), "%ld", count);
+        args[offset] = (uintptr_t)estrdup(count_str);
+        args_len[offset] = strlen(count_str);
+        offset++;
+    }
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        ZScan,     /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Free allocated memory for COUNT */
+    if (count > 0)
+    {
+        efree((void *)args[arg_count - 1]);
+    }
+
+    /* Free arrays */
+    efree(args);
+    efree(args_len);
+
+    /* Process the result */
+    int status = 0;
+    if (result)
+    {
+        if (result->command_error)
+        {
+            /* Command failed */
+            free_command_result(result);
+            return 0;
+        }
+
+        if (result->response && result->response->response_type == Array && result->response->array_value_len >= 2)
+        {
+            /* Get new cursor from first element */
+            CommandResponse *cursor_resp = &result->response->array_value[0];
+            if (cursor_resp->response_type == String)
+            {
+                *cursor = atol(cursor_resp->string_value);
+            }
+
+            /* Initialize result array */
+            array_init(return_value);
+
+            /* Add cursor as first element */
+            zval z_cursor;
+            ZVAL_LONG(&z_cursor, *cursor);
+            add_next_index_zval(return_value, &z_cursor);
+
+            /* Add elements array as second element */
+            zval z_elements;
+            CommandResponse *elements = &result->response->array_value[1];
+            if (elements->response_type == Array)
+            {
+                command_response_to_zval(elements, &z_elements, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
+                add_next_index_zval(return_value, &z_elements);
+            }
+            else
+            {
+                array_init(&z_elements);
+                add_next_index_zval(return_value, &z_elements);
+            }
+
+            status = 1;
+        }
+
+        free_command_result(result);
+    }
+
+    return status;
+}

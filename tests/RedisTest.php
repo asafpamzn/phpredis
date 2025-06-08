@@ -1443,8 +1443,7 @@ class Redis_Test extends TestSuite {
         }
     }
 
-    public function testLindex() {
-                print_r("file: ".__FILE__." line: ".__LINE__."\n");
+    public function testLindex() {                
 
         $this->redis->del('list');
         $this->redis->lPush('list', 'val');
