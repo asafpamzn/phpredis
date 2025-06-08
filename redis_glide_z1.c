@@ -148,307 +148,40 @@ void free_weights_strings(uintptr_t *args, int count)
 /* Execute a ZINTERCARD command using the Valkey Glide client */
 int execute_zintercard_command(const void *glide_client, zval *keys, int keys_count, zval *options, zval *return_value)
 {
-    /* Check if client and keys are valid */
-    if (!glide_client || !keys || keys_count <= 0)
-    {
-        return 0;
-    }
+    z_command_args_t args = {0};
+    args.members = keys; /* Reuse members field for keys */
+    args.member_count = keys_count;
+    args.options = options;
 
-    /* Prepare keys arguments */
-    uintptr_t *keys_args = NULL;
-    unsigned long *keys_len = NULL;
-
-    if (!prepare_keys_array(keys, keys_count, &keys_args, &keys_len))
-    {
-        return 0;
-    }
-
-    /* Calculate total arguments (numkeys + keys + LIMIT if present) */
-    unsigned long arg_count = keys_count + 1; /* +1 for numkeys */
-    int has_limit = 0;
-    long limit = 0;
-
-    if (options && Z_TYPE_P(options) == IS_ARRAY)
-    {
-        HashTable *ht = Z_ARRVAL_P(options);
-        zval *limit_val = zend_hash_str_find(ht, "LIMIT", sizeof("LIMIT") - 1);
-        if (limit_val && Z_TYPE_P(limit_val) == IS_LONG)
-        {
-            has_limit = 1;
-            limit = Z_LVAL_P(limit_val);
-            arg_count += 2; /* LIMIT + value */
-        }
-    }
-
-    /* Allocate final args arrays */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (keys_args)
-            efree(keys_args);
-        if (keys_len)
-            efree(keys_len);
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Add numkeys as the first argument */
-    char numkeys_str[32];
-    snprintf(numkeys_str, sizeof(numkeys_str), "%d", keys_count);
-    args[0] = (uintptr_t)estrdup(numkeys_str);
-    args_len[0] = strlen(numkeys_str);
-
-    /* Copy keys to args array (offset by 1 for numkeys) */
-    memcpy(args + 1, keys_args, keys_count * sizeof(uintptr_t));
-    memcpy(args_len + 1, keys_len, keys_count * sizeof(unsigned long));
-
-    /* Add LIMIT option if present */
-    if (has_limit)
-    {
-        char limit_str[32];
-        unsigned int offset = keys_count + 1; /* +1 for numkeys */
-
-        /* Add LIMIT keyword */
-        args[offset] = (uintptr_t)"LIMIT";
-        args_len[offset] = 5;
-        offset++;
-
-        /* Add limit value */
-        snprintf(limit_str, sizeof(limit_str), "%ld", limit);
-        args[offset] = (uintptr_t)estrdup(limit_str);
-        args_len[offset] = strlen(limit_str);
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZInterCard, /* command type */
-        arg_count,  /* number of arguments */
-        args,       /* arguments */
-        args_len    /* argument lengths */
-    );
-
-    /* Free the argument arrays */
-    if (has_limit)
-    {
-        /* Free the limit value string */
-        efree((void *)args[keys_count + 2]); /* +2 for numkeys and LIMIT */
-    }
-    efree((void *)args[0]); /* Free the numkeys string */
-    efree(keys_args);
-    efree(keys_len);
-    efree(args);
-    efree(args_len);
-
-    /* Handle the result */
-    long output_value = 0;
-    int status = handle_int_response(result, &output_value);
-
-    /* Set output value as the return value for PHP */
-    if (status)
-    {
-        ZVAL_LONG(return_value, output_value);
-    }
-
-    return status;
+        ZInterCard,
+        &args,
+        return_value,
+        process_z_long_to_zval_result);
 }
 
 /* Execute a ZUNION command using the Valkey Glide client */
 int execute_zunion_command(const void *glide_client, zval *keys, int keys_count, zval *weights, zval *options, zval *return_value)
 {
-    /* Check if client and keys are valid */
-    if (!glide_client || !keys || keys_count <= 0)
+    z_command_args_t args = {0};
+    args.members = keys; /* Reuse members field for keys */
+    args.member_count = keys_count;
+    args.weights = weights;
+    args.options = options;
+
+    struct
     {
-        return 0;
-    }
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, 0}; /* withscores determined by options */
 
-    /* Prepare keys arguments */
-    uintptr_t *keys_args = NULL;
-    unsigned long *keys_len = NULL;
-
-    if (!prepare_keys_array(keys, keys_count, &keys_args, &keys_len))
-    {
-        return 0;
-    }
-
-    /* Calculate total arguments (numkeys + keys + WEIGHTS + AGGREGATE + WITHSCORES if present) */
-    unsigned long arg_count = 1 + keys_count; /* +1 for numkeys */
-    int has_weights = 0;
-    int has_aggregate = 0;
-    int has_withscores = 0;
-    uintptr_t *weights_args = NULL;
-    unsigned long *weights_len = NULL;
-    uintptr_t agg_type = 0;
-    unsigned long agg_len = 0;
-
-    /* Check for weights */
-    if (weights && Z_TYPE_P(weights) == IS_ARRAY)
-    {
-        int weights_count = zend_hash_num_elements(Z_ARRVAL_P(weights));
-        if (weights_count > 0)
-        {
-            has_weights = 1;
-            if (!prepare_weights_array(weights, weights_count, &weights_args, &weights_len))
-            {
-                efree(keys_args);
-                efree(keys_len);
-                return 0;
-            }
-            arg_count += 1 + weights_count; /* WEIGHTS + values */
-        }
-    }
-
-    /* Check for AGGREGATE and WITHSCORES options */
-    if (options && Z_TYPE_P(options) == IS_ARRAY)
-    {
-        /* Check for aggregate option */
-        if (prepare_aggregate_option(options, &agg_type, &agg_len))
-        {
-            has_aggregate = 1;
-            arg_count += 2; /* AGGREGATE + value */
-        }
-
-        /* Check for withscores option */
-        HashTable *ht = Z_ARRVAL_P(options);
-        zval *withscores = zend_hash_str_find(ht, "withscores", sizeof("withscores") - 1);
-        if (withscores && (Z_TYPE_P(withscores) == IS_TRUE ||
-                           (Z_TYPE_P(withscores) == IS_LONG && Z_LVAL_P(withscores) == 1)))
-        {
-            has_withscores = 1;
-            arg_count += 1; /* WITHSCORES */
-        }
-    }
-
-    /* Allocate final args arrays */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (keys_args)
-            efree(keys_args);
-        if (keys_len)
-            efree(keys_len);
-        if (weights_args)
-        {
-            free_weights_strings(weights_args, zend_hash_num_elements(Z_ARRVAL_P(weights)));
-            efree(weights_args);
-        }
-        if (weights_len)
-            efree(weights_len);
-        if (has_aggregate)
-            efree((void *)agg_type);
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Add numkeys as the first argument */
-    char numkeys_str[32];
-    snprintf(numkeys_str, sizeof(numkeys_str), "%d", keys_count);
-    args[0] = (uintptr_t)estrdup(numkeys_str);
-    args_len[0] = strlen(numkeys_str);
-
-    /* Copy keys to args array (offset by 1 for numkeys) */
-    unsigned int offset = 1;
-    memcpy(args + offset, keys_args, keys_count * sizeof(uintptr_t));
-    memcpy(args_len + offset, keys_len, keys_count * sizeof(unsigned long));
-    offset += keys_count;
-
-    /* Add WEIGHTS if present */
-    if (has_weights)
-    {
-        int weights_count = zend_hash_num_elements(Z_ARRVAL_P(weights));
-
-        /* Add WEIGHTS keyword */
-        args[offset] = (uintptr_t)"WEIGHTS";
-        args_len[offset] = 7;
-        offset++;
-
-        /* Add weights values */
-        memcpy(args + offset, weights_args, weights_count * sizeof(uintptr_t));
-        memcpy(args_len + offset, weights_len, weights_count * sizeof(unsigned long));
-        offset += weights_count;
-    }
-
-    /* Add AGGREGATE if present */
-    if (has_aggregate)
-    {
-        /* Add AGGREGATE keyword */
-        args[offset] = (uintptr_t)"AGGREGATE";
-        args_len[offset] = 9;
-        offset++;
-
-        /* Add aggregate value */
-        args[offset] = agg_type;
-        args_len[offset] = agg_len;
-        offset++;
-    }
-
-    /* Add WITHSCORES if present */
-    if (has_withscores)
-    {
-        /* Add WITHSCORES keyword */
-        args[offset] = (uintptr_t)"WITHSCORES";
-        args_len[offset] = 10;
-        offset++;
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZUnion,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument arrays */
-    efree((void *)args[0]); /* Free the numkeys string */
-    efree(keys_args);
-    efree(keys_len);
-    if (has_weights)
-    {
-        free_weights_strings(weights_args, zend_hash_num_elements(Z_ARRVAL_P(weights)));
-        efree(weights_args);
-        efree(weights_len);
-    }
-    if (has_aggregate)
-    {
-        efree((void *)agg_type);
-    }
-    efree(args);
-    efree(args_len);
-
-    /* Process the result */
-    int status = 0;
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
-            return 0;
-        }
-
-        if (result->response)
-        {
-            /* ZUNION returns array of members with scores */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
-            free_command_result(result);
-            return status;
-        }
-        free_command_result(result);
-    }
-
-    return 0;
+        ZUnion,
+        &args,
+        &array_data,
+        process_z_array_result);
 }
 
 /* Execute a ZPOPMAX command using the Valkey Glide client */

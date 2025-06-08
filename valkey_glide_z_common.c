@@ -800,6 +800,26 @@ int execute_z_generic_command(
                                          &allocated_strings, &allocated_count);
         break;
 
+    case ZInterCard:
+        allocated_strings = (char **)emalloc(5 * sizeof(char *)); /* Enough for ZINTERCARD */
+        if (!allocated_strings)
+        {
+            return 0;
+        }
+        arg_count = prepare_z_intercard_args(args, &arg_values, &arg_lens,
+                                             &allocated_strings, &allocated_count);
+        break;
+
+    case ZUnion:
+        allocated_strings = (char **)emalloc(20 * sizeof(char *)); /* Enough for ZUNION */
+        if (!allocated_strings)
+        {
+            return 0;
+        }
+        arg_count = prepare_z_union_args(args, &arg_values, &arg_lens,
+                                         &allocated_strings, &allocated_count);
+        break;
+
     default:
         /* Unsupported command type */
         return 0;
@@ -1383,9 +1403,287 @@ int prepare_z_store_args(z_command_args_t *args, uintptr_t **args_out,
     return arg_count;
 }
 
+/**
+ * Prepare ZINTERCARD command arguments (numkeys + keys + optional LIMIT)
+ */
+int prepare_z_intercard_args(z_command_args_t *args, uintptr_t **args_out,
+                             unsigned long **args_len_out,
+                             char ***allocated_strings, int *allocated_count)
+{
+    if (!args || !args->members || args->member_count <= 0 ||
+        !args_out || !args_len_out || !allocated_strings || !allocated_count)
+    {
+        return 0;
+    }
+
+    *allocated_count = 0;
+
+    /* Calculate total arguments (numkeys + keys + LIMIT if present) */
+    unsigned long arg_count = 1 + args->member_count; /* +1 for numkeys */
+    int has_limit = 0;
+    long limit = 0;
+
+    if (args->options && Z_TYPE_P(args->options) == IS_ARRAY)
+    {
+        HashTable *ht = Z_ARRVAL_P(args->options);
+        zval *limit_val = zend_hash_str_find(ht, "LIMIT", sizeof("LIMIT") - 1);
+        if (limit_val && Z_TYPE_P(limit_val) == IS_LONG)
+        {
+            has_limit = 1;
+            limit = Z_LVAL_P(limit_val);
+            arg_count += 2; /* LIMIT + value */
+        }
+    }
+
+    /* Allocate final args arrays */
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!(*args_out) || !(*args_len_out))
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Add numkeys as the first argument */
+    char numkeys_str[32];
+    snprintf(numkeys_str, sizeof(numkeys_str), "%d", args->member_count);
+    char *numkeys_str_copy = estrdup(numkeys_str);
+    if (!numkeys_str_copy)
+    {
+        efree(*args_out);
+        efree(*args_len_out);
+        return 0;
+    }
+    (*args_out)[0] = (uintptr_t)numkeys_str_copy;
+    (*args_len_out)[0] = strlen(numkeys_str);
+    (*allocated_strings)[(*allocated_count)++] = numkeys_str_copy;
+
+    /* Add keys starting from index 1 */
+    HashTable *keys_hash = Z_ARRVAL_P(args->members); /* members field is reused for keys */
+    zval *key;
+    int idx = 1;
+    ZEND_HASH_FOREACH_VAL(keys_hash, key)
+    {
+        if (Z_TYPE_P(key) != IS_STRING)
+        {
+            convert_to_string(key);
+        }
+        (*args_out)[idx] = (uintptr_t)Z_STRVAL_P(key);
+        (*args_len_out)[idx] = Z_STRLEN_P(key);
+        idx++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    /* Add LIMIT option if present */
+    if (has_limit)
+    {
+        unsigned int offset = 1 + args->member_count; /* +1 for numkeys */
+
+        /* Add LIMIT keyword */
+        (*args_out)[offset] = (uintptr_t)"LIMIT";
+        (*args_len_out)[offset] = 5;
+        offset++;
+
+        /* Add limit value */
+        char limit_str[32];
+        snprintf(limit_str, sizeof(limit_str), "%ld", limit);
+        char *limit_str_copy = estrdup(limit_str);
+        if (!limit_str_copy)
+        {
+            /* Cleanup on error */
+            int j;
+            for (j = 0; j < *allocated_count; j++)
+            {
+                efree((*allocated_strings)[j]);
+            }
+            efree(*args_out);
+            efree(*args_len_out);
+            return 0;
+        }
+        (*args_out)[offset] = (uintptr_t)limit_str_copy;
+        (*args_len_out)[offset] = strlen(limit_str);
+        (*allocated_strings)[(*allocated_count)++] = limit_str_copy;
+    }
+
+    return arg_count;
+}
+
+/**
+ * Prepare ZUNION command arguments (numkeys + keys + WEIGHTS + AGGREGATE + WITHSCORES if present)
+ */
+int prepare_z_union_args(z_command_args_t *args, uintptr_t **args_out,
+                         unsigned long **args_len_out,
+                         char ***allocated_strings, int *allocated_count)
+{
+    if (!args || !args->members || args->member_count <= 0 ||
+        !args_out || !args_len_out || !allocated_strings || !allocated_count)
+    {
+        return 0;
+    }
+
+    *allocated_count = 0;
+
+    /* Parse union options */
+    store_options_t union_opts = {0};
+    parse_store_options(args->weights, args->options, &union_opts);
+
+    /* Calculate total arguments (numkeys + keys + WEIGHTS + AGGREGATE + WITHSCORES if present) */
+    unsigned long arg_count = 1 + args->member_count; /* +1 for numkeys */
+    int weights_count = 0;
+
+    if (union_opts.has_weights)
+    {
+        weights_count = zend_hash_num_elements(Z_ARRVAL_P(union_opts.weights));
+        arg_count += 1 + weights_count; /* WEIGHTS + values */
+    }
+
+    if (union_opts.has_aggregate)
+    {
+        arg_count += 2; /* AGGREGATE + value */
+    }
+
+    if (union_opts.withscores)
+    {
+        arg_count += 1; /* WITHSCORES */
+    }
+
+    /* Allocate final args arrays */
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!(*args_out) || !(*args_len_out))
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Add numkeys as the first argument */
+    char numkeys_str[32];
+    snprintf(numkeys_str, sizeof(numkeys_str), "%d", args->member_count);
+    char *numkeys_str_copy = estrdup(numkeys_str);
+    if (!numkeys_str_copy)
+    {
+        efree(*args_out);
+        efree(*args_len_out);
+        return 0;
+    }
+    (*args_out)[0] = (uintptr_t)numkeys_str_copy;
+    (*args_len_out)[0] = strlen(numkeys_str);
+    (*allocated_strings)[(*allocated_count)++] = numkeys_str_copy;
+
+    /* Add keys starting from index 1 */
+    HashTable *keys_hash = Z_ARRVAL_P(args->members); /* members field is reused for keys */
+    zval *key;
+    unsigned int offset = 1;
+    ZEND_HASH_FOREACH_VAL(keys_hash, key)
+    {
+        if (Z_TYPE_P(key) != IS_STRING)
+        {
+            convert_to_string(key);
+        }
+        (*args_out)[offset] = (uintptr_t)Z_STRVAL_P(key);
+        (*args_len_out)[offset] = Z_STRLEN_P(key);
+        offset++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    /* Add WEIGHTS if present */
+    if (union_opts.has_weights)
+    {
+        /* Add WEIGHTS keyword */
+        (*args_out)[offset] = (uintptr_t)"WEIGHTS";
+        (*args_len_out)[offset] = 7;
+        offset++;
+
+        /* Add weights values using framework helper */
+        HashTable *weights_hash = Z_ARRVAL_P(union_opts.weights);
+        zval *weight;
+        ZEND_HASH_FOREACH_VAL(weights_hash, weight)
+        {
+            char *weight_str = NULL;
+            size_t weight_len = 0;
+            int need_free = 0;
+
+            weight_str = zval_to_string_safe(weight, &weight_len, &need_free);
+
+            if (!weight_str)
+            {
+                /* Cleanup on error */
+                int j;
+                for (j = 0; j < *allocated_count; j++)
+                {
+                    efree((*allocated_strings)[j]);
+                }
+                efree(*args_out);
+                efree(*args_len_out);
+                return 0;
+            }
+
+            (*args_out)[offset] = (uintptr_t)weight_str;
+            (*args_len_out)[offset] = weight_len;
+
+            if (need_free)
+            {
+                (*allocated_strings)[(*allocated_count)++] = weight_str;
+            }
+
+            offset++;
+        }
+        ZEND_HASH_FOREACH_END();
+    }
+
+    /* Add AGGREGATE if present */
+    if (union_opts.has_aggregate)
+    {
+        /* Add AGGREGATE keyword */
+        (*args_out)[offset] = (uintptr_t)"AGGREGATE";
+        (*args_len_out)[offset] = 9;
+        offset++;
+
+        /* Add aggregate value */
+        const char *agg_str = Z_STRVAL_P(union_opts.aggregate);
+        char *agg_str_copy = estrdup(agg_str);
+        if (!agg_str_copy)
+        {
+            /* Cleanup on error */
+            int j;
+            for (j = 0; j < *allocated_count; j++)
+            {
+                efree((*allocated_strings)[j]);
+            }
+            efree(*args_out);
+            efree(*args_len_out);
+            return 0;
+        }
+
+        (*args_out)[offset] = (uintptr_t)agg_str_copy;
+        (*args_len_out)[offset] = Z_STRLEN_P(union_opts.aggregate);
+        (*allocated_strings)[(*allocated_count)++] = agg_str_copy;
+        offset++;
+    }
+
+    /* Add WITHSCORES if present */
+    if (union_opts.withscores)
+    {
+        /* Add WITHSCORES keyword */
+        (*args_out)[offset] = (uintptr_t)"WITHSCORES";
+        (*args_len_out)[offset] = 10;
+        offset++;
+    }
+
+    return arg_count;
+}
+
 /* ====================================================================
  * RESULT PROCESSING FUNCTIONS
- * ==================================================================== */
+ * ===================================================================== */
 
 /**
  * Process integer result (for commands returning count)
@@ -1539,4 +1837,25 @@ int process_z_array_result(CommandResult *result, void *output)
                                            COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, true);
 
     return success;
+}
+
+/**
+ * Process integer result and set as ZVAL_LONG (for commands like ZINTERCARD)
+ */
+int process_z_long_to_zval_result(CommandResult *result, void *output)
+{
+    zval *return_value = (zval *)output;
+
+    if (!result || !result->response || !return_value)
+    {
+        return 0;
+    }
+
+    if (result->response->response_type == Int)
+    {
+        ZVAL_LONG(return_value, result->response->int_value);
+        return 1;
+    }
+
+    return 0;
 }

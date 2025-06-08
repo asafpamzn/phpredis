@@ -150,6 +150,8 @@ int process_z_exists_result(CommandResult *result, void *output);
  */
 int process_z_array_result(CommandResult *result, void *output);
 
+int process_z_long_to_zval_result(CommandResult *result, void *output);
+
 /**
  * Process rank result with optional score
  */
@@ -195,6 +197,20 @@ int prepare_z_complex_range_args(z_command_args_t *args, uintptr_t **args_out,
  * Prepare store command arguments (destination + numkeys + keys + weights + aggregate)
  */
 int prepare_z_store_args(z_command_args_t *args, uintptr_t **args_out,
+                         unsigned long **args_len_out,
+                         char ***allocated_strings, int *allocated_count);
+
+/**
+ * Prepare ZINTERCARD command arguments (numkeys + keys + optional LIMIT)
+ */
+int prepare_z_intercard_args(z_command_args_t *args, uintptr_t **args_out,
+                             unsigned long **args_len_out,
+                             char ***allocated_strings, int *allocated_count);
+
+/**
+ * Prepare ZUNION command arguments (numkeys + keys + WEIGHTS + AGGREGATE + WITHSCORES)
+ */
+int prepare_z_union_args(z_command_args_t *args, uintptr_t **args_out,
                          unsigned long **args_len_out,
                          char ***allocated_strings, int *allocated_count);
 
