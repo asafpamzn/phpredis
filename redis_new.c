@@ -1011,10 +1011,6 @@ PHP_METHOD(Redis, blmpop)
 }
 /* }}} */
 
-/* {{{ proto Redis|array|false Redis::zmpop(array $keys, string $from, int $count = 1) */
-ZMPOP_METHOD_IMPL(Redis)
-/* }}} */
-
 static void
 redis_parse_info_response(char *response, zval *z_ret)
 {
@@ -1231,8 +1227,4 @@ PHP_METHOD(Redis, rPush)
         RETURN_LONG(result);
     }
 }
-/* }}} */
-
-/* {{{ proto long Redis::zadd(string key, double score, string member, ...) */
-ZADD_METHOD_IMPL(Redis)
 /* }}} */

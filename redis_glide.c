@@ -1406,11 +1406,7 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
     {
         return execute_lmpop_command(glide_client, cmd, timeout, keys, from, from_len, count, result);
     }
-    /* Check for sorted set-based commands (ZMPOP, BZMPOP) */
-    else if (strcmp(cmd, "ZMPOP") == 0 || strcmp(cmd, "BZMPOP") == 0)
-    {
-        return -1;
-    }
+
     /* Unknown command type */
     else
     {

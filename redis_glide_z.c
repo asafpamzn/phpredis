@@ -1994,7 +1994,7 @@ int execute_zmpop_command(zval *object, int argc, zval *return_value)
     ZVAL_NULL(return_value);
 
     /* Execute the command */
-    return execute_mpop_command(glide_client, "ZMPOP", 0.0, z_keys, from, from_len, count, return_value);
+    return execute_zmpop_command1(glide_client, "ZMPOP", 0.0, z_keys, from, from_len, count, return_value);
 }
 
 /* Execute a ZADD command with the new signature pattern */

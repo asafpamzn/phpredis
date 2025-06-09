@@ -138,11 +138,3 @@ PHP_METHOD(Redis, move)
     }
 }
 /* }}} */
-
-/* {{{ proto array Redis::bzPopMax(string|array key [, string otherkeys, ...,], float timeout) */
-BZPOPMAX_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto array Redis::bzPopMin(string|array key [, string otherkeys, ...,], float timeout) */
-BZPOPMIN_METHOD_IMPL(Redis)
-/* }}} */

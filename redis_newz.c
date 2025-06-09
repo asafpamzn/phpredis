@@ -174,3 +174,51 @@ ZDIFF_METHOD_IMPL(Redis)
 /* {{{ proto array Redis::zinter(array keys [, array weights] [, array options]) */
 ZINTER_METHOD_IMPL(Redis)
 /* }}} */
+
+/* {{{ proto array Redis::bzPopMax(string|array key [, string otherkeys, ...,], float timeout) */
+BZPOPMAX_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::bzPopMin(string|array key [, string otherkeys, ...,], float timeout) */
+BZPOPMIN_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::zintercard(array $keys, int|array $limit_or_options = null) */
+ZINTERCARD_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::zunion(array $keys, array $weights = null, array $options = null) */
+ZUNION_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::zdiffstore(string dst, array keys) */
+ZDIFFSTORE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::zinterstore(string dst, array keys) */
+ZINTERSTORE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::zunionstore(string dst, array keys) */
+ZUNIONSTORE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::zPopMax(string key, [int count]) */
+ZPOPMAX_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::zPopMin(string key, [int count]) */
+ZPOPMIN_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::zscan(string key, long &iterator, [string pattern, long count]) */
+ZSCAN_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto Redis|array|false Redis::zmpop(array $keys, string $from, int $count = 1) */
+ZMPOP_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::zadd(string key, double score, string member, ...) */
+ZADD_METHOD_IMPL(Redis)
+/* }}} */

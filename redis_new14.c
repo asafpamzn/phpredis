@@ -23,35 +23,3 @@
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
-
-/* {{{ proto array Redis::zintercard(array $keys, int|array $limit_or_options = null) */
-ZINTERCARD_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto array Redis::zunion(array $keys, array $weights = null, array $options = null) */
-ZUNION_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto long Redis::zdiffstore(string dst, array keys) */
-ZDIFFSTORE_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto long Redis::zinterstore(string dst, array keys) */
-ZINTERSTORE_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto long Redis::zunionstore(string dst, array keys) */
-ZUNIONSTORE_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto array Redis::zPopMax(string key, [int count]) */
-ZPOPMAX_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto array Redis::zPopMin(string key, [int count]) */
-ZPOPMIN_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto array Redis::zscan(string key, long &iterator, [string pattern, long count]) */
-ZSCAN_METHOD_IMPL(Redis)
-/* }}} */
