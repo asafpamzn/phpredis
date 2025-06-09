@@ -111,126 +111,11 @@ ZREVRANGEBYSCORE_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::zRangeByLex(string key, mixed min, mixed max [, array options | long offset, long count]) */
-PHP_METHOD(Redis, zRangeByLex)
-{
-    zval *object, *options = NULL;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_min, *z_max;
-    zend_long offset = -1, count = -1;
-    int argc = ZEND_NUM_ARGS();
-
-    /* Parse parameters - allow either options array or offset/count */
-    if (argc == 4)
-    {
-        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|z",
-                                         &object, redis_ce, &key, &key_len, &z_min, &z_max,
-                                         &options) == FAILURE)
-        {
-            RETURN_FALSE;
-        }
-    }
-    else if (argc == 5)
-    {
-        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszzll",
-                                         &object, redis_ce, &key, &key_len, &z_min, &z_max,
-                                         &offset, &count) == FAILURE)
-        {
-            RETURN_FALSE;
-        }
-    }
-    else
-    {
-        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz",
-                                         &object, redis_ce, &key, &key_len, &z_min, &z_max) == FAILURE)
-        {
-            RETURN_FALSE;
-        }
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Initialize return array */
-        array_init(return_value);
-
-        /* If offset and count are provided as separate parameters, create options array */
-        zval new_options;
-        if (offset >= 0 && count >= 0)
-        {
-            array_init(&new_options);
-
-            /* Create LIMIT subarray */
-            zval limit_array;
-            array_init(&limit_array);
-            add_index_long(&limit_array, 0, offset);
-            add_index_long(&limit_array, 1, count);
-
-            /* Add LIMIT subarray to options */
-            add_assoc_zval(&new_options, "LIMIT", &limit_array);
-            options = &new_options;
-        }
-
-        /* Execute the ZRANGEBYLEX command using the Glide client */
-        int result = execute_zrangebylex_command(redis->glide_client, key, key_len, z_min, z_max, options, return_value);
-
-        /* Free the temporary options array if we created one */
-        if (offset >= 0 && count >= 0)
-        {
-            zval_dtor(&new_options);
-        }
-
-        if (result)
-        {
-            return;
-        }
-
-        /* If the command failed, clean up and return FALSE */
-        zval_dtor(return_value);
-    }
-}
+ZRANGEBYLEX_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::zRevRangeByLex(string key, mixed max, mixed min [, array options]) */
-PHP_METHOD(Redis, zRevRangeByLex)
-{
-    zval *object, *options = NULL;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_max, *z_min;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|a",
-                                     &object, redis_ce, &key, &key_len, &z_max, &z_min,
-                                     &options) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Initialize return array */
-        array_init(return_value);
-
-        /* Execute the ZREVRANGEBYLEX command using the Glide client */
-        if (execute_zrevrangebylex_command(redis->glide_client, key, key_len, z_max, z_min, options, return_value))
-        {
-            return;
-        }
-
-        /* If the command failed, clean up and return FALSE */
-        zval_dtor(return_value);
-    }
-}
+ZREVRANGEBYLEX_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::zLexCount(string key, mixed min, mixed max) */
@@ -269,116 +154,15 @@ PHP_METHOD(Redis, zLexCount)
 /* }}} */
 
 /* {{{ proto long Redis::zRemRangeByLex(string key, mixed min, mixed max) */
-PHP_METHOD(Redis, zRemRangeByLex)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    char *min, *max;
-    size_t min_len, max_len;
-    long count;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss",
-                                     &object, redis_ce, &key, &key_len, &min, &min_len,
-                                     &max, &max_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZREMRANGEBYLEX command using the Glide client */
-        if (execute_zremrangebylex_command(redis->glide_client, key, key_len, min, min_len, max, max_len, &count))
-        {
-            RETURN_LONG(count);
-        }
-        RETURN_FALSE;
-    }
-}
+ZREMRANGEBYLEX_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::zRem(string key, string member, ...) */
-PHP_METHOD(Redis, zRem)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    int argc = ZEND_NUM_ARGS();
-    long count;
-    zval *z_args = NULL;
-
-    /* Parse parameters */
-
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_args, &argc) == FAILURE)
-    {
-
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZREM command using the Glide client */
-        if (execute_zrem_command(redis->glide_client, key, key_len, z_args, argc, &count))
-        {
-
-            RETURN_LONG(count);
-        }
-
-        RETURN_FALSE;
-    }
-
-    /* Free our arguments array */
-
-    RETURN_FALSE;
-}
+ZREM_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::zRemRangeByScore(string key, mixed min, mixed max) */
-PHP_METHOD(Redis, zRemRangeByScore)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    char *min, *max;
-    size_t min_len, max_len;
-    long count;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss",
-                                     &object, redis_ce, &key, &key_len, &min, &min_len,
-                                     &max, &max_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZREMRANGEBYSCORE command using the Glide client */
-        if (execute_zremrangebyscore_command(redis->glide_client, key, key_len, min, min_len, max, max_len, &count))
-        {
-            RETURN_LONG(count);
-        }
-        RETURN_FALSE;
-    }
-}
+ZREMRANGEBYSCORE_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::zRemRangeByRank(string key, long start, long end) */

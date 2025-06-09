@@ -343,8 +343,8 @@ int execute_zrevrank_command(const void *glide_client, const char *key, size_t k
 int execute_zincrby_command(const void *glide_client, const char *key, size_t key_len, double increment, const char *member, size_t member_len, double *new_score);
 int execute_zcount_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *count);
 int execute_zlexcount_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *count);
-int execute_zrem_command(const void *glide_client, const char *key, size_t key_len, zval *members, int member_count, long *removed_count);
-int execute_zremrangebylex_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *removed_count);
+int execute_zrem_command(zval *object, int argc, zval *return_value);
+int execute_zremrangebylex_command(zval *object, int argc, zval *return_value);
 int execute_zremrangebyrank_command(const void *glide_client, const char *key, size_t key_len, long start, long stop, long *removed_count);
 int execute_zrange_command(zval *object, int argc, zval *return_value);
 int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
@@ -370,11 +370,11 @@ int execute_zscan_command(const void *glide_client, const char *key, size_t key_
 int execute_zrevrange_command(zval *object, int argc, zval *return_value);
 int execute_zrangebyscore_command(zval *object, int argc, zval *return_value);
 int execute_zrevrangebyscore_command(zval *object, int argc, zval *return_value);
-int execute_zrangebylex_command(const void *glide_client, const char *key, size_t key_len, zval *z_min, zval *z_max, zval *options, zval *return_value);
-
-int execute_zrevrangebylex_command(const void *glide_client, const char *key, size_t key_len, zval *z_max, zval *z_min, zval *options, zval *return_value);
+int execute_zrangebylex_command(zval *object, int argc, zval *return_value);
+int execute_zrevrangebylex_command(zval *object, int argc, zval *return_value);
 int execute_zdiff_command(const void *glide_client, zval *keys, zval *options, zval *return_value);
 int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights, zval *options, zval *return_value);
+int execute_zremrangebyscore_command(zval *object, int argc, zval *return_value);
 
 /* ====================================================================
  * UTILITY MACROS
@@ -482,6 +482,63 @@ int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights
             return;                                                                     \
         }                                                                               \
         zval_dtor(return_value);                                                        \
+        RETURN_FALSE;                                                                   \
+    }
+
+/* Ultra-simple macro for ZRANGEBYLEX method implementation */
+#define ZRANGEBYLEX_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRangeByLex)                                            \
+    {                                                                              \
+        if (execute_zrangebylex_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                          \
+            return;                                                                \
+        }                                                                          \
+        zval_dtor(return_value);                                                   \
+        RETURN_FALSE;                                                              \
+    }
+
+/* Ultra-simple macro for ZREVRANGEBYLEX method implementation */
+#define ZREVRANGEBYLEX_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRevRangeByLex)                                            \
+    {                                                                                 \
+        if (execute_zrevrangebylex_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                             \
+            return;                                                                   \
+        }                                                                             \
+        zval_dtor(return_value);                                                      \
+        RETURN_FALSE;                                                                 \
+    }
+
+/* Ultra-simple macro for ZREMRANGEBYLEX method implementation */
+#define ZREMRANGEBYLEX_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRemRangeByLex)                                            \
+    {                                                                                 \
+        if (execute_zremrangebylex_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                             \
+            return;                                                                   \
+        }                                                                             \
+        RETURN_FALSE;                                                                 \
+    }
+
+/* Ultra-simple macro for ZREM method implementation */
+#define ZREM_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRem)                                            \
+    {                                                                       \
+        if (execute_zrem_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        RETURN_FALSE;                                                       \
+    }
+
+/* Ultra-simple macro for ZREMRANGEBYSCORE method implementation */
+#define ZREMRANGEBYSCORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRemRangeByScore)                                            \
+    {                                                                                   \
+        if (execute_zremrangebyscore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                               \
+            return;                                                                     \
+        }                                                                               \
         RETURN_FALSE;                                                                   \
     }
 

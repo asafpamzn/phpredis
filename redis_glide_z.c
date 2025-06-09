@@ -335,27 +335,83 @@ int execute_zlexcount_command(const void *glide_client, const char *key, size_t 
         process_z_int_result);
 }
 
-int execute_zrem_command(const void *glide_client, const char *key, size_t key_len,
-                         zval *members, int members_count, long *output_value)
+int execute_zrem_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL;
+    size_t key_len;
+    int variadic_argc = 0;
+    zval *z_args = NULL;
+    const void *glide_client = NULL;
+    long count;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os*",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &variadic_argc) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
-    args.members = members;
-    args.member_count = members_count;
+    args.members = z_args;
+    args.member_count = variadic_argc;
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZRem,
         &args,
-        output_value,
+        &count,
         process_z_int_result);
+
+    if (result)
+    {
+        ZVAL_LONG(return_value, count);
+    }
+
+    return result;
 }
 
-int execute_zremrangebylex_command(const void *glide_client, const char *key, size_t key_len,
-                                   const char *min, size_t min_len, const char *max, size_t max_len,
-                                   long *output_value)
+int execute_zremrangebylex_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL;
+    size_t key_len;
+    char *min, *max;
+    size_t min_len, max_len;
+    const void *glide_client = NULL;
+    long count;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osss",
+                                     &object, redis_ce, &key, &key_len, &min, &min_len,
+                                     &max, &max_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
@@ -364,12 +420,19 @@ int execute_zremrangebylex_command(const void *glide_client, const char *key, si
     args.max = max;
     args.max_len = max_len;
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZRemRangeByLex,
         &args,
-        output_value,
+        &count,
         process_z_int_result);
+
+    if (result)
+    {
+        ZVAL_LONG(return_value, count);
+    }
+
+    return result;
 }
 
 int execute_zremrangebyrank_command(const void *glide_client, const char *key, size_t key_len,
@@ -389,10 +452,34 @@ int execute_zremrangebyrank_command(const void *glide_client, const char *key, s
         process_z_int_result);
 }
 
-int execute_zremrangebyscore_command(const void *glide_client, const char *key, size_t key_len,
-                                     const char *min, size_t min_len, const char *max, size_t max_len,
-                                     long *output_value)
+int execute_zremrangebyscore_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL;
+    size_t key_len;
+    char *min, *max;
+    size_t min_len, max_len;
+    const void *glide_client = NULL;
+    long count;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osss",
+                                     &object, redis_ce, &key, &key_len, &min, &min_len,
+                                     &max, &max_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
@@ -401,12 +488,19 @@ int execute_zremrangebyscore_command(const void *glide_client, const char *key, 
     args.max = max;
     args.max_len = max_len;
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZRemRangeByScore,
         &args,
-        output_value,
+        &count,
         process_z_int_result);
+
+    if (result)
+    {
+        ZVAL_LONG(return_value, count);
+    }
+
+    return result;
 }
 
 int execute_zrange_command(zval *object, int argc, zval *return_value)
@@ -716,9 +810,73 @@ int execute_zrevrangebyscore_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a ZRANGEBYLEX command using the Valkey Glide client */
-int execute_zrangebylex_command(const void *glide_client, const char *key, size_t key_len,
-                                zval *z_min, zval *z_max, zval *options, zval *return_value)
+int execute_zrangebylex_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL;
+    size_t key_len;
+    zval *z_min, *z_max, *options = NULL;
+    const void *glide_client = NULL;
+    zend_long offset = -1, count = -1;
+
+    /* Parse parameters - allow either options array or offset/count */
+    if (argc == 4)
+    {
+        if (zend_parse_method_parameters(argc, object, "Oszz|z",
+                                         &object, redis_ce, &key, &key_len, &z_min, &z_max,
+                                         &options) == FAILURE)
+        {
+            return 0;
+        }
+    }
+    else if (argc == 5)
+    {
+        if (zend_parse_method_parameters(argc, object, "Oszzll",
+                                         &object, redis_ce, &key, &key_len, &z_min, &z_max,
+                                         &offset, &count) == FAILURE)
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        if (zend_parse_method_parameters(argc, object, "Oszz",
+                                         &object, redis_ce, &key, &key_len, &z_min, &z_max) == FAILURE)
+        {
+            return 0;
+        }
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* If offset and count are provided as separate parameters, create options array */
+    zval new_options;
+    if (offset >= 0 && count >= 0)
+    {
+        array_init(&new_options);
+
+        /* Create LIMIT subarray */
+        zval limit_array;
+        array_init(&limit_array);
+        add_index_long(&limit_array, 0, offset);
+        add_index_long(&limit_array, 1, count);
+
+        /* Add LIMIT subarray to options */
+        add_assoc_zval(&new_options, "LIMIT", &limit_array);
+        options = &new_options;
+    }
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
@@ -737,12 +895,26 @@ int execute_zrangebylex_command(const void *glide_client, const char *key, size_
         int withscores;
     } array_data = {return_value, range_opts.withscores};
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZRangeByLex,
         &args,
         &array_data,
         process_z_array_result);
+
+    /* Free the temporary options array if we created one */
+    if (offset >= 0 && count >= 0)
+    {
+        zval_dtor(&new_options);
+    }
+
+    /* If the command failed, clean up the return array */
+    if (!result)
+    {
+        zval_dtor(return_value);
+    }
+
+    return result;
 }
 
 /* Execute a ZINTERCARD command using the Valkey Glide client */
@@ -914,9 +1086,35 @@ int execute_zrangestore_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a ZREVRANGEBYLEX command using the Valkey Glide client */
-int execute_zrevrangebylex_command(const void *glide_client, const char *key, size_t key_len,
-                                   zval *z_max, zval *z_min, zval *options, zval *return_value)
+int execute_zrevrangebylex_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL;
+    size_t key_len;
+    zval *z_max, *z_min, *options = NULL;
+    const void *glide_client = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oszz|a",
+                                     &object, redis_ce, &key, &key_len, &z_max, &z_min,
+                                     &options) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
@@ -930,12 +1128,20 @@ int execute_zrevrangebylex_command(const void *glide_client, const char *key, si
         int withscores;
     } array_data = {return_value, 0}; /* ZREVRANGEBYLEX never has withscores */
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZRevRangeByLex,
         &args,
         &array_data,
         process_z_array_result);
+
+    /* If the command failed, clean up the return array */
+    if (!result)
+    {
+        zval_dtor(return_value);
+    }
+
+    return result;
 }
 
 /* Execute a ZDIFF command using the Valkey Glide client */
