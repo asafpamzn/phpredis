@@ -342,20 +342,21 @@ int execute_zrank_command(zval *object, int argc, zval *return_value);
 int execute_zrevrank_command(zval *object, int argc, zval *return_value);
 int execute_zincrby_command(zval *object, int argc, zval *return_value);
 int execute_zcount_command(zval *object, int argc, zval *return_value);
-int execute_zlexcount_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *count);
+int execute_zlexcount_command(zval *object, int argc, zval *return_value);
 int execute_zrem_command(zval *object, int argc, zval *return_value);
 int execute_zremrangebylex_command(zval *object, int argc, zval *return_value);
 int execute_zremrangebyrank_command(zval *object, int argc, zval *return_value);
 int execute_zrange_command(zval *object, int argc, zval *return_value);
 int execute_zcard_command(zval *object, int argc, zval *return_value);
 /* ZADD command with options */
+int execute_zadd_command(zval *object, int argc, zval *return_value);
+
 /* ZRANGE command family */
 int execute_zrangestore_command(zval *object, int argc, zval *return_value);
 
-int execute_zadd_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, int flags, long *output_value, double *output_value_double);
 int execute_zdiffstore_command(zval *object, int argc, zval *return_value);
 int execute_zinterstore_command(zval *object, int argc, zval *return_value);
-int execute_zmpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
+int execute_zmpop_command1(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
 int execute_zintercard_command(zval *object, int argc, zval *return_value);
 int execute_zunion_command(zval *object, int argc, zval *return_value);
 int execute_zunionstore_command(zval *object, int argc, zval *return_value);
@@ -368,9 +369,13 @@ int execute_zrangebyscore_command(zval *object, int argc, zval *return_value);
 int execute_zrevrangebyscore_command(zval *object, int argc, zval *return_value);
 int execute_zrangebylex_command(zval *object, int argc, zval *return_value);
 int execute_zrevrangebylex_command(zval *object, int argc, zval *return_value);
-int execute_zdiff_command(const void *glide_client, zval *keys, zval *options, zval *return_value);
+int execute_zdiff_command(zval *object, int argc, zval *return_value);
 int execute_zinter_command(zval *object, int argc, zval *return_value);
 int execute_zremrangebyscore_command(zval *object, int argc, zval *return_value);
+int execute_bzmpop_command(zval *object, int argc, zval *return_value);
+int execute_zmpop_command(zval *object, int argc, zval *return_value);
+int execute_bzpopmax_command(zval *object, int argc, zval *return_value);
+int execute_bzpopmin_command(zval *object, int argc, zval *return_value);
 
 /* ====================================================================
  * UTILITY MACROS
@@ -728,6 +733,84 @@ int execute_zremrangebyscore_command(zval *object, int argc, zval *return_value)
             return;                                                          \
         }                                                                    \
         RETURN_FALSE;                                                        \
+    }
+
+/* Ultra-simple macro for BZMPOP method implementation */
+#define BZMPOP_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, bzmpop)                                            \
+    {                                                                         \
+        if (execute_bzmpop_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        RETURN_FALSE;                                                         \
+    }
+
+/* Ultra-simple macro for ZMPOP method implementation */
+#define ZMPOP_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zmpop)                                            \
+    {                                                                        \
+        if (execute_zmpop_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        RETURN_FALSE;                                                        \
+    }
+
+/* Ultra-simple macro for ZADD method implementation */
+#define ZADD_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zAdd)                                            \
+    {                                                                       \
+        if (execute_zadd_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        RETURN_FALSE;                                                       \
+    }
+
+/* Ultra-simple macro for ZLEXCOUNT method implementation */
+#define ZLEXCOUNT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zLexCount)                                            \
+    {                                                                            \
+        if (execute_zlexcount_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                        \
+            return;                                                              \
+        }                                                                        \
+        RETURN_FALSE;                                                            \
+    }
+
+/* Ultra-simple macro for ZDIFF method implementation */
+#define ZDIFF_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zdiff)                                            \
+    {                                                                        \
+        if (execute_zdiff_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+/* Ultra-simple macro for BZPOPMAX method implementation */
+#define BZPOPMAX_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, bzPopMax)                                            \
+    {                                                                           \
+        if (execute_bzpopmax_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        RETURN_FALSE;                                                           \
+    }
+
+/* Ultra-simple macro for BZPOPMIN method implementation */
+#define BZPOPMIN_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, bzPopMin)                                            \
+    {                                                                           \
+        if (execute_bzpopmin_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        RETURN_FALSE;                                                           \
     }
 
 #endif /* VALKEY_GLIDE_Z_COMMON_H */

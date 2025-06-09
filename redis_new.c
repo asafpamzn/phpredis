@@ -27,6 +27,7 @@
 #include "redis_cluster.h"
 
 #include "redis_glide.h"
+#include "valkey_glide_z_common.h"
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
@@ -923,50 +924,7 @@ PHP_METHOD(Redis, strlen)
 }
 
 /* {{{ proto Redis|array|false Redis::bzmpop(double $timeout, array $keys, string $from, int $count = 1) */
-PHP_METHOD(Redis, bzmpop)
-{
-    zval *object, *z_keys;
-    redis_object *redis;
-    double timeout;
-    zend_long count = 1;
-    char *from = NULL;
-    size_t from_len;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Odas|l",
-                                     &object, redis_ce, &timeout, &z_keys,
-                                     &from, &from_len, &count) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* Make sure we have a glide client */
-    if (!redis->glide_client)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Execute the BZMPOP command using the Glide client */
-    zval result;
-    ZVAL_NULL(&result);
-
-    /* Note: we need to pass "BZMPOP" as the cmd parameter for messaging purposes,
-     * but the actual command type is determined by the "BZMPop" enum in the execute_zmpop_command function */
-    int ret = execute_zmpop_command(redis->glide_client, "BZMPOP", timeout, z_keys, from, from_len, count, &result);
-
-    /* If the result is 0, there was an error */
-    if (ret == 0)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Return the result */
-    RETURN_ZVAL(&result, 0, 1);
-}
-
+BZMPOP_METHOD_IMPL(Redis)
 /* }}} */
 /* {{{ proto Redis|array|false Redis::lmpop(array $keys, string $from, int $count = 1) */
 PHP_METHOD(Redis, lmpop)
@@ -1054,45 +1012,7 @@ PHP_METHOD(Redis, blmpop)
 /* }}} */
 
 /* {{{ proto Redis|array|false Redis::zmpop(array $keys, string $from, int $count = 1) */
-PHP_METHOD(Redis, zmpop)
-{
-    zval *object;
-    redis_object *redis;
-    zval *keys = NULL;
-    char *from = NULL;
-    size_t from_len;
-    zend_long count = 1;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oas|l",
-                                     &object, redis_ce, &keys, &from, &from_len,
-                                     &count) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZMPOP command using the Glide client */
-        zval result;
-        ZVAL_NULL(&result);
-
-        int ret = execute_mpop_command(redis->glide_client, "ZMPOP", 0.0, keys, from, from_len, count, &result);
-
-        /* If the result is -1, there was an error */
-        if (ret == 0)
-        {
-            RETURN_FALSE;
-        }
-
-        /* Return the result */
-        RETURN_ZVAL(&result, 0, 1);
-    }
-}
+ZMPOP_METHOD_IMPL(Redis)
 /* }}} */
 
 static void
@@ -1314,52 +1234,5 @@ PHP_METHOD(Redis, rPush)
 /* }}} */
 
 /* {{{ proto long Redis::zadd(string key, double score, string member, ...) */
-PHP_METHOD(Redis, zAdd)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_args;
-    int argc;
-    int flags = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZADD command using the Glide client */
-        long result_value;
-        double result_value_double = 0;
-        int res = execute_zadd_command(redis->glide_client, key, key_len, z_args, argc, flags, &result_value, &result_value_double);
-        if (res != 0)
-        {
-            if (res == 2)
-            {
-                /* If the result is 2, it means we got a double value */
-                RETURN_DOUBLE(result_value_double);
-            }
-            else
-            {
-                /* If the result is 1, it means we got a long value */
-                RETURN_LONG(result_value);
-            }
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-}
+ZADD_METHOD_IMPL(Redis)
 /* }}} */

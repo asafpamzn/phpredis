@@ -209,7 +209,7 @@ static int prepare_mpop_arguments(
 }
 
 /* Execute a ZMPOP or BZMPOP command (for sorted set operations) using the Valkey Glide client */
-int execute_zmpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result)
+int execute_zmpop_command1(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result)
 {
     /* Check if client, keys, and from are valid */
     if (!glide_client || !keys || !from)

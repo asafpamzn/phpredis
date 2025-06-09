@@ -119,38 +119,7 @@ ZREVRANGEBYLEX_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::zLexCount(string key, mixed min, mixed max) */
-PHP_METHOD(Redis, zLexCount)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    char *min, *max;
-    size_t min_len, max_len;
-    long count;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss",
-                                     &object, redis_ce, &key, &key_len, &min, &min_len,
-                                     &max, &max_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZLEXCOUNT command using the Glide client */
-        if (execute_zlexcount_command(redis->glide_client, key, key_len, min, min_len, max, max_len, &count))
-        {
-            RETURN_LONG(count);
-        }
-        RETURN_FALSE;
-    }
-}
+ZLEXCOUNT_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::zRemRangeByLex(string key, mixed min, mixed max) */
@@ -199,37 +168,7 @@ ZINCRBY_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::zdiff(array keys [, array options]) */
-PHP_METHOD(Redis, zdiff)
-{
-    zval *object, *z_keys, *z_opts = NULL;
-    redis_object *redis;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa|a",
-                                     &object, redis_ce, &z_keys, &z_opts) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Initialize return array */
-        array_init(return_value);
-
-        /* Execute the ZDIFF command using the Glide client */
-        if (execute_zdiff_command(redis->glide_client, z_keys, z_opts, return_value))
-        {
-            return;
-        }
-
-        /* If the command failed, clean up and return FALSE */
-        zval_dtor(return_value);
-    }
-}
+ZDIFF_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::zinter(array keys [, array weights] [, array options]) */

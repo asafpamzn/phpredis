@@ -141,7 +141,6 @@ extern int execute_setrange_command(const void *glide_client, const char *key, s
 extern long execute_rpush_command(const void *glide_client, const char *key, size_t key_len, zval *values, int values_count);
 extern int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_len, const char *key2, size_t key2_len, zval *options, zval *result);
 extern int execute_mpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
-extern int execute_zmpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
 extern int execute_lmpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
 
 /* Time to live operations */
@@ -156,9 +155,6 @@ extern int execute_expiretime_command(const void *glide_client, const char *key,
 extern int execute_pexpiretime_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
 
 /* Sorted set operations */
-extern int execute_zadd_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, int flags, long *output_value, double *output_value_double);
-
-extern int execute_zlexcount_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *output_value);
 
 /* Hash operations */
 extern int execute_hset_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, long *output_value, int is_arg_array);

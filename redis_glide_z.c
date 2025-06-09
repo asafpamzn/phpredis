@@ -575,9 +575,9 @@ int execute_zcount_command(zval *object, int argc, zval *return_value)
     return result;
 }
 
-int execute_zlexcount_command(const void *glide_client, const char *key, size_t key_len,
-                              const char *min, size_t min_len, const char *max, size_t max_len,
-                              long *output_value)
+int execute_zlexcount_command_internal(const void *glide_client, const char *key, size_t key_len,
+                                       const char *min, size_t min_len, const char *max, size_t max_len,
+                                       long *output_value)
 {
     z_command_args_t args = {0};
     args.key = key;
@@ -1671,8 +1671,8 @@ int execute_zpopmin_command(zval *object, int argc, zval *return_value)
     return result;
 }
 
-/* Execute a ZADD command using the Valkey Glide client */
-int execute_zadd_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, int flags, long *output_value, double *output_value_double)
+/* Execute a ZADD command using the Valkey Glide client - internal implementation */
+int execute_zadd_command_internal(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, int flags, long *output_value, double *output_value_double)
 {
     z_command_args_t args = {0};
     args.key = key;
@@ -1815,8 +1815,9 @@ int execute_zrevrangebylex_command(zval *object, int argc, zval *return_value)
     return result;
 }
 
-/* Execute a ZDIFF command using the Valkey Glide client */
-int execute_zdiff_command(const void *glide_client, zval *keys, zval *options, zval *return_value)
+/* Execute a ZDIFF command using the Valkey Glide client - standardized version */
+/* Execute a ZDIFF command using the Valkey Glide client - internal implementation */
+int execute_zdiff_command_internal(const void *glide_client, zval *keys, zval *options, zval *return_value)
 {
     z_command_args_t args = {0};
     args.members = keys; /* Reuse members field for keys */
@@ -1835,6 +1836,42 @@ int execute_zdiff_command(const void *glide_client, zval *keys, zval *options, z
         &args,
         &array_data,
         process_z_array_result);
+}
+
+int execute_zdiff_command(zval *object, int argc, zval *return_value)
+{
+    zval *z_keys, *z_opts = NULL;
+    const void *glide_client = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oa|a",
+                                     &object, redis_ce, &z_keys, &z_opts) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Execute the ZDIFF command using the internal function */
+    if (execute_zdiff_command_internal(glide_client, z_keys, z_opts, return_value))
+    {
+        return 1;
+    }
+
+    /* If the command failed, clean up and return FALSE */
+    zval_dtor(return_value);
+    return 0;
 }
 
 /* Execute a ZINTER command using the Valkey Glide client */
@@ -1889,6 +1926,714 @@ int execute_zinter_command(zval *object, int argc, zval *return_value)
     }
 
     return result;
+}
+
+/* Execute BZMPOP command using the Valkey Glide client */
+int execute_bzmpop_command(zval *object, int argc, zval *return_value)
+{
+    zval *z_keys;
+    double timeout;
+    zend_long count = 1;
+    char *from = NULL;
+    size_t from_len;
+    const void *glide_client = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Odas|l",
+                                     &object, redis_ce, &timeout, &z_keys,
+                                     &from, &from_len, &count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize result zval */
+    ZVAL_NULL(return_value);
+
+    /* Execute the command - we pass "BZMPOP" as the command name for messaging */
+    return execute_zmpop_command1(glide_client, "BZMPOP", timeout, z_keys, from, from_len, count, return_value);
+}
+
+/* Execute ZMPOP command using the Valkey Glide client */
+int execute_zmpop_command(zval *object, int argc, zval *return_value)
+{
+    zval *z_keys;
+    char *from = NULL;
+    size_t from_len;
+    zend_long count = 1;
+    const void *glide_client = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oas|l",
+                                     &object, redis_ce, &z_keys, &from, &from_len,
+                                     &count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize result zval */
+    ZVAL_NULL(return_value);
+
+    /* Execute the command */
+    return execute_mpop_command(glide_client, "ZMPOP", 0.0, z_keys, from, from_len, count, return_value);
+}
+
+/* Execute a ZADD command with the new signature pattern */
+int execute_zadd_command(zval *object, int argc, zval *return_value)
+{
+    char *key = NULL;
+    size_t key_len;
+    zval *z_args;
+    int variadic_argc = 0;
+    const void *glide_client = NULL;
+    int flags = 0; /* No flags by default */
+    long result_value = 0;
+    double result_value_double = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os*",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &variadic_argc) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the ZADD command using the old function */
+    int result = execute_zadd_command_internal(glide_client, key, key_len, z_args, variadic_argc,
+                                               flags, &result_value, &result_value_double);
+
+    if (result == 0)
+    {
+        return 0; /* Command failed */
+    }
+    else if (result == 1)
+    {
+        /* Standard result as long */
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+    else if (result == 2)
+    {
+        /* INCR result as double */
+        ZVAL_DOUBLE(return_value, result_value_double);
+        return 1;
+    }
+
+    return 0; /* Should not happen */
+}
+
+/* Execute ZLEXCOUNT command with the standardized parameter format */
+int execute_zlexcount_command(zval *object, int argc, zval *return_value)
+{
+    char *key = NULL;
+    size_t key_len;
+    char *min = NULL, *max = NULL;
+    size_t min_len, max_len;
+    const void *glide_client = NULL;
+    long count;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osss",
+                                     &object, redis_ce, &key, &key_len, &min, &min_len,
+                                     &max, &max_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the ZLEXCOUNT command using the internal function */
+    if (execute_zlexcount_command_internal(glide_client, key, key_len, min, min_len, max, max_len, &count))
+    {
+        ZVAL_LONG(return_value, count);
+        return 1;
+    }
+
+    return 0;
+}
+
+/* Execute a BZPOPMAX command using the Valkey Glide client */
+int execute_bzpopmax_command_internal(const void *glide_client, zval *keys, int keys_count,
+                                      double timeout, zval *return_value)
+{
+    /* Check if client, keys, and return_value are valid */
+    if (!glide_client || !keys || keys_count <= 0 || !return_value)
+    {
+        return 0;
+    }
+
+    /* Calculate the number of arguments */
+    unsigned long arg_count = keys_count + 1; /* keys + timeout */
+
+    /* Allocate argument arrays */
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!args || !args_len)
+    {
+        if (args)
+            efree(args);
+        if (args_len)
+            efree(args_len);
+        return 0;
+    }
+
+    /* Add keys as arguments */
+    int i;
+    for (i = 0; i < keys_count; i++)
+    {
+        zval *key = &keys[i];
+        if (Z_TYPE_P(key) != IS_STRING)
+        {
+            efree(args);
+            efree(args_len);
+            return 0;
+        }
+        args[i] = (uintptr_t)Z_STRVAL_P(key);
+        args_len[i] = Z_STRLEN_P(key);
+    }
+
+    /* Add timeout as the last argument */
+    size_t timeout_len;
+    char *timeout_str = double_to_string(timeout, &timeout_len);
+    if (!timeout_str)
+    {
+        efree(args);
+        efree(args_len);
+        return 0;
+    }
+    args[keys_count] = (uintptr_t)timeout_str;
+    args_len[keys_count] = timeout_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        BZPopMax,  /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Free the timeout string */
+    efree(timeout_str);
+
+    /* Free the argument arrays */
+    efree(args);
+    efree(args_len);
+
+    /* Process the result */
+    int status = 0;
+
+    if (result)
+    {
+        if (result->command_error)
+        {
+            /* Command failed */
+            free_command_result(result);
+            return 0;
+        }
+
+        if (result->response)
+        {
+            if (result->response->response_type == Null)
+            {
+                /* Timeout occurred, return false */
+                ZVAL_FALSE(return_value);
+                status = 1;
+            }
+            else if (result->response->response_type == Array)
+            {
+                /* For BZPOPMIN, need to manually ensure the score is a string */
+                if (result->response->array_value_len == 3 &&
+                    result->response->array_value[2].response_type != String)
+                {
+
+                    /* Convert the response array to PHP array */
+                    status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+
+                    /* Get the score element (should be index 2) */
+                    zval *score = NULL;
+                    zval *arr = return_value;
+                    HashTable *ht = Z_ARRVAL_P(arr);
+
+                    /* Convert numeric score to string */
+                    if (ht && zend_hash_index_exists(ht, 2))
+                    {
+                        score = zend_hash_index_find(ht, 2);
+                        if (score && (Z_TYPE_P(score) == IS_LONG || Z_TYPE_P(score) == IS_DOUBLE))
+                        {
+                            convert_to_string(score);
+                        }
+                    }
+                }
+                else
+                {
+                    /* Regular array conversion */
+                    status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+                }
+            }
+        }
+        free_command_result(result);
+    }
+
+    return status;
+}
+
+/* Execute BZPOPMAX command with standardized parameter format */
+int execute_bzpopmax_command(zval *object, int argc, zval *return_value)
+{
+    zval *z_keys = NULL, *z_timeout = NULL;
+    zval *z_args = NULL;
+    zval z_processed_keys;
+    int keys_count = 0;
+    double timeout = 0.0;
+    zend_bool is_array_arg = 0;
+    const void *glide_client = NULL;
+
+    /* Check if we have exactly 2 arguments (could be array + timeout) */
+    if (argc == 2)
+    {
+        /* Parse as array + timeout */
+        if (zend_parse_method_parameters(2, object, "Ozz",
+                                         &object, redis_ce, &z_keys, &z_timeout) == FAILURE)
+        {
+            return 0;
+        }
+
+        /* Check if first parameter is an array */
+        if (Z_TYPE_P(z_keys) == IS_ARRAY)
+        {
+            /* Get timeout value */
+            if (Z_TYPE_P(z_timeout) == IS_LONG)
+            {
+                timeout = (double)Z_LVAL_P(z_timeout);
+            }
+            else if (Z_TYPE_P(z_timeout) == IS_DOUBLE)
+            {
+                timeout = Z_DVAL_P(z_timeout);
+            }
+            else
+            {
+                php_error_docref(NULL, E_WARNING, "Timeout must be a numeric value");
+                return 0;
+            }
+
+            /* Create a new array for processed keys */
+            array_init(&z_processed_keys);
+
+            /* Copy all keys to the new array */
+            zval *key_entry;
+            ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(z_keys), key_entry)
+            {
+                if (Z_TYPE_P(key_entry) != IS_STRING)
+                {
+                    /* Convert to string if possible */
+                    zval tmp;
+                    ZVAL_COPY(&tmp, key_entry);
+                    convert_to_string(&tmp);
+                    add_next_index_zval(&z_processed_keys, &tmp);
+                }
+                else
+                {
+                    /* Add as-is if already string */
+                    zval tmp;
+                    ZVAL_COPY(&tmp, key_entry);
+                    add_next_index_zval(&z_processed_keys, &tmp);
+                }
+            }
+            ZEND_HASH_FOREACH_END();
+
+            /* Get Redis object */
+            redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+            glide_client = redis->glide_client;
+            is_array_arg = 1;
+            keys_count = zend_hash_num_elements(Z_ARRVAL(z_processed_keys));
+        }
+        else
+        {
+            /* Not an array, fall through to variadic format */
+            return 0;
+        }
+    }
+    else
+    {
+        /* Use variadic format */
+        if (zend_parse_method_parameters(argc, object, "O+d",
+                                         &object, redis_ce, &z_args, &keys_count, &timeout) == FAILURE)
+        {
+            return 0;
+        }
+
+        /* Need at least one key */
+        if (keys_count < 1)
+        {
+            return 0;
+        }
+
+        /* Get Redis object */
+        redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+        glide_client = redis->glide_client;
+        is_array_arg = 0;
+    }
+
+    /* Check for valid glide client */
+    if (!glide_client)
+    {
+        if (is_array_arg)
+        {
+            zval_ptr_dtor(&z_processed_keys);
+        }
+        return 0;
+    }
+
+    /* Process the command call based on argument format */
+    int success;
+
+    if (is_array_arg)
+    {
+        /* Create a temporary array for keys with proper format */
+        zval *temp_args = emalloc(sizeof(zval) * keys_count);
+
+        /* Copy the values from processed keys */
+        HashTable *ht = Z_ARRVAL(z_processed_keys);
+        int i = 0;
+        zval *entry;
+
+        ZEND_HASH_FOREACH_VAL(ht, entry)
+        {
+            ZVAL_COPY_VALUE(&temp_args[i], entry);
+            i++;
+        }
+        ZEND_HASH_FOREACH_END();
+
+        /* Execute command */
+        success = execute_bzpopmax_command_internal(glide_client, temp_args, keys_count, timeout, return_value);
+
+        /* Clean up */
+        efree(temp_args);
+    }
+    else
+    {
+        success = execute_bzpopmax_command_internal(glide_client, z_args, keys_count, timeout, return_value);
+    }
+
+    /* Clean up if we created a processed keys array */
+    if (is_array_arg)
+    {
+        zval_ptr_dtor(&z_processed_keys);
+    }
+
+    return success;
+}
+
+/* Execute a BZPOPMIN command using the Valkey Glide client */
+int execute_bzpopmin_command_internal(const void *glide_client, zval *keys, int keys_count,
+                                      double timeout, zval *return_value)
+{
+    /* Check if client, keys, and return_value are valid */
+    if (!glide_client || !keys || keys_count <= 0 || !return_value)
+    {
+        return 0;
+    }
+
+    /* Calculate the number of arguments */
+    unsigned long arg_count = keys_count + 1; /* keys + timeout */
+
+    /* Allocate argument arrays */
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!args || !args_len)
+    {
+        if (args)
+            efree(args);
+        if (args_len)
+            efree(args_len);
+        return 0;
+    }
+
+    /* Add keys as arguments */
+    int i;
+    for (i = 0; i < keys_count; i++)
+    {
+        zval *key = &keys[i];
+        if (Z_TYPE_P(key) != IS_STRING)
+        {
+            efree(args);
+            efree(args_len);
+            return 0;
+        }
+        args[i] = (uintptr_t)Z_STRVAL_P(key);
+        args_len[i] = Z_STRLEN_P(key);
+    }
+
+    /* Add timeout as the last argument */
+    size_t timeout_len;
+    char *timeout_str = double_to_string(timeout, &timeout_len);
+    if (!timeout_str)
+    {
+        efree(args);
+        efree(args_len);
+        return 0;
+    }
+    args[keys_count] = (uintptr_t)timeout_str;
+    args_len[keys_count] = timeout_len;
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        BZPopMin,  /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Free the timeout string */
+    efree(timeout_str);
+
+    /* Free the argument arrays */
+    efree(args);
+    efree(args_len);
+
+    /* Process the result */
+    int status = 0;
+
+    if (result)
+    {
+        if (result->command_error)
+        {
+            /* Command failed */
+            free_command_result(result);
+            return 0;
+        }
+
+        if (result->response)
+        {
+            if (result->response->response_type == Null)
+            {
+                /* Timeout occurred, return false */
+                ZVAL_FALSE(return_value);
+                status = 1;
+            }
+            else if (result->response->response_type == Array)
+            {
+                /* For BZPOPMIN, need to manually ensure the score is a string */
+                if (result->response->array_value_len == 3 &&
+                    result->response->array_value[2].response_type != String)
+                {
+
+                    /* Convert the response array to PHP array */
+                    status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+
+                    /* Get the score element (should be index 2) */
+                    zval *score = NULL;
+                    zval *arr = return_value;
+                    HashTable *ht = Z_ARRVAL_P(arr);
+
+                    /* Convert numeric score to string */
+                    if (ht && zend_hash_index_exists(ht, 2))
+                    {
+                        score = zend_hash_index_find(ht, 2);
+                        if (score && (Z_TYPE_P(score) == IS_LONG || Z_TYPE_P(score) == IS_DOUBLE))
+                        {
+                            convert_to_string(score);
+                        }
+                    }
+                }
+                else
+                {
+                    /* Regular array conversion */
+                    status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+                }
+            }
+        }
+        free_command_result(result);
+    }
+
+    return status;
+}
+/* Execute BZPOPMIN command with standardized parameter format */
+int execute_bzpopmin_command(zval *object, int argc, zval *return_value)
+{
+    zval *z_keys = NULL, *z_timeout = NULL;
+    zval *z_args = NULL;
+    zval z_processed_keys;
+    int keys_count = 0;
+    double timeout = 0.0;
+    zend_bool is_array_arg = 0;
+    const void *glide_client = NULL;
+
+    /* Check if we have exactly 2 arguments (could be array + timeout) */
+    if (argc == 2)
+    {
+        /* Parse as array + timeout */
+        if (zend_parse_method_parameters(2, object, "Ozz",
+                                         &object, redis_ce, &z_keys, &z_timeout) == FAILURE)
+        {
+            return 0;
+        }
+
+        /* Check if first parameter is an array */
+        if (Z_TYPE_P(z_keys) == IS_ARRAY)
+        {
+            /* Get timeout value */
+            if (Z_TYPE_P(z_timeout) == IS_LONG)
+            {
+                timeout = (double)Z_LVAL_P(z_timeout);
+            }
+            else if (Z_TYPE_P(z_timeout) == IS_DOUBLE)
+            {
+                timeout = Z_DVAL_P(z_timeout);
+            }
+            else
+            {
+                php_error_docref(NULL, E_WARNING, "Timeout must be a numeric value");
+                return 0;
+            }
+
+            /* Create a new array for processed keys */
+            array_init(&z_processed_keys);
+
+            /* Copy all keys to the new array */
+            zval *key_entry;
+            ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(z_keys), key_entry)
+            {
+                if (Z_TYPE_P(key_entry) != IS_STRING)
+                {
+                    /* Convert to string if possible */
+                    zval tmp;
+                    ZVAL_COPY(&tmp, key_entry);
+                    convert_to_string(&tmp);
+                    add_next_index_zval(&z_processed_keys, &tmp);
+                }
+                else
+                {
+                    /* Add as-is if already string */
+                    zval tmp;
+                    ZVAL_COPY(&tmp, key_entry);
+                    add_next_index_zval(&z_processed_keys, &tmp);
+                }
+            }
+            ZEND_HASH_FOREACH_END();
+
+            /* Get Redis object */
+            redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+            glide_client = redis->glide_client;
+            is_array_arg = 1;
+            keys_count = zend_hash_num_elements(Z_ARRVAL(z_processed_keys));
+        }
+        else
+        {
+            /* Not an array, fall through to variadic format */
+            return 0;
+        }
+    }
+    else
+    {
+        /* Use variadic format */
+        if (zend_parse_method_parameters(argc, object, "O+d",
+                                         &object, redis_ce, &z_args, &keys_count, &timeout) == FAILURE)
+        {
+            return 0;
+        }
+
+        /* Need at least one key */
+        if (keys_count < 1)
+        {
+            return 0;
+        }
+
+        /* Get Redis object */
+        redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+        glide_client = redis->glide_client;
+        is_array_arg = 0;
+    }
+
+    /* Check for valid glide client */
+    if (!glide_client)
+    {
+        if (is_array_arg)
+        {
+            zval_ptr_dtor(&z_processed_keys);
+        }
+        return 0;
+    }
+
+    /* Process the command call based on argument format */
+    int success;
+
+    if (is_array_arg)
+    {
+        /* Create a temporary array for keys with proper format */
+        zval *temp_args = emalloc(sizeof(zval) * keys_count);
+
+        /* Copy the values from processed keys */
+        HashTable *ht = Z_ARRVAL(z_processed_keys);
+        int i = 0;
+        zval *entry;
+
+        ZEND_HASH_FOREACH_VAL(ht, entry)
+        {
+            ZVAL_COPY_VALUE(&temp_args[i], entry);
+            i++;
+        }
+        ZEND_HASH_FOREACH_END();
+
+        /* Execute command */
+        success = execute_bzpopmin_command_internal(glide_client, temp_args, keys_count, timeout, return_value);
+
+        /* Clean up */
+        efree(temp_args);
+    }
+    else
+    {
+        success = execute_bzpopmin_command_internal(glide_client, z_args, keys_count, timeout, return_value);
+    }
+
+    /* Clean up if we created a processed keys array */
+    if (is_array_arg)
+    {
+        zval_ptr_dtor(&z_processed_keys);
+    }
+
+    return success;
 }
 
 /* Execute a ZSCAN command using the Valkey Glide client */
