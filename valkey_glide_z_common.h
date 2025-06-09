@@ -150,6 +150,8 @@ int process_z_exists_result(CommandResult *result, void *output);
  */
 int process_z_array_result(CommandResult *result, void *output);
 
+int process_z_array_zrand_result(CommandResult *result, void *output);
+
 int process_z_long_to_zval_result(CommandResult *result, void *output);
 
 /**
@@ -248,6 +250,13 @@ int prepare_z_zdiff_args(z_command_args_t *args, uintptr_t **args_out,
                          unsigned long **args_len_out,
                          char ***allocated_strings, int *allocated_count);
 
+/**
+ * Prepare ZRANDMEMBER command arguments (key + optional count + optional WITHSCORES)
+ */
+int prepare_z_randmember_args(z_command_args_t *args, uintptr_t **args_out,
+                              unsigned long **args_len_out,
+                              char ***allocated_strings, int *allocated_count);
+
 /* ====================================================================
  * OPTIONS PARSING HELPERS
  * ==================================================================== */
@@ -326,7 +335,7 @@ void free_allocated_strings(char **strings, int count);
  * ==================================================================== */
 
 /* Traditional function signatures (original) */
-int execute_zrandmember_command(const void *glide_client, const char *key, size_t key_len, long count, int withscores, zval *return_value);
+int execute_zrandmember_command(zval *object, int argc, zval *return_value);
 int execute_zscore_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, double *score);
 int execute_zmscore_command(const void *glide_client, const char *key, size_t key_len, zval *members, int member_count, zval *return_value);
 int execute_zrank_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, int withscore, long *rank, double *score);
@@ -404,5 +413,17 @@ int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights
         }                                                       \
         RETURN_FALSE;                                           \
     } while (0)
+
+/* Ultra-simple macro for ZRANDMEMBER method implementation */
+#define ZRANDMEMBER_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRandMember)                                            \
+    {                                                                              \
+        if (execute_zrandmember_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                          \
+            return;                                                                \
+        }                                                                          \
+        zval_dtor(return_value);                                                   \
+        RETURN_FALSE;                                                              \
+    }
 
 #endif /* VALKEY_GLIDE_Z_COMMON_H */

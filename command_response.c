@@ -436,7 +436,7 @@ int command_response_to_zval(CommandResponse *response, zval *output, int use_as
 
                 command_response_to_zval(&response->array_value[i], &value, use_associative_array, use_false_if_null);
                 // printf("%s:%d - DEBUG: Adding array value %d\n", __FILE__, __LINE__, i);
-                //  php_var_dump(&value, 2); // No need to modify this as it's not printf
+                //   php_var_dump(&value, 2); // No need to modify this as it's not printf
 
                 add_next_index_zval(output, &value);
                 // printf("%s:%d - DEBUG: Added array value %d\n", __FILE__, __LINE__, i);

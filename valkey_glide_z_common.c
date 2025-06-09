@@ -872,6 +872,16 @@ int execute_z_generic_command(
                                          &allocated_strings, &allocated_count);
         break;
 
+    case ZRandMember:
+        allocated_strings = (char **)emalloc(2 * sizeof(char *)); /* Enough for ZRANDMEMBER */
+        if (!allocated_strings)
+        {
+            return 0;
+        }
+        arg_count = prepare_z_randmember_args(args, &arg_values, &arg_lens,
+                                              &allocated_strings, &allocated_count);
+        break;
+
     default:
         /* Unsupported command type */
         return 0;
@@ -2148,6 +2158,79 @@ int prepare_z_zdiff_args(z_command_args_t *args, uintptr_t **args_out,
     return arg_count;
 }
 
+/**
+ * Prepare ZRANDMEMBER command arguments (key + optional count + optional WITHSCORES)
+ */
+int prepare_z_randmember_args(z_command_args_t *args, uintptr_t **args_out,
+                              unsigned long **args_len_out,
+                              char ***allocated_strings, int *allocated_count)
+{
+    if (!args || !args->key || !args_out || !args_len_out ||
+        !allocated_strings || !allocated_count)
+    {
+        return 0;
+    }
+
+    *allocated_count = 0;
+
+    /* Calculate argument count: key + optional count + optional WITHSCORES */
+    unsigned long arg_count = 1; /* key */
+    if (args->start != 1)        /* reuse start field for count */
+    {
+        arg_count++; /* count */
+    }
+    if (args->withscores)
+    {
+        arg_count++; /* WITHSCORES */
+    }
+
+    /* Allocate final args arrays */
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!(*args_out) || !(*args_len_out))
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Set key */
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+    int arg_idx = 1;
+
+    /* Add count if not default (1) */
+    if (args->start != 1)
+    {
+        char count_str[32];
+        snprintf(count_str, sizeof(count_str), "%ld", args->start);
+        char *count_str_copy = estrdup(count_str);
+        if (!count_str_copy)
+        {
+            efree(*args_out);
+            efree(*args_len_out);
+            return 0;
+        }
+        (*args_out)[arg_idx] = (uintptr_t)count_str_copy;
+        (*args_len_out)[arg_idx] = strlen(count_str);
+        (*allocated_strings)[(*allocated_count)++] = count_str_copy;
+        arg_idx++;
+    }
+
+    /* Add WITHSCORES if present */
+    if (args->withscores)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"WITHSCORES";
+        (*args_len_out)[arg_idx] = 10; /* length of "WITHSCORES" */
+        arg_idx++;
+    }
+
+    return arg_count;
+}
+
 /* ====================================================================
  * RESULT PROCESSING FUNCTIONS
  * ===================================================================== */
@@ -2281,6 +2364,46 @@ int process_z_rank_result(CommandResult *result, void *output)
     }
 
     return -1;
+}
+
+int process_z_array_zrand_result(CommandResult *result, void *output)
+{
+    struct
+    {
+        zval *return_value;
+        int withscores;
+    } *array_data = output;
+    if (!result || !result->response || !array_data || !array_data->return_value)
+    {
+        return 0;
+    }
+
+    /* Process the result */
+
+    int success = command_response_to_zval(result->response, array_data->return_value,
+                                           COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+
+    if (Z_TYPE_P(array_data->return_value) == IS_STRING)
+    {
+        // Save the string temporarily
+        zval tmp;
+
+        ZVAL_COPY(&tmp, array_data->return_value);
+
+        // Convert return_value to an array
+        array_init(array_data->return_value);
+
+        // Add the original string as the first element (index 0)
+        add_next_index_zval(array_data->return_value, &tmp);
+    }
+
+    if (array_data->withscores && success && Z_TYPE_P(array_data->return_value) == IS_ARRAY)
+    {
+        /* Use common helper to flatten withscores array */
+        flatten_withscores_array(array_data->return_value);
+    }
+
+    return success;
 }
 
 /**

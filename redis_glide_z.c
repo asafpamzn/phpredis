@@ -14,8 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-#include "php_redis.h"
-#include "redis_glide.h"
 #include "valkey_glide_z_common.h"
 #include "command_response.h"
 #include "include/glide_bindings.h"
@@ -23,101 +21,143 @@
 #include <string.h>
 #include <stdio.h>
 
-int execute_zrandmember_command(const void *glide_client, const char *key, size_t key_len, long count, int withscores, zval *return_value)
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "php_redis.h"
+
+#include "redis_cluster.h"
+
+#include "redis_glide.h"
+#include "valkey_glide_z_common.h"
+
+#include "command_response.h" /* Include command_response.h for string conversion functions */
+#include <ext/spl/spl_exceptions.h>
+#include <zend_exceptions.h>
+#include <ext/standard/info.h>
+#include <ext/hash/php_hash.h>
+
+#if PHP_VERSION_ID < 80400
+#include <ext/standard/php_random.h>
+#else
+#include <ext/random/php_random.h>
+#endif
+
+#ifdef PHP_SESSION
+#include <ext/session/php_session.h>
+#endif
+
+/* Import the string conversion functions from command_response.c */
+extern char *long_to_string(long value, size_t *len);
+extern char *double_to_string(double value, size_t *len);
+
+extern zend_class_entry *redis_ce;
+extern zend_class_entry *redis_exception_ce;
+
+#if PHP_VERSION_ID < 80000
+#include "redis_legacy_arginfo.h"
+#else
+#include "zend_attributes.h"
+#include "redis_arginfo.h"
+#endif
+
+int execute_zrandmember_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
+    char *key = NULL;
+    size_t key_len;
+    zend_long count = 1;
+    zend_bool withscores = 0;
+
+    zval *z_opts = NULL;
+    const void *glide_client = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|zb",
+                                     &object, redis_ce, &key, &key_len, &z_opts, &withscores) == FAILURE)
+    {
+
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
     {
         return 0;
     }
 
-    /* ZRANDMEMBER has unique optional parameter handling, so we use custom argument preparation */
-    /* but leverage the framework for result processing */
-
-    /* Prepare command arguments */
-    unsigned long arg_count = 1; /* Start with key */
-    if (count != 0)
+    /* Process the options if provided */
+    if (argc >= 2)
     {
-        arg_count++; /* Add count parameter */
+        /* If the second parameter is an array, it contains options */
+        if (z_opts && Z_TYPE_P(z_opts) == IS_ARRAY)
+        {
+            /* Reset default values as we'll get them from the array */
+            count = 1;
+            withscores = 0;
+
+            /* Look for 'count' option */
+            zval *z_count;
+            if ((z_count = zend_hash_str_find(Z_ARRVAL_P(z_opts), "count", sizeof("count") - 1)) != NULL ||
+                (z_count = zend_hash_str_find(Z_ARRVAL_P(z_opts), "COUNT", sizeof("COUNT") - 1)) != NULL)
+            {
+                if (z_count && Z_TYPE_P(z_count) == IS_LONG)
+                {
+                    count = Z_LVAL_P(z_count);
+                }
+            }
+
+            /* Look for 'withscores' option */
+            zval *z_withscores;
+            if ((z_withscores = zend_hash_str_find(Z_ARRVAL_P(z_opts), "withscores", sizeof("withscores") - 1)) != NULL ||
+                (z_withscores = zend_hash_str_find(Z_ARRVAL_P(z_opts), "WITHSCORES", sizeof("WITHSCORES") - 1)) != NULL)
+            {
+                if (z_withscores && Z_TYPE_P(z_withscores) == IS_TRUE)
+                {
+                    withscores = 1;
+                }
+            }
+        }
+        /* If the second parameter is a long, it's a count (backward compatibility) */
+        else if (Z_TYPE_P(z_opts) == IS_LONG)
+        {
+            count = Z_LVAL_P(z_opts);
+            /* If there's a third argument, it's withscores (backward compatibility) */
+            if (argc >= 3)
+            {
+                /* withscores was already parsed above via zend_parse_method_parameters */
+            }
+        }
+        /* If the second parameter is boolean, it's withscores without a count */
+        else if (Z_TYPE_P(z_opts) == IS_TRUE)
+        {
+            withscores = 1;
+        }
     }
-    if (withscores)
+
+    /* Use framework for command execution */
+    z_command_args_t args = {0};
+    args.key = key;
+    args.key_len = key_len;
+    args.start = count; /* reuse start field for count */
+    args.withscores = withscores;
+
+    struct
     {
-        arg_count++; /* Add WITHSCORES parameter */
-    }
+        zval *return_value;
+        int withscores;
+    } array_data = {return_value, withscores};
 
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Add count parameter if not default */
-    int arg_idx = 1;
-    char count_str[32] = {0};
-    if (count != 0)
-    {
-        int count_str_len = snprintf(count_str, sizeof(count_str), "%ld", count);
-        args[arg_idx] = (uintptr_t)count_str;
-        args_len[arg_idx] = count_str_len;
-        arg_idx++;
-    }
-
-    /* Add WITHSCORES if required */
-    if (withscores)
-    {
-        const char *withscores_str = "WITHSCORES";
-        args[arg_idx] = (uintptr_t)withscores_str;
-        args_len[arg_idx] = 10; /* length of "WITHSCORES" */
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
+    return execute_z_generic_command(
         glide_client,
-        ZRandMember, /* command type from RequestType enum */
-        arg_count,   /* number of arguments */
-        args,        /* arguments array */
-        args_len     /* argument lengths array */
-    );
-
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Process the result */
-    int success = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
-    if (withscores && success && Z_TYPE_P(return_value) == IS_ARRAY)
-    {
-        /* Use common helper to flatten withscores array */
-        flatten_withscores_array(return_value);
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return success;
+        ZRandMember,
+        &args,
+        &array_data,
+        process_z_array_zrand_result);
 }
 
 int execute_zscore_command(const void *glide_client, const char *key, size_t key_len,

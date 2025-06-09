@@ -169,7 +169,7 @@ extern int execute_zrem_command(const void *glide_client, const char *key, size_
 extern int execute_zremrangebylex_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *output_value);
 extern int execute_zremrangebyrank_command(const void *glide_client, const char *key, size_t key_len, long start, long end, long *output_value);
 extern int execute_zremrangebyscore_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *output_value);
-extern int execute_zrandmember_command(const void *glide_client, const char *key, size_t key_len, long count, int withscores, zval *return_value);
+
 extern int execute_zrange_command(const void *glide_client, const char *key, size_t key_len, zval *z_start, zval *z_end, zval *options, zval *return_value);
 
 /* Hash operations */
