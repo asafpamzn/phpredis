@@ -350,7 +350,7 @@ int execute_zrange_command(zval *object, int argc, zval *return_value);
 int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
 /* ZADD command with options */
 /* ZRANGE command family */
-int execute_zrangestore_command(const void *glide_client, const char *dst, size_t dst_len, const char *src, size_t src_len, zval *z_start, zval *z_end, zval *options, long *output_value);
+int execute_zrangestore_command(zval *object, int argc, zval *return_value);
 
 int execute_zadd_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, int flags, long *output_value, double *output_value_double);
 int execute_zdiffstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count,
@@ -367,9 +367,9 @@ int execute_zpopmax_command(const void *glide_client, const char *key, size_t ke
 int execute_zpopmin_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value);
 int execute_zscan_command(const void *glide_client, const char *key, size_t key_len, long *cursor, char *pattern, size_t pattern_len, long count, zval *return_value);
 
-int execute_zrevrange_command(const void *glide_client, const char *key, size_t key_len, zval *z_start, zval *z_end, zval *options, zval *return_value);
-int execute_zrangebyscore_command(const void *glide_client, const char *key, size_t key_len, zval *z_min, zval *z_max, zval *options, zval *return_value);
-int execute_zrevrangebyscore_command(const void *glide_client, const char *key, size_t key_len, zval *z_max, zval *z_min, zval *options, zval *return_value);
+int execute_zrevrange_command(zval *object, int argc, zval *return_value);
+int execute_zrangebyscore_command(zval *object, int argc, zval *return_value);
+int execute_zrevrangebyscore_command(zval *object, int argc, zval *return_value);
 int execute_zrangebylex_command(const void *glide_client, const char *key, size_t key_len, zval *z_min, zval *z_max, zval *options, zval *return_value);
 
 int execute_zrevrangebylex_command(const void *glide_client, const char *key, size_t key_len, zval *z_max, zval *z_min, zval *options, zval *return_value);
@@ -436,6 +436,53 @@ int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights
         }                                                                     \
         zval_dtor(return_value);                                              \
         RETURN_FALSE;                                                         \
+    }
+
+/* Ultra-simple macro for ZRANGESTORE method implementation */
+#define ZRANGESTORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zrangestore)                                            \
+    {                                                                              \
+        if (execute_zrangestore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                          \
+            return;                                                                \
+        }                                                                          \
+        RETURN_FALSE;                                                              \
+    }
+
+/* Ultra-simple macro for ZREVRANGE method implementation */
+#define ZREVRANGE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRevRange)                                            \
+    {                                                                            \
+        if (execute_zrevrange_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                        \
+            return;                                                              \
+        }                                                                        \
+        zval_dtor(return_value);                                                 \
+        RETURN_FALSE;                                                            \
+    }
+
+/* Ultra-simple macro for ZRANGEBYSCORE method implementation */
+#define ZRANGEBYSCORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRangeByScore)                                            \
+    {                                                                                \
+        if (execute_zrangebyscore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                            \
+            return;                                                                  \
+        }                                                                            \
+        zval_dtor(return_value);                                                     \
+        RETURN_FALSE;                                                                \
+    }
+
+/* Ultra-simple macro for ZREVRANGEBYSCORE method implementation */
+#define ZREVRANGEBYSCORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRevRangeByScore)                                            \
+    {                                                                                   \
+        if (execute_zrevrangebyscore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                               \
+            return;                                                                     \
+        }                                                                               \
+        zval_dtor(return_value);                                                        \
+        RETURN_FALSE;                                                                   \
     }
 
 #endif /* VALKEY_GLIDE_Z_COMMON_H */
