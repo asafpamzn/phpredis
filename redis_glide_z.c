@@ -242,30 +242,64 @@ int execute_zrank_command(const void *glide_client, const char *key, size_t key_
         process_z_rank_result);
 }
 
-int execute_zrevrank_command(const void *glide_client, const char *key, size_t key_len,
-                             const char *member, size_t member_len, int withscore,
-                             long *rank_value, double *score_value)
+int execute_zrevrank_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL, *member = NULL;
+    size_t key_len, member_len;
+    const void *glide_client = NULL;
+    long rank;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &member, &member_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
     args.member = member;
     args.member_len = member_len;
-    args.withscores = withscore;
+    args.withscores = 0; /* ZREVRANK doesn't use withscores in this context */
 
     struct
     {
         long *rank;
         double *score;
         int withscore;
-    } rank_data = {rank_value, score_value, withscore};
+    } rank_data = {&rank, NULL, 0};
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZRevRank,
         &args,
         &rank_data,
         process_z_rank_result);
+
+    if (result == 1)
+    {
+        ZVAL_LONG(return_value, rank);
+    }
+    else if (result == 0)
+    {
+        ZVAL_NULL(return_value); /* Member doesn't exist */
+    }
+    /* For result == -1 (error), return_value remains uninitialized, which is handled by the macro */
+
+    return result;
 }
 
 int execute_zincrby_command(const void *glide_client, const char *key, size_t key_len,
@@ -435,21 +469,52 @@ int execute_zremrangebylex_command(zval *object, int argc, zval *return_value)
     return result;
 }
 
-int execute_zremrangebyrank_command(const void *glide_client, const char *key, size_t key_len,
-                                    long start, long end, long *output_value)
+int execute_zremrangebyrank_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL;
+    size_t key_len;
+    zend_long start, end;
+    const void *glide_client = NULL;
+    long count;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osll",
+                                     &object, redis_ce, &key, &key_len,
+                                     &start, &end) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
     args.start = start;
     args.end = end;
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZRemRangeByRank,
         &args,
-        output_value,
+        &count,
         process_z_int_result);
+
+    if (result)
+    {
+        ZVAL_LONG(return_value, count);
+    }
+
+    return result;
 }
 
 int execute_zremrangebyscore_command(zval *object, int argc, zval *return_value)

@@ -166,37 +166,7 @@ ZREMRANGEBYSCORE_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::zRemRangeByRank(string key, long start, long end) */
-PHP_METHOD(Redis, zRemRangeByRank)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zend_long start, end;
-    long count;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osll",
-                                     &object, redis_ce, &key, &key_len,
-                                     &start, &end) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZREMRANGEBYRANK command using the Glide client */
-        if (execute_zremrangebyrank_command(redis->glide_client, key, key_len, start, end, &count))
-        {
-            RETURN_LONG(count);
-        }
-        RETURN_FALSE;
-    }
-}
+ZREMRANGEBYRANK_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::zCount(string key, mixed min, mixed max) */
@@ -455,45 +425,7 @@ PHP_METHOD(Redis, zRank)
 /* }}} */
 
 /* {{{ proto long Redis::zRevRank(string key, string member) */
-PHP_METHOD(Redis, zRevRank)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *member = NULL;
-    size_t key_len, member_len;
-    long rank;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
-                                     &object, redis_ce, &key, &key_len,
-                                     &member, &member_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZREVRANK command using the Glide client */
-        int result = execute_zrevrank_command(redis->glide_client, key, key_len, member, member_len, 0, &rank, NULL);
-
-        if (result == 1)
-        {
-            RETURN_LONG(rank);
-        }
-        else if (result == 0)
-        {
-            RETURN_NULL(); /* Member doesn't exist */
-        }
-        else
-        {
-            RETURN_FALSE; /* Error */
-        }
-    }
-}
+ZREVRANK_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto double Redis::zIncrBy(string key, double value, string member) */

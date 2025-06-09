@@ -339,13 +339,13 @@ int execute_zrandmember_command(zval *object, int argc, zval *return_value);
 int execute_zscore_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, double *score);
 int execute_zmscore_command(const void *glide_client, const char *key, size_t key_len, zval *members, int member_count, zval *return_value);
 int execute_zrank_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, int withscore, long *rank, double *score);
-int execute_zrevrank_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, int withscore, long *rank, double *score);
+int execute_zrevrank_command(zval *object, int argc, zval *return_value);
 int execute_zincrby_command(const void *glide_client, const char *key, size_t key_len, double increment, const char *member, size_t member_len, double *new_score);
 int execute_zcount_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *count);
 int execute_zlexcount_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *count);
 int execute_zrem_command(zval *object, int argc, zval *return_value);
 int execute_zremrangebylex_command(zval *object, int argc, zval *return_value);
-int execute_zremrangebyrank_command(const void *glide_client, const char *key, size_t key_len, long start, long stop, long *removed_count);
+int execute_zremrangebyrank_command(zval *object, int argc, zval *return_value);
 int execute_zrange_command(zval *object, int argc, zval *return_value);
 int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
 /* ZADD command with options */
@@ -540,6 +540,28 @@ int execute_zremrangebyscore_command(zval *object, int argc, zval *return_value)
             return;                                                                     \
         }                                                                               \
         RETURN_FALSE;                                                                   \
+    }
+
+/* Ultra-simple macro for ZREVRANK method implementation */
+#define ZREVRANK_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRevRank)                                            \
+    {                                                                           \
+        if (execute_zrevrank_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        RETURN_FALSE;                                                           \
+    }
+
+/* Ultra-simple macro for ZREMRANGEBYRANK method implementation */
+#define ZREMRANGEBYRANK_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRemRangeByRank)                                            \
+    {                                                                                  \
+        if (execute_zremrangebyrank_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                              \
+            return;                                                                    \
+        }                                                                              \
+        RETURN_FALSE;                                                                  \
     }
 
 #endif /* VALKEY_GLIDE_Z_COMMON_H */
