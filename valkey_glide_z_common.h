@@ -373,7 +373,7 @@ int execute_zrevrangebyscore_command(zval *object, int argc, zval *return_value)
 int execute_zrangebylex_command(zval *object, int argc, zval *return_value);
 int execute_zrevrangebylex_command(zval *object, int argc, zval *return_value);
 int execute_zdiff_command(const void *glide_client, zval *keys, zval *options, zval *return_value);
-int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights, zval *options, zval *return_value);
+int execute_zinter_command(zval *object, int argc, zval *return_value);
 int execute_zremrangebyscore_command(zval *object, int argc, zval *return_value);
 
 /* ====================================================================
@@ -629,6 +629,18 @@ int execute_zremrangebyscore_command(zval *object, int argc, zval *return_value)
             return;                                                            \
         }                                                                      \
         RETURN_FALSE;                                                          \
+    }
+
+/* Ultra-simple macro for ZINTER method implementation */
+#define ZINTER_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zinter)                                            \
+    {                                                                         \
+        if (execute_zinter_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
     }
 
 #endif /* VALKEY_GLIDE_Z_COMMON_H */

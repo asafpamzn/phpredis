@@ -233,35 +233,5 @@ PHP_METHOD(Redis, zdiff)
 /* }}} */
 
 /* {{{ proto array Redis::zinter(array keys [, array weights] [, array options]) */
-PHP_METHOD(Redis, zinter)
-{
-    zval *object, *z_keys, *z_weights = NULL, *z_opts = NULL;
-    redis_object *redis;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa|za",
-                                     &object, redis_ce, &z_keys, &z_weights, &z_opts) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Initialize return array */
-        array_init(return_value);
-
-        /* Execute the ZINTER command using the Glide client */
-        if (execute_zinter_command(redis->glide_client, z_keys, z_weights, z_opts, return_value))
-        {
-            return;
-        }
-
-        /* If the command failed, clean up and return FALSE */
-        zval_dtor(return_value);
-    }
-}
+ZINTER_METHOD_IMPL(Redis)
 /* }}} */

@@ -1488,13 +1488,37 @@ int execute_zdiff_command(const void *glide_client, zval *keys, zval *options, z
 }
 
 /* Execute a ZINTER command using the Valkey Glide client */
-int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights, zval *options, zval *return_value)
+int execute_zinter_command(zval *object, int argc, zval *return_value)
 {
+    zval *z_keys, *z_weights = NULL, *z_opts = NULL;
+    const void *glide_client = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oa|za",
+                                     &object, redis_ce, &z_keys, &z_weights, &z_opts) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
-    args.members = keys; /* Reuse members field for keys */
-    args.member_count = zend_hash_num_elements(Z_ARRVAL_P(keys));
+    args.members = z_keys; /* Reuse members field for keys */
+    args.member_count = zend_hash_num_elements(Z_ARRVAL_P(z_keys));
     args.weights = z_weights;
-    args.options = options;
+    args.options = z_opts;
 
     struct
     {
@@ -1502,12 +1526,19 @@ int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights
         int withscores;
     } array_data = {return_value, 0};
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZInter,
         &args,
         &array_data,
         process_z_array_result);
+
+    if (!result)
+    {
+        zval_dtor(return_value);
+    }
+
+    return result;
 }
 
 /* Execute a ZSCAN command using the Valkey Glide client */
