@@ -353,19 +353,15 @@ int execute_zcard_command(zval *object, int argc, zval *return_value);
 int execute_zrangestore_command(zval *object, int argc, zval *return_value);
 
 int execute_zadd_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, int flags, long *output_value, double *output_value_double);
-int execute_zdiffstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count,
-                               zval *weights, zval *options, long *output_value);
-int execute_zinterstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count,
-                                zval *weights, zval *options, long *output_value);
+int execute_zdiffstore_command(zval *object, int argc, zval *return_value);
+int execute_zinterstore_command(zval *object, int argc, zval *return_value);
 int execute_zmpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
-int execute_zintercard_command(const void *glide_client, zval *keys, int keys_count, zval *options, zval *return_value);
-int execute_zunion_command(const void *glide_client, zval *keys, int keys_count, zval *weights, zval *options, zval *return_value);
-
-int execute_zinterstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count, zval *weights, zval *options, long *output_value);
-int execute_zunionstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count, zval *weights, zval *options, long *output_value);
-int execute_zpopmax_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value);
-int execute_zpopmin_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value);
-int execute_zscan_command(const void *glide_client, const char *key, size_t key_len, long *cursor, char *pattern, size_t pattern_len, long count, zval *return_value);
+int execute_zintercard_command(zval *object, int argc, zval *return_value);
+int execute_zunion_command(zval *object, int argc, zval *return_value);
+int execute_zunionstore_command(zval *object, int argc, zval *return_value);
+int execute_zpopmax_command(zval *object, int argc, zval *return_value);
+int execute_zpopmin_command(zval *object, int argc, zval *return_value);
+int execute_zscan_command(zval *object, int argc, zval *return_value);
 
 int execute_zrevrange_command(zval *object, int argc, zval *return_value);
 int execute_zrangebyscore_command(zval *object, int argc, zval *return_value);
@@ -641,6 +637,97 @@ int execute_zremrangebyscore_command(zval *object, int argc, zval *return_value)
         }                                                                     \
         zval_dtor(return_value);                                              \
         RETURN_FALSE;                                                         \
+    }
+
+/* Ultra-simple macro for ZINTERCARD method implementation */
+#define ZINTERCARD_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zintercard)                                            \
+    {                                                                             \
+        if (execute_zintercard_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        RETURN_FALSE;                                                             \
+    }
+
+/* Ultra-simple macro for ZUNION method implementation */
+#define ZUNION_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zunion)                                            \
+    {                                                                         \
+        if (execute_zunion_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+/* Ultra-simple macro for ZDIFFSTORE method implementation */
+#define ZDIFFSTORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zdiffstore)                                            \
+    {                                                                             \
+        if (execute_zdiffstore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        RETURN_FALSE;                                                             \
+    }
+
+/* Ultra-simple macro for ZINTERSTORE method implementation */
+#define ZINTERSTORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zinterstore)                                            \
+    {                                                                              \
+        if (execute_zinterstore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                          \
+            return;                                                                \
+        }                                                                          \
+        RETURN_FALSE;                                                              \
+    }
+
+/* Ultra-simple macro for ZUNIONSTORE method implementation */
+#define ZUNIONSTORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zunionstore)                                            \
+    {                                                                              \
+        if (execute_zunionstore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                          \
+            return;                                                                \
+        }                                                                          \
+        RETURN_FALSE;                                                              \
+    }
+
+/* Ultra-simple macro for ZPOPMAX method implementation */
+#define ZPOPMAX_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zPopMax)                                            \
+    {                                                                          \
+        if (execute_zpopmax_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+/* Ultra-simple macro for ZPOPMIN method implementation */
+#define ZPOPMIN_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zPopMin)                                            \
+    {                                                                          \
+        if (execute_zpopmin_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+/* Ultra-simple macro for ZSCAN method implementation */
+#define ZSCAN_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zscan)                                            \
+    {                                                                        \
+        if (execute_zscan_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        RETURN_FALSE;                                                        \
     }
 
 #endif /* VALKEY_GLIDE_Z_COMMON_H */

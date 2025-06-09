@@ -921,24 +921,206 @@ int execute_zstore_command(const void *glide_client, enum RequestType cmd_type, 
 }
 
 /* Execute a ZDIFFSTORE command using the Valkey Glide client */
-int execute_zdiffstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count,
-                               zval *weights, zval *options, long *output_value)
+int execute_zdiffstore_command(zval *object, int argc, zval *return_value)
 {
-    return execute_zstore_command(glide_client, ZDiffStore, dst, dst_len, keys, keys_count, weights, options, output_value);
+    zval *z_keys, *z_weights = NULL, *z_options = NULL;
+    HashTable *keys_hash;
+    char *dst;
+    size_t dst_len;
+    const void *glide_client = NULL;
+    long cardinality = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osa|aa",
+                                     &object, redis_ce, &dst, &dst_len, &z_keys,
+                                     &z_weights, &z_options) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check key count */
+    keys_hash = Z_ARRVAL_P(z_keys);
+    if (zend_hash_num_elements(keys_hash) == 0)
+    {
+        return 0;
+    }
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Use framework for command execution */
+    int result = execute_zstore_command(glide_client, ZDiffStore, dst, dst_len, z_keys,
+                                        zend_hash_num_elements(keys_hash), z_weights, z_options, &cardinality);
+
+    if (result)
+    {
+        ZVAL_LONG(return_value, cardinality);
+    }
+
+    return result;
 }
 
 /* Execute a ZINTERSTORE command using the Valkey Glide client */
-int execute_zinterstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count,
-                                zval *weights, zval *options, long *output_value)
+int execute_zinterstore_command(zval *object, int argc, zval *return_value)
 {
-    return execute_zstore_command(glide_client, ZInterStore, dst, dst_len, keys, keys_count, weights, options, output_value);
+    zval *z_keys, *z_weights = NULL, *z_options = NULL;
+    zval z_aggregate_option;
+    int free_options = 0;
+    HashTable *keys_hash;
+    char *dst;
+    size_t dst_len;
+    const void *glide_client = NULL;
+    long cardinality = 0;
+
+    /* Parse parameters - we accept both array and string for the options parameter */
+    if (zend_parse_method_parameters(argc, object, "Osa|zz",
+                                     &object, redis_ce, &dst, &dst_len, &z_keys,
+                                     &z_weights, &z_options) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* If weights is not an array, set it to NULL */
+    if (z_weights != NULL && Z_TYPE_P(z_weights) != IS_ARRAY)
+    {
+        z_weights = NULL;
+    }
+
+    /* If z_options is a string, convert it to an array with ['AGGREGATE' => string] */
+    if (z_options && Z_TYPE_P(z_options) == IS_STRING)
+    {
+        array_init(&z_aggregate_option);
+        add_assoc_stringl(&z_aggregate_option, "AGGREGATE", Z_STRVAL_P(z_options), Z_STRLEN_P(z_options));
+        z_options = &z_aggregate_option;
+        free_options = 1;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check key count */
+    keys_hash = Z_ARRVAL_P(z_keys);
+    if (zend_hash_num_elements(keys_hash) == 0)
+    {
+        if (free_options)
+        {
+            zval_dtor(&z_aggregate_option);
+        }
+        return 0;
+    }
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        if (free_options)
+        {
+            zval_dtor(&z_aggregate_option);
+        }
+        return 0;
+    }
+
+    /* Use framework for command execution */
+    int result = execute_zstore_command(glide_client, ZInterStore, dst, dst_len, z_keys,
+                                        zend_hash_num_elements(keys_hash), z_weights, z_options, &cardinality);
+
+    /* Free the temporary options array if we created one */
+    if (free_options)
+    {
+        zval_dtor(&z_aggregate_option);
+    }
+
+    if (result)
+    {
+        ZVAL_LONG(return_value, cardinality);
+    }
+
+    return result;
 }
 
 /* Execute a ZUNIONSTORE command using the Valkey Glide client */
-int execute_zunionstore_command(const void *glide_client, const char *dst, size_t dst_len, zval *keys, int keys_count,
-                                zval *weights, zval *options, long *output_value)
+int execute_zunionstore_command(zval *object, int argc, zval *return_value)
 {
-    return execute_zstore_command(glide_client, ZUnionStore, dst, dst_len, keys, keys_count, weights, options, output_value);
+    zval *z_keys, *z_weights = NULL, *z_options = NULL;
+    zval z_aggregate_option;
+    int free_options = 0;
+    HashTable *keys_hash;
+    char *dst;
+    size_t dst_len;
+    const void *glide_client = NULL;
+    long cardinality = 0;
+
+    /* Parse parameters - we accept both array and string for the options parameter */
+    if (zend_parse_method_parameters(argc, object, "Osa|zz",
+                                     &object, redis_ce, &dst, &dst_len, &z_keys,
+                                     &z_weights, &z_options) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* If weights is not an array, set it to NULL */
+    if (z_weights != NULL && Z_TYPE_P(z_weights) != IS_ARRAY)
+    {
+        z_weights = NULL;
+    }
+
+    /* If z_options is a string, convert it to an array with ['AGGREGATE' => string] */
+    if (z_options && Z_TYPE_P(z_options) == IS_STRING)
+    {
+        array_init(&z_aggregate_option);
+        add_assoc_stringl(&z_aggregate_option, "AGGREGATE", Z_STRVAL_P(z_options), Z_STRLEN_P(z_options));
+        z_options = &z_aggregate_option;
+        free_options = 1;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check key count */
+    keys_hash = Z_ARRVAL_P(z_keys);
+    if (zend_hash_num_elements(keys_hash) == 0)
+    {
+        if (free_options)
+        {
+            zval_dtor(&z_aggregate_option);
+        }
+        return 0;
+    }
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        if (free_options)
+        {
+            zval_dtor(&z_aggregate_option);
+        }
+        return 0;
+    }
+
+    /* Use framework for command execution */
+    int result = execute_zstore_command(glide_client, ZUnionStore, dst, dst_len, z_keys,
+                                        zend_hash_num_elements(keys_hash), z_weights, z_options, &cardinality);
+
+    /* Free the temporary options array if we created one */
+    if (free_options)
+    {
+        zval_dtor(&z_aggregate_option);
+    }
+
+    if (result)
+    {
+        ZVAL_LONG(return_value, cardinality);
+    }
+
+    return result;
 }
 
 /* Execute a ZREVRANGE command using the Valkey Glide client */
@@ -1239,29 +1421,124 @@ int execute_zrangebylex_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a ZINTERCARD command using the Valkey Glide client */
-int execute_zintercard_command(const void *glide_client, zval *keys, int keys_count, zval *options, zval *return_value)
+int execute_zintercard_command(zval *object, int argc, zval *return_value)
 {
-    z_command_args_t args = {0};
-    args.members = keys; /* Reuse members field for keys */
-    args.member_count = keys_count;
-    args.options = options;
+    zval *z_keys, *z_options = NULL;
+    zval z_temp_options;
+    const void *glide_client = NULL;
+    HashTable *keys_hash;
+    long limit = 0;
+    int free_options = 0;
 
-    return execute_z_generic_command(
+    /* Parse parameters - accept either array,array or array,long */
+    if (zend_parse_method_parameters(argc, object, "Oa|z",
+                                     &object, redis_ce, &z_keys, &z_options) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* If second parameter is an integer (limit), convert it to an options array */
+    if (z_options && Z_TYPE_P(z_options) == IS_LONG)
+    {
+        limit = Z_LVAL_P(z_options);
+        if (limit < 0)
+        {
+            return 0;
+        }
+
+        array_init(&z_temp_options);
+        add_assoc_long(&z_temp_options, "LIMIT", limit);
+        z_options = &z_temp_options;
+        free_options = 1; /* Flag to free the temporary array */
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check key count */
+    keys_hash = Z_ARRVAL_P(z_keys);
+    if (zend_hash_num_elements(keys_hash) == 0)
+    {
+        if (free_options)
+        {
+            zval_dtor(&z_temp_options);
+        }
+        return 0;
+    }
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        if (free_options)
+        {
+            zval_dtor(&z_temp_options);
+        }
+        return 0;
+    }
+
+    /* Use framework for command execution */
+    z_command_args_t args = {0};
+    args.members = z_keys; /* Reuse members field for keys */
+    args.member_count = zend_hash_num_elements(keys_hash);
+    args.options = z_options;
+
+    int result = execute_z_generic_command(
         glide_client,
         ZInterCard,
         &args,
         return_value,
         process_z_long_to_zval_result);
+
+    /* If we created a temporary options array, free it */
+    if (free_options)
+    {
+        zval_dtor(&z_temp_options);
+    }
+
+    return result;
 }
 
 /* Execute a ZUNION command using the Valkey Glide client */
-int execute_zunion_command(const void *glide_client, zval *keys, int keys_count, zval *weights, zval *options, zval *return_value)
+int execute_zunion_command(zval *object, int argc, zval *return_value)
 {
+    zval *z_keys, *z_weights = NULL, *z_options = NULL;
+    const void *glide_client = NULL;
+    HashTable *keys_hash;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oa|za",
+                                     &object, redis_ce, &z_keys, &z_weights, &z_options) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check key count */
+    keys_hash = Z_ARRVAL_P(z_keys);
+    if (zend_hash_num_elements(keys_hash) == 0)
+    {
+        return 0;
+    }
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
-    args.members = keys; /* Reuse members field for keys */
-    args.member_count = keys_count;
-    args.weights = weights;
-    args.options = options;
+    args.members = z_keys; /* Reuse members field for keys */
+    args.member_count = zend_hash_num_elements(keys_hash);
+    args.weights = z_weights;
+    args.options = z_options;
 
     struct
     {
@@ -1269,17 +1546,50 @@ int execute_zunion_command(const void *glide_client, zval *keys, int keys_count,
         int withscores;
     } array_data = {return_value, 0}; /* withscores determined by options */
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZUnion,
         &args,
         &array_data,
         process_z_array_result);
+
+    if (!result)
+    {
+        zval_dtor(return_value);
+    }
+
+    return result;
 }
 
 /* Execute a ZPOPMAX command using the Valkey Glide client */
-int execute_zpopmax_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value)
+int execute_zpopmax_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL;
+    size_t key_len;
+    long count = 1;
+    const void *glide_client = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|l",
+                                     &object, redis_ce, &key, &key_len, &count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
@@ -1291,17 +1601,50 @@ int execute_zpopmax_command(const void *glide_client, const char *key, size_t ke
         int withscores;
     } array_data = {return_value, 0};
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZPopMax,
         &args,
         &array_data,
         process_z_array_result);
+
+    if (!result)
+    {
+        zval_dtor(return_value);
+    }
+
+    return result;
 }
 
 /* Execute a ZPOPMIN command using the Valkey Glide client */
-int execute_zpopmin_command(const void *glide_client, const char *key, size_t key_len, long count, zval *return_value)
+int execute_zpopmin_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL;
+    size_t key_len;
+    long count = 1;
+    const void *glide_client = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|l",
+                                     &object, redis_ce, &key, &key_len, &count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
@@ -1313,12 +1656,19 @@ int execute_zpopmin_command(const void *glide_client, const char *key, size_t ke
         int withscores;
     } array_data = {return_value, 0};
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZPopMin,
         &args,
         &array_data,
         process_z_array_result);
+
+    if (!result)
+    {
+        zval_dtor(return_value);
+    }
+
+    return result;
 }
 
 /* Execute a ZADD command using the Valkey Glide client */
@@ -1542,14 +1892,41 @@ int execute_zinter_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a ZSCAN command using the Valkey Glide client */
-int execute_zscan_command(const void *glide_client, const char *key, size_t key_len, long *cursor,
-                          char *pattern, size_t pattern_len, long count, zval *return_value)
+int execute_zscan_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key || key_len <= 0 || !cursor)
+    zval *z_iterator;
+    char *key = NULL, *pattern = NULL;
+    size_t key_len, pattern_len = 0;
+    long count = 0, cursor;
+    const void *glide_client = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osz|sl",
+                                     &object, redis_ce, &key, &key_len, &z_iterator,
+                                     &pattern, &pattern_len, &count) == FAILURE)
     {
         return 0;
     }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client || !key || key_len <= 0)
+    {
+        return 0;
+    }
+
+    /* Make sure the iterator value is a reference */
+    if (!Z_ISREF_P(z_iterator))
+    {
+        php_error_docref(NULL, E_WARNING, "Iterator must be passed as a reference");
+        return 0;
+    }
+
+    /* Get current iterator value */
+    cursor = Z_LVAL_P(Z_REFVAL_P(z_iterator));
 
     /* Calculate number of arguments */
     unsigned long arg_count = 2; /* key + cursor */
@@ -1577,7 +1954,7 @@ int execute_zscan_command(const void *glide_client, const char *key, size_t key_
 
     /* Convert cursor to string */
     char cursor_str[32];
-    snprintf(cursor_str, sizeof(cursor_str), "%ld", *cursor);
+    snprintf(cursor_str, sizeof(cursor_str), "%ld", cursor);
 
     /* Set key and cursor */
     args[0] = (uintptr_t)key;
@@ -1649,7 +2026,7 @@ int execute_zscan_command(const void *glide_client, const char *key, size_t key_
             CommandResponse *cursor_resp = &result->response->array_value[0];
             if (cursor_resp->response_type == String)
             {
-                *cursor = atol(cursor_resp->string_value);
+                cursor = atol(cursor_resp->string_value);
             }
 
             /* Initialize result array */
@@ -1657,7 +2034,7 @@ int execute_zscan_command(const void *glide_client, const char *key, size_t key_
 
             /* Add cursor as first element */
             zval z_cursor;
-            ZVAL_LONG(&z_cursor, *cursor);
+            ZVAL_LONG(&z_cursor, cursor);
             add_next_index_zval(return_value, &z_cursor);
 
             /* Add elements array as second element */
