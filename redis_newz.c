@@ -90,50 +90,8 @@ PHP_METHOD(Redis, object)
 }
 /* }}} */
 
-/* {{{ proto array Redis::zRandMember(string key [, int|array options [, bool withscores]]) */
-ZRANDMEMBER_METHOD_IMPL(Redis)
-/* }}} */
-
 /* {{{ proto array Redis::zRange(string key, mixed start, mixed end [, bool|array options]) */
-PHP_METHOD(Redis, zRange)
-{
-    zval *object, *options = NULL;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_start, *z_end;
-
-    /* Parse parameters - allow either boolean or array for the optional 4th parameter */
-
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszz|z",
-                                     &object, redis_ce, &key, &key_len, &z_start, &z_end,
-                                     &options) == FAILURE)
-    {
-
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-
-        /* Initialize return array */
-        array_init(return_value);
-
-        /* Execute the ZRANGE command using the Glide client */
-        if (execute_zrange_command(redis->glide_client, key, key_len, z_start, z_end, options, return_value))
-        {
-            return;
-        }
-
-        /* If the command failed, clean up and return FALSE */
-        zval_dtor(return_value);
-        RETURN_FALSE;
-    }
-}
+ZRANGE_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto int Redis::zRangeStore(string dest, string src, mixed start, mixed end [, array options]) */

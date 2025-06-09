@@ -346,7 +346,7 @@ int execute_zlexcount_command(const void *glide_client, const char *key, size_t 
 int execute_zrem_command(const void *glide_client, const char *key, size_t key_len, zval *members, int member_count, long *removed_count);
 int execute_zremrangebylex_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *removed_count);
 int execute_zremrangebyrank_command(const void *glide_client, const char *key, size_t key_len, long start, long stop, long *removed_count);
-int execute_zrange_command(const void *glide_client, const char *key, size_t key_len, zval *z_start, zval *z_end, zval *z_options, zval *return_value);
+int execute_zrange_command(zval *object, int argc, zval *return_value);
 int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
 /* ZADD command with options */
 /* ZRANGE command family */
@@ -424,6 +424,18 @@ int execute_zinter_command(const void *glide_client, zval *keys, zval *z_weights
         }                                                                          \
         zval_dtor(return_value);                                                   \
         RETURN_FALSE;                                                              \
+    }
+
+/* Ultra-simple macro for ZRANGE method implementation */
+#define ZRANGE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRange)                                            \
+    {                                                                         \
+        if (execute_zrange_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
     }
 
 #endif /* VALKEY_GLIDE_Z_COMMON_H */

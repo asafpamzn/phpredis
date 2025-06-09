@@ -62,6 +62,10 @@ extern zend_class_entry *redis_exception_ce;
 #include "redis_arginfo.h"
 #endif
 
+/* {{{ proto array Redis::zRandMember(string key [, int|array options [, bool withscores]]) */
+ZRANDMEMBER_METHOD_IMPL(Redis)
+/* }}} */
+
 int execute_zrandmember_command(zval *object, int argc, zval *return_value)
 {
     char *key = NULL;
@@ -405,9 +409,35 @@ int execute_zremrangebyscore_command(const void *glide_client, const char *key, 
         process_z_int_result);
 }
 
-int execute_zrange_command(const void *glide_client, const char *key, size_t key_len,
-                           zval *z_start, zval *z_end, zval *options, zval *return_value)
+int execute_zrange_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL;
+    size_t key_len;
+    zval *z_start, *z_end, *options = NULL;
+    const void *glide_client = NULL;
+
+    /* Parse parameters - allow either boolean or array for the optional 4th parameter */
+    if (zend_parse_method_parameters(argc, object, "Oszz|z",
+                                     &object, redis_ce, &key, &key_len, &z_start, &z_end,
+                                     &options) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
@@ -425,12 +455,20 @@ int execute_zrange_command(const void *glide_client, const char *key, size_t key
         int withscores;
     } array_data = {return_value, range_opts.withscores};
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZRange,
         &args,
         &array_data,
         process_z_array_result);
+
+    /* If the command failed, clean up the return array */
+    if (!result)
+    {
+        zval_dtor(return_value);
+    }
+
+    return result;
 }
 
 int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
