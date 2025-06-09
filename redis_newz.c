@@ -170,258 +170,24 @@ ZREMRANGEBYRANK_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::zCount(string key, mixed min, mixed max) */
-PHP_METHOD(Redis, zCount)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    char *min, *max;
-    size_t min_len, max_len;
-    long count;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss",
-                                     &object, redis_ce, &key, &key_len, &min, &min_len,
-                                     &max, &max_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZCOUNT command using the Glide client */
-        if (execute_zcount_command(redis->glide_client, key, key_len, min, min_len, max, max_len, &count))
-        {
-            RETURN_LONG(count);
-        }
-        RETURN_FALSE;
-    }
-}
+ZCOUNT_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::zCard(string key) */
-PHP_METHOD(Redis, zCard)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    long card;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZCARD command using the Glide client */
-        if (execute_zcard_command(redis->glide_client, key, key_len, &card))
-        {
-            RETURN_LONG(card);
-        }
-        RETURN_FALSE;
-    }
-}
+ZCARD_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto double Redis::zScore(string key, string member) */
-PHP_METHOD(Redis, zScore)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *member = NULL;
-    size_t key_len, member_len;
-    double score;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
-                                     &object, redis_ce, &key, &key_len,
-                                     &member, &member_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZSCORE command using the Glide client */
-        int result = execute_zscore_command(redis->glide_client, key, key_len, member, member_len, &score);
-
-        if (result == 1)
-        {
-            RETURN_DOUBLE(score);
-        }
-        else if (result == 0)
-        {
-            RETURN_FALSE; /* Member doesn't exist */
-        }
-        else
-        {
-            RETURN_FALSE; /* Error */
-        }
-    }
-}
+ZSCORE_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::zMscore(string key, string member, string member2...)
    proto array Redis::zMscore(string key, array members) */
-PHP_METHOD(Redis, zMscore)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    int argc = ZEND_NUM_ARGS();
-    zval *z_args = NULL;
-    int member_count = 0;
-
-    /* Method signature can be either of the following:
-     * - zMscore(string key, string member [, string ...])
-     * - zMscore(string key, array members)
-     */
-
-    /* First, check if we have the second signature with an array */
-    if (argc == 2)
-    {
-        zval *z_members;
-
-        /* Try to parse as (key, array) */
-        if (zend_parse_method_parameters(argc, getThis(), "Osa",
-                                         &object, redis_ce, &key, &key_len,
-                                         &z_members) == SUCCESS)
-        {
-            /* Get Redis object */
-            redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-            /* If we have a Glide client, use it */
-            if (redis->glide_client)
-            {
-                HashTable *ht_members = Z_ARRVAL_P(z_members);
-                member_count = zend_hash_num_elements(ht_members);
-
-                if (member_count == 0)
-                {
-                    RETURN_FALSE;
-                }
-
-                /* Create an array of members from the associative array */
-                zval *members = emalloc(sizeof(zval) * member_count);
-                zval *data;
-                int idx = 0;
-
-                ZEND_HASH_FOREACH_VAL(ht_members, data)
-                {
-                    ZVAL_COPY_VALUE(&members[idx++], data);
-                }
-                ZEND_HASH_FOREACH_END();
-
-                /* Initialize return array */
-                array_init(return_value);
-
-                /* Execute the ZMSCORE command using the Glide client */
-                if (execute_zmscore_command(redis->glide_client, key, key_len, members, member_count, return_value))
-                {
-                    efree(members);
-                    return;
-                }
-
-                /* Command failed */
-                efree(members);
-                zval_dtor(return_value);
-                RETURN_FALSE;
-            }
-        }
-    }
-
-    /* If we got here, either the array format failed or we have variadic args */
-    /* Parse as (key, member, member, ...) format */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_args, &member_count) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Create an array for the member arguments */
-        zval *members = z_args; /* z_args already contains our variadic arguments */
-
-        /* Initialize return array */
-        array_init(return_value);
-
-        /* Execute the ZMSCORE command using the Glide client */
-        if (execute_zmscore_command(redis->glide_client, key, key_len, members, member_count, return_value))
-        {
-            return;
-        }
-
-        /* Command failed */
-        zval_dtor(return_value);
-        RETURN_FALSE;
-    }
-}
+ZMSCORE_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::zRank(string key, string member) */
-PHP_METHOD(Redis, zRank)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *member = NULL;
-    size_t key_len, member_len;
-    long rank;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
-                                     &object, redis_ce, &key, &key_len,
-                                     &member, &member_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZRANK command using the Glide client */
-        int result = execute_zrank_command(redis->glide_client, key, key_len, member, member_len, 0, &rank, NULL);
-
-        if (result == 1)
-        {
-            RETURN_LONG(rank);
-        }
-        else if (result == 0)
-        {
-            RETURN_NULL(); /* Member doesn't exist */
-        }
-        else
-        {
-            RETURN_FALSE; /* Error */
-        }
-    }
-}
+ZRANK_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::zRevRank(string key, string member) */
@@ -429,36 +195,7 @@ ZREVRANK_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto double Redis::zIncrBy(string key, double value, string member) */
-PHP_METHOD(Redis, zIncrBy)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *member = NULL;
-    size_t key_len, member_len;
-    double increment, new_score;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osds",
-                                     &object, redis_ce, &key, &key_len,
-                                     &increment, &member, &member_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ZINCRBY command using the Glide client */
-        if (execute_zincrby_command(redis->glide_client, key, key_len, increment, member, member_len, &new_score))
-        {
-            RETURN_DOUBLE(new_score);
-        }
-        RETURN_FALSE;
-    }
-}
+ZINCRBY_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::zdiff(array keys [, array options]) */

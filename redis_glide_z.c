@@ -164,43 +164,175 @@ int execute_zrandmember_command(zval *object, int argc, zval *return_value)
         process_z_array_zrand_result);
 }
 
-int execute_zscore_command(const void *glide_client, const char *key, size_t key_len,
-                           const char *member, size_t member_len, double *output_value)
+int execute_zscore_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL, *member = NULL;
+    size_t key_len, member_len;
+    const void *glide_client = NULL;
+    double score;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &member, &member_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
     args.member = member;
     args.member_len = member_len;
 
-    int success = execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZScore,
         &args,
-        output_value,
+        &score,
         process_z_double_result);
 
-    /* Convert result to expected format for ZSCORE (-1/0/1 instead of 0/1) */
-    if (success == 0)
+    if (result == 1)
     {
-        success = -1; /* Member not found */
+        ZVAL_DOUBLE(return_value, score);
+        return 1;
     }
-    else if (success == 1)
+    else if (result == 0)
     {
-        success = 1; /* Success */
+        return 0; /* Member not found */
     }
-
-    return success;
+    else
+    {
+        return -1; /* Error */
+    }
 }
 
-int execute_zmscore_command(const void *glide_client, const char *key, size_t key_len,
-                            zval *members, int members_count, zval *return_value)
+int execute_zmscore_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL;
+    size_t key_len;
+    int member_count = 0;
+    zval *z_args = NULL;
+    const void *glide_client = NULL;
+
+    /* Method signature can be either of the following:
+     * - zMscore(string key, string member [, string ...])
+     * - zMscore(string key, array members)
+     */
+
+    /* First, check if we have the second signature with an array */
+    if (argc == 2)
+    {
+        zval *z_members;
+
+        /* Try to parse as (key, array) */
+        if (zend_parse_method_parameters(argc, object, "Osa",
+                                         &object, redis_ce, &key, &key_len,
+                                         &z_members) == SUCCESS)
+        {
+            /* Get Redis object */
+            redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+            glide_client = redis->glide_client;
+
+            /* Check if we have a valid glide client */
+            if (!glide_client)
+            {
+                return 0;
+            }
+
+            HashTable *ht_members = Z_ARRVAL_P(z_members);
+            member_count = zend_hash_num_elements(ht_members);
+
+            if (member_count == 0)
+            {
+                return 0;
+            }
+
+            /* Create an array of members from the associative array */
+            zval *members = emalloc(sizeof(zval) * member_count);
+            zval *data;
+            int idx = 0;
+
+            ZEND_HASH_FOREACH_VAL(ht_members, data)
+            {
+                ZVAL_COPY_VALUE(&members[idx++], data);
+            }
+            ZEND_HASH_FOREACH_END();
+
+            /* Initialize return array */
+            array_init(return_value);
+
+            /* Use framework for command execution */
+            z_command_args_t args = {0};
+            args.key = key;
+            args.key_len = key_len;
+            args.members = members;
+            args.member_count = member_count;
+
+            struct
+            {
+                zval *return_value;
+                int withscores;
+            } array_data = {return_value, 0}; /* ZMSCORE doesn't use withscores */
+
+            int result = execute_z_generic_command(
+                glide_client,
+                ZMScore,
+                &args,
+                &array_data,
+                process_z_array_result);
+
+            /* Clean up */
+            efree(members);
+
+            if (!result)
+            {
+                zval_dtor(return_value);
+            }
+
+            return result;
+        }
+    }
+
+    /* If we got here, either the array format failed or we have variadic args */
+    /* Parse as (key, member, member, ...) format */
+    if (zend_parse_method_parameters(argc, object, "Os*",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &member_count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
-    args.members = members;
-    args.member_count = members_count;
+    args.members = z_args; /* z_args already contains our variadic arguments */
+    args.member_count = member_count;
 
     struct
     {
@@ -208,38 +340,79 @@ int execute_zmscore_command(const void *glide_client, const char *key, size_t ke
         int withscores;
     } array_data = {return_value, 0}; /* ZMSCORE doesn't use withscores */
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZMScore,
         &args,
         &array_data,
         process_z_array_result);
+
+    if (!result)
+    {
+        zval_dtor(return_value);
+    }
+
+    return result;
 }
 
-int execute_zrank_command(const void *glide_client, const char *key, size_t key_len,
-                          const char *member, size_t member_len, int withscore,
-                          long *rank_value, double *score_value)
+int execute_zrank_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL, *member = NULL;
+    size_t key_len, member_len;
+    const void *glide_client = NULL;
+    long rank;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &member, &member_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
     args.member = member;
     args.member_len = member_len;
-    args.withscores = withscore;
+    args.withscores = 0; /* ZRANK doesn't use withscores in this context */
 
     struct
     {
         long *rank;
         double *score;
         int withscore;
-    } rank_data = {rank_value, score_value, withscore};
+    } rank_data = {&rank, NULL, 0};
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZRank,
         &args,
         &rank_data,
         process_z_rank_result);
+
+    if (result == 1)
+    {
+        ZVAL_LONG(return_value, rank);
+    }
+    else if (result == 0)
+    {
+        ZVAL_NULL(return_value); /* Member doesn't exist */
+    }
+    /* For result == -1 (error), return_value remains uninitialized, which is handled by the macro */
+
+    return result;
 }
 
 int execute_zrevrank_command(zval *object, int argc, zval *return_value)
@@ -302,10 +475,33 @@ int execute_zrevrank_command(zval *object, int argc, zval *return_value)
     return result;
 }
 
-int execute_zincrby_command(const void *glide_client, const char *key, size_t key_len,
-                            double increment, const char *member, size_t member_len,
-                            double *output_value)
+int execute_zincrby_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL, *member = NULL;
+    size_t key_len, member_len;
+    double increment;
+    const void *glide_client = NULL;
+    double new_score;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osds",
+                                     &object, redis_ce, &key, &key_len,
+                                     &increment, &member, &member_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
@@ -313,26 +509,49 @@ int execute_zincrby_command(const void *glide_client, const char *key, size_t ke
     args.member = member;
     args.member_len = member_len;
 
-    int success = execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZIncrBy,
         &args,
-        output_value,
+        &new_score,
         process_z_double_result);
 
-    /* Convert result to expected format for ZINCRBY (0/1 instead of -1/0/1) */
-    if (success == -1)
+    if (result)
     {
-        success = 0;
+        ZVAL_DOUBLE(return_value, new_score);
     }
 
-    return success;
+    return result;
 }
 
-int execute_zcount_command(const void *glide_client, const char *key, size_t key_len,
-                           const char *min, size_t min_len, const char *max, size_t max_len,
-                           long *output_value)
+int execute_zcount_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL;
+    size_t key_len;
+    char *min, *max;
+    size_t min_len, max_len;
+    const void *glide_client = NULL;
+    long count;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osss",
+                                     &object, redis_ce, &key, &key_len, &min, &min_len,
+                                     &max, &max_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
@@ -341,12 +560,19 @@ int execute_zcount_command(const void *glide_client, const char *key, size_t key
     args.max = max;
     args.max_len = max_len;
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZCount,
         &args,
-        output_value,
+        &count,
         process_z_int_result);
+
+    if (result)
+    {
+        ZVAL_LONG(return_value, count);
+    }
+
+    return result;
 }
 
 int execute_zlexcount_command(const void *glide_client, const char *key, size_t key_len,
@@ -630,18 +856,48 @@ int execute_zrange_command(zval *object, int argc, zval *return_value)
     return result;
 }
 
-int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
+int execute_zcard_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL;
+    size_t key_len;
+    const void *glide_client = NULL;
+    long card;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
+    }
+
+    /* Use framework for command execution */
     z_command_args_t args = {0};
     args.key = key;
     args.key_len = key_len;
 
-    return execute_z_generic_command(
+    int result = execute_z_generic_command(
         glide_client,
         ZCard,
         &args,
-        output_value,
+        &card,
         process_z_int_result);
+
+    if (result)
+    {
+        ZVAL_LONG(return_value, card);
+    }
+
+    return result;
 }
 
 /* Helper function for ZDIFFSTORE, ZINTERSTORE and ZUNIONSTORE commands */

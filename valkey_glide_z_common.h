@@ -336,18 +336,18 @@ void free_allocated_strings(char **strings, int count);
 
 /* Traditional function signatures (original) */
 int execute_zrandmember_command(zval *object, int argc, zval *return_value);
-int execute_zscore_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, double *score);
-int execute_zmscore_command(const void *glide_client, const char *key, size_t key_len, zval *members, int member_count, zval *return_value);
-int execute_zrank_command(const void *glide_client, const char *key, size_t key_len, const char *member, size_t member_len, int withscore, long *rank, double *score);
+int execute_zscore_command(zval *object, int argc, zval *return_value);
+int execute_zmscore_command(zval *object, int argc, zval *return_value);
+int execute_zrank_command(zval *object, int argc, zval *return_value);
 int execute_zrevrank_command(zval *object, int argc, zval *return_value);
-int execute_zincrby_command(const void *glide_client, const char *key, size_t key_len, double increment, const char *member, size_t member_len, double *new_score);
-int execute_zcount_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *count);
+int execute_zincrby_command(zval *object, int argc, zval *return_value);
+int execute_zcount_command(zval *object, int argc, zval *return_value);
 int execute_zlexcount_command(const void *glide_client, const char *key, size_t key_len, const char *min, size_t min_len, const char *max, size_t max_len, long *count);
 int execute_zrem_command(zval *object, int argc, zval *return_value);
 int execute_zremrangebylex_command(zval *object, int argc, zval *return_value);
 int execute_zremrangebyrank_command(zval *object, int argc, zval *return_value);
 int execute_zrange_command(zval *object, int argc, zval *return_value);
-int execute_zcard_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
+int execute_zcard_command(zval *object, int argc, zval *return_value);
 /* ZADD command with options */
 /* ZRANGE command family */
 int execute_zrangestore_command(zval *object, int argc, zval *return_value);
@@ -562,6 +562,73 @@ int execute_zremrangebyscore_command(zval *object, int argc, zval *return_value)
             return;                                                                    \
         }                                                                              \
         RETURN_FALSE;                                                                  \
+    }
+
+/* Ultra-simple macro for ZCOUNT method implementation */
+#define ZCOUNT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zCount)                                            \
+    {                                                                         \
+        if (execute_zcount_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        RETURN_FALSE;                                                         \
+    }
+
+/* Ultra-simple macro for ZCARD method implementation */
+#define ZCARD_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zCard)                                            \
+    {                                                                        \
+        if (execute_zcard_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        RETURN_FALSE;                                                        \
+    }
+
+/* Ultra-simple macro for ZSCORE method implementation */
+#define ZSCORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zScore)                                            \
+    {                                                                         \
+        if (execute_zscore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        RETURN_FALSE;                                                         \
+    }
+
+/* Ultra-simple macro for ZMSCORE method implementation */
+#define ZMSCORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zMscore)                                            \
+    {                                                                          \
+        if (execute_zmscore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+/* Ultra-simple macro for ZRANK method implementation */
+#define ZRANK_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zRank)                                            \
+    {                                                                        \
+        if (execute_zrank_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        RETURN_FALSE;                                                        \
+    }
+
+/* Ultra-simple macro for ZINCRBY method implementation */
+#define ZINCRBY_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, zIncrBy)                                            \
+    {                                                                          \
+        if (execute_zincrby_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        RETURN_FALSE;                                                          \
     }
 
 #endif /* VALKEY_GLIDE_Z_COMMON_H */
