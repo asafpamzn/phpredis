@@ -5712,6 +5712,7 @@ class Redis_Test extends TestSuite {
         $this->addCities('gk');
     
         $this->assertEquals(['Chico'], $this->redis->geosearch('gk', 'Chico', 1, 'm'));
+        $res = $this->redis->geosearch('gk', 'Chico', 1, 'm', ['withcoord', 'withdist', 'withhash']);       
         
         $this->assertValidate($this->redis->geosearch('gk', 'Chico', 1, 'm', ['withcoord', 'withdist', 'withhash']), function ($v) {
            

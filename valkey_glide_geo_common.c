@@ -1118,6 +1118,8 @@ int process_geo_radius_result(CommandResult *result, void *output)
     }
 
     /* Process the result (array of points) */
+    printf("Processing GEORADIUS result with options: withcoord=%d, withdist=%d, withhash=%d result->response->response_type =%d\n",
+           withcoord, withdist, withhash, result->response->response_type);
     if (result->response->response_type == Array)
     {
         array_init(return_value);
@@ -1238,8 +1240,136 @@ int process_geo_radius_result(CommandResult *result, void *output)
  */
 int process_geo_search_result(CommandResult *result, void *output)
 {
-    /* GEOSEARCH processing is the same as GEORADIUS processing */
-    return process_geo_radius_result(result, output);
+    struct
+    {
+        zval *return_value;
+        int withcoord;
+        int withdist;
+        int withhash;
+    } *search_data = (void *)output;
+
+    zval *return_value = search_data->return_value;
+    int withcoord = search_data->withcoord;
+    int withdist = search_data->withdist;
+    int withhash = search_data->withhash;
+
+    if (!result || !result->response || !return_value)
+    {
+        return 0;
+    }
+
+    /* If no WITH* options, just return the array of names */
+    if (!withcoord && !withdist && !withhash)
+    {
+        /* Simple case - just return the array */
+        return command_response_to_zval(result->response, return_value,
+                                        COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+    }
+
+    /* Process the result and build an associative array */
+    if (result->response->response_type == Array)
+    {
+        array_init(return_value);
+
+        for (size_t i = 0; i < result->response->array_value_len; i++)
+        {
+
+            struct CommandResponse *element = &result->response->array_value[i];
+
+            /* Process elements with member name and WITH* data */
+            if (element->response_type == Array && element->array_value_len > 0)
+            {
+
+                /* First element is always the member name */
+                if (element->array_value[0].response_type == String)
+                {
+                    char *member_name = element->array_value[0].string_value;
+                    size_t member_len = element->array_value[0].string_value_len;
+
+                    /* Create an array for this member's data */
+                    zval member_data;
+                    array_init(&member_data);
+                    CommandResponse *inner_element = &element->array_value[1];
+
+                    int idx = 0;
+                    /* Distance if requested */
+                    if (withdist && idx < inner_element->array_value_len)
+                    {
+
+                        if (inner_element->array_value[idx].response_type == String)
+                        {
+                            add_next_index_double(&member_data,
+                                                  atof(inner_element->array_value[idx].string_value));
+                        }
+                        else if (inner_element->array_value[idx].response_type == Float)
+                        {
+                            add_next_index_double(&member_data,
+                                                  inner_element->array_value[idx].float_value);
+                        }
+                        idx++;
+                    }
+
+                    /* Hash if requested */
+                    if (withhash && idx < inner_element->array_value_len)
+                    {
+
+                        if (inner_element->array_value[idx].response_type == Int)
+                        {
+                            add_next_index_long(&member_data,
+                                                inner_element->array_value[idx].int_value);
+                        }
+                        idx++;
+                    }
+
+                    /* Coordinates if requested */
+                    if (withcoord && idx < inner_element->array_value_len)
+                    {
+
+                        if (inner_element->array_value[idx].response_type == Array &&
+                            inner_element->array_value[idx].array_value_len == 2)
+                        {
+                            /* Create a coordinates array */
+                            zval coordinates;
+                            array_init(&coordinates);
+
+                            /* Add longitude */
+                            if (inner_element->array_value[idx].array_value[0].response_type == String)
+                            {
+                                add_next_index_double(&coordinates,
+                                                      atof(inner_element->array_value[idx].array_value[0].string_value));
+                            }
+                            else if (inner_element->array_value[idx].array_value[0].response_type == Float)
+                            {
+                                add_next_index_double(&coordinates,
+                                                      inner_element->array_value[idx].array_value[0].float_value);
+                            }
+
+                            /* Add latitude */
+                            if (inner_element->array_value[idx].array_value[1].response_type == String)
+                            {
+                                add_next_index_double(&coordinates,
+                                                      atof(inner_element->array_value[idx].array_value[1].string_value));
+                            }
+                            else if (inner_element->array_value[idx].array_value[1].response_type == Float)
+                            {
+                                add_next_index_double(&coordinates,
+                                                      inner_element->array_value[idx].array_value[1].float_value);
+                            }
+
+                            add_next_index_zval(&member_data, &coordinates);
+                        }
+                    }
+
+                    /* Add the member data to the result array with member name as key */
+                    add_assoc_zval_ex(return_value, member_name, member_len, &member_data);
+                }
+            }
+        }
+
+        return 1;
+    }
+
+    return 0;
 }
 
 /* ====================================================================
