@@ -487,6 +487,12 @@ int execute_x_generic_command(const void *glide_client,
     case XClaim:
         arg_count = prepare_x_claim_args(args, &cmd_args, &args_len);
         break;
+    case XInfoGroups:
+    case XInfoConsumers:
+    case XInfoStream:
+        /* XINFO commands need special handling for allocated strings */
+        arg_count = prepare_x_info_args(args, &cmd_args, &args_len, &allocated_strings, &allocated_count);
+        break;
     default:
         printf("Unknown command type: %d\n", cmd_type);
         return 0;
@@ -783,6 +789,261 @@ int process_x_autoclaim_result(CommandResult *result, void *output)
     }
 
     return 1;
+}
+
+/**
+ * Process an XINFO result from a command
+ */
+int process_x_info_result(CommandResult *result, void *output)
+{
+    zval *return_value = (zval *)output;
+
+    /* XINFO returns information about the stream or consumers in associative array format */
+    return command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
+}
+
+/**
+ * Prepare arguments for XINFO command.
+ */
+int prepare_x_info_args(x_command_args_t *args, uintptr_t **args_out,
+                        unsigned long **args_len_out,
+                        char ***allocated_strings, int *allocated_count)
+{
+    /* Check if client and arguments are valid */
+    if (!args->glide_client || !args->subcommand || args->subcommand_len <= 0)
+    {
+        return 0;
+    }
+
+    /* Initialize allocated strings tracking */
+    *allocated_strings = NULL;
+    *allocated_count = 0;
+
+    /* Calculate arg count based on subcommand */
+    unsigned long arg_count = 0;
+    enum RequestType command_type = 0;
+
+    /* Determine which XINFO command to use based on subcommand */
+    if (strcasecmp(args->subcommand, "CONSUMERS") == 0)
+    {
+        command_type = XInfoConsumers;
+
+        /* We need key + group */
+        if (!args->args || args->args_count < 2)
+        {
+            return 0;
+        }
+
+        arg_count = 2; /* key and group */
+    }
+    else if (strcasecmp(args->subcommand, "GROUPS") == 0)
+    {
+        command_type = XInfoGroups;
+
+        /* We need at least key */
+        if (!args->args || args->args_count < 1)
+        {
+            return 0;
+        }
+
+        arg_count = 1; /* just key */
+    }
+    else if (strcasecmp(args->subcommand, "STREAM") == 0)
+    {
+        command_type = XInfoStream;
+
+        /* We need at least key */
+        if (!args->args || args->args_count < 1)
+        {
+            return 0;
+        }
+
+        /* Count options */
+        unsigned long extra_args = 0;
+        zend_bool has_full = 0;
+        zend_bool has_count = 0;
+
+        if (args->args_count >= 2)
+        {
+            /* Check if FULL option is present */
+            if (Z_TYPE(args->args[1]) == IS_STRING &&
+                strcasecmp(Z_STRVAL(args->args[1]), "FULL") == 0)
+            {
+                has_full = 1;
+                extra_args += 1; /* FULL */
+
+                /* Check for COUNT option */
+                if (args->args_count >= 3 && Z_TYPE(args->args[2]) != IS_NULL)
+                {
+                    if (Z_TYPE(args->args[2]) == IS_LONG)
+                    {
+                        long count_value = Z_LVAL(args->args[2]);
+                        if (count_value != -1)
+                        {
+                            has_count = 1;
+                            extra_args += 2; /* COUNT + value */
+                        }
+                    }
+                }
+            }
+        }
+
+        arg_count = 1 + extra_args; /* key + options */
+
+        /* Allocate memory to track dynamic strings */
+        if (has_count)
+        {
+            *allocated_strings = (char **)ecalloc(1, sizeof(char *));
+            if (!*allocated_strings)
+            {
+                return 0;
+            }
+        }
+    }
+    else
+    {
+        /* Unknown subcommand */
+        return 0;
+    }
+
+    /* Allocate memory for arguments */
+    if (!allocate_command_args(arg_count, args_out, args_len_out))
+    {
+        if (*allocated_strings)
+        {
+            efree(*allocated_strings);
+            *allocated_strings = NULL;
+        }
+        return 0;
+    }
+
+    /* Set arguments based on subcommand */
+    unsigned int arg_idx = 0;
+
+    if (strcasecmp(args->subcommand, "CONSUMERS") == 0)
+    {
+        /* First argument: key */
+        if (Z_TYPE(args->args[0]) == IS_STRING)
+        {
+            (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL(args->args[0]);
+            (*args_len_out)[arg_idx] = Z_STRLEN(args->args[0]);
+            arg_idx++;
+        }
+        else
+        {
+            convert_to_string(&args->args[0]);
+            (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL(args->args[0]);
+            (*args_len_out)[arg_idx] = Z_STRLEN(args->args[0]);
+            arg_idx++;
+        }
+
+        /* Second argument: group */
+        if (Z_TYPE(args->args[1]) == IS_STRING)
+        {
+            (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL(args->args[1]);
+            (*args_len_out)[arg_idx] = Z_STRLEN(args->args[1]);
+            arg_idx++;
+        }
+        else
+        {
+            convert_to_string(&args->args[1]);
+            (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL(args->args[1]);
+            (*args_len_out)[arg_idx] = Z_STRLEN(args->args[1]);
+            arg_idx++;
+        }
+    }
+    else if (strcasecmp(args->subcommand, "GROUPS") == 0)
+    {
+        /* Only argument: key */
+        if (Z_TYPE(args->args[0]) == IS_STRING)
+        {
+            (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL(args->args[0]);
+            (*args_len_out)[arg_idx] = Z_STRLEN(args->args[0]);
+            arg_idx++;
+        }
+        else
+        {
+            convert_to_string(&args->args[0]);
+            (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL(args->args[0]);
+            (*args_len_out)[arg_idx] = Z_STRLEN(args->args[0]);
+            arg_idx++;
+        }
+    }
+    else if (strcasecmp(args->subcommand, "STREAM") == 0)
+    {
+        /* First argument: key */
+        if (Z_TYPE(args->args[0]) == IS_STRING)
+        {
+            (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL(args->args[0]);
+            (*args_len_out)[arg_idx] = Z_STRLEN(args->args[0]);
+            arg_idx++;
+        }
+        else
+        {
+            convert_to_string(&args->args[0]);
+            (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL(args->args[0]);
+            (*args_len_out)[arg_idx] = Z_STRLEN(args->args[0]);
+            arg_idx++;
+        }
+
+        /* Check for FULL option */
+        zend_bool has_full = 0;
+        if (args->args_count >= 2 && Z_TYPE(args->args[1]) == IS_STRING &&
+            strcasecmp(Z_STRVAL(args->args[1]), "FULL") == 0)
+        {
+            has_full = 1;
+            (*args_out)[arg_idx] = (uintptr_t)"FULL";
+            (*args_len_out)[arg_idx] = sizeof("FULL") - 1;
+            arg_idx++;
+
+            /* Check for COUNT option */
+            if (has_full && args->args_count >= 3 && Z_TYPE(args->args[2]) != IS_NULL)
+            {
+                zend_bool has_count = 0;
+                long count_value = 0;
+
+                if (Z_TYPE(args->args[2]) == IS_LONG)
+                {
+                    count_value = Z_LVAL(args->args[2]);
+                    if (count_value != -1)
+                    {
+                        has_count = 1;
+                    }
+                }
+                else if (Z_TYPE(args->args[2]) == IS_STRING)
+                {
+                    if (Z_STRLEN(args->args[2]) != 2 || strcmp(Z_STRVAL(args->args[2]), "-1") != 0)
+                    {
+                        has_count = 1;
+                        count_value = atol(Z_STRVAL(args->args[2]));
+                    }
+                }
+
+                if (has_count)
+                {
+                    (*args_out)[arg_idx] = (uintptr_t)"COUNT";
+                    (*args_len_out)[arg_idx] = sizeof("COUNT") - 1;
+                    arg_idx++;
+
+                    /* Convert count to string */
+                    char count_str[32];
+                    size_t count_str_len = snprintf(count_str, sizeof(count_str), "%ld", count_value);
+                    char *count_copy = estrndup(count_str, count_str_len);
+                    if (count_copy)
+                    {
+                        (*allocated_strings)[*allocated_count] = count_copy;
+                        (*allocated_count)++;
+
+                        (*args_out)[arg_idx] = (uintptr_t)count_copy;
+                        (*args_len_out)[arg_idx] = count_str_len;
+                        arg_idx++;
+                    }
+                }
+            }
+        }
+    }
+
+    return arg_count;
 }
 
 /* ====================================================================
