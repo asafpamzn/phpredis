@@ -152,6 +152,8 @@ int execute_geohash_command(zval *object, int argc, zval *return_value);
 
 int execute_geodist_command(zval *object, int argc, zval *return_value);
 int execute_geopos_command(zval *object, int argc, zval *return_value);
+int execute_geosearch_command(zval *object, int argc, zval *return_value);
+int execute_geosearchstore_command(zval *object, int argc, zval *return_value);
 
 /* Execution framework */
 int execute_geo_generic_command(
@@ -257,6 +259,29 @@ int execute_geo_generic_command(
         }                                                                                   \
         zval_dtor(return_value);                                                            \
         RETURN_FALSE;                                                                       \
+    }
+
+/* Ultra-simple macro for GEOSEARCH method implementation */
+#define GEOSEARCH_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, geosearch)                                            \
+    {                                                                            \
+        if (execute_geosearch_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                        \
+            return;                                                              \
+        }                                                                        \
+        zval_dtor(return_value);                                                 \
+        RETURN_FALSE;                                                            \
+    }
+
+/* Ultra-simple macro for GEOSEARCHSTORE method implementation */
+#define GEOSEARCHSTORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, geosearchstore)                                            \
+    {                                                                                 \
+        if (execute_geosearchstore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                             \
+            return;                                                                   \
+        }                                                                             \
+        RETURN_FALSE;                                                                 \
     }
 
 #endif /* VALKEY_GLIDE_GEO_COMMON_H */

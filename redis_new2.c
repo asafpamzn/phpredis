@@ -98,17 +98,6 @@ GEORADIUS_RO_METHOD_IMPL(Redis)
 /* {{{ proto array Redis::georadiusbymember(string key, string member, float radius, string unit [, array options]) */
 PHP_METHOD(Redis, georadiusbymember)
 {
-    /* For now, we'll leave this to the standard implementation since it's not
-       directly implemented in the redis_geo_glide.c file */
-    zval *object;
-    redis_object *redis;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-                                     &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
 
     RETURN_FALSE;
 }
@@ -119,112 +108,15 @@ PHP_METHOD(Redis, georadiusbymember_ro)
 {
     /* For now, we'll leave this to the standard implementation since it's not
        directly implemented in the redis_geo_glide.c file */
-    zval *object;
-    redis_object *redis;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-                                     &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
 
     RETURN_FALSE;
 }
 /* }}} */
 
-/* Import GEOSEARCH functions */
-extern int execute_geosearch_command(const void *glide_client, const char *key, size_t key_len,
-                                     zval *from, double *by_radius, const char *by_unit, size_t by_unit_len,
-                                     zval *options, zval *return_value);
-
-extern int execute_geosearchstore_command(const void *glide_client, const char *dest, size_t dest_len,
-                                          const char *src, size_t src_len, zval *from, double *by_radius,
-                                          const char *by_unit, size_t by_unit_len, zval *options, long *output_value);
-
 /* {{{ proto array Redis::geosearch(string key, array|string from, array|string by, string|null radius_unit, string|null count, string|null sorting, string|null pattern) */
-PHP_METHOD(Redis, geosearch)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *unit = NULL;
-    size_t key_len, unit_len;
-    zval *from, *options = NULL;
-    double radius;
-
-    /* Parse parameters for simple case: geosearch(key, member, radius, unit [, options]) */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oszds|a",
-                                     &object, redis_ce, &key, &key_len,
-                                     &from, &radius, &unit, &unit_len, &options) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* Initialize return value as array */
-    array_init(return_value);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the GEOSEARCH command using the Glide client */
-        if (execute_geosearch_command(redis->glide_client, key, key_len, from, &radius, unit, unit_len, options, return_value))
-        {
-            /* Command already populated return_value */
-            return;
-        }
-        else
-        {
-            /* Command failed */
-            zval_dtor(return_value);
-            RETURN_FALSE;
-        }
-    }
-    RETURN_FALSE;
-}
+GEOSEARCH_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::geosearchstore(string dst, string src, array|string from, array|string by, string|null radius_unit, string|null count, string|null sorting, string|null storedist) */
-PHP_METHOD(Redis, geosearchstore)
-{
-    zval *object;
-    redis_object *redis;
-    char *dest = NULL, *src = NULL, *unit = NULL;
-    size_t dest_len, src_len, unit_len;
-    zval *from, *options = NULL;
-    double radius;
-    long result_value;
-
-    /* Parse parameters for simple case: geosearchstore(dest, src, member, radius, unit [, options]) */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osszds|a",
-                                     &object, redis_ce, &dest, &dest_len,
-                                     &src, &src_len, &from, &radius,
-                                     &unit, &unit_len, &options) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the GEOSEARCHSTORE command using the Glide client */
-        if (execute_geosearchstore_command(redis->glide_client, dest, dest_len, src, src_len,
-                                           from, &radius, unit, unit_len, options, &result_value))
-        {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-    RETURN_FALSE;
-}
+GEOSEARCHSTORE_METHOD_IMPL(Redis)
 /* }}} */

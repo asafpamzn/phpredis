@@ -467,13 +467,29 @@ int execute_georadius_ro_command(zval *object, int argc, zval *return_value)
 }
 
 /* GEOSEARCH implementation */
-int execute_geosearch_command(const void *glide_client, const char *key, size_t key_len,
-                              zval *from, double *by_radius, const char *by_unit, size_t by_unit_len,
-                              zval *options, zval *return_value)
+int execute_geosearch_command(zval *object, int argc, zval *return_value)
 {
+    char *key = NULL, *unit = NULL;
+    size_t key_len, unit_len;
+    zval *from = NULL;
+    double radius;
+    zval *options = NULL;
+    const void *glide_client = NULL;
 
-    /* Check if client is valid */
-    if (!glide_client || !key || !from || !by_radius)
+    /* Parse parameters for simple case: geosearch(key, member, radius, unit [, options]) */
+    if (zend_parse_method_parameters(argc, object, "Oszds|a",
+                                     &object, redis_ce, &key, &key_len,
+                                     &from, &radius, &unit, &unit_len, &options) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client || !key || !from)
     {
         return 0;
     }
@@ -483,9 +499,9 @@ int execute_geosearch_command(const void *glide_client, const char *key, size_t 
     args.key = key;
     args.key_len = key_len;
     args.from = from;
-    args.by_radius = by_radius;
-    args.unit = by_unit;
-    args.unit_len = by_unit_len;
+    args.by_radius = &radius;
+    args.unit = unit;
+    args.unit_len = unit_len;
     args.options = options;
 
     /* Parse the WITH* options if provided */
@@ -528,6 +544,9 @@ int execute_geosearch_command(const void *glide_client, const char *key, size_t 
         args.radius_opts.with_opts.withdist,
         args.radius_opts.with_opts.withhash};
 
+    /* Initialize return value as array */
+    array_init(return_value);
+
     /* Execute the generic command with appropriate result processor */
     return execute_geo_generic_command(
         glide_client,
@@ -538,12 +557,31 @@ int execute_geosearch_command(const void *glide_client, const char *key, size_t 
 }
 
 /* GEOSEARCHSTORE implementation */
-int execute_geosearchstore_command(const void *glide_client, const char *dest, size_t dest_len,
-                                   const char *src, size_t src_len, zval *from, double *by_radius,
-                                   const char *by_unit, size_t by_unit_len, zval *options, long *output_value)
+int execute_geosearchstore_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client is valid */
-    if (!glide_client || !dest || !src || !from || !by_radius)
+    char *dest = NULL, *src = NULL, *unit = NULL;
+    size_t dest_len, src_len, unit_len;
+    zval *from;
+    double radius;
+    zval *options = NULL;
+    const void *glide_client = NULL;
+    long result_value = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osszds|a",
+                                     &object, redis_ce, &dest, &dest_len,
+                                     &src, &src_len, &from, &radius,
+                                     &unit, &unit_len, &options) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client || !dest || !src || !from)
     {
         return 0;
     }
@@ -555,9 +593,9 @@ int execute_geosearchstore_command(const void *glide_client, const char *dest, s
     args.src = src;
     args.src_len = src_len;
     args.from = from;
-    args.by_radius = by_radius;
-    args.unit = by_unit;
-    args.unit_len = by_unit_len;
+    args.by_radius = &radius;
+    args.unit = unit;
+    args.unit_len = unit_len;
     args.options = options;
 
     /* Parse options if provided */
@@ -590,10 +628,17 @@ int execute_geosearchstore_command(const void *glide_client, const char *dest, s
     }
 
     /* Execute the generic command with appropriate result processor */
-    return execute_geo_generic_command(
+    int result = execute_geo_generic_command(
         glide_client,
         GeoSearchStore,
         &args,
-        output_value,
+        &result_value,
         process_geo_int_result);
+
+    if (result)
+    {
+        ZVAL_LONG(return_value, result_value);
+    }
+
+    return result;
 }
