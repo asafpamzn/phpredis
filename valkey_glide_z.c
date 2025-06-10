@@ -62,10 +62,6 @@ extern zend_class_entry *redis_exception_ce;
 #include "redis_arginfo.h"
 #endif
 
-/* {{{ proto array Redis::zRandMember(string key [, int|array options [, bool withscores]]) */
-ZRANDMEMBER_METHOD_IMPL(Redis)
-/* }}} */
-
 int execute_zrandmember_command(zval *object, int argc, zval *return_value)
 {
     char *key = NULL;

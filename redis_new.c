@@ -923,9 +923,6 @@ PHP_METHOD(Redis, strlen)
     }
 }
 
-/* {{{ proto Redis|array|false Redis::bzmpop(double $timeout, array $keys, string $from, int $count = 1) */
-BZMPOP_METHOD_IMPL(Redis)
-/* }}} */
 /* {{{ proto Redis|array|false Redis::lmpop(array $keys, string $from, int $count = 1) */
 PHP_METHOD(Redis, lmpop)
 {
