@@ -1,0 +1,883 @@
+/*
+  +----------------------------------------------------------------------+
+  | Valkey Glide X-Commands Common Utilities                             |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2023-2025 The PHP Group                                |
+  +----------------------------------------------------------------------+
+  | This source file is subject to version 3.01 of the PHP license,      |
+  | that is bundled with this package in the file LICENSE, and is        |
+  | available through the world-wide-web at the following url:           |
+  | http://www.php.net/license/3_01.txt                                  |
+  | If you did not receive a copy of the PHP license and are unable to   |
+  | obtain it through the world-wide-web, please send a note to          |
+  | license@php.net so we can mail you a copy immediately.               |
+  +----------------------------------------------------------------------+
+*/
+
+#include "valkey_glide_x_common.h"
+
+/* ====================================================================
+ * OPTION PARSING FUNCTIONS
+ * ==================================================================== */
+
+/**
+ * Parse COUNT option common to several X commands.
+ */
+int parse_x_count_options(zval *options, x_count_options_t *opts)
+{
+    /* Initialize options to default values */
+    opts->count = 0;
+    opts->has_count = 0;
+
+    /* If no options, return success */
+    if (!options || Z_TYPE_P(options) != IS_ARRAY)
+    {
+        return 1;
+    }
+
+    /* Look for COUNT option */
+    HashTable *ht = Z_ARRVAL_P(options);
+    zval *z_count;
+
+    /* Check for COUNT option */
+    if ((z_count = zend_hash_str_find(ht, "COUNT", sizeof("COUNT") - 1)) != NULL)
+    {
+        if (Z_TYPE_P(z_count) == IS_LONG)
+        {
+            opts->count = Z_LVAL_P(z_count);
+            opts->has_count = 1;
+        }
+    }
+
+    return 1;
+}
+
+/**
+ * Parse XREAD/XREADGROUP command options.
+ */
+int parse_x_read_options(zval *options, x_read_options_t *opts)
+{
+    /* Initialize options to default values */
+    opts->block = 0;
+    opts->has_block = 0;
+    opts->count = 0;
+    opts->has_count = 0;
+    opts->noack = 0;
+
+    /* If no options, return success */
+    if (!options || Z_TYPE_P(options) != IS_ARRAY)
+    {
+        return 1;
+    }
+
+    /* Parse options */
+    HashTable *ht = Z_ARRVAL_P(options);
+    zval *z_block, *z_count, *z_noack;
+
+    /* Check for BLOCK option */
+    if ((z_block = zend_hash_str_find(ht, "BLOCK", sizeof("BLOCK") - 1)) != NULL)
+    {
+        if (Z_TYPE_P(z_block) == IS_LONG)
+        {
+            opts->block = Z_LVAL_P(z_block);
+            opts->has_block = 1;
+        }
+    }
+
+    /* Check for COUNT option */
+    if ((z_count = zend_hash_str_find(ht, "COUNT", sizeof("COUNT") - 1)) != NULL)
+    {
+        if (Z_TYPE_P(z_count) == IS_LONG)
+        {
+            opts->count = Z_LVAL_P(z_count);
+            opts->has_count = 1;
+        }
+    }
+
+    /* Check for NOACK option */
+    if ((z_noack = zend_hash_str_find(ht, "NOACK", sizeof("NOACK") - 1)) != NULL)
+    {
+        opts->noack = zval_is_true(z_noack);
+    }
+    else
+    {
+        /* Legacy: Check if NOACK is specified as an array value */
+        zval *z_val;
+        ZEND_HASH_FOREACH_VAL(ht, z_val)
+        {
+            if (Z_TYPE_P(z_val) == IS_STRING &&
+                Z_STRLEN_P(z_val) == 5 &&
+                strcasecmp(Z_STRVAL_P(z_val), "NOACK") == 0)
+            {
+                opts->noack = 1;
+                break;
+            }
+        }
+        ZEND_HASH_FOREACH_END();
+    }
+
+    return 1;
+}
+
+/**
+ * Parse XPENDING command options.
+ */
+int parse_x_pending_options(zval *options, x_pending_options_t *opts)
+{
+    /* Initialize options to default values */
+    opts->start = NULL;
+    opts->start_len = 0;
+    opts->end = NULL;
+    opts->end_len = 0;
+    opts->count = 0;
+    opts->has_count = 0;
+    opts->consumer = NULL;
+    opts->consumer_len = 0;
+
+    /* If no options, return success */
+    if (!options || Z_TYPE_P(options) != IS_ARRAY)
+    {
+        return 1;
+    }
+
+    /* Parse options */
+    HashTable *ht = Z_ARRVAL_P(options);
+    zval *z_start, *z_end, *z_count, *z_consumer;
+
+    /* Check for START option */
+    if ((z_start = zend_hash_str_find(ht, "START", sizeof("START") - 1)) != NULL)
+    {
+        if (Z_TYPE_P(z_start) == IS_STRING)
+        {
+            opts->start = Z_STRVAL_P(z_start);
+            opts->start_len = Z_STRLEN_P(z_start);
+        }
+    }
+
+    /* Check for END option */
+    if ((z_end = zend_hash_str_find(ht, "END", sizeof("END") - 1)) != NULL)
+    {
+        if (Z_TYPE_P(z_end) == IS_STRING)
+        {
+            opts->end = Z_STRVAL_P(z_end);
+            opts->end_len = Z_STRLEN_P(z_end);
+        }
+    }
+
+    /* Check for COUNT option */
+    if ((z_count = zend_hash_str_find(ht, "COUNT", sizeof("COUNT") - 1)) != NULL)
+    {
+        if (Z_TYPE_P(z_count) == IS_LONG)
+        {
+            opts->count = Z_LVAL_P(z_count);
+            opts->has_count = 1;
+        }
+    }
+
+    /* Check for CONSUMER option */
+    if ((z_consumer = zend_hash_str_find(ht, "CONSUMER", sizeof("CONSUMER") - 1)) != NULL)
+    {
+        if (Z_TYPE_P(z_consumer) == IS_STRING)
+        {
+            opts->consumer = Z_STRVAL_P(z_consumer);
+            opts->consumer_len = Z_STRLEN_P(z_consumer);
+        }
+    }
+
+    return 1;
+}
+
+/**
+ * Parse XTRIM command options.
+ */
+int parse_x_trim_options(zval *options, x_trim_options_t *opts)
+{
+    /* Initialize options to default values */
+    opts->approximate = 0;
+    opts->limit = 0;
+    opts->has_limit = 0;
+
+    /* If no options, return success */
+    if (!options || Z_TYPE_P(options) != IS_ARRAY)
+    {
+        return 1;
+    }
+
+    /* Parse options */
+    HashTable *ht = Z_ARRVAL_P(options);
+    zval *z_approx, *z_limit;
+
+    /* Check for APPROXIMATE option */
+    if ((z_approx = zend_hash_str_find(ht, "APPROXIMATE", sizeof("APPROXIMATE") - 1)) != NULL)
+    {
+        opts->approximate = zval_is_true(z_approx);
+    }
+
+    /* Check for LIMIT option */
+    if ((z_limit = zend_hash_str_find(ht, "LIMIT", sizeof("LIMIT") - 1)) != NULL)
+    {
+        if (Z_TYPE_P(z_limit) == IS_LONG)
+        {
+            opts->limit = Z_LVAL_P(z_limit);
+            opts->has_limit = 1;
+        }
+    }
+
+    return 1;
+}
+
+/**
+ * Parse XADD command options.
+ */
+int parse_x_add_options(zval *options, x_add_options_t *opts)
+{
+    /* Initialize options to default values */
+    opts->maxlen = 0;
+    opts->has_maxlen = 0;
+    opts->approximate = 0;
+    opts->nomkstream = 0;
+    opts->minid_strategy = 0;
+
+    /* If no options, return success */
+    if (!options || Z_TYPE_P(options) != IS_ARRAY)
+    {
+        return 1;
+    }
+
+    /* Parse options */
+    HashTable *ht = Z_ARRVAL_P(options);
+    zval *z_maxlen, *z_approx, *z_nomkstream, *z_minid_strategy;
+
+    /* Check for MAXLEN option */
+    if ((z_maxlen = zend_hash_str_find(ht, "MAXLEN", sizeof("MAXLEN") - 1)) != NULL)
+    {
+        if (Z_TYPE_P(z_maxlen) == IS_LONG)
+        {
+            opts->maxlen = Z_LVAL_P(z_maxlen);
+            opts->has_maxlen = 1;
+        }
+    }
+
+    /* Check for APPROXIMATE option */
+    if ((z_approx = zend_hash_str_find(ht, "APPROXIMATE", sizeof("APPROXIMATE") - 1)) != NULL)
+    {
+        opts->approximate = zval_is_true(z_approx);
+    }
+
+    /* Check for NOMKSTREAM option */
+    if ((z_nomkstream = zend_hash_str_find(ht, "NOMKSTREAM", sizeof("NOMKSTREAM") - 1)) != NULL)
+    {
+        opts->nomkstream = zval_is_true(z_nomkstream);
+    }
+
+    /* Check for MINID strategy option */
+    if ((z_minid_strategy = zend_hash_str_find(ht, "MINID", sizeof("MINID") - 1)) != NULL)
+    {
+        opts->minid_strategy = zval_is_true(z_minid_strategy);
+    }
+
+    return 1;
+}
+
+/**
+ * Parse XCLAIM/XAUTOCLAIM command options.
+ */
+int parse_x_claim_options(zval *options, x_claim_options_t *opts)
+{
+    /* Initialize options to default values */
+    opts->idle = 0;
+    opts->has_idle = 0;
+    opts->time = 0;
+    opts->has_time = 0;
+    opts->retrycount = 0;
+    opts->has_retrycount = 0;
+    opts->force = 0;
+    opts->justid = 0;
+
+    /* If no options, return success */
+    if (!options || Z_TYPE_P(options) != IS_ARRAY)
+    {
+        return 1;
+    }
+
+    /* Parse options */
+    HashTable *ht = Z_ARRVAL_P(options);
+    zval *z_idle, *z_time, *z_retry, *z_force, *z_justid;
+
+    /* Check for IDLE option */
+    if ((z_idle = zend_hash_str_find(ht, "IDLE", sizeof("IDLE") - 1)) != NULL)
+    {
+        if (Z_TYPE_P(z_idle) == IS_LONG)
+        {
+            opts->idle = Z_LVAL_P(z_idle);
+            opts->has_idle = 1;
+        }
+    }
+
+    /* Check for TIME option */
+    if ((z_time = zend_hash_str_find(ht, "TIME", sizeof("TIME") - 1)) != NULL)
+    {
+        if (Z_TYPE_P(z_time) == IS_LONG)
+        {
+            opts->time = Z_LVAL_P(z_time);
+            opts->has_time = 1;
+        }
+    }
+
+    /* Check for RETRYCOUNT option */
+    if ((z_retry = zend_hash_str_find(ht, "RETRYCOUNT", sizeof("RETRYCOUNT") - 1)) != NULL)
+    {
+        if (Z_TYPE_P(z_retry) == IS_LONG)
+        {
+            opts->retrycount = Z_LVAL_P(z_retry);
+            opts->has_retrycount = 1;
+        }
+    }
+
+    /* Check for FORCE option - first check associative key */
+    if ((z_force = zend_hash_str_find(ht, "FORCE", sizeof("FORCE") - 1)) != NULL)
+    {
+        opts->force = zval_is_true(z_force);
+    }
+    else
+    {
+        /* If not found as associative key, check array values */
+        zval *z_val;
+        ZEND_HASH_FOREACH_VAL(ht, z_val)
+        {
+            if (Z_TYPE_P(z_val) == IS_STRING &&
+                Z_STRLEN_P(z_val) == 5 &&
+                strcasecmp(Z_STRVAL_P(z_val), "FORCE") == 0)
+            {
+                opts->force = 1;
+                break;
+            }
+        }
+        ZEND_HASH_FOREACH_END();
+    }
+
+    /* Check for JUSTID option - first check associative key */
+    if ((z_justid = zend_hash_str_find(ht, "JUSTID", sizeof("JUSTID") - 1)) != NULL)
+    {
+        opts->justid = zval_is_true(z_justid);
+    }
+    else
+    {
+        /* If not found as associative key, check array values */
+        zval *z_val;
+        ZEND_HASH_FOREACH_VAL(ht, z_val)
+        {
+            if (Z_TYPE_P(z_val) == IS_STRING &&
+                Z_STRLEN_P(z_val) == 6 &&
+                strcasecmp(Z_STRVAL_P(z_val), "JUSTID") == 0)
+            {
+                opts->justid = 1;
+                break;
+            }
+        }
+        ZEND_HASH_FOREACH_END();
+    }
+
+    return 1;
+}
+
+/* ====================================================================
+ * RESULT PROCESSING FUNCTIONS
+ * ==================================================================== */
+
+/**
+ * Process an integer result from a command
+ */
+int process_x_int_result(CommandResult *result, void *output)
+{
+    long *output_value = (long *)output;
+
+    /* For Redis stream commands, integer response is the count */
+    if (result->response->response_type == Int)
+    {
+        /* Store the count in output_value */
+        *output_value = result->response->int_value;
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Process a string result from a command
+ */
+int process_x_string_result(CommandResult *result, void *output)
+{
+    zval *return_value = (zval *)output;
+
+    if (result->response->response_type == String)
+    {
+        ZVAL_STRINGL(return_value, result->response->string_value, result->response->string_value_len);
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Process a stream result from a command
+ */
+int process_x_stream_result(CommandResult *result, void *output)
+{
+    zval *return_value = (zval *)output;
+
+    /* Use the command_response_to_stream_zval function */
+    return command_response_to_stream_zval(result->response, return_value);
+}
+
+/* ====================================================================
+ * ARGUMENT PREPARATION FUNCTIONS
+ * ==================================================================== */
+
+/**
+ * Prepare arguments for XLEN command.
+ */
+int prepare_x_len_args(x_command_args_t *args, uintptr_t **args_out,
+                       unsigned long **args_len_out)
+{
+    /* Check if client and key are valid */
+    if (!args->glide_client || !args->key || args->key_len <= 0)
+    {
+        return 0;
+    }
+
+    /* Allocate memory for arguments */
+    *args_out = (uintptr_t *)emalloc(sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(sizeof(unsigned long));
+
+    if (!*args_out || !*args_len_out)
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Set key as the only argument */
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+
+    return 1;
+}
+
+/**
+ * Prepare arguments for XACK command.
+ */
+int prepare_x_ack_args(x_command_args_t *args, uintptr_t **args_out,
+                       unsigned long **args_len_out)
+{
+    /* Check if client and arguments are valid */
+    if (!args->glide_client || !args->key || args->key_len <= 0 ||
+        !args->group || args->group_len <= 0 ||
+        !args->ids || args->id_count <= 0)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments: key + group + IDs */
+    unsigned long arg_count = 2 + args->id_count;
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!*args_out || !*args_len_out)
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Set key as first argument */
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+
+    /* Set group as second argument */
+    (*args_out)[1] = (uintptr_t)args->group;
+    (*args_len_out)[1] = args->group_len;
+
+    /* Add all stream IDs */
+    zval *z_id;
+    int i = 2;
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args->ids), z_id)
+    {
+        if (Z_TYPE_P(z_id) != IS_STRING)
+        {
+            convert_to_string(z_id);
+        }
+        (*args_out)[i] = (uintptr_t)Z_STRVAL_P(z_id);
+        (*args_len_out)[i] = Z_STRLEN_P(z_id);
+        i++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    return arg_count;
+}
+
+/**
+ * Prepare arguments for XDEL command.
+ */
+int prepare_x_del_args(x_command_args_t *args, uintptr_t **args_out,
+                       unsigned long **args_len_out)
+{
+    /* Check if client and arguments are valid */
+    if (!args->glide_client || !args->key || args->key_len <= 0 ||
+        !args->ids || args->id_count <= 0)
+    {
+        return 0;
+    }
+
+    /* Prepare command arguments: key + IDs */
+    unsigned long arg_count = 1 + args->id_count;
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!*args_out || !*args_len_out)
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Set key as first argument */
+    (*args_out)[0] = (uintptr_t)args->key;
+    (*args_len_out)[0] = args->key_len;
+
+    /* Add all stream IDs */
+    zval *z_id;
+    int i = 1;
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args->ids), z_id)
+    {
+        if (Z_TYPE_P(z_id) != IS_STRING)
+        {
+            convert_to_string(z_id);
+        }
+        (*args_out)[i] = (uintptr_t)Z_STRVAL_P(z_id);
+        (*args_len_out)[i] = Z_STRLEN_P(z_id);
+        i++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    return arg_count;
+}
+
+/**
+ * Prepare arguments for XRANGE/XREVRANGE commands.
+ */
+int prepare_x_range_args(x_command_args_t *args, uintptr_t **args_out,
+                         unsigned long **args_len_out)
+{
+    /* Check if client and arguments are valid */
+    if (!args->glide_client || !args->key || args->key_len <= 0 ||
+        !args->start || args->start_len <= 0 ||
+        !args->end || args->end_len <= 0)
+    {
+        return 0;
+    }
+
+    /* Calculate total args: key + start + end + (COUNT + count_value) */
+    unsigned long arg_count = 1 + 1 + 1 + (args->range_opts.has_count ? 2 : 0);
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    /* Check if memory allocation was successful */
+    if (!*args_out || !*args_len_out)
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Set arguments */
+    unsigned int arg_idx = 0;
+
+    /* Key */
+    (*args_out)[arg_idx] = (uintptr_t)args->key;
+    (*args_len_out)[arg_idx] = args->key_len;
+    arg_idx++;
+
+    /* Start ID */
+    (*args_out)[arg_idx] = (uintptr_t)args->start;
+    (*args_len_out)[arg_idx] = args->start_len;
+    arg_idx++;
+
+    /* End ID */
+    (*args_out)[arg_idx] = (uintptr_t)args->end;
+    (*args_len_out)[arg_idx] = args->end_len;
+    arg_idx++;
+
+    /* Add COUNT if specified */
+    if (args->range_opts.has_count)
+    {
+        /* Add COUNT keyword */
+        (*args_out)[arg_idx] = (uintptr_t)"COUNT";
+        (*args_len_out)[arg_idx] = sizeof("COUNT") - 1;
+        arg_idx++;
+
+        /* Convert count to string */
+        char count_str[32];
+        unsigned long count_str_len = snprintf(count_str, sizeof(count_str), "%ld",
+                                               args->range_opts.count);
+
+        /* Allocate memory for the string */
+        char *count_str_copy = emalloc(count_str_len + 1);
+        if (count_str_copy)
+        {
+            memcpy(count_str_copy, count_str, count_str_len);
+            count_str_copy[count_str_len] = '\0';
+
+            (*args_out)[arg_idx] = (uintptr_t)count_str_copy;
+            (*args_len_out)[arg_idx] = count_str_len;
+            arg_idx++;
+        }
+    }
+
+    return arg_count;
+}
+
+/**
+ * Prepare arguments for XADD command.
+ */
+int prepare_x_add_args(x_command_args_t *args, uintptr_t **args_out,
+                       unsigned long **args_len_out,
+                       char ***allocated_strings, int *allocated_count)
+{
+    /* Check if client and arguments are valid */
+    if (!args->glide_client || !args->key || args->key_len <= 0 ||
+        !args->id || args->id_len <= 0 ||
+        !args->field_values || args->fv_count <= 0)
+    {
+        return 0;
+    }
+
+    /* Count options */
+    unsigned long extra_args = 0;
+    if (args->add_opts.nomkstream)
+    {
+        extra_args += 1; /* NOMKSTREAM */
+    }
+    if (args->add_opts.has_maxlen)
+    {
+        extra_args += 2; /* MAXLEN/MINID + value */
+        if (args->add_opts.approximate)
+        {
+            extra_args += 1; /* ~ (tilde) */
+        }
+    }
+
+    /* Calculate total args: key + options + ID + field/value pairs (each entry is a pair) */
+    unsigned long arg_count = 1 + extra_args + 1 + (args->fv_count * 2);
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    /* Allocate array to track temporary string allocations */
+    *allocated_strings = (char **)ecalloc(args->fv_count + 5, sizeof(char *));
+    *allocated_count = 0;
+
+    if (!*args_out || !*args_len_out || !*allocated_strings)
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        if (*allocated_strings)
+            efree(*allocated_strings);
+        return 0;
+    }
+
+    /* Set key as first argument */
+    unsigned int arg_idx = 0;
+    (*args_out)[arg_idx] = (uintptr_t)args->key;
+    (*args_len_out)[arg_idx] = args->key_len;
+    arg_idx++;
+
+    /* Add NOMKSTREAM if specified */
+    if (args->add_opts.nomkstream)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"NOMKSTREAM";
+        (*args_len_out)[arg_idx] = sizeof("NOMKSTREAM") - 1;
+        arg_idx++;
+    }
+
+    /* Add MAXLEN/MINID if specified */
+    if (args->add_opts.has_maxlen)
+    {
+        char maxlen_str[64];
+        unsigned long maxlen_str_len = 0;
+        maxlen_str_len = snprintf(maxlen_str, sizeof(maxlen_str), "%ld", args->add_opts.maxlen);
+
+        if (args->add_opts.minid_strategy)
+        {
+            (*args_out)[arg_idx] = (uintptr_t)"MINID";
+            (*args_len_out)[arg_idx] = sizeof("MINID") - 1;
+        }
+        else
+        {
+            (*args_out)[arg_idx] = (uintptr_t)"MAXLEN";
+            (*args_len_out)[arg_idx] = sizeof("MAXLEN") - 1;
+        }
+        arg_idx++;
+
+        /* Add ~ for approximate trimming */
+        if (args->add_opts.approximate)
+        {
+            (*args_out)[arg_idx] = (uintptr_t)"~";
+            (*args_len_out)[arg_idx] = 1;
+            arg_idx++;
+        }
+
+        /* Add the threshold value - need to allocate a copy for persistence */
+        char *maxlen_str_copy = estrndup(maxlen_str, maxlen_str_len);
+        if (maxlen_str_copy)
+        {
+            (*allocated_strings)[*allocated_count] = maxlen_str_copy;
+            (*allocated_count)++;
+
+            (*args_out)[arg_idx] = (uintptr_t)maxlen_str_copy;
+            (*args_len_out)[arg_idx] = maxlen_str_len;
+            arg_idx++;
+        }
+    }
+
+    /* Add stream ID */
+    (*args_out)[arg_idx] = (uintptr_t)args->id;
+    (*args_len_out)[arg_idx] = args->id_len;
+    arg_idx++;
+
+    /* Add field-value pairs */
+    HashTable *ht = Z_ARRVAL_P(args->field_values);
+    zend_string *field_str;
+    zval *z_value;
+
+    ZEND_HASH_FOREACH_STR_KEY_VAL(ht, field_str, z_value)
+    {
+        /* Add field name */
+        if (field_str)
+        {
+            (*args_out)[arg_idx] = (uintptr_t)ZSTR_VAL(field_str);
+            (*args_len_out)[arg_idx] = ZSTR_LEN(field_str);
+            arg_idx++;
+
+            /* Add field value, convert to string if needed */
+            if (Z_TYPE_P(z_value) != IS_STRING)
+            {
+                zval temp;
+                ZVAL_COPY(&temp, z_value);
+                convert_to_string(&temp);
+
+                /* Create persistent copy of the string */
+                char *str_copy = estrndup(Z_STRVAL(temp), Z_STRLEN(temp));
+                if (str_copy)
+                {
+                    (*allocated_strings)[*allocated_count] = str_copy;
+                    (*allocated_count)++;
+
+                    (*args_out)[arg_idx] = (uintptr_t)str_copy;
+                    (*args_len_out)[arg_idx] = Z_STRLEN(temp);
+                    arg_idx++;
+                }
+
+                zval_dtor(&temp);
+            }
+            else
+            {
+                (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL_P(z_value);
+                (*args_len_out)[arg_idx] = Z_STRLEN_P(z_value);
+                arg_idx++;
+            }
+        }
+    }
+    ZEND_HASH_FOREACH_END();
+
+    return arg_idx; /* Return the actual number of arguments used */
+}
+
+/**
+ * Prepare arguments for XTRIM command.
+ */
+int prepare_x_trim_args(x_command_args_t *args, uintptr_t **args_out,
+                        unsigned long **args_len_out)
+{
+    /* Check if client and arguments are valid */
+    if (!args->glide_client || !args->key || args->key_len <= 0 ||
+        !args->strategy || args->strategy_len <= 0 ||
+        !args->threshold || args->threshold_len <= 0)
+    {
+        return 0;
+    }
+
+    /* Calculate total args: key + strategy + [~] + threshold + [LIMIT + value] */
+    unsigned long arg_count = 1 + 1 + (args->trim_opts.approximate ? 1 : 0) + 1 + (args->trim_opts.has_limit ? 2 : 0);
+    *args_out = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!*args_out || !*args_len_out)
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    /* Set key as first argument */
+    unsigned int arg_idx = 0;
+    (*args_out)[arg_idx] = (uintptr_t)args->key;
+    (*args_len_out)[arg_idx] = args->key_len;
+    arg_idx++;
+
+    /* Add strategy */
+    (*args_out)[arg_idx] = (uintptr_t)args->strategy;
+    (*args_len_out)[arg_idx] = args->strategy_len;
+    arg_idx++;
+
+    /* Add ~ for approximate trimming */
+    if (args->trim_opts.approximate)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"~";
+        (*args_len_out)[arg_idx] = 1;
+        arg_idx++;
+    }
+
+    /* Add threshold value */
+    (*args_out)[arg_idx] = (uintptr_t)args->threshold;
+    (*args_len_out)[arg_idx] = args->threshold_len;
+    arg_idx++;
+
+    /* Add LIMIT if specified */
+    if (args->trim_opts.has_limit)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"LIMIT";
+        (*args_len_out)[arg_idx] = sizeof("LIMIT") - 1;
+        arg_idx++;
+
+        /* Convert limit to string */
+        char limit_str[32];
+        unsigned long limit_str_len = snprintf(limit_str, sizeof(limit_str), "%ld",
+                                               args->trim_opts.limit);
+
+        /* Need to allocate memory for the string */
+        char *limit_str_copy = emalloc(limit_str_len + 1);
+        if (limit_str_copy)
+        {
+            memcpy(limit_str_copy, limit_str, limit_str_len);
+            limit_str_copy[limit_str_len] = '\0';
+
+            (*args_out)[arg_idx] = (uintptr_t)limit_str_copy;
+            (*args_len_out)[arg_idx] = limit_str_len;
+            arg_idx++;
+        }
+    }
+
+    return arg_count;
+}

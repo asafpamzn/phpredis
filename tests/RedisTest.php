@@ -5827,6 +5827,7 @@ class Redis_Test extends TestSuite {
         
         $this->assertEquals(count($messages), 3);
         
+        
         $i = $reverse ? 2 : 0;
         foreach ($messages as $seq => $v) {
             $this->assertEquals(count(explode('-', $seq)), 2);
@@ -5949,6 +5950,7 @@ class Redis_Test extends TestSuite {
         
             /* Now ACK $n messages */
             $ids = array_slice($ids, 0, $n);
+            
             $this->assertEquals($n, $this->redis->xAck('{s}', 'g1', $ids));
         }
 
