@@ -591,6 +591,17 @@ int process_x_add_result(CommandResult *result, void *output)
     return command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
 }
 
+/**
+ * Process an XGROUP result from a command
+ */
+int process_x_group_result(CommandResult *result, void *output)
+{
+    zval *return_value = (zval *)output;
+
+    /* XGROUP response depends on subcommand */
+    return command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+}
+
 /* ====================================================================
  * ARGUMENT PREPARATION FUNCTIONS
  * ==================================================================== */
@@ -961,6 +972,52 @@ int prepare_x_add_args(x_command_args_t *args, uintptr_t **args_out,
     ZEND_HASH_FOREACH_END();
 
     return arg_idx; /* Return the actual number of arguments used */
+}
+
+/**
+ * Prepare arguments for XGROUP command.
+ */
+int prepare_x_group_args(x_command_args_t *args, uintptr_t **args_out,
+                         unsigned long **args_len_out)
+{
+    /* Check if client and arguments are valid */
+    if (!args->glide_client || !args->subcommand || args->subcommand_len <= 0 || !args->args)
+    {
+        return 0;
+    }
+
+    /* Calculate total args: subcommand + args */
+    unsigned long arg_count = 1 + args->args_count;
+
+    /* Allocate memory for arguments */
+    if (!allocate_command_args(arg_count, args_out, args_len_out))
+    {
+        return 0;
+    }
+
+    /* Set subcommand as first argument */
+    unsigned int arg_idx = 0;
+    (*args_out)[arg_idx] = (uintptr_t)args->subcommand;
+    (*args_len_out)[arg_idx] = args->subcommand_len;
+    arg_idx++;
+
+    /* Add all additional arguments */
+    for (int i = 0; i < args->args_count; i++)
+    {
+        zval *arg = &args->args[i];
+
+        /* Convert to string if not already a string */
+        if (Z_TYPE_P(arg) != IS_STRING)
+        {
+            convert_to_string(arg);
+        }
+
+        (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL_P(arg);
+        (*args_len_out)[arg_idx] = Z_STRLEN_P(arg);
+        arg_idx++;
+    }
+
+    return arg_count;
 }
 
 /**

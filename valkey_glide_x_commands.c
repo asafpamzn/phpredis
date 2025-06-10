@@ -477,61 +477,70 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
 int execute_xgroup_command(const void *glide_client, const char *subcommand, size_t subcommand_len,
                            zval *args, int args_count, zval *return_value)
 {
-    /* Check if client and arguments are valid */
-    if (!glide_client || !subcommand || subcommand_len <= 0 || !args)
+    /* Initialize the arguments structure */
+    x_command_args_t x_args = {0};
+    x_args.glide_client = glide_client;
+    x_args.subcommand = subcommand;
+    x_args.subcommand_len = subcommand_len;
+    x_args.args = args;
+    x_args.args_count = args_count;
+
+    /* Prepare arguments manually since XGROUP needs special handling */
+    uintptr_t *cmd_args = NULL;
+    unsigned long *args_len = NULL;
+    int arg_count;
+
+    /* Prepare arguments for the XGROUP command */
+    arg_count = prepare_x_group_args(&x_args, &cmd_args, &args_len);
+    if (arg_count <= 0)
     {
         return 0;
     }
 
-    /* Calculate total args: XGROUP + subcommand + args */
-    unsigned long arg_count = 2 + args_count;
-    uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    /* Prepend "XGROUP" to the command arguments */
+    uintptr_t *full_args = (uintptr_t *)emalloc((arg_count + 1) * sizeof(uintptr_t));
+    unsigned long *full_args_len = (unsigned long *)emalloc((arg_count + 1) * sizeof(unsigned long));
 
-    if (!cmd_args || !args_len)
+    if (!full_args || !full_args_len)
     {
         if (cmd_args)
             efree(cmd_args);
         if (args_len)
             efree(args_len);
+        if (full_args)
+            efree(full_args);
+        if (full_args_len)
+            efree(full_args_len);
         return 0;
     }
 
-    /* Set the first argument as "XGROUP" and second as the subcommand */
-    cmd_args[0] = (uintptr_t)"XGROUP";
-    args_len[0] = sizeof("XGROUP") - 1;
+    /* Add "XGROUP" as the first argument */
+    full_args[0] = (uintptr_t)"XGROUP";
+    full_args_len[0] = sizeof("XGROUP") - 1;
 
-    cmd_args[1] = (uintptr_t)subcommand;
-    args_len[1] = subcommand_len;
-
-    /* Add all additional arguments */
-    int i;
-    for (i = 0; i < args_count; i++)
+    /* Copy the rest of the arguments */
+    for (int i = 0; i < arg_count; i++)
     {
-        zval *arg = &args[i];
-
-        /* Convert to string if not already a string */
-        if (Z_TYPE_P(arg) != IS_STRING)
-        {
-            convert_to_string(arg);
-        }
-
-        cmd_args[i + 2] = (uintptr_t)Z_STRVAL_P(arg);
-        args_len[i + 2] = Z_STRLEN_P(arg);
+        full_args[i + 1] = cmd_args[i];
+        full_args_len[i + 1] = args_len[i];
     }
+
+    /* Free the original arguments arrays */
+    efree(cmd_args);
+    efree(args_len);
 
     /* Execute the command */
     CommandResult *result = execute_command(
         glide_client,
         CustomCommand, /* XGROUP uses custom command type */
-        arg_count,     /* total arguments */
-        cmd_args,      /* arguments */
-        args_len       /* argument lengths */
+        arg_count + 1, /* total arguments (including XGROUP) */
+        full_args,     /* arguments */
+        full_args_len  /* argument lengths */
     );
 
     /* Free arguments */
-    efree(cmd_args);
-    efree(args_len);
+    efree(full_args);
+    efree(full_args_len);
 
     /* Process result */
     int status = 0;
@@ -539,8 +548,8 @@ int execute_xgroup_command(const void *glide_client, const char *subcommand, siz
     {
         if (!result->command_error && result->response)
         {
-            /* XGROUP response depends on subcommand */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+            /* Process the result with our standard function */
+            status = process_x_group_result(result, return_value);
         }
         free_command_result(result);
     }
