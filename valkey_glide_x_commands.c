@@ -131,50 +131,8 @@ int execute_xtrim_command(const void *glide_client, const char *key, size_t key_
     /* Parse options */
     parse_x_trim_options(options, &args.trim_opts);
 
-    /* Prepare arguments */
-    uintptr_t *cmd_args = NULL;
-    unsigned long *args_len = NULL;
-    int arg_count;
-
-    /* Prepare arguments for XTRIM command */
-    arg_count = prepare_x_trim_args(&args, &cmd_args, &args_len);
-    if (arg_count <= 0)
-    {
-        return 0;
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        XTrim,     /* command type */
-        arg_count, /* number of arguments */
-        cmd_args,  /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free special allocations from prepare_x_trim_args */
-    if (args.trim_opts.has_limit)
-    {
-        /* Free the limit string which is the last argument */
-        efree((void *)cmd_args[arg_count - 1]);
-    }
-
-    /* Free arguments */
-    efree(cmd_args);
-    efree(args_len);
-
-    /* Process result */
-    int status = 0;
-    if (result)
-    {
-        if (!result->command_error && result->response)
-        {
-            status = process_x_int_result(result, output_value);
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    /* Use the generic command execution framework */
+    return execute_x_generic_command(glide_client, XTrim, &args, output_value, process_x_int_result);
 }
 
 /**
@@ -198,51 +156,8 @@ int execute_xrange_command(const void *glide_client, const char *key, size_t key
     /* Parse options */
     parse_x_count_options(options, &args.range_opts);
 
-    /* Prepare arguments */
-    uintptr_t *cmd_args = NULL;
-    unsigned long *args_len = NULL;
-    int arg_count;
-
-    /* Prepare arguments for XRANGE command */
-    arg_count = prepare_x_range_args(&args, &cmd_args, &args_len);
-    if (arg_count <= 0)
-    {
-        return 0;
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        XRange,    /* command type */
-        arg_count, /* number of arguments */
-        cmd_args,  /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free special allocations */
-    if (args.range_opts.has_count)
-    {
-        /* Free the count string which is the last argument */
-        efree((void *)cmd_args[arg_count - 1]);
-    }
-
-    /* Free arguments */
-    efree(cmd_args);
-    efree(args_len);
-
-    /* Process result */
-    int status = 0;
-    if (result)
-    {
-        if (!result->command_error && result->response)
-        {
-            /* XRANGE returns array of entries, use stream-specific handler */
-            status = process_x_stream_result(result, return_value);
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    /* Use the generic command execution framework */
+    return execute_x_generic_command(glide_client, XRange, &args, return_value, process_x_stream_result);
 }
 
 /**
@@ -269,51 +184,8 @@ int execute_xrevrange_command(const void *glide_client, const char *key, size_t 
     /* Parse options */
     parse_x_count_options(options, &args.range_opts);
 
-    /* Prepare arguments - reuse the XRANGE logic, but pass end and start in the proper order */
-    uintptr_t *cmd_args = NULL;
-    unsigned long *args_len = NULL;
-    int arg_count;
-
-    /* Prepare arguments for XRANGE command */
-    arg_count = prepare_x_range_args(&args, &cmd_args, &args_len);
-    if (arg_count <= 0)
-    {
-        return 0;
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        XRevRange, /* command type */
-        arg_count, /* number of arguments */
-        cmd_args,  /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free special allocations */
-    if (args.range_opts.has_count)
-    {
-        /* Free the count string which is the last argument */
-        efree((void *)cmd_args[arg_count - 1]);
-    }
-
-    /* Free arguments */
-    efree(cmd_args);
-    efree(args_len);
-
-    /* Process result */
-    int status = 0;
-    if (result)
-    {
-        if (!result->command_error && result->response)
-        {
-            /* XREVRANGE returns array of entries, use stream-specific handler */
-            status = process_x_stream_result(result, return_value);
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    /* Use the generic command execution framework */
+    return execute_x_generic_command(glide_client, XRevRange, &args, return_value, process_x_stream_result);
 }
 
 /**
