@@ -154,4 +154,14 @@ void extract_stream_field_values(CommandResponse *response, zval *field_array);
  */
 int command_response_to_stream_zval(CommandResponse *response, zval *output);
 
+/* Utility functions */
+/**
+ * Safe zval to string conversion with memory management
+ * Returns allocated string that must be freed, or NULL on error
+ * Sets need_free to 1 if returned string must be freed
+ */
+
+char *zval_to_string_safe(zval *z, size_t *len, int *need_free);
+void free_allocated_strings(char **strings, int count);
+
 #endif /* COMMAND_RESPONSE_H */

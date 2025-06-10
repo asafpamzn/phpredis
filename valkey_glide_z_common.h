@@ -284,13 +284,6 @@ int parse_store_options(zval *weights, zval *options, store_options_t *opts);
  * ==================================================================== */
 
 /**
- * Safe zval to string conversion with memory management
- * Returns allocated string that must be freed, or NULL on error
- * Sets need_free to 1 if returned string must be freed
- */
-char *zval_to_string_safe(zval *z, size_t *len, int *need_free);
-
-/**
  * Prepare keys array from zval for multi-key operations
  * Returns keys count on success, 0 on failure
  */
@@ -324,11 +317,6 @@ int handle_rank_response(CommandResult *result, long *rank, double *score, int w
  * Returns 1 on success, 0 on failure
  */
 int flatten_withscores_array(zval *return_value);
-
-/**
- * Free array of allocated strings
- */
-void free_allocated_strings(char **strings, int count);
 
 /* ====================================================================
  * Z COMMAND IMPLEMENTATION FUNCTIONS (THIN WRAPPERS)

@@ -796,3 +796,79 @@ int command_response_to_stream_zval(CommandResponse *response, zval *output)
 
     return 1;
 }
+
+/**
+ * Safe zval to string conversion with memory management
+ * Returns allocated string that must be freed, or NULL on error
+ * Sets need_free to 1 if returned string must be freed
+ */
+char *zval_to_string_safe(zval *z, size_t *len, int *need_free)
+{
+    char *str = NULL;
+    *need_free = 0;
+
+    if (!z || !len)
+    {
+        return NULL;
+    }
+
+    switch (Z_TYPE_P(z))
+    {
+    case IS_STRING:
+        str = Z_STRVAL_P(z);
+        *len = Z_STRLEN_P(z);
+        break;
+
+    case IS_LONG:
+        str = long_to_string(Z_LVAL_P(z), len);
+        *need_free = 1;
+        break;
+
+    case IS_DOUBLE:
+        str = double_to_string(Z_DVAL_P(z), len);
+        *need_free = 1;
+        break;
+
+    case IS_TRUE:
+        str = estrdup("1");
+        *len = 1;
+        *need_free = 1;
+        break;
+
+    case IS_FALSE:
+        str = estrdup("0");
+        *len = 1;
+        *need_free = 1;
+        break;
+
+    default:
+        /* Convert other types to string */
+        zval copy;
+        ZVAL_COPY(&copy, z);
+        convert_to_string(&copy);
+        str = estrndup(Z_STRVAL(copy), Z_STRLEN(copy));
+        *len = Z_STRLEN(copy);
+        zval_dtor(&copy);
+        *need_free = 1;
+        break;
+    }
+
+    return str;
+}
+
+/**
+ * Free array of allocated strings
+ */
+void free_allocated_strings(char **strings, int count)
+{
+    if (!strings)
+        return;
+
+    for (int i = 0; i < count; i++)
+    {
+        if (strings[i])
+        {
+            efree(strings[i]);
+        }
+    }
+}
