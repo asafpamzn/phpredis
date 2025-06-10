@@ -27,7 +27,8 @@
 #include "redis_cluster.h"
 
 #include "redis_glide.h"
-#include "command_response.h" /* Include command_response.h for string conversion functions */
+#include "command_response.h"        /* Include command_response.h for string conversion functions */
+#include "valkey_glide_geo_common.h" /* Include geo common header for macros */
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
 #include <ext/standard/info.h>
@@ -48,8 +49,7 @@ extern char *long_to_string(long value, size_t *len);
 extern char *double_to_string(double value, size_t *len);
 
 /* Import GEO functions */
-extern int execute_geoadd_command(const void *glide_client, const char *key, size_t key_len,
-                                  zval *z_args, int argc, long *output_value);
+
 extern int execute_geodist_command(const void *glide_client, const char *key, size_t key_len,
                                    char *src, size_t src_len, char *dst, size_t dst_len,
                                    char *unit, size_t unit_len, double *output_value);
@@ -86,51 +86,7 @@ extern zend_class_entry *redis_exception_ce;
 #endif
 
 /* {{{ proto long Redis::geoadd(string key, float longitude, float latitude, string member, ...) */
-PHP_METHOD(Redis, geoadd)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_args;
-    int argc;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Check that we have the right number of arguments */
-    if (argc < 3 || argc % 3 != 0)
-    {
-        php_error_docref(NULL, E_WARNING,
-                         "geoadd requires at least one longitude/latitude/member triplet");
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the GEOADD command using the Glide client */
-        long result_value;
-        if (execute_geoadd_command(redis->glide_client, key, key_len, z_args, argc, &result_value))
-        {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-}
+GEOADD_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto double Redis::geodist(string key, string src, string dst [, string unit]) */

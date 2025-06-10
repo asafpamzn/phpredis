@@ -23,15 +23,42 @@
 #include <stdio.h>
 
 #include "valkey_glide_geo_common.h"
+extern zend_class_entry *redis_ce;
 
 /* Execute a GEOADD command using the Valkey Glide client */
-int execute_geoadd_command(const void *glide_client, const char *key, size_t key_len,
-                           zval *z_args, int argc, long *output_value)
+int execute_geoadd_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client, key, and args are valid */
-    if (!glide_client || !key || !z_args || argc < 3 || argc % 3 != 0)
+    char *key = NULL;
+    size_t key_len;
+    zval *z_args;
+    int variadic_argc = 0;
+    const void *glide_client = NULL;
+    long result_value = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os*",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &variadic_argc) == FAILURE)
     {
-        return 0; // Invalid arguments
+        return 0;
+    }
+
+    /* Check that we have the right number of arguments */
+    if (variadic_argc < 3 || variadic_argc % 3 != 0)
+    {
+        php_error_docref(NULL, E_WARNING,
+                         "geoadd requires at least one longitude/latitude/member triplet");
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis_object *redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    glide_client = redis->glide_client;
+
+    /* Check if we have a valid glide client */
+    if (!glide_client)
+    {
+        return 0;
     }
 
     /* Initialize geo command arguments structure */
@@ -39,15 +66,22 @@ int execute_geoadd_command(const void *glide_client, const char *key, size_t key
     args.key = key;
     args.key_len = key_len;
     args.geo_args = z_args;
-    args.geo_args_count = argc;
+    args.geo_args_count = variadic_argc;
 
     /* Execute the generic command with appropriate result processor */
-    return execute_geo_generic_command(
+    int result = execute_geo_generic_command(
         glide_client,
         GeoAdd,
         &args,
-        output_value,
+        &result_value,
         process_geo_int_result);
+
+    if (result)
+    {
+        ZVAL_LONG(return_value, result_value);
+    }
+
+    return result;
 }
 
 /* Execute a GEODIST command using the Valkey Glide client */

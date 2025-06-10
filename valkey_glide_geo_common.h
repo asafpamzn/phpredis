@@ -145,6 +145,8 @@ int process_geo_pos_result(CommandResult *result, void *output);
 int process_geo_radius_result(CommandResult *result, void *output);
 int process_geo_search_result(CommandResult *result, void *output);
 
+int execute_geoadd_command(zval *object, int argc, zval *return_value);
+
 /* Execution framework */
 int execute_geo_generic_command(
     const void *glide_client,
@@ -152,5 +154,20 @@ int execute_geo_generic_command(
     geo_command_args_t *args,
     void *result_ptr,
     geo_result_processor_t process_result);
+
+/* ====================================================================
+ * GEO COMMAND MACROS
+ * ==================================================================== */
+
+/* Ultra-simple macro for GEOADD method implementation */
+#define GEOADD_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, geoadd)                                            \
+    {                                                                         \
+        if (execute_geoadd_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        RETURN_FALSE;                                                         \
+    }
 
 #endif /* VALKEY_GLIDE_GEO_COMMON_H */
