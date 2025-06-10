@@ -39,43 +39,8 @@ int execute_xlen_command(const void *glide_client, const char *key, size_t key_l
     args.key = key;
     args.key_len = key_len;
 
-    /* Prepare arguments */
-    uintptr_t *cmd_args = NULL;
-    unsigned long *args_len = NULL;
-    int arg_count;
-
-    /* Prepare arguments for XLEN command */
-    arg_count = prepare_x_len_args(&args, &cmd_args, &args_len);
-    if (arg_count <= 0)
-    {
-        return 0;
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        XLen,      /* command type */
-        arg_count, /* number of arguments */
-        cmd_args,  /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free arguments */
-    efree(cmd_args);
-    efree(args_len);
-
-    /* Process result */
-    int status = 0;
-    if (result)
-    {
-        if (!result->command_error && result->response)
-        {
-            status = process_x_int_result(result, output_value);
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    /* Use the generic command execution framework */
+    return execute_x_generic_command(glide_client, XLen, &args, output_value, process_x_int_result);
 }
 
 /**
@@ -92,43 +57,8 @@ int execute_xdel_command(const void *glide_client, const char *key, size_t key_l
     args.ids = ids;
     args.id_count = id_count;
 
-    /* Prepare arguments */
-    uintptr_t *cmd_args = NULL;
-    unsigned long *args_len = NULL;
-    int arg_count;
-
-    /* Prepare arguments for XDEL command */
-    arg_count = prepare_x_del_args(&args, &cmd_args, &args_len);
-    if (arg_count <= 0)
-    {
-        return 0;
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        XDel,      /* command type */
-        arg_count, /* number of arguments */
-        cmd_args,  /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free arguments */
-    efree(cmd_args);
-    efree(args_len);
-
-    /* Process result */
-    int status = 0;
-    if (result)
-    {
-        if (!result->command_error && result->response)
-        {
-            status = process_x_int_result(result, output_value);
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    /* Use the generic command execution framework */
+    return execute_x_generic_command(glide_client, XDel, &args, output_value, process_x_int_result);
 }
 
 /**
@@ -151,43 +81,8 @@ int execute_xack_command(const void *glide_client, const char *key, size_t key_l
     args.ids = ids;
     args.id_count = id_count;
 
-    /* Prepare arguments */
-    uintptr_t *cmd_args = NULL;
-    unsigned long *args_len = NULL;
-    int arg_count;
-
-    /* Prepare arguments for XACK command */
-    arg_count = prepare_x_ack_args(&args, &cmd_args, &args_len);
-    if (arg_count <= 0)
-    {
-        return 0;
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        XAck,      /* command type */
-        arg_count, /* number of arguments */
-        cmd_args,  /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free arguments */
-    efree(cmd_args);
-    efree(args_len);
-
-    /* Process result */
-    int status = 0;
-    if (result)
-    {
-        if (!result->command_error && result->response)
-        {
-            status = process_x_int_result(result, output_value);
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    /* Use the generic command execution framework */
+    return execute_x_generic_command(glide_client, XAck, &args, output_value, process_x_int_result);
 }
 
 /**

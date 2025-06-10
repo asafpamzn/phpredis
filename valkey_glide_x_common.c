@@ -382,6 +382,156 @@ int parse_x_claim_options(zval *options, x_claim_options_t *opts)
 }
 
 /* ====================================================================
+ * UTILITY FUNCTIONS
+ * ==================================================================== */
+
+/**
+ * Allocate command arguments arrays
+ */
+int allocate_command_args(int count, uintptr_t **args_out, unsigned long **args_len_out)
+{
+    *args_out = (uintptr_t *)emalloc(count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(count * sizeof(unsigned long));
+
+    if (!*args_out || !*args_len_out)
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    return 1;
+}
+
+/**
+ * Free command arguments arrays
+ */
+void free_command_args(uintptr_t *args, unsigned long *args_len)
+{
+    if (args)
+        efree(args);
+    if (args_len)
+        efree(args_len);
+}
+
+/**
+ * Allocate a string representation of a number
+ */
+char *alloc_number_string(long value, size_t *len_out)
+{
+    char temp[32];
+    size_t len = snprintf(temp, sizeof(temp), "%ld", value);
+    char *result = emalloc(len + 1);
+    if (result)
+    {
+        memcpy(result, temp, len);
+        result[len] = '\0';
+        if (len_out)
+            *len_out = len;
+    }
+    return result;
+}
+
+/**
+ * Generic command execution framework
+ */
+int execute_x_generic_command(const void *glide_client,
+                              enum RequestType cmd_type,
+                              x_command_args_t *args,
+                              void *result_ptr,
+                              x_result_processor_t process_result)
+{
+    uintptr_t *cmd_args = NULL;
+    unsigned long *args_len = NULL;
+    char **allocated_strings = NULL;
+    int allocated_count = 0;
+    int arg_count = 0;
+    int status = 0;
+
+    /* Prepare arguments based on command type */
+    switch (cmd_type)
+    {
+    case XLen:
+        arg_count = prepare_x_len_args(args, &cmd_args, &args_len);
+        break;
+    case XDel:
+        arg_count = prepare_x_del_args(args, &cmd_args, &args_len);
+        break;
+    case XAck:
+        arg_count = prepare_x_ack_args(args, &cmd_args, &args_len);
+        break;
+    case XAdd:
+        arg_count = prepare_x_add_args(args, &cmd_args, &args_len, &allocated_strings, &allocated_count);
+        break;
+    case XTrim:
+        arg_count = prepare_x_trim_args(args, &cmd_args, &args_len);
+        break;
+    case XRange:
+    case XRevRange:
+        arg_count = prepare_x_range_args(args, &cmd_args, &args_len);
+        break;
+    default:
+        return 0;
+    }
+
+    if (arg_count <= 0)
+    {
+        goto cleanup;
+    }
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        cmd_type,
+        arg_count,
+        cmd_args,
+        args_len);
+
+    /* Process result */
+    if (result)
+    {
+        if (!result->command_error && result->response && process_result)
+        {
+            status = process_result(result, result_ptr);
+        }
+        free_command_result(result);
+    }
+
+cleanup:
+    /* Free allocated strings for complex commands */
+    if (allocated_strings)
+    {
+        for (int i = 0; i < allocated_count; i++)
+        {
+            if (allocated_strings[i])
+            {
+                efree(allocated_strings[i]);
+            }
+        }
+        efree(allocated_strings);
+    }
+
+    /* Free command arguments */
+    free_command_args(cmd_args, args_len);
+
+    /* Handle special cleanup for specific commands */
+    if (cmd_type == XTrim && args->trim_opts.has_limit && cmd_args && arg_count > 0)
+    {
+        /* XTRIM allocates limit string separately */
+        efree((void *)cmd_args[arg_count - 1]);
+    }
+    if ((cmd_type == XRange || cmd_type == XRevRange) && args->range_opts.has_count && cmd_args && arg_count > 0)
+    {
+        /* XRANGE/XREVRANGE allocates count string separately */
+        efree((void *)cmd_args[arg_count - 1]);
+    }
+
+    return status;
+}
+
+/* ====================================================================
  * RESULT PROCESSING FUNCTIONS
  * ==================================================================== */
 

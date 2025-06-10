@@ -194,6 +194,19 @@ typedef struct _x_command_def_t
     enum RequestType cmd_type;             /* Redis command type */
     x_arg_preparation_func_t prepare_args; /* Function to prepare arguments */
 } x_command_def_t;
+
+/* Utility functions */
+int allocate_command_args(int count, uintptr_t **args_out, unsigned long **args_len_out);
+void free_command_args(uintptr_t *args, unsigned long *args_len);
+char *alloc_number_string(long value, size_t *len_out);
+
+/* Generic command execution framework */
+int execute_x_generic_command(const void *glide_client,
+                              enum RequestType cmd_type,
+                              x_command_args_t *args,
+                              void *result_ptr,
+                              x_result_processor_t process_result);
+
 /* Argument preparation */
 int prepare_x_len_args(x_command_args_t *args, uintptr_t **args_out,
                        unsigned long **args_len_out);
