@@ -20,22 +20,11 @@
 #include "valkey_glide_x_common.h"
 
 /* Forward declarations for the Glide execute functions */
-extern int execute_xack_command(const void *glide_client, const char *key, size_t key_len,
-                                const char *group, size_t group_len, zval *ids, int id_count,
-                                long *output_value);
-extern int execute_xadd_command(const void *glide_client, const char *key, size_t key_len,
-                                const char *id, size_t id_len, zval *field_values, int fv_count,
-                                zval *options, zval *return_value);
-extern int execute_xautoclaim_command(const void *glide_client, const char *key, size_t key_len,
-                                      const char *group, size_t group_len, const char *consumer,
-                                      size_t consumer_len, long min_idle_time, const char *start,
-                                      size_t start_len, zval *options, zval *return_value);
-extern int execute_xclaim_command(const void *glide_client, const char *key, size_t key_len,
-                                  const char *group, size_t group_len, const char *consumer,
-                                  size_t consumer_len, long min_idle_time, zval *ids, int id_count,
-                                  zval *options, zval *return_value);
-extern int execute_xdel_command(const void *glide_client, const char *key, size_t key_len,
-                                zval *ids, int id_count, long *output_value);
+extern int execute_xack_command(zval *object, int argc, zval *return_value);
+extern int execute_xadd_command(zval *object, int argc, zval *return_value);
+extern int execute_xautoclaim_command(zval *object, int argc, zval *return_value);
+extern int execute_xclaim_command(zval *object, int argc, zval *return_value);
+extern int execute_xdel_command(zval *object, int argc, zval *return_value);
 extern int execute_xgroup_command(const void *glide_client, const char *op, size_t op_len,
                                   zval *args, int args_count, zval *return_value);
 extern int execute_xinfo_command(const void *glide_client, const char *op, size_t op_len,
@@ -62,289 +51,23 @@ extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
 /* {{{ proto long Redis::xack(string key, string group, array ids) */
-PHP_METHOD(Redis, xack)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *group = NULL;
-    size_t key_len = 0, group_len = 0;
-    zval *z_ids;
-    long count = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ossa",
-                                     &object, redis_ce, &key, &key_len,
-                                     &group, &group_len, &z_ids) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the XACK command using the Glide client */
-        if (execute_xack_command(redis->glide_client, key, key_len, group, group_len,
-                                 z_ids, zend_hash_num_elements(Z_ARRVAL_P(z_ids)), &count))
-        {
-            RETURN_LONG(count);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-    else
-    {
-        /* Fall back to the original implementation if Glide isn't available */
-        RETURN_FALSE;
-    }
-}
+XACK_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto string Redis::xadd(string key, string id, array field_values [, int maxlen [, bool approximate]]) */
-PHP_METHOD(Redis, xadd)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *id = NULL;
-    size_t key_len = 0, id_len = 0;
-    zval *z_field_values, *z_options = NULL;
-    zend_long maxlen = 0;
-    zend_bool approximate = 0;
-    int argc = ZEND_NUM_ARGS();
-    int options_created = 0;
-
-    /* First, try parsing as (key, id, fields, maxlen, approximate) */
-    if (argc >= 4 && argc <= 5)
-    {
-        zend_bool parse_success = 0;
-
-        if (argc == 4)
-        {
-            if (zend_parse_method_parameters(argc, getThis(), "Ossal",
-                                             &object, redis_ce, &key, &key_len,
-                                             &id, &id_len, &z_field_values, &maxlen) == SUCCESS)
-            {
-                parse_success = 1;
-            }
-        }
-        else if (argc == 5)
-        {
-            if (zend_parse_method_parameters(argc, getThis(), "Ossalb",
-                                             &object, redis_ce, &key, &key_len,
-                                             &id, &id_len, &z_field_values, &maxlen, &approximate) == SUCCESS)
-            {
-                parse_success = 1;
-            }
-        }
-
-        if (parse_success)
-        {
-            /* Create options array with MAXLEN */
-            z_options = emalloc(sizeof(zval));
-            array_init(z_options);
-
-            /* Add MAXLEN option */
-            add_assoc_long(z_options, "MAXLEN", maxlen);
-
-            /* Add APPROXIMATE option if true */
-            if (approximate)
-            {
-                add_assoc_bool(z_options, "APPROXIMATE", 1);
-            }
-
-            /* Flag that we created this and will need to free it later */
-            options_created = 1;
-        }
-    }
-
-    /* If above parsing failed or was not attempted, try the standard way */
-    if (!z_options)
-    {
-        if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ossa|a",
-                                         &object, redis_ce, &key, &key_len,
-                                         &id, &id_len, &z_field_values, &z_options) == FAILURE)
-        {
-            RETURN_FALSE;
-        }
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the XADD command using the Glide client */
-        if (execute_xadd_command(redis->glide_client, key, key_len, id, id_len,
-                                 z_field_values, zend_hash_num_elements(Z_ARRVAL_P(z_field_values)),
-                                 z_options, return_value))
-        {
-            /* Clean up if we created options array */
-            if (options_created)
-            {
-                zval_dtor(z_options);
-                efree(z_options);
-            }
-
-            /* Return value already set in execute_xadd_command */
-            return;
-        }
-        else
-        {
-            /* Clean up if we created options array */
-            if (options_created)
-            {
-                zval_dtor(z_options);
-                efree(z_options);
-            }
-
-            RETURN_FALSE;
-        }
-    }
-    else
-    {
-        /* Fall back to the original implementation if Glide isn't available */
-        RETURN_FALSE;
-    }
-}
+XADD_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::xautoclaim(string key, string group, string consumer, int min_idle_time, string start [, array options]) */
-PHP_METHOD(Redis, xautoclaim)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *group = NULL, *consumer = NULL, *start = NULL;
-    size_t key_len = 0, group_len = 0, consumer_len = 0, start_len = 0;
-    long min_idle_time = 0;
-    zval *z_options = NULL;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osssls|a",
-                                     &object, redis_ce, &key, &key_len,
-                                     &group, &group_len, &consumer, &consumer_len,
-                                     &min_idle_time, &start, &start_len, &z_options) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the XAUTOCLAIM command using the Glide client */
-        if (execute_xautoclaim_command(redis->glide_client, key, key_len, group, group_len,
-                                       consumer, consumer_len, min_idle_time, start, start_len,
-                                       z_options, return_value))
-        {
-            /* Return value already set in execute_xautoclaim_command */
-            return;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-    else
-    {
-        /* Fall back to the original implementation if Glide isn't available */
-        RETURN_FALSE;
-    }
-}
+XAUTOCLAIM_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::xclaim(string key, string group, string consumer, int min_idle_time, array ids [, array options]) */
-PHP_METHOD(Redis, xclaim)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *group = NULL, *consumer = NULL;
-    size_t key_len = 0, group_len = 0, consumer_len = 0;
-    long min_idle_time = 0;
-    zval *z_ids, *z_options = NULL;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osssla|a",
-                                     &object, redis_ce, &key, &key_len,
-                                     &group, &group_len, &consumer, &consumer_len,
-                                     &min_idle_time, &z_ids, &z_options) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the XCLAIM command using the Glide client */
-        if (execute_xclaim_command(redis->glide_client, key, key_len, group, group_len,
-                                   consumer, consumer_len, min_idle_time, z_ids,
-                                   zend_hash_num_elements(Z_ARRVAL_P(z_ids)), z_options, return_value))
-        {
-            /* Return value already set in execute_xclaim_command */
-            return;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-    else
-    {
-        /* Fall back to the original implementation if Glide isn't available */
-        RETURN_FALSE;
-    }
-}
+XCLAIM_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::xdel(string key, array ids) */
-PHP_METHOD(Redis, xdel)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len = 0;
-    zval *z_ids;
-    long count = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osa",
-                                     &object, redis_ce, &key, &key_len, &z_ids) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the XDEL command using the Glide client */
-        if (execute_xdel_command(redis->glide_client, key, key_len,
-                                 z_ids, zend_hash_num_elements(Z_ARRVAL_P(z_ids)), &count))
-        {
-            RETURN_LONG(count);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-    else
-    {
-        /* Fall back to the original implementation if Glide isn't available */
-        RETURN_FALSE;
-    }
-}
+XDEL_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto mixed Redis::xgroup(string op, [string key, string group, ...]) */

@@ -49,68 +49,203 @@ int execute_xlen_command(const void *glide_client, const char *key, size_t key_l
 /**
  * Execute an XDEL command
  */
-int execute_xdel_command(const void *glide_client, const char *key, size_t key_len,
-                         zval *ids, int id_count, long *output_value)
+int execute_xdel_command(zval *object, int argc, zval *return_value)
 {
-    /* Initialize the arguments structure */
-    x_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.ids = ids;
-    args.id_count = id_count;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len = 0;
+    zval *z_ids;
+    long count = 0;
 
-    /* Use the generic command execution framework */
-    return execute_x_generic_command(glide_client, XDel, &args, output_value, process_x_int_result);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osa",
+                                     &object, redis_ce, &key, &key_len, &z_ids) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize the arguments structure */
+        x_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.ids = z_ids;
+        args.id_count = zend_hash_num_elements(Z_ARRVAL_P(z_ids));
+
+        /* Use the generic command execution framework */
+        int result = execute_x_generic_command(redis->glide_client, XDel, &args, &count, process_x_int_result);
+
+        if (result)
+        {
+            ZVAL_LONG(return_value, count);
+        }
+
+        return result;
+    }
+
+    return 0;
 }
 
 /**
  * Execute an XACK command
  */
-int execute_xack_command(const void *glide_client, const char *key, size_t key_len,
-                         const char *group, size_t group_len, zval *ids, int id_count,
-                         long *output_value)
+int execute_xack_command(zval *object, int argc, zval *return_value)
 {
-    /* Set a default value for output in case of early return */
-    *output_value = 0;
+    redis_object *redis;
+    char *key = NULL, *group = NULL;
+    size_t key_len = 0, group_len = 0;
+    zval *z_ids;
+    long count = 0;
 
-    /* Initialize the arguments structure */
-    x_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.group = group;
-    args.group_len = group_len;
-    args.ids = ids;
-    args.id_count = id_count;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Ossa",
+                                     &object, redis_ce, &key, &key_len,
+                                     &group, &group_len, &z_ids) == FAILURE)
+    {
+        return 0;
+    }
 
-    /* Use the generic command execution framework */
-    return execute_x_generic_command(glide_client, XAck, &args, output_value, process_x_int_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize the arguments structure */
+        x_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.group = group;
+        args.group_len = group_len;
+        args.ids = z_ids;
+        args.id_count = zend_hash_num_elements(Z_ARRVAL_P(z_ids));
+
+        /* Set a default value for output in case of early return */
+        count = 0;
+
+        /* Use the generic command execution framework */
+        int result = execute_x_generic_command(redis->glide_client, XAck, &args, &count, process_x_int_result);
+
+        if (result)
+        {
+            ZVAL_LONG(return_value, count);
+        }
+
+        return result;
+    }
+
+    return 0;
 }
 
 /**
  * Execute an XADD command
  */
-int execute_xadd_command(const void *glide_client, const char *key, size_t key_len,
-                         const char *id, size_t id_len, zval *field_values, int fv_count,
-                         zval *options, zval *return_value)
+int execute_xadd_command(zval *object, int argc, zval *return_value)
 {
-    /* Initialize the arguments structure */
-    x_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.id = id;
-    args.id_len = id_len;
-    args.field_values = field_values;
-    args.fv_count = fv_count;
-    args.options = options;
+    redis_object *redis;
+    char *key = NULL, *id = NULL;
+    size_t key_len = 0, id_len = 0;
+    zval *z_field_values, *z_options = NULL;
+    zend_long maxlen = 0;
+    zend_bool approximate = 0;
+    int options_created = 0;
 
-    /* Parse options */
-    parse_x_add_options(options, &args.add_opts);
+    /* First, try parsing as (key, id, fields, maxlen, approximate) */
+    if (argc >= 4 && argc <= 5)
+    {
+        zend_bool parse_success = 0;
 
-    /* Use the generic command execution framework */
-    return execute_x_generic_command(glide_client, XAdd, &args, return_value, process_x_add_result);
+        if (argc == 4)
+        {
+            if (zend_parse_method_parameters(argc, object, "Ossal",
+                                             &object, redis_ce, &key, &key_len,
+                                             &id, &id_len, &z_field_values, &maxlen) == SUCCESS)
+            {
+                parse_success = 1;
+            }
+        }
+        else if (argc == 5)
+        {
+            if (zend_parse_method_parameters(argc, object, "Ossalb",
+                                             &object, redis_ce, &key, &key_len,
+                                             &id, &id_len, &z_field_values, &maxlen, &approximate) == SUCCESS)
+            {
+                parse_success = 1;
+            }
+        }
+
+        if (parse_success)
+        {
+            /* Create options array with MAXLEN */
+            z_options = emalloc(sizeof(zval));
+            array_init(z_options);
+
+            /* Add MAXLEN option */
+            add_assoc_long(z_options, "MAXLEN", maxlen);
+
+            /* Add APPROXIMATE option if true */
+            if (approximate)
+            {
+                add_assoc_bool(z_options, "APPROXIMATE", 1);
+            }
+
+            /* Flag that we created this and will need to free it later */
+            options_created = 1;
+        }
+    }
+
+    /* If above parsing failed or was not attempted, try the standard way */
+    if (!z_options)
+    {
+        if (zend_parse_method_parameters(argc, object, "Ossa|a",
+                                         &object, redis_ce, &key, &key_len,
+                                         &id, &id_len, &z_field_values, &z_options) == FAILURE)
+        {
+            return 0;
+        }
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize the arguments structure */
+        x_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.id = id;
+        args.id_len = id_len;
+        args.field_values = z_field_values;
+        args.fv_count = zend_hash_num_elements(Z_ARRVAL_P(z_field_values));
+        args.options = z_options;
+
+        /* Parse options */
+        parse_x_add_options(z_options, &args.add_opts);
+
+        /* Execute the command */
+        int result = execute_x_generic_command(redis->glide_client, XAdd, &args, return_value, process_x_add_result);
+
+        /* Clean up if we created options array */
+        if (options_created)
+        {
+            zval_dtor(z_options);
+            efree(z_options);
+        }
+
+        return result;
+    }
+
+    return 0;
 }
 
 /**
@@ -509,47 +644,68 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an XAUTOCLAIM command using the Valkey Glide client */
-int execute_xautoclaim_command(const void *glide_client, const char *key, size_t key_len,
-                               const char *group, size_t group_len, const char *consumer,
-                               size_t consumer_len, long min_idle_time, const char *start,
-                               size_t start_len, zval *options, zval *return_value)
+int execute_xautoclaim_command(zval *object, int argc, zval *return_value)
 {
-    /* Initialize the arguments structure */
-    x_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.group = group;
-    args.group_len = group_len;
-    args.consumer = consumer;
-    args.consumer_len = consumer_len;
-    args.min_idle_time = min_idle_time;
-    args.start = start;
-    args.start_len = start_len;
-    args.options = options;
+    redis_object *redis;
+    char *key = NULL, *group = NULL, *consumer = NULL, *start = NULL;
+    size_t key_len = 0, group_len = 0, consumer_len = 0, start_len = 0;
+    long min_idle_time = 0;
+    zval *z_options = NULL;
 
-    /* Parse options for XAUTOCLAIM command */
-    parse_x_claim_options(options, &args.claim_opts);
-
-    /* Check if COUNT is specified (not in standard claim_opts) */
-    if (options && Z_TYPE_P(options) == IS_ARRAY)
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osssls|a",
+                                     &object, redis_ce, &key, &key_len,
+                                     &group, &group_len, &consumer, &consumer_len,
+                                     &min_idle_time, &start, &start_len, &z_options) == FAILURE)
     {
-        HashTable *ht = Z_ARRVAL_P(options);
-        zval *z_count;
-
-        /* Check for COUNT option */
-        if ((z_count = zend_hash_str_find(ht, "COUNT", sizeof("COUNT") - 1)) != NULL)
-        {
-            if (Z_TYPE_P(z_count) == IS_LONG)
-            {
-                args.claim_opts.count = Z_LVAL_P(z_count);
-                args.claim_opts.has_count = 1;
-            }
-        }
+        return 0;
     }
 
-    /* Use the generic command execution framework */
-    return execute_x_generic_command(glide_client, XAutoClaim, &args, return_value, process_x_autoclaim_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize the arguments structure */
+        x_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.group = group;
+        args.group_len = group_len;
+        args.consumer = consumer;
+        args.consumer_len = consumer_len;
+        args.min_idle_time = min_idle_time;
+        args.start = start;
+        args.start_len = start_len;
+        args.options = z_options;
+
+        /* Parse options for XAUTOCLAIM command */
+        parse_x_claim_options(z_options, &args.claim_opts);
+
+        /* Check if COUNT is specified (not in standard claim_opts) */
+        if (z_options && Z_TYPE_P(z_options) == IS_ARRAY)
+        {
+            HashTable *ht = Z_ARRVAL_P(z_options);
+            zval *z_count;
+
+            /* Check for COUNT option */
+            if ((z_count = zend_hash_str_find(ht, "COUNT", sizeof("COUNT") - 1)) != NULL)
+            {
+                if (Z_TYPE_P(z_count) == IS_LONG)
+                {
+                    args.claim_opts.count = Z_LVAL_P(z_count);
+                    args.claim_opts.has_count = 1;
+                }
+            }
+        }
+
+        /* Use the generic command execution framework */
+        return execute_x_generic_command(redis->glide_client, XAutoClaim, &args, return_value, process_x_autoclaim_result);
+    }
+
+    return 0;
 }
 
 /**
@@ -561,63 +717,84 @@ static int process_xclaim_result_adapter(CommandResult *result, void *output, in
 }
 
 /* Execute an XCLAIM command using the Valkey Glide client */
-int execute_xclaim_command(const void *glide_client, const char *key, size_t key_len,
-                           const char *group, size_t group_len, const char *consumer,
-                           size_t consumer_len, long min_idle_time, zval *ids, int id_count,
-                           zval *options, zval *return_value)
+int execute_xclaim_command(zval *object, int argc, zval *return_value)
 {
-    /* Initialize the arguments structure */
-    x_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.group = group;
-    args.group_len = group_len;
-    args.consumer = consumer;
-    args.consumer_len = consumer_len;
-    args.min_idle_time = min_idle_time;
-    args.ids = ids;
-    args.id_count = id_count;
-    args.options = options;
+    redis_object *redis;
+    char *key = NULL, *group = NULL, *consumer = NULL;
+    size_t key_len = 0, group_len = 0, consumer_len = 0;
+    long min_idle_time = 0;
+    zval *z_ids, *z_options = NULL;
 
-    /* Parse options for XCLAIM command */
-    parse_x_claim_options(options, &args.claim_opts);
-
-    /* For XCLAIM, we need to implement a custom result processor */
-    int status = 0;
-
-    /* Use direct command execution so we can extract the JUSTID flag */
-    uintptr_t *cmd_args = NULL;
-    unsigned long *args_len = NULL;
-    int arg_count = 0;
-
-    /* Prepare arguments */
-    arg_count = prepare_x_claim_args(&args, &cmd_args, &args_len);
-    if (arg_count <= 0)
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osssla|a",
+                                     &object, redis_ce, &key, &key_len,
+                                     &group, &group_len, &consumer, &consumer_len,
+                                     &min_idle_time, &z_ids, &z_options) == FAILURE)
     {
         return 0;
     }
 
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        XClaim,
-        arg_count,
-        cmd_args,
-        args_len);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Free command args */
-    free_command_args(cmd_args, args_len);
-
-    /* Process result */
-    if (result)
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
     {
-        if (!result->command_error && result->response)
+        /* Initialize the arguments structure */
+        x_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.group = group;
+        args.group_len = group_len;
+        args.consumer = consumer;
+        args.consumer_len = consumer_len;
+        args.min_idle_time = min_idle_time;
+        args.ids = z_ids;
+        args.id_count = zend_hash_num_elements(Z_ARRVAL_P(z_ids));
+        args.options = z_options;
+
+        /* Parse options for XCLAIM command */
+        parse_x_claim_options(z_options, &args.claim_opts);
+
+        /* For XCLAIM, we need to implement a custom result processor */
+        int status = 0;
+
+        /* Use direct command execution so we can extract the JUSTID flag */
+        uintptr_t *cmd_args = NULL;
+        unsigned long *args_len = NULL;
+        int arg_count = 0;
+
+        /* Prepare arguments */
+        arg_count = prepare_x_claim_args(&args, &cmd_args, &args_len);
+        if (arg_count <= 0)
         {
-            status = process_xclaim_result_adapter(result, return_value, args.claim_opts.justid);
+            return 0;
         }
-        free_command_result(result);
+
+        /* Execute the command */
+        CommandResult *result = execute_command(
+            redis->glide_client,
+            XClaim,
+            arg_count,
+            cmd_args,
+            args_len);
+
+        /* Free command args */
+        free_command_args(cmd_args, args_len);
+
+        /* Process result */
+        if (result)
+        {
+            if (!result->command_error && result->response)
+            {
+                status = process_xclaim_result_adapter(result, return_value, args.claim_opts.justid);
+            }
+            free_command_result(result);
+        }
+
+        return status;
     }
 
-    return status;
+    return 0;
 }
