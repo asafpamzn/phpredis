@@ -146,6 +146,12 @@ int process_geo_radius_result(CommandResult *result, void *output);
 int process_geo_search_result(CommandResult *result, void *output);
 
 int execute_geoadd_command(zval *object, int argc, zval *return_value);
+int execute_georadius_ro_command(zval *object, int argc, zval *return_value);
+int execute_georadius_command(zval *object, int argc, zval *return_value);
+int execute_geohash_command(zval *object, int argc, zval *return_value);
+
+int execute_geodist_command(zval *object, int argc, zval *return_value);
+int execute_geopos_command(zval *object, int argc, zval *return_value);
 
 /* Execution framework */
 int execute_geo_generic_command(
@@ -168,6 +174,89 @@ int execute_geo_generic_command(
             return;                                                           \
         }                                                                     \
         RETURN_FALSE;                                                         \
+    }
+
+/* Ultra-simple macro for GEODIST method implementation */
+#define GEODIST_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, geodist)                                            \
+    {                                                                          \
+        if (execute_geodist_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        RETURN_FALSE;                                                          \
+    }
+
+/* Ultra-simple macro for GEOHASH method implementation */
+#define GEOHASH_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, geohash)                                            \
+    {                                                                          \
+        if (execute_geohash_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+/* Ultra-simple macro for GEOPOS method implementation */
+#define GEOPOS_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, geopos)                                            \
+    {                                                                         \
+        if (execute_geopos_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+/* Ultra-simple macro for GEORADIUS method implementation */
+#define GEORADIUS_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, georadius)                                            \
+    {                                                                            \
+        if (execute_georadius_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                        \
+            return;                                                              \
+        }                                                                        \
+        zval_dtor(return_value);                                                 \
+        RETURN_FALSE;                                                            \
+    }
+
+/* Ultra-simple macro for GEORADIUS_RO method implementation */
+#define GEORADIUS_RO_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, georadius_ro)                                            \
+    {                                                                               \
+        if (execute_georadius_ro_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                           \
+            return;                                                                 \
+        }                                                                           \
+        zval_dtor(return_value);                                                    \
+        RETURN_FALSE;                                                               \
+    }
+
+/* Ultra-simple macro for GEORADIUSBYMEMBER method implementation */
+#define GEORADIUSBYMEMBER_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, georadiusbymember)                                            \
+    {                                                                                    \
+        if (execute_georadiusbymember_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                                \
+            return;                                                                      \
+        }                                                                                \
+        zval_dtor(return_value);                                                         \
+        RETURN_FALSE;                                                                    \
+    }
+
+/* Ultra-simple macro for GEORADIUSBYMEMBER_RO method implementation */
+#define GEORADIUSBYMEMBER_RO_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, georadiusbymember_ro)                                            \
+    {                                                                                       \
+        if (execute_georadiusbymember_ro_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                                   \
+            return;                                                                         \
+        }                                                                                   \
+        zval_dtor(return_value);                                                            \
+        RETURN_FALSE;                                                                       \
     }
 
 #endif /* VALKEY_GLIDE_GEO_COMMON_H */

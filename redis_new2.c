@@ -48,20 +48,6 @@
 extern char *long_to_string(long value, size_t *len);
 extern char *double_to_string(double value, size_t *len);
 
-/* Import GEO functions */
-
-extern int execute_geodist_command(const void *glide_client, const char *key, size_t key_len,
-                                   char *src, size_t src_len, char *dst, size_t dst_len,
-                                   char *unit, size_t unit_len, double *output_value);
-extern int execute_geohash_command(const void *glide_client, const char *key, size_t key_len,
-                                   zval *members, int member_count, zval *return_value);
-extern int execute_geopos_command(const void *glide_client, const char *key, size_t key_len,
-                                  zval *members, int member_count, zval *return_value);
-extern int execute_georadius_command(const void *glide_client, const char *key, size_t key_len,
-                                     double longitude, double latitude, double radius,
-                                     const char *unit, size_t unit_len,
-                                     zval *opts, zval *return_value);
-
 #ifdef HAVE_REDIS_ZSTD
 #include <zstd.h>
 #endif
@@ -90,252 +76,23 @@ GEOADD_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto double Redis::geodist(string key, string src, string dst [, string unit]) */
-PHP_METHOD(Redis, geodist)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *src = NULL, *dst = NULL, *unit = NULL;
-    size_t key_len, src_len, dst_len, unit_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss|s",
-                                     &object, redis_ce, &key, &key_len,
-                                     &src, &src_len, &dst, &dst_len,
-                                     &unit, &unit_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the GEODIST command using the Glide client */
-        double result_value;
-        int ret = execute_geodist_command(redis->glide_client, key, key_len,
-                                          src, src_len, dst, dst_len,
-                                          unit_len ? unit : NULL, unit_len,
-                                          &result_value);
-
-        if (ret == 1)
-        {
-            /* Command succeeded, return the value */
-            RETURN_DOUBLE(result_value);
-        }
-        else if (ret == 0)
-        {
-            /* Key or member doesn't exist */
-            RETURN_NULL();
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-}
+GEODIST_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::geohash(string key, string member [, string ...]) */
-PHP_METHOD(Redis, geohash)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_args;
-    int argc;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Check that we have at least one member */
-    if (argc < 1)
-    {
-        php_error_docref(NULL, E_WARNING, "geohash requires at least one member");
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* Initialize return value as array */
-    array_init(return_value);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the GEOHASH command using the Glide client */
-        if (execute_geohash_command(redis->glide_client, key, key_len, z_args, argc, return_value))
-        {
-            /* Command already populated return_value */
-            return;
-        }
-        else
-        {
-            /* Command failed */
-            zval_dtor(return_value);
-            RETURN_FALSE;
-        }
-    }
-}
+GEOHASH_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::geopos(string key, string member [, string ...]) */
-PHP_METHOD(Redis, geopos)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_args;
-    int argc;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Check that we have at least one member */
-    if (argc < 1)
-    {
-        php_error_docref(NULL, E_WARNING, "geopos requires at least one member");
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* Initialize return value as array */
-    array_init(return_value);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the GEOPOS command using the Glide client */
-        if (execute_geopos_command(redis->glide_client, key, key_len, z_args, argc, return_value))
-        {
-            /* Command already populated return_value */
-            return;
-        }
-        else
-        {
-            /* Command failed */
-            zval_dtor(return_value);
-            RETURN_FALSE;
-        }
-    }
-
-    RETURN_FALSE;
-}
+GEOPOS_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::georadius(string key, float lng, float lat, float radius, string unit [, array options]) */
-PHP_METHOD(Redis, georadius)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *unit = NULL;
-    size_t key_len, unit_len;
-    double lng, lat, radius;
-    zval *z_opts = NULL;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osddds|a",
-                                     &object, redis_ce, &key, &key_len,
-                                     &lng, &lat, &radius,
-                                     &unit, &unit_len, &z_opts) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* Initialize return value as array */
-    array_init(return_value);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the GEORADIUS command using the Glide client */
-        if (execute_georadius_command(redis->glide_client, key, key_len,
-                                      lng, lat, radius,
-                                      unit, unit_len, z_opts, return_value))
-        {
-            /* Command already populated return_value */
-            return;
-        }
-        else
-        {
-            /* Command failed */
-            zval_dtor(return_value);
-            RETURN_FALSE;
-        }
-    }
-
-    RETURN_FALSE;
-}
+GEORADIUS_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::georadius_ro(string key, float lng, float lat, float radius, string unit [, array options]) */
-PHP_METHOD(Redis, georadius_ro)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *unit = NULL;
-    size_t key_len, unit_len;
-    double lng, lat, radius;
-    zval *z_opts = NULL;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osddds|a",
-                                     &object, redis_ce, &key, &key_len,
-                                     &lng, &lat, &radius,
-                                     &unit, &unit_len, &z_opts) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* Initialize return value as array */
-    array_init(return_value);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the GEORADIUS_RO command using the Glide client */
-        /* For now, we can use the same implementation as GEORADIUS since our Glide implementation
-           doesn't modify any data, but ideally we'd have a specific RO version */
-        if (execute_georadius_command(redis->glide_client, key, key_len,
-                                      lng, lat, radius,
-                                      unit, unit_len, z_opts, return_value))
-        {
-            /* Command already populated return_value */
-            return;
-        }
-        else
-        {
-            /* Command failed */
-            zval_dtor(return_value);
-            RETURN_FALSE;
-        }
-    }
-
-    RETURN_FALSE;
-}
+GEORADIUS_RO_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::georadiusbymember(string key, string member, float radius, string unit [, array options]) */
@@ -380,6 +137,7 @@ PHP_METHOD(Redis, georadiusbymember_ro)
 extern int execute_geosearch_command(const void *glide_client, const char *key, size_t key_len,
                                      zval *from, double *by_radius, const char *by_unit, size_t by_unit_len,
                                      zval *options, zval *return_value);
+
 extern int execute_geosearchstore_command(const void *glide_client, const char *dest, size_t dest_len,
                                           const char *src, size_t src_len, zval *from, double *by_radius,
                                           const char *by_unit, size_t by_unit_len, zval *options, long *output_value);
