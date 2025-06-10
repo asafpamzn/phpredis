@@ -315,9 +315,7 @@ int execute_xpending_command(const void *glide_client, const char *key, size_t k
 int execute_xread_command(const void *glide_client, zval *streams, zval *ids,
                           zval *options, zval *return_value);
 
-int execute_xreadgroup_command(const void *glide_client, const char *group, size_t group_len,
-                               const char *consumer, size_t consumer_len, zval *streams, zval *ids,
-                               zval *options, zval *return_value);
+int execute_xreadgroup_command(zval *object, int argc, zval *return_value);
 
 int execute_xautoclaim_command(const void *glide_client, const char *key, size_t key_len,
                                const char *group, size_t group_len, const char *consumer,
@@ -334,5 +332,20 @@ int execute_xgroup_command(const void *glide_client, const char *subcommand, siz
 
 int execute_xinfo_command(const void *glide_client, const char *subcommand, size_t subcommand_len,
                           zval *args, int args_count, zval *return_value);
+
+/* ====================================================================
+ * X COMMAND MACROS
+ * ==================================================================== */
+
+#define XREADGROUP_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xreadgroup)                                            \
+    {                                                                             \
+        if (execute_xreadgroup_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        zval_dtor(return_value);                                                  \
+        RETURN_FALSE;                                                             \
+    }
 
 #endif /* VALKEY_GLIDE_X_COMMON_H */

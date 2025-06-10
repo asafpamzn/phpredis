@@ -17,6 +17,7 @@
 #include "php_redis.h"
 
 #include "redis_glide.h"
+#include "valkey_glide_x_common.h"
 
 /* Forward declarations for the Glide execute functions */
 extern int execute_xack_command(const void *glide_client, const char *key, size_t key_len,
@@ -49,9 +50,7 @@ extern int execute_xrange_command(const void *glide_client, const char *key, siz
                                   zval *options, zval *return_value);
 extern int execute_xread_command(const void *glide_client, zval *streams, zval *ids,
                                  zval *options, zval *return_value);
-extern int execute_xreadgroup_command(const void *glide_client, const char *group, size_t group_len,
-                                      const char *consumer, size_t consumer_len, zval *streams,
-                                      zval *ids, zval *options, zval *return_value);
+
 extern int execute_xrevrange_command(const void *glide_client, const char *key, size_t key_len,
                                      const char *end, size_t end_len, const char *start, size_t start_len,
                                      zval *options, zval *return_value);
@@ -906,152 +905,7 @@ PHP_METHOD(Redis, xread)
 /* }}} */
 
 /* {{{ proto array Redis::xreadgroup(string group, string consumer, array streams [, int count [, array options]]) */
-PHP_METHOD(Redis, xreadgroup)
-{
-    zval *object;
-    redis_object *redis;
-    char *group = NULL, *consumer = NULL;
-    size_t group_len = 0, consumer_len = 0;
-    zval *z_streams_and_ids, *z_options = NULL;
-    long count = -1;
-    int argc = ZEND_NUM_ARGS();
-    int options_created = 0;
-
-    /* Parse parameters - handle multiple calling patterns */
-    if (argc == 4)
-    {
-        /* Try parsing as (group, consumer, streams, count) first */
-        if (zend_parse_method_parameters(argc, getThis(), "Ossal",
-                                         &object, redis_ce, &group, &group_len,
-                                         &consumer, &consumer_len, &z_streams_and_ids, &count) == SUCCESS)
-        {
-            /* Create options array with COUNT */
-            z_options = emalloc(sizeof(zval));
-            array_init(z_options);
-            add_assoc_long(z_options, "COUNT", count);
-            options_created = 1;
-        }
-        else
-        {
-            /* Try parsing as (group, consumer, streams, options) */
-            if (zend_parse_method_parameters(argc, getThis(), "Ossa",
-                                             &object, redis_ce, &group, &group_len,
-                                             &consumer, &consumer_len, &z_streams_and_ids, &z_options) == FAILURE)
-            {
-                RETURN_FALSE;
-            }
-        }
-    }
-    else if (argc == 5)
-    {
-        long block = -1;
-
-        /* First try parsing as (group, consumer, streams, count, block) */
-        if (zend_parse_method_parameters(argc, getThis(), "Ossall",
-                                         &object, redis_ce, &group, &group_len,
-                                         &consumer, &consumer_len, &z_streams_and_ids, &count, &block) == SUCCESS)
-        {
-            /* Create options array with both COUNT and BLOCK */
-            z_options = emalloc(sizeof(zval));
-            array_init(z_options);
-            add_assoc_long(z_options, "COUNT", count);
-            add_assoc_long(z_options, "BLOCK", block);
-            options_created = 1;
-        }
-        else
-        {
-            /* Fallback to parsing as (group, consumer, streams, count, options) */
-            if (zend_parse_method_parameters(argc, getThis(), "Ossala",
-                                             &object, redis_ce, &group, &group_len,
-                                             &consumer, &consumer_len, &z_streams_and_ids, &count, &z_options) == FAILURE)
-            {
-                RETURN_FALSE;
-            }
-
-            /* Add COUNT to existing options array or create new one */
-            if (z_options && Z_TYPE_P(z_options) == IS_ARRAY)
-            {
-                add_assoc_long(z_options, "COUNT", count);
-            }
-            else
-            {
-                z_options = emalloc(sizeof(zval));
-                array_init(z_options);
-                add_assoc_long(z_options, "COUNT", count);
-                options_created = 1;
-            }
-        }
-    }
-    else
-    {
-        /* Parse as (group, consumer, streams [, options]) - original format for backward compatibility */
-        if (zend_parse_method_parameters(argc, getThis(), "Ossa|a",
-                                         &object, redis_ce, &group, &group_len,
-                                         &consumer, &consumer_len, &z_streams_and_ids, &z_options) == FAILURE)
-        {
-            RETURN_FALSE;
-        }
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* For the combined format, we need to separate streams and IDs */
-        zval z_streams, z_ids;
-        array_init(&z_streams);
-        array_init(&z_ids);
-
-        /* Extract streams and IDs from the combined array */
-        zend_string *stream_key;
-        zval *stream_id;
-        ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(z_streams_and_ids), stream_key, stream_id)
-        {
-            if (stream_key)
-            {
-                add_next_index_str(&z_streams, zend_string_copy(stream_key));
-                if (Z_TYPE_P(stream_id) != IS_STRING)
-                {
-                    convert_to_string(stream_id);
-                }
-                add_next_index_str(&z_ids, zend_string_copy(Z_STR_P(stream_id)));
-            }
-        }
-        ZEND_HASH_FOREACH_END();
-
-        /* Execute the XREADGROUP command using the Glide client */
-        int result = execute_xreadgroup_command(redis->glide_client, group, group_len, consumer, consumer_len,
-                                                &z_streams, &z_ids, z_options, return_value);
-
-        /* Clean up temporary arrays */
-        zval_dtor(&z_streams);
-        zval_dtor(&z_ids);
-
-        /* Clean up if we created options array */
-        if (options_created)
-        {
-            zval_dtor(z_options);
-            efree(z_options);
-        }
-
-        if (result)
-        {
-            /* Return value already set in execute_xreadgroup_command */
-            return;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-    else
-    {
-        /* Fall back to the original implementation if Glide isn't available */
-        RETURN_FALSE;
-    }
-}
+XREADGROUP_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::xrevrange(string key, string end, string start [, int count [, array options]]) */
