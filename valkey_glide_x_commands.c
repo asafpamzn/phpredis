@@ -106,56 +106,8 @@ int execute_xadd_command(const void *glide_client, const char *key, size_t key_l
     /* Parse options */
     parse_x_add_options(options, &args.add_opts);
 
-    /* Prepare arguments */
-    uintptr_t *cmd_args = NULL;
-    unsigned long *args_len = NULL;
-    char **allocated_strings = NULL;
-    int allocated_count = 0;
-    int arg_count;
-
-    /* Prepare arguments for XADD command */
-    arg_count = prepare_x_add_args(&args, &cmd_args, &args_len, &allocated_strings, &allocated_count);
-    if (arg_count <= 0)
-    {
-        return 0;
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        XAdd,      /* command type */
-        arg_count, /* number of arguments */
-        cmd_args,  /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free allocated strings */
-    for (int i = 0; i < allocated_count; i++)
-    {
-        if (allocated_strings[i])
-        {
-            efree(allocated_strings[i]);
-        }
-    }
-    efree(allocated_strings);
-
-    /* Free arguments */
-    efree(cmd_args);
-    efree(args_len);
-
-    /* Process result */
-    int status = 0;
-    if (result)
-    {
-        if (!result->command_error && result->response)
-        {
-            /* XADD returns the ID string, convert to proper output */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    /* Use the generic command execution framework */
+    return execute_x_generic_command(glide_client, XAdd, &args, return_value, process_x_add_result);
 }
 
 /**

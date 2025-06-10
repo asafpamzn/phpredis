@@ -580,6 +580,17 @@ int process_x_stream_result(CommandResult *result, void *output)
     return command_response_to_stream_zval(result->response, return_value);
 }
 
+/**
+ * Process an XADD result from a command
+ */
+int process_x_add_result(CommandResult *result, void *output)
+{
+    zval *return_value = (zval *)output;
+
+    /* XADD returns the ID string, convert to proper output */
+    return command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+}
+
 /* ====================================================================
  * ARGUMENT PREPARATION FUNCTIONS
  * ==================================================================== */

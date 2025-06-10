@@ -252,6 +252,7 @@ int process_x_double_result(CommandResult *result, void *output);
 int process_x_string_result(CommandResult *result, void *output);
 int process_x_array_result(CommandResult *result, void *output);
 int process_x_stream_result(CommandResult *result, void *output);
+int process_x_add_result(CommandResult *result, void *output);
 int process_x_pending_result(CommandResult *result, void *output);
 int process_x_claim_result(CommandResult *result, void *output, int justid);
 int process_x_info_result(CommandResult *result, void *output);
