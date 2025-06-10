@@ -99,6 +99,8 @@ typedef struct _x_claim_options_t
     int has_retrycount; /* Whether RETRYCOUNT option is set */
     int force;          /* FORCE flag */
     int justid;         /* JUSTID flag */
+    int has_count;      /* Whether COUNT option is set */
+    long count;         /* COUNT option value */
 } x_claim_options_t;
 
 /**
@@ -229,6 +231,9 @@ int prepare_x_range_args(x_command_args_t *args, uintptr_t **args_out,
 
 int prepare_x_claim_args(x_command_args_t *args, uintptr_t **args_out,
                          unsigned long **args_len_out);
+
+int prepare_x_autoclaim_args(x_command_args_t *args, uintptr_t **args_out,
+                             unsigned long **args_len_out);
 
 int prepare_x_group_args(x_command_args_t *args, uintptr_t **args_out,
                          unsigned long **args_len_out);

@@ -481,7 +481,14 @@ int execute_x_generic_command(const void *glide_client,
     case XReadGroup:
         arg_count = prepare_x_readgroup_args(args, &cmd_args, &args_len);
         break;
+    case XAutoClaim:
+        arg_count = prepare_x_autoclaim_args(args, &cmd_args, &args_len);
+        break;
+    case XClaim:
+        arg_count = prepare_x_claim_args(args, &cmd_args, &args_len);
+        break;
     default:
+        printf("Unknown command type: %d\n", cmd_type);
         return 0;
     }
 
@@ -491,6 +498,7 @@ int execute_x_generic_command(const void *glide_client,
     }
 
     /* Execute the command */
+
     CommandResult *result = execute_command(
         glide_client,
         cmd_type,
@@ -717,8 +725,64 @@ int process_x_autoclaim_result(CommandResult *result, void *output)
 {
     zval *return_value = (zval *)output;
 
-    /* XAUTOCLAIM returns array with [next-id, claimed-entries] */
-    return command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_STREAM_ARRAY_ASSOCIATIVE, false);
+    /* XAUTOCLAIM returns a multi-part response */
+    if (result->response->response_type != Array || result->response->array_value_len < 1)
+    {
+        return 0;
+    }
+
+    /* Initialize the return array */
+    array_init(return_value);
+
+    /* Extract the cursor (first element) */
+    CommandResponse *cursor_response = &result->response->array_value[0];
+    if (cursor_response->response_type == String)
+    {
+        zval cursor_zval;
+        ZVAL_STRINGL(&cursor_zval, cursor_response->string_value, cursor_response->string_value_len);
+        add_next_index_zval(return_value, &cursor_zval);
+    }
+    else
+    {
+        /* If not a string, add null */
+        add_next_index_null(return_value);
+    }
+
+    /* Extract the messages (second element) */
+    if (result->response->array_value_len >= 2)
+    {
+        CommandResponse *messages_response = &result->response->array_value[1];
+        zval messages_zval;
+
+        /* Process the messages using stream format */
+        command_response_to_stream_zval(messages_response, &messages_zval);
+        add_next_index_zval(return_value, &messages_zval);
+    }
+    else
+    {
+        /* If no messages, add empty array */
+        zval messages_zval;
+        array_init(&messages_zval);
+        add_next_index_zval(return_value, &messages_zval);
+    }
+
+    /* Extract deleted IDs if present (third element) */
+    if (result->response->array_value_len >= 3)
+    {
+        CommandResponse *deleted_response = &result->response->array_value[2];
+        zval deleted_zval;
+        command_response_to_zval(deleted_response, &deleted_zval, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+        add_next_index_zval(return_value, &deleted_zval);
+    }
+    else
+    {
+        /* If no deleted IDs, add empty array */
+        zval deleted_zval;
+        array_init(&deleted_zval);
+        add_next_index_zval(return_value, &deleted_zval);
+    }
+
+    return 1;
 }
 
 /* ====================================================================
@@ -1518,6 +1582,311 @@ int prepare_x_read_args(x_command_args_t *args, uintptr_t **args_out,
         arg_idx++;
     }
     ZEND_HASH_FOREACH_END();
+
+    return arg_count;
+}
+
+/**
+ * Prepare arguments for XCLAIM command.
+ */
+int prepare_x_claim_args(x_command_args_t *args, uintptr_t **args_out,
+                         unsigned long **args_len_out)
+{
+    /* Check if client and arguments are valid */
+    if (!args->glide_client || !args->key || args->key_len <= 0 ||
+        !args->group || args->group_len <= 0 ||
+        !args->consumer || args->consumer_len <= 0 ||
+        !args->ids || args->id_count <= 0)
+    {
+        return 0;
+    }
+
+    /* Count options */
+    unsigned long extra_args = 0;
+    if (args->claim_opts.has_idle)
+        extra_args += 2; /* IDLE + value */
+    if (args->claim_opts.has_time)
+        extra_args += 2; /* TIME + value */
+    if (args->claim_opts.has_retrycount)
+        extra_args += 2; /* RETRYCOUNT + value */
+    if (args->claim_opts.force)
+        extra_args += 1; /* FORCE */
+    if (args->claim_opts.justid)
+        extra_args += 1; /* JUSTID */
+
+    /* Calculate total args: key + group + consumer + min_idle_time + options + ids */
+    unsigned long arg_count = 4 + extra_args + args->id_count;
+
+    /* Allocate memory for arguments */
+    if (!allocate_command_args(arg_count, args_out, args_len_out))
+    {
+        return 0;
+    }
+
+    /* Set key, group, consumer, min_idle_time */
+    unsigned int arg_idx = 0;
+    (*args_out)[arg_idx] = (uintptr_t)args->key;
+    (*args_len_out)[arg_idx] = args->key_len;
+    arg_idx++;
+
+    (*args_out)[arg_idx] = (uintptr_t)args->group;
+    (*args_len_out)[arg_idx] = args->group_len;
+    arg_idx++;
+
+    (*args_out)[arg_idx] = (uintptr_t)args->consumer;
+    (*args_len_out)[arg_idx] = args->consumer_len;
+    arg_idx++;
+
+    /* Convert min_idle_time to string */
+    char min_idle_str[32];
+    unsigned long min_idle_str_len = snprintf(min_idle_str, sizeof(min_idle_str), "%ld",
+                                              args->min_idle_time);
+
+    /* Allocate memory for the min_idle_time string */
+    char *min_idle_str_copy = emalloc(min_idle_str_len + 1);
+    if (min_idle_str_copy)
+    {
+        memcpy(min_idle_str_copy, min_idle_str, min_idle_str_len);
+        min_idle_str_copy[min_idle_str_len] = '\0';
+
+        (*args_out)[arg_idx] = (uintptr_t)min_idle_str_copy;
+        (*args_len_out)[arg_idx] = min_idle_str_len;
+        arg_idx++;
+
+        /* This string needs to be freed later */
+        // TODO: Track this string for cleanup
+    }
+    else
+    {
+        /* Failed to allocate memory for min_idle_time */
+        free_command_args(*args_out, *args_len_out);
+        return 0;
+    }
+
+    /* Add all message IDs */
+    zval *z_id;
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args->ids), z_id)
+    {
+        if (Z_TYPE_P(z_id) != IS_STRING)
+        {
+            convert_to_string(z_id);
+        }
+        (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL_P(z_id);
+        (*args_len_out)[arg_idx] = Z_STRLEN_P(z_id);
+        arg_idx++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    /* Add options */
+    if (args->claim_opts.has_idle)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"IDLE";
+        (*args_len_out)[arg_idx] = sizeof("IDLE") - 1;
+        arg_idx++;
+
+        /* Convert idle to string */
+        char idle_str[32];
+        unsigned long idle_str_len = snprintf(idle_str, sizeof(idle_str), "%ld",
+                                              args->claim_opts.idle);
+
+        /* Allocate memory for the idle string */
+        char *idle_str_copy = emalloc(idle_str_len + 1);
+        if (idle_str_copy)
+        {
+            memcpy(idle_str_copy, idle_str, idle_str_len);
+            idle_str_copy[idle_str_len] = '\0';
+
+            (*args_out)[arg_idx] = (uintptr_t)idle_str_copy;
+            (*args_len_out)[arg_idx] = idle_str_len;
+            arg_idx++;
+
+            /* This string needs to be freed later */
+            // TODO: Track this string for cleanup
+        }
+    }
+
+    if (args->claim_opts.has_time)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"TIME";
+        (*args_len_out)[arg_idx] = sizeof("TIME") - 1;
+        arg_idx++;
+
+        /* Convert time to string */
+        char time_str[32];
+        unsigned long time_str_len = snprintf(time_str, sizeof(time_str), "%ld",
+                                              args->claim_opts.time);
+
+        /* Allocate memory for the time string */
+        char *time_str_copy = emalloc(time_str_len + 1);
+        if (time_str_copy)
+        {
+            memcpy(time_str_copy, time_str, time_str_len);
+            time_str_copy[time_str_len] = '\0';
+
+            (*args_out)[arg_idx] = (uintptr_t)time_str_copy;
+            (*args_len_out)[arg_idx] = time_str_len;
+            arg_idx++;
+
+            /* This string needs to be freed later */
+            // TODO: Track this string for cleanup
+        }
+    }
+
+    if (args->claim_opts.has_retrycount)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"RETRYCOUNT";
+        (*args_len_out)[arg_idx] = sizeof("RETRYCOUNT") - 1;
+        arg_idx++;
+
+        /* Convert retrycount to string */
+        char retry_str[32];
+        unsigned long retry_str_len = snprintf(retry_str, sizeof(retry_str), "%ld",
+                                               args->claim_opts.retrycount);
+
+        /* Allocate memory for the retry string */
+        char *retry_str_copy = emalloc(retry_str_len + 1);
+        if (retry_str_copy)
+        {
+            memcpy(retry_str_copy, retry_str, retry_str_len);
+            retry_str_copy[retry_str_len] = '\0';
+
+            (*args_out)[arg_idx] = (uintptr_t)retry_str_copy;
+            (*args_len_out)[arg_idx] = retry_str_len;
+            arg_idx++;
+
+            /* This string needs to be freed later */
+            // TODO: Track this string for cleanup
+        }
+    }
+
+    if (args->claim_opts.force)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"FORCE";
+        (*args_len_out)[arg_idx] = sizeof("FORCE") - 1;
+        arg_idx++;
+    }
+
+    if (args->claim_opts.justid)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"JUSTID";
+        (*args_len_out)[arg_idx] = sizeof("JUSTID") - 1;
+        arg_idx++;
+    }
+
+    return arg_count;
+}
+
+/**
+ * Prepare arguments for XAUTOCLAIM command.
+ */
+int prepare_x_autoclaim_args(x_command_args_t *args, uintptr_t **args_out,
+                             unsigned long **args_len_out)
+{
+    /* Check if client and arguments are valid */
+    if (!args->glide_client || !args->key || args->key_len <= 0 ||
+        !args->group || args->group_len <= 0 ||
+        !args->consumer || args->consumer_len <= 0 ||
+        !args->start || args->start_len <= 0)
+    {
+        return 0;
+    }
+
+    /* Count options */
+    unsigned long extra_args = 0;
+    if (args->claim_opts.has_count)
+        extra_args += 2; /* COUNT + value */
+    if (args->claim_opts.justid)
+        extra_args += 1; /* JUSTID */
+
+    /* Calculate total args: key + group + consumer + min_idle_time + start + options */
+    unsigned long arg_count = 5 + extra_args;
+
+    /* Allocate memory for arguments */
+    if (!allocate_command_args(arg_count, args_out, args_len_out))
+    {
+        return 0;
+    }
+
+    /* Set key, group, consumer */
+    unsigned int arg_idx = 0;
+    (*args_out)[arg_idx] = (uintptr_t)args->key;
+    (*args_len_out)[arg_idx] = args->key_len;
+    arg_idx++;
+
+    (*args_out)[arg_idx] = (uintptr_t)args->group;
+    (*args_len_out)[arg_idx] = args->group_len;
+    arg_idx++;
+
+    (*args_out)[arg_idx] = (uintptr_t)args->consumer;
+    (*args_len_out)[arg_idx] = args->consumer_len;
+    arg_idx++;
+
+    /* Convert min_idle_time to string */
+    char min_idle_str[32];
+    unsigned long min_idle_str_len = snprintf(min_idle_str, sizeof(min_idle_str), "%ld",
+                                              args->min_idle_time);
+
+    /* Allocate memory for the min_idle_time string */
+    char *min_idle_str_copy = emalloc(min_idle_str_len + 1);
+    if (min_idle_str_copy)
+    {
+        memcpy(min_idle_str_copy, min_idle_str, min_idle_str_len);
+        min_idle_str_copy[min_idle_str_len] = '\0';
+
+        (*args_out)[arg_idx] = (uintptr_t)min_idle_str_copy;
+        (*args_len_out)[arg_idx] = min_idle_str_len;
+        arg_idx++;
+
+        /* This string needs to be freed later */
+        // TODO: Track this string for cleanup
+    }
+    else
+    {
+        /* Failed to allocate memory for min_idle_time */
+        free_command_args(*args_out, *args_len_out);
+        return 0;
+    }
+
+    /* Add start ID */
+    (*args_out)[arg_idx] = (uintptr_t)args->start;
+    (*args_len_out)[arg_idx] = args->start_len;
+    arg_idx++;
+
+    /* Add COUNT if specified */
+    if (args->claim_opts.has_count)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"COUNT";
+        (*args_len_out)[arg_idx] = sizeof("COUNT") - 1;
+        arg_idx++;
+
+        /* Convert count to string */
+        char count_str[32];
+        unsigned long count_str_len = snprintf(count_str, sizeof(count_str), "%ld",
+                                               args->claim_opts.count);
+
+        /* Allocate memory for the count string */
+        char *count_str_copy = emalloc(count_str_len + 1);
+        if (count_str_copy)
+        {
+            memcpy(count_str_copy, count_str, count_str_len);
+            count_str_copy[count_str_len] = '\0';
+
+            (*args_out)[arg_idx] = (uintptr_t)count_str_copy;
+            (*args_len_out)[arg_idx] = count_str_len;
+            arg_idx++;
+
+            /* This string needs to be freed later */
+            // TODO: Track this string for cleanup
+        }
+    }
+
+    /* Add JUSTID if specified */
+    if (args->claim_opts.justid)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"JUSTID";
+        (*args_len_out)[arg_idx] = sizeof("JUSTID") - 1;
+        arg_idx++;
+    }
 
     return arg_count;
 }

@@ -6314,8 +6314,8 @@ class Redis_Test extends TestSuite {
         
         $this->assertTrue($res && (count($res) == 2 || count($res) == 3));
         
-        $this->assertTrue(isset($res[1]['1424-74205'][0]['name']) &&
-                          $res[1]['1424-74205'][0]['name'] == 'Defiant');
+        $this->assertTrue(isset($res[1]['1424-74205']['name']) &&
+                          $res[1]['1424-74205']['name'] == 'Defiant');
         
         // Now the 'Sisko' consumer should own the message
         $pending = $this->redis->xPending('ships', 'combatants');
