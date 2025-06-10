@@ -472,6 +472,13 @@ int execute_x_generic_command(const void *glide_client,
     case XRevRange:
         arg_count = prepare_x_range_args(args, &cmd_args, &args_len);
         break;
+    case XPending:
+        arg_count = prepare_x_pending_args(args, &cmd_args, &args_len);
+        break;
+    case XRead:
+    case XReadGroup:
+        arg_count = prepare_x_read_args(args, &cmd_args, &args_len);
+        break;
     default:
         return 0;
     }
@@ -600,6 +607,44 @@ int process_x_group_result(CommandResult *result, void *output)
 
     /* XGROUP response depends on subcommand */
     return command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+}
+
+/**
+ * Process an XPENDING result from a command
+ */
+int process_x_pending_result(CommandResult *result, void *output)
+{
+    zval *return_value = (zval *)output;
+    int status = 0;
+
+    /* XPENDING returns pending entries info */
+    status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+
+    /* Special handling for empty XPENDING response */
+    if (status && Z_TYPE_P(return_value) == IS_ARRAY)
+    {
+        HashTable *ht = Z_ARRVAL_P(return_value);
+        int num_elements = zend_hash_num_elements(ht);
+
+        if (num_elements > 0)
+        {
+            /* Iterate through all elements */
+            zval *element;
+            zend_ulong idx;
+
+            ZEND_HASH_FOREACH_NUM_KEY_VAL(ht, idx, element)
+            {
+                /* If element is NULL, convert it to bool(false) */
+                if (Z_TYPE_P(element) == IS_NULL)
+                {
+                    ZVAL_BOOL(element, 0);
+                }
+            }
+            ZEND_HASH_FOREACH_END();
+        }
+    }
+
+    return status;
 }
 
 /* ====================================================================
@@ -1016,6 +1061,236 @@ int prepare_x_group_args(x_command_args_t *args, uintptr_t **args_out,
         (*args_len_out)[arg_idx] = Z_STRLEN_P(arg);
         arg_idx++;
     }
+
+    return arg_count;
+}
+
+/**
+ * Prepare arguments for XPENDING command.
+ */
+int prepare_x_pending_args(x_command_args_t *args, uintptr_t **args_out,
+                           unsigned long **args_len_out)
+{
+    /* Check if client and arguments are valid */
+    if (!args->glide_client || !args->key || args->key_len <= 0 ||
+        !args->group || args->group_len <= 0)
+    {
+        return 0;
+    }
+
+    /* Count extra args based on options */
+    unsigned long extra_args = 0;
+    if (args->pending_opts.start)
+        extra_args++; /* START */
+    if (args->pending_opts.end)
+        extra_args++; /* END */
+    if (args->pending_opts.has_count)
+        extra_args++; /* COUNT */
+    if (args->pending_opts.consumer)
+        extra_args++; /* CONSUMER */
+
+    /* Calculate total args: key + group + optional args */
+    unsigned long arg_count = 2 + extra_args;
+
+    /* Allocate memory for arguments */
+    if (!allocate_command_args(arg_count, args_out, args_len_out))
+    {
+        return 0;
+    }
+
+    /* Set key and group as first two arguments */
+    unsigned int arg_idx = 0;
+    (*args_out)[arg_idx] = (uintptr_t)args->key;
+    (*args_len_out)[arg_idx] = args->key_len;
+    arg_idx++;
+
+    (*args_out)[arg_idx] = (uintptr_t)args->group;
+    (*args_len_out)[arg_idx] = args->group_len;
+    arg_idx++;
+
+    /* Add additional options */
+    if (args->pending_opts.start)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)args->pending_opts.start;
+        (*args_len_out)[arg_idx] = args->pending_opts.start_len;
+        arg_idx++;
+    }
+
+    if (args->pending_opts.end)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)args->pending_opts.end;
+        (*args_len_out)[arg_idx] = args->pending_opts.end_len;
+        arg_idx++;
+    }
+
+    if (args->pending_opts.has_count)
+    {
+        /* Convert count to string */
+        char count_str[32];
+        unsigned long count_str_len = snprintf(count_str, sizeof(count_str), "%ld",
+                                               args->pending_opts.count);
+
+        /* Allocate memory for the count string */
+        char *count_str_copy = emalloc(count_str_len + 1);
+        if (count_str_copy)
+        {
+            memcpy(count_str_copy, count_str, count_str_len);
+            count_str_copy[count_str_len] = '\0';
+
+            (*args_out)[arg_idx] = (uintptr_t)count_str_copy;
+            (*args_len_out)[arg_idx] = count_str_len;
+            arg_idx++;
+
+            /* This needs to be freed later */
+            (*args_out)[arg_count - 1] = (uintptr_t)count_str_copy;
+        }
+    }
+
+    if (args->pending_opts.consumer)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)args->pending_opts.consumer;
+        (*args_len_out)[arg_idx] = args->pending_opts.consumer_len;
+        arg_idx++;
+    }
+
+    return arg_count;
+}
+
+/**
+ * Prepare arguments for XREAD command.
+ */
+int prepare_x_read_args(x_command_args_t *args, uintptr_t **args_out,
+                        unsigned long **args_len_out)
+{
+    /* Check if client and arguments are valid */
+    if (!args->glide_client || !args->streams || !args->ids)
+    {
+        return 0;
+    }
+
+    /* Get the number of streams and IDs */
+    HashTable *streams_ht = Z_ARRVAL_P(args->streams);
+    HashTable *ids_ht = Z_ARRVAL_P(args->ids);
+    int streams_count = zend_hash_num_elements(streams_ht);
+    int ids_count = zend_hash_num_elements(ids_ht);
+
+    /* Check counts match */
+    if (streams_count <= 0 || streams_count != ids_count)
+    {
+        return 0;
+    }
+
+    /* Count options */
+    unsigned long extra_args = 0;
+    if (args->read_opts.has_count)
+        extra_args += 2; /* COUNT + value */
+    if (args->read_opts.has_block)
+        extra_args += 2; /* BLOCK + value */
+    if (args->read_opts.noack)
+        extra_args += 1; /* NOACK */
+
+    /* Calculate total args: options + STREAMS + streams + ids */
+    unsigned long arg_count = extra_args + 1 + streams_count + ids_count;
+
+    /* Allocate memory for arguments */
+    if (!allocate_command_args(arg_count, args_out, args_len_out))
+    {
+        return 0;
+    }
+
+    /* Set arguments */
+    unsigned int arg_idx = 0;
+
+    /* Add COUNT if specified */
+    if (args->read_opts.has_count)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"COUNT";
+        (*args_len_out)[arg_idx] = sizeof("COUNT") - 1;
+        arg_idx++;
+
+        /* Convert count to string */
+        char count_str[32];
+        unsigned long count_str_len = snprintf(count_str, sizeof(count_str), "%ld",
+                                               args->read_opts.count);
+
+        /* Allocate memory for the count string */
+        char *count_str_copy = emalloc(count_str_len + 1);
+        if (count_str_copy)
+        {
+            memcpy(count_str_copy, count_str, count_str_len);
+            count_str_copy[count_str_len] = '\0';
+
+            (*args_out)[arg_idx] = (uintptr_t)count_str_copy;
+            (*args_len_out)[arg_idx] = count_str_len;
+            arg_idx++;
+        }
+    }
+
+    /* Add BLOCK if specified */
+    if (args->read_opts.has_block)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"BLOCK";
+        (*args_len_out)[arg_idx] = sizeof("BLOCK") - 1;
+        arg_idx++;
+
+        /* Convert block to string */
+        char block_str[32];
+        unsigned long block_str_len = snprintf(block_str, sizeof(block_str), "%ld",
+                                               args->read_opts.block);
+
+        /* Allocate memory for the block string */
+        char *block_str_copy = emalloc(block_str_len + 1);
+        if (block_str_copy)
+        {
+            memcpy(block_str_copy, block_str, block_str_len);
+            block_str_copy[block_str_len] = '\0';
+
+            (*args_out)[arg_idx] = (uintptr_t)block_str_copy;
+            (*args_len_out)[arg_idx] = block_str_len;
+            arg_idx++;
+        }
+    }
+
+    /* Add NOACK if specified */
+    if (args->read_opts.noack)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"NOACK";
+        (*args_len_out)[arg_idx] = sizeof("NOACK") - 1;
+        arg_idx++;
+    }
+
+    /* Add STREAMS keyword */
+    (*args_out)[arg_idx] = (uintptr_t)"STREAMS";
+    (*args_len_out)[arg_idx] = sizeof("STREAMS") - 1;
+    arg_idx++;
+
+    /* Add all stream keys */
+    zval *z_stream;
+    ZEND_HASH_FOREACH_VAL(streams_ht, z_stream)
+    {
+        if (Z_TYPE_P(z_stream) != IS_STRING)
+        {
+            convert_to_string(z_stream);
+        }
+        (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL_P(z_stream);
+        (*args_len_out)[arg_idx] = Z_STRLEN_P(z_stream);
+        arg_idx++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    /* Add all stream IDs */
+    zval *z_id;
+    ZEND_HASH_FOREACH_VAL(ids_ht, z_id)
+    {
+        if (Z_TYPE_P(z_id) != IS_STRING)
+        {
+            convert_to_string(z_id);
+        }
+        (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL_P(z_id);
+        (*args_len_out)[arg_idx] = Z_STRLEN_P(z_id);
+        arg_idx++;
+    }
+    ZEND_HASH_FOREACH_END();
 
     return arg_count;
 }
