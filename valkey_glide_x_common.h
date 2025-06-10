@@ -239,6 +239,9 @@ int prepare_x_pending_args(x_command_args_t *args, uintptr_t **args_out,
 int prepare_x_read_args(x_command_args_t *args, uintptr_t **args_out,
                         unsigned long **args_len_out);
 
+int prepare_x_readgroup_args(x_command_args_t *args, uintptr_t **args_out,
+                             unsigned long **args_len_out);
+
 int prepare_x_info_args(x_command_args_t *args, uintptr_t **args_out,
                         unsigned long **args_len_out,
                         char ***allocated_strings, int *allocated_count);
@@ -261,7 +264,9 @@ int process_x_stream_result(CommandResult *result, void *output);
 int process_x_add_result(CommandResult *result, void *output);
 int process_x_group_result(CommandResult *result, void *output);
 int process_x_pending_result(CommandResult *result, void *output);
+int process_x_readgroup_result(CommandResult *result, void *output);
 int process_x_claim_result(CommandResult *result, void *output, int justid);
+int process_x_autoclaim_result(CommandResult *result, void *output);
 int process_x_info_result(CommandResult *result, void *output);
 
 /* Execution framework */

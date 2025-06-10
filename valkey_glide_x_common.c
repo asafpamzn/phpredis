@@ -476,8 +476,10 @@ int execute_x_generic_command(const void *glide_client,
         arg_count = prepare_x_pending_args(args, &cmd_args, &args_len);
         break;
     case XRead:
-    case XReadGroup:
         arg_count = prepare_x_read_args(args, &cmd_args, &args_len);
+        break;
+    case XReadGroup:
+        arg_count = prepare_x_readgroup_args(args, &cmd_args, &args_len);
         break;
     default:
         return 0;
@@ -645,6 +647,78 @@ int process_x_pending_result(CommandResult *result, void *output)
     }
 
     return status;
+}
+
+/**
+ * Process an XREADGROUP result from a command
+ */
+int process_x_readgroup_result(CommandResult *result, void *output)
+{
+    zval *return_value = (zval *)output;
+    int status = 0;
+
+    /* Initialize array for results */
+    array_init(return_value);
+
+    if (result->response->response_type == Map && result->response->array_value_len > 0)
+    {
+        /* Process each stream in the map */
+        for (int i = 0; i < result->response->array_value_len; i++)
+        {
+            CommandResponse *element = &result->response->array_value[i];
+
+            if (element->map_key && element->map_key->response_type == String && element->map_value)
+            {
+                /* Extract stream name */
+                zval stream_name;
+                command_response_to_zval(element->map_key, &stream_name, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+
+                /* Process stream entries */
+                zval stream_entries;
+                command_response_to_stream_zval(element->map_value, &stream_entries);
+
+                /* Add stream entries to output as an associative array */
+                add_assoc_zval(return_value, Z_STRVAL(stream_name), &stream_entries);
+                zval_dtor(&stream_name); // Clean up stream name after adding
+                status = 1;
+            }
+        }
+    }
+
+    return status;
+}
+
+/**
+ * Process an XCLAIM result from a command
+ */
+int process_x_claim_result(CommandResult *result, void *output, int justid)
+{
+    zval *return_value = (zval *)output;
+    int status = 0;
+
+    if (justid)
+    {
+        /* If JUSTID was specified, return an array of IDs */
+        status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+    }
+    else
+    {
+        /* Otherwise, return the full entries */
+        status = command_response_to_stream_zval(result->response, return_value);
+    }
+
+    return status;
+}
+
+/**
+ * Process an XAUTOCLAIM result from a command
+ */
+int process_x_autoclaim_result(CommandResult *result, void *output)
+{
+    zval *return_value = (zval *)output;
+
+    /* XAUTOCLAIM returns array with [next-id, claimed-entries] */
+    return command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_STREAM_ARRAY_ASSOCIATIVE, false);
 }
 
 /* ====================================================================
@@ -1152,6 +1226,159 @@ int prepare_x_pending_args(x_command_args_t *args, uintptr_t **args_out,
         (*args_len_out)[arg_idx] = args->pending_opts.consumer_len;
         arg_idx++;
     }
+
+    return arg_count;
+}
+
+/**
+ * Prepare arguments for XREADGROUP command.
+ */
+int prepare_x_readgroup_args(x_command_args_t *args, uintptr_t **args_out,
+                             unsigned long **args_len_out)
+{
+    /* Check if client and arguments are valid */
+    if (!args->glide_client || !args->group || args->group_len <= 0 ||
+        !args->consumer || args->consumer_len <= 0 || !args->streams || !args->ids)
+    {
+        return 0;
+    }
+
+    /* Get the number of streams and IDs */
+    HashTable *streams_ht = Z_ARRVAL_P(args->streams);
+    HashTable *ids_ht = Z_ARRVAL_P(args->ids);
+    int streams_count = zend_hash_num_elements(streams_ht);
+    int ids_count = zend_hash_num_elements(ids_ht);
+
+    /* Check counts match */
+    if (streams_count <= 0 || streams_count != ids_count)
+    {
+        return 0;
+    }
+
+    /* Count options */
+    unsigned long extra_args = 0;
+    if (args->read_opts.has_count)
+        extra_args += 2; /* COUNT + value */
+    if (args->read_opts.has_block)
+        extra_args += 2; /* BLOCK + value */
+    if (args->read_opts.noack)
+        extra_args += 1; /* NOACK */
+
+    /* Calculate total args: GROUP + group + consumer + options + STREAMS + streams + ids */
+    unsigned long arg_count = 3 + extra_args + 1 + streams_count + ids_count;
+
+    /* Allocate memory for arguments */
+    if (!allocate_command_args(arg_count, args_out, args_len_out))
+    {
+        return 0;
+    }
+
+    /* Set arguments */
+    unsigned int arg_idx = 0;
+
+    /* Add GROUP, group, consumer */
+    (*args_out)[arg_idx] = (uintptr_t)"GROUP";
+    (*args_len_out)[arg_idx] = sizeof("GROUP") - 1;
+    arg_idx++;
+
+    (*args_out)[arg_idx] = (uintptr_t)args->group;
+    (*args_len_out)[arg_idx] = args->group_len;
+    arg_idx++;
+
+    (*args_out)[arg_idx] = (uintptr_t)args->consumer;
+    (*args_len_out)[arg_idx] = args->consumer_len;
+    arg_idx++;
+
+    /* Add COUNT if specified */
+    if (args->read_opts.has_count)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"COUNT";
+        (*args_len_out)[arg_idx] = sizeof("COUNT") - 1;
+        arg_idx++;
+
+        /* Convert count to string */
+        char count_str[32];
+        unsigned long count_str_len = snprintf(count_str, sizeof(count_str), "%ld",
+                                               args->read_opts.count);
+
+        /* Allocate memory for the count string */
+        char *count_str_copy = emalloc(count_str_len + 1);
+        if (count_str_copy)
+        {
+            memcpy(count_str_copy, count_str, count_str_len);
+            count_str_copy[count_str_len] = '\0';
+
+            (*args_out)[arg_idx] = (uintptr_t)count_str_copy;
+            (*args_len_out)[arg_idx] = count_str_len;
+            arg_idx++;
+        }
+    }
+
+    /* Add BLOCK if specified */
+    if (args->read_opts.has_block)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"BLOCK";
+        (*args_len_out)[arg_idx] = sizeof("BLOCK") - 1;
+        arg_idx++;
+
+        /* Convert block to string */
+        char block_str[32];
+        unsigned long block_str_len = snprintf(block_str, sizeof(block_str), "%ld",
+                                               args->read_opts.block);
+
+        /* Allocate memory for the block string */
+        char *block_str_copy = emalloc(block_str_len + 1);
+        if (block_str_copy)
+        {
+            memcpy(block_str_copy, block_str, block_str_len);
+            block_str_copy[block_str_len] = '\0';
+
+            (*args_out)[arg_idx] = (uintptr_t)block_str_copy;
+            (*args_len_out)[arg_idx] = block_str_len;
+            arg_idx++;
+        }
+    }
+
+    /* Add NOACK if specified */
+    if (args->read_opts.noack)
+    {
+        (*args_out)[arg_idx] = (uintptr_t)"NOACK";
+        (*args_len_out)[arg_idx] = sizeof("NOACK") - 1;
+        arg_idx++;
+    }
+
+    /* Add STREAMS keyword */
+    (*args_out)[arg_idx] = (uintptr_t)"STREAMS";
+    (*args_len_out)[arg_idx] = sizeof("STREAMS") - 1;
+    arg_idx++;
+
+    /* Add all stream keys */
+    zval *z_stream;
+    ZEND_HASH_FOREACH_VAL(streams_ht, z_stream)
+    {
+        if (Z_TYPE_P(z_stream) != IS_STRING)
+        {
+            convert_to_string(z_stream);
+        }
+        (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL_P(z_stream);
+        (*args_len_out)[arg_idx] = Z_STRLEN_P(z_stream);
+        arg_idx++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    /* Add all stream IDs */
+    zval *z_id;
+    ZEND_HASH_FOREACH_VAL(ids_ht, z_id)
+    {
+        if (Z_TYPE_P(z_id) != IS_STRING)
+        {
+            convert_to_string(z_id);
+        }
+        (*args_out)[arg_idx] = (uintptr_t)Z_STRVAL_P(z_id);
+        (*args_len_out)[arg_idx] = Z_STRLEN_P(z_id);
+        arg_idx++;
+    }
+    ZEND_HASH_FOREACH_END();
 
     return arg_count;
 }
