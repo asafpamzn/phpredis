@@ -222,3 +222,55 @@ ZMPOP_METHOD_IMPL(Redis)
 /* {{{ proto long Redis::zadd(string key, double score, string member, ...) */
 ZADD_METHOD_IMPL(Redis)
 /* }}} */
+
+// GEO commands
+
+/* {{{ proto long Redis::geoadd(string key, float longitude, float latitude, string member, ...) */
+GEOADD_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto double Redis::geodist(string key, string src, string dst [, string unit]) */
+GEODIST_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::geohash(string key, string member [, string ...]) */
+GEOHASH_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::geopos(string key, string member [, string ...]) */
+GEOPOS_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::georadius(string key, float lng, float lat, float radius, string unit [, array options]) */
+GEORADIUS_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::georadius_ro(string key, float lng, float lat, float radius, string unit [, array options]) */
+GEORADIUS_RO_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::georadiusbymember(string key, string member, float radius, string unit [, array options]) */
+PHP_METHOD(Redis, georadiusbymember)
+{
+
+    RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto array Redis::georadiusbymember_ro(string key, string member, float radius, string unit [, array options]) */
+PHP_METHOD(Redis, georadiusbymember_ro)
+{
+    /* For now, we'll leave this to the standard implementation since it's not
+       directly implemented in the redis_geo_glide.c file */
+
+    RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto array Redis::geosearch(string key, array|string from, array|string by, string|null radius_unit, string|null count, string|null sorting, string|null pattern) */
+GEOSEARCH_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::geosearchstore(string dst, string src, array|string from, array|string by, string|null radius_unit, string|null count, string|null sorting, string|null storedist) */
+GEOSEARCHSTORE_METHOD_IMPL(Redis)
+/* }}} */
