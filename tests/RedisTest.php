@@ -5874,12 +5874,13 @@ class Redis_Test extends TestSuite {
         /* CREATE MKSTREAM */
         $key = 's:' . uniqid();
         $this->assertFalse($this->redis->xGroup('CREATE', $key, 'g0', 0));
+          
         
         $this->assertTrue($this->redis->xGroup('CREATE', $key, 'g1', 0, true));
-        
+      
         /* XGROUP DESTROY */
         $this->assertTrue($this->redis->xGroup('DESTROY', $key, 'g1'));
-        
+       
         /* Populate some entries in stream 's' */
         $this->addStreamEntries('s', 2);
 

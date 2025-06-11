@@ -282,42 +282,28 @@ int execute_x_generic_command(const void *glide_client,
                               x_result_processor_t process_result);
 
 /* Command implementation functions */
-int execute_xlen_command(const void *glide_client, const char *key, size_t key_len,
-                         long *output_value);
+int execute_xlen_command(zval *object, int argc, zval *return_value);
+
+int execute_xdel_command(zval *object, int argc, zval *return_value);
 
 int execute_xack_command(zval *object, int argc, zval *return_value);
 int execute_xadd_command(zval *object, int argc, zval *return_value);
-int execute_xautoclaim_command(zval *object, int argc, zval *return_value);
-int execute_xclaim_command(zval *object, int argc, zval *return_value);
-int execute_xdel_command(zval *object, int argc, zval *return_value);
 
-int execute_xtrim_command(const void *glide_client, const char *key, size_t key_len,
-                          const char *strategy, size_t strategy_len, const char *threshold,
-                          size_t threshold_len, zval *options, long *output_value);
+int execute_xtrim_command(zval *object, int argc, zval *return_value);
+int execute_xrange_command(zval *object, int argc, zval *return_value);
+int execute_xrevrange_command(zval *object, int argc, zval *return_value);
+int execute_xpending_command(zval *object, int argc, zval *return_value);
 
-int execute_xrange_command(const void *glide_client, const char *key, size_t key_len,
-                           const char *start, size_t start_len, const char *end, size_t end_len,
-                           zval *options, zval *return_value);
-
-int execute_xrevrange_command(const void *glide_client, const char *key, size_t key_len,
-                              const char *end, size_t end_len, const char *start, size_t start_len,
-                              zval *options, zval *return_value);
-
-int execute_xpending_command(const void *glide_client, const char *key, size_t key_len,
-                             const char *group, size_t group_len, zval *options,
-                             zval *return_value);
-
-int execute_xread_command(const void *glide_client, zval *streams, zval *ids,
-                          zval *options, zval *return_value);
+int execute_xread_command(zval *object, int argc, zval *return_value);
 
 int execute_xreadgroup_command(zval *object, int argc, zval *return_value);
 
-int execute_xgroup_command(const void *glide_client, const char *subcommand, size_t subcommand_len,
-                           zval *args, int args_count, zval *return_value);
+int execute_xautoclaim_command(zval *object, int argc, zval *return_value);
+int execute_xclaim_command(zval *object, int argc, zval *return_value);
 
-int execute_xinfo_command(const void *glide_client, const char *subcommand, size_t subcommand_len,
-                          zval *args, int args_count, zval *return_value);
+int execute_xgroup_command(zval *object, int argc, zval *return_value);
 
+int execute_xinfo_command(zval *object, int argc, zval *return_value);
 /* ====================================================================
  * X COMMAND MACROS
  * ==================================================================== */
@@ -384,6 +370,149 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
         }                                                                   \
         zval_dtor(return_value);                                            \
         RETURN_FALSE;                                                       \
+    }
+
+#define XACK_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xack)                                            \
+    {                                                                       \
+        if (execute_xack_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define XADD_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xadd)                                            \
+    {                                                                       \
+        if (execute_xadd_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define XAUTOCLAIM_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xautoclaim)                                            \
+    {                                                                             \
+        if (execute_xautoclaim_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        zval_dtor(return_value);                                                  \
+        RETURN_FALSE;                                                             \
+    }
+
+#define XCLAIM_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xclaim)                                            \
+    {                                                                         \
+        if (execute_xclaim_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define XDEL_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xdel)                                            \
+    {                                                                       \
+        if (execute_xdel_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define XGROUP_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xgroup)                                            \
+    {                                                                         \
+        if (execute_xgroup_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define XINFO_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xinfo)                                            \
+    {                                                                        \
+        if (execute_xinfo_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+#define XLEN_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xlen)                                            \
+    {                                                                       \
+        if (execute_xlen_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define XPENDING_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xpending)                                            \
+    {                                                                           \
+        if (execute_xpending_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        zval_dtor(return_value);                                                \
+        RETURN_FALSE;                                                           \
+    }
+
+#define XRANGE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xrange)                                            \
+    {                                                                         \
+        if (execute_xrange_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define XREAD_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xread)                                            \
+    {                                                                        \
+        if (execute_xread_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+#define XREVRANGE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xrevrange)                                            \
+    {                                                                            \
+        if (execute_xrevrange_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                        \
+            return;                                                              \
+        }                                                                        \
+        zval_dtor(return_value);                                                 \
+        RETURN_FALSE;                                                            \
+    }
+
+#define XTRIM_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xtrim)                                            \
+    {                                                                        \
+        if (execute_xtrim_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
     }
 
 #endif /* VALKEY_GLIDE_X_COMMON_H */

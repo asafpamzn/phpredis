@@ -33,17 +33,44 @@ extern zend_class_entry *redis_exception_ce;
 /**
  * Execute an XLEN command
  */
-int execute_xlen_command(const void *glide_client, const char *key, size_t key_len,
-                         long *output_value)
+int execute_xlen_command(zval *object, int argc, zval *return_value)
 {
-    /* Initialize the arguments structure */
-    x_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len = 0;
+    long length = 0;
 
-    /* Use the generic command execution framework */
-    return execute_x_generic_command(glide_client, XLen, &args, output_value, process_x_int_result);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize the arguments structure */
+        x_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+
+        /* Use the generic command execution framework */
+        int result = execute_x_generic_command(redis->glide_client, XLen, &args, &length, process_x_int_result);
+
+        if (result)
+        {
+            ZVAL_LONG(return_value, length);
+        }
+
+        return result;
+    }
+
+    return 0;
 }
 
 /**
@@ -251,243 +278,473 @@ int execute_xadd_command(zval *object, int argc, zval *return_value)
 /**
  * Execute an XTRIM command
  */
-int execute_xtrim_command(const void *glide_client, const char *key, size_t key_len,
-                          const char *strategy, size_t strategy_len, const char *threshold,
-                          size_t threshold_len, zval *options, long *output_value)
+int execute_xtrim_command(zval *object, int argc, zval *return_value)
 {
-    /* Initialize the arguments structure */
-    x_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.strategy = strategy;
-    args.strategy_len = strategy_len;
-    args.threshold = threshold;
-    args.threshold_len = threshold_len;
-    args.options = options;
+    redis_object *redis;
+    char *key = NULL, *threshold = NULL;
+    size_t key_len = 0, threshold_len = 0;
+    zend_bool approx = 0, minid = 0;
+    zend_long limit = -1;
+    long count = 0;
+    zval *z_options = NULL;
 
-    /* Parse options */
-    parse_x_trim_options(options, &args.trim_opts);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss|bbl",
+                                     &object, redis_ce, &key, &key_len,
+                                     &threshold, &threshold_len, &approx, &minid, &limit) == FAILURE)
+    {
+        return 0;
+    }
 
-    /* Use the generic command execution framework */
-    return execute_x_generic_command(glide_client, XTrim, &args, output_value, process_x_int_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Determine strategy based on minid flag */
+        const char *strategy = minid ? "MINID" : "MAXLEN";
+        size_t strategy_len = minid ? sizeof("MINID") - 1 : sizeof("MAXLEN") - 1;
+
+        /* Create options array if we have approx or limit */
+        if (approx || limit >= 0)
+        {
+            z_options = emalloc(sizeof(zval));
+            array_init(z_options);
+
+            if (approx)
+            {
+                add_assoc_bool(z_options, "APPROXIMATE", 1);
+            }
+
+            if (limit >= 0)
+            {
+                add_assoc_long(z_options, "LIMIT", limit);
+            }
+        }
+
+        /* Initialize the arguments structure */
+        x_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.strategy = strategy;
+        args.strategy_len = strategy_len;
+        args.threshold = threshold;
+        args.threshold_len = threshold_len;
+        args.options = z_options;
+
+        /* Parse options */
+        parse_x_trim_options(z_options, &args.trim_opts);
+
+        /* Execute the command */
+        int result = execute_x_generic_command(redis->glide_client, XTrim, &args, &count, process_x_int_result);
+
+        /* Clean up if we created options array */
+        if (z_options)
+        {
+            zval_dtor(z_options);
+            efree(z_options);
+        }
+
+        if (result)
+        {
+            ZVAL_LONG(return_value, count);
+        }
+
+        return result;
+    }
+
+    return 0;
 }
 
 /**
  * Execute an XRANGE command
  */
-int execute_xrange_command(const void *glide_client, const char *key, size_t key_len,
-                           const char *start, size_t start_len, const char *end, size_t end_len,
-                           zval *options, zval *return_value)
+int execute_xrange_command(zval *object, int argc, zval *return_value)
 {
-    /* Initialize the arguments structure */
-    x_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.start = start;
-    args.start_len = start_len;
-    args.end = end;
-    args.end_len = end_len;
-    args.options = options;
+    redis_object *redis;
+    char *key = NULL, *start = NULL, *end = NULL;
+    size_t key_len = 0, start_len = 0, end_len = 0;
+    zval *z_options = NULL;
+    long count = 0;
+    int options_created = 0;
 
-    /* Parse options */
-    parse_x_count_options(options, &args.range_opts);
+    /* Parse parameters - try different combinations based on argument count */
+    if (argc == 4)
+    {
+        /* xrange(key, start, end, count) */
+        if (zend_parse_method_parameters(argc, object, "Osssl",
+                                         &object, redis_ce, &key, &key_len,
+                                         &start, &start_len, &end, &end_len, &count) == FAILURE)
+        {
+            return 0;
+        }
 
-    /* Use the generic command execution framework */
-    return execute_x_generic_command(glide_client, XRange, &args, return_value, process_x_stream_result);
+        /* Create options array with COUNT */
+        z_options = emalloc(sizeof(zval));
+        array_init(z_options);
+        add_assoc_long(z_options, "COUNT", count);
+        options_created = 1;
+    }
+    else if (argc == 5)
+    {
+        /* xrange(key, start, end, count, options) */
+        if (zend_parse_method_parameters(argc, object, "Ossla",
+                                         &object, redis_ce, &key, &key_len,
+                                         &start, &start_len, &end, &end_len, &count, &z_options) == FAILURE)
+        {
+            return 0;
+        }
+
+        /* Add COUNT to existing options array or create new one */
+        if (z_options && Z_TYPE_P(z_options) == IS_ARRAY)
+        {
+            add_assoc_long(z_options, "COUNT", count);
+        }
+        else
+        {
+            z_options = emalloc(sizeof(zval));
+            array_init(z_options);
+            add_assoc_long(z_options, "COUNT", count);
+            options_created = 1;
+        }
+    }
+    else
+    {
+        /* xrange(key, start, end [, options]) - original format for backward compatibility */
+        if (zend_parse_method_parameters(argc, object, "Osss|a",
+                                         &object, redis_ce, &key, &key_len,
+                                         &start, &start_len, &end, &end_len, &z_options) == FAILURE)
+        {
+            return 0;
+        }
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize the arguments structure */
+        x_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.start = start;
+        args.start_len = start_len;
+        args.end = end;
+        args.end_len = end_len;
+        args.options = z_options;
+
+        /* Parse options */
+        parse_x_count_options(z_options, &args.range_opts);
+
+        /* Use the generic command execution framework */
+        int result = execute_x_generic_command(redis->glide_client, XRange, &args, return_value, process_x_stream_result);
+
+        /* Clean up if we created options array */
+        if (options_created)
+        {
+            zval_dtor(z_options);
+            efree(z_options);
+        }
+
+        return result;
+    }
+
+    return 0;
 }
 
 /**
  * Execute an XREVRANGE command
  */
-int execute_xrevrange_command(const void *glide_client, const char *key, size_t key_len,
-                              const char *end, size_t end_len, const char *start, size_t start_len,
-                              zval *options, zval *return_value)
+int execute_xrevrange_command(zval *object, int argc, zval *return_value)
 {
-    /* Initialize the arguments structure */
-    x_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    /* Note: For XREVRANGE, the function parameters are already swapped (end comes before start)
-     * But in the command arguments, we need to preserve the order expected by prepare_x_range_args
-     * So we assign them in the correct mapping for command construction */
-    args.start = end; /* end is actually the 'start' argument for XREVRANGE */
-    args.start_len = end_len;
-    args.end = start; /* start is actually the 'end' argument for XREVRANGE */
-    args.end_len = start_len;
-    args.options = options;
+    redis_object *redis;
+    char *key = NULL, *start = NULL, *end = NULL;
+    size_t key_len = 0, start_len = 0, end_len = 0;
+    zval *z_options = NULL;
+    long count = 0;
+    int options_created = 0;
 
-    /* Parse options */
-    parse_x_count_options(options, &args.range_opts);
-
-    /* Use the generic command execution framework */
-    return execute_x_generic_command(glide_client, XRevRange, &args, return_value, process_x_stream_result);
-}
-
-/**
- * Execute an XINFO command
- */
-int execute_xinfo_command(const void *glide_client, const char *subcommand, size_t subcommand_len,
-                          zval *args, int args_count, zval *return_value)
-{
-    enum RequestType command_type;
-
-    /* Initialize the arguments structure */
-    x_command_args_t x_args = {0};
-    x_args.glide_client = glide_client;
-    x_args.subcommand = subcommand;
-    x_args.subcommand_len = subcommand_len;
-    x_args.args = args;
-    x_args.args_count = args_count;
-
-    /* Determine which XINFO command to use based on subcommand */
-    if (strcasecmp(subcommand, "CONSUMERS") == 0)
+    /* Parse parameters - try different combinations based on argument count */
+    if (argc == 4)
     {
-        command_type = XInfoConsumers;
+        /* xrevrange(key, end, start, count) */
+        if (zend_parse_method_parameters(argc, object, "Osssl",
+                                         &object, redis_ce, &key, &key_len,
+                                         &end, &end_len, &start, &start_len, &count) == FAILURE)
+        {
+            return 0;
+        }
+
+        /* Create options array with COUNT */
+        z_options = emalloc(sizeof(zval));
+        array_init(z_options);
+        add_assoc_long(z_options, "COUNT", count);
+        options_created = 1;
     }
-    else if (strcasecmp(subcommand, "GROUPS") == 0)
+    else if (argc == 5)
     {
-        command_type = XInfoGroups;
-    }
-    else if (strcasecmp(subcommand, "STREAM") == 0)
-    {
-        command_type = XInfoStream;
+        /* xrevrange(key, end, start, count, options) */
+        if (zend_parse_method_parameters(argc, object, "Ossla",
+                                         &object, redis_ce, &key, &key_len,
+                                         &end, &end_len, &start, &start_len, &count, &z_options) == FAILURE)
+        {
+            return 0;
+        }
+
+        /* Add COUNT to existing options array or create new one */
+        if (z_options && Z_TYPE_P(z_options) == IS_ARRAY)
+        {
+            add_assoc_long(z_options, "COUNT", count);
+        }
+        else
+        {
+            z_options = emalloc(sizeof(zval));
+            array_init(z_options);
+            add_assoc_long(z_options, "COUNT", count);
+            options_created = 1;
+        }
     }
     else
     {
-        /* Unknown subcommand */
-        return 0;
-    }
-
-    /* Use the generic command execution framework */
-    return execute_x_generic_command(glide_client, command_type, &x_args, return_value, process_x_info_result);
-}
-
-/**
- * Execute an XGROUP command
- */
-int execute_xgroup_command(const void *glide_client, const char *subcommand, size_t subcommand_len,
-                           zval *args, int args_count, zval *return_value)
-{
-    /* Initialize the arguments structure */
-    x_command_args_t x_args = {0};
-    x_args.glide_client = glide_client;
-    x_args.subcommand = subcommand;
-    x_args.subcommand_len = subcommand_len;
-    x_args.args = args;
-    x_args.args_count = args_count;
-
-    /* Prepare arguments manually since XGROUP needs special handling */
-    uintptr_t *cmd_args = NULL;
-    unsigned long *args_len = NULL;
-    int arg_count;
-
-    /* Prepare arguments for the XGROUP command */
-    arg_count = prepare_x_group_args(&x_args, &cmd_args, &args_len);
-    if (arg_count <= 0)
-    {
-        return 0;
-    }
-
-    /* Prepend "XGROUP" to the command arguments */
-    uintptr_t *full_args = (uintptr_t *)emalloc((arg_count + 1) * sizeof(uintptr_t));
-    unsigned long *full_args_len = (unsigned long *)emalloc((arg_count + 1) * sizeof(unsigned long));
-
-    if (!full_args || !full_args_len)
-    {
-        if (cmd_args)
-            efree(cmd_args);
-        if (args_len)
-            efree(args_len);
-        if (full_args)
-            efree(full_args);
-        if (full_args_len)
-            efree(full_args_len);
-        return 0;
-    }
-
-    /* Add "XGROUP" as the first argument */
-    full_args[0] = (uintptr_t)"XGROUP";
-    full_args_len[0] = sizeof("XGROUP") - 1;
-
-    /* Copy the rest of the arguments */
-    for (int i = 0; i < arg_count; i++)
-    {
-        full_args[i + 1] = cmd_args[i];
-        full_args_len[i + 1] = args_len[i];
-    }
-
-    /* Free the original arguments arrays */
-    efree(cmd_args);
-    efree(args_len);
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        CustomCommand, /* XGROUP uses custom command type */
-        arg_count + 1, /* total arguments (including XGROUP) */
-        full_args,     /* arguments */
-        full_args_len  /* argument lengths */
-    );
-
-    /* Free arguments */
-    efree(full_args);
-    efree(full_args_len);
-
-    /* Process result */
-    int status = 0;
-    if (result)
-    {
-        if (!result->command_error && result->response)
+        /* xrevrange(key, end, start [, options]) - original format for backward compatibility */
+        if (zend_parse_method_parameters(argc, object, "Osss|a",
+                                         &object, redis_ce, &key, &key_len,
+                                         &end, &end_len, &start, &start_len, &z_options) == FAILURE)
         {
-            /* Process the result with our standard function */
-            status = process_x_group_result(result, return_value);
+            return 0;
         }
-        free_command_result(result);
     }
 
-    return status;
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize the arguments structure */
+        x_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        /* Note: For XREVRANGE, the function parameters are already swapped (end comes before start)
+         * But in the command arguments, we need to preserve the order expected by prepare_x_range_args
+         * So we assign them in the correct mapping for command construction */
+        args.start = end; /* end is actually the 'start' argument for XREVRANGE */
+        args.start_len = end_len;
+        args.end = start; /* start is actually the 'end' argument for XREVRANGE */
+        args.end_len = start_len;
+        args.options = z_options;
+
+        /* Parse options */
+        parse_x_count_options(z_options, &args.range_opts);
+
+        /* Use the generic command execution framework */
+        int result = execute_x_generic_command(redis->glide_client, XRevRange, &args, return_value, process_x_stream_result);
+
+        /* Clean up if we created options array */
+        if (options_created)
+        {
+            zval_dtor(z_options);
+            efree(z_options);
+        }
+
+        return result;
+    }
+
+    return 0;
 }
-
 /* Execute an XPENDING command using the Valkey Glide client */
-int execute_xpending_command(const void *glide_client, const char *key, size_t key_len,
-                             const char *group, size_t group_len, zval *options,
-                             zval *return_value)
+int execute_xpending_command(zval *object, int argc, zval *return_value)
 {
-    /* Initialize the arguments structure */
-    x_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.group = group;
-    args.group_len = group_len;
-    args.options = options;
+    redis_object *redis;
+    zval *z_options = NULL;
+    char *key = NULL, *group = NULL;
+    char *start = NULL, *end = NULL, *consumer = NULL;
+    size_t key_len = 0, group_len = 0;
+    size_t start_len = 0, end_len = 0, consumer_len = 0;
+    zend_long count = 0;
+    zend_bool options_created = 0;
 
-    /* Parse options for XPENDING command */
-    parse_x_pending_options(options, &args.pending_opts);
+    /* Handle different parameter formats based on argument count */
+    if (argc == 3 || argc == 2)
+    {
+        /* Format: xpending(key, group, options_array) */
+        if (zend_parse_method_parameters(argc, object, "Oss|a",
+                                         &object, redis_ce, &key, &key_len,
+                                         &group, &group_len, &z_options) == FAILURE)
+        {
+            return 0;
+        }
+    }
+    else if (argc == 5)
+    {
+        /* Format: xpending(key, group, start, end, count) */
+        if (zend_parse_method_parameters(argc, object, "Osssl",
+                                         &object, redis_ce, &key, &key_len,
+                                         &group, &group_len, &start, &start_len,
+                                         &end, &end_len, &count) == FAILURE)
+        {
+            return 0;
+        }
+    }
+    else if (argc == 6)
+    {
+        /* Format: xpending(key, group, start, end, count, consumer) */
+        if (zend_parse_method_parameters(argc, object, "Ossssls",
+                                         &object, redis_ce, &key, &key_len,
+                                         &group, &group_len, &start, &start_len,
+                                         &end, &end_len, &count, &consumer, &consumer_len) == FAILURE)
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        /* Invalid number of arguments */
+        return 0;
+    }
 
-    /* Use the generic command execution framework */
-    return execute_x_generic_command(glide_client, XPending, &args, return_value, process_x_pending_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* If we got the extended format (start, end, count), convert to options array */
+        if (z_options == NULL && start != NULL)
+        {
+            options_created = 1;
+            z_options = emalloc(sizeof(zval));
+            array_init(z_options);
+
+            /* Add START, END to options array */
+            add_assoc_stringl(z_options, "START", start, start_len);
+            add_assoc_stringl(z_options, "END", end, end_len);
+            add_assoc_long(z_options, "COUNT", count);
+
+            /* Add CONSUMER to options array if provided */
+            if (consumer)
+            {
+                add_assoc_stringl(z_options, "CONSUMER", consumer, consumer_len);
+            }
+        }
+
+        /* Initialize the arguments structure */
+        x_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.group = group;
+        args.group_len = group_len;
+        args.options = z_options;
+
+        /* Parse options for XPENDING command */
+        parse_x_pending_options(z_options, &args.pending_opts);
+
+        /* Execute the command */
+        int result = execute_x_generic_command(redis->glide_client, XPending, &args, return_value, process_x_pending_result);
+
+        /* Clean up if we created options array */
+        if (options_created && z_options)
+        {
+            zval_dtor(z_options);
+            efree(z_options);
+        }
+
+        return result;
+    }
+
+    return 0;
 }
 
 /* Execute an XREAD command using the Valkey Glide client */
-int execute_xread_command(const void *glide_client, zval *streams, zval *ids,
-                          zval *options, zval *return_value)
+int execute_xread_command(zval *object, int argc, zval *return_value)
 {
-    /* Initialize the arguments structure */
-    x_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.streams = streams;
-    args.ids = ids;
-    args.options = options;
+    redis_object *redis;
+    zval *z_streams_and_ids, *z_options = NULL;
+    long count = -1, block = -1;
 
-    /* Parse options for XREAD command */
-    parse_x_read_options(options, &args.read_opts);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oa|ll",
+                                     &object, redis_ce, &z_streams_and_ids, &count, &block) == FAILURE)
+    {
+        return 0;
+    }
 
-    /* Use the generic command execution framework */
-    return execute_x_generic_command(glide_client, XRead, &args, return_value, process_x_stream_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Convert associative array to separate streams and ids arrays */
+        zval z_streams, z_ids;
+        array_init(&z_streams);
+        array_init(&z_ids);
+
+        zend_string *stream_key;
+        zval *stream_id;
+        ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(z_streams_and_ids), stream_key, stream_id)
+        {
+            if (stream_key)
+            {
+                add_next_index_str(&z_streams, zend_string_copy(stream_key));
+                if (Z_TYPE_P(stream_id) != IS_STRING)
+                {
+                    convert_to_string(stream_id);
+                }
+                add_next_index_str(&z_ids, zend_string_copy(Z_STR_P(stream_id)));
+            }
+        }
+        ZEND_HASH_FOREACH_END();
+
+        /* Create options array if count or block were specified */
+        if (count >= 0 || block >= 0)
+        {
+            z_options = emalloc(sizeof(zval));
+            array_init(z_options);
+
+            if (count >= 0)
+            {
+                add_assoc_long(z_options, "COUNT", count);
+            }
+            if (block >= 0)
+            {
+                add_assoc_long(z_options, "BLOCK", block);
+            }
+        }
+
+        /* Initialize the arguments structure */
+        x_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.streams = &z_streams;
+        args.ids = &z_ids;
+        args.options = z_options;
+
+        /* Parse options for XREAD command */
+        parse_x_read_options(z_options, &args.read_opts);
+
+        /* Execute the command */
+        int result = execute_x_generic_command(redis->glide_client, XRead, &args, return_value, process_x_stream_result);
+
+        /* Clean up */
+        zval_dtor(&z_streams);
+        zval_dtor(&z_ids);
+        if (z_options)
+        {
+            zval_dtor(z_options);
+            efree(z_options);
+        }
+
+        return result;
+    }
+
+    return 0;
 }
 
 /* Execute an XREADGROUP command using the Valkey Glide client */
@@ -709,27 +966,19 @@ int execute_xautoclaim_command(zval *object, int argc, zval *return_value)
 }
 
 /**
- * Helper function to process XCLAIM results
+ * Execute an XINFO command
  */
-static int process_xclaim_result_adapter(CommandResult *result, void *output, int justid)
-{
-    return process_x_claim_result(result, output, justid);
-}
-
-/* Execute an XCLAIM command using the Valkey Glide client */
-int execute_xclaim_command(zval *object, int argc, zval *return_value)
+int execute_xinfo_command(zval *object, int argc, zval *return_value)
 {
     redis_object *redis;
-    char *key = NULL, *group = NULL, *consumer = NULL;
-    size_t key_len = 0, group_len = 0, consumer_len = 0;
-    long min_idle_time = 0;
-    zval *z_ids, *z_options = NULL;
+    char *op = NULL;
+    size_t op_len = 0;
+    zval *z_args;
+    int args_count;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(argc, object, "Osssla|a",
-                                     &object, redis_ce, &key, &key_len,
-                                     &group, &group_len, &consumer, &consumer_len,
-                                     &min_idle_time, &z_ids, &z_options) == FAILURE)
+    if (zend_parse_method_parameters(argc, object, "Os*",
+                                     &object, redis_ce, &op, &op_len, &z_args, &args_count) == FAILURE)
     {
         return 0;
     }
@@ -741,59 +990,276 @@ int execute_xclaim_command(zval *object, int argc, zval *return_value)
     if (redis->glide_client)
     {
         /* Initialize the arguments structure */
-        x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
-        args.key = key;
-        args.key_len = key_len;
-        args.group = group;
-        args.group_len = group_len;
-        args.consumer = consumer;
-        args.consumer_len = consumer_len;
-        args.min_idle_time = min_idle_time;
-        args.ids = z_ids;
-        args.id_count = zend_hash_num_elements(Z_ARRVAL_P(z_ids));
-        args.options = z_options;
+        x_command_args_t args_struct = {0};
+        args_struct.glide_client = redis->glide_client;
+        args_struct.subcommand = op;
+        args_struct.subcommand_len = op_len;
+        args_struct.args = z_args;
+        args_struct.args_count = args_count;
 
-        /* Parse options for XCLAIM command */
-        parse_x_claim_options(z_options, &args.claim_opts);
-
-        /* For XCLAIM, we need to implement a custom result processor */
-        int status = 0;
-
-        /* Use direct command execution so we can extract the JUSTID flag */
-        uintptr_t *cmd_args = NULL;
-        unsigned long *args_len = NULL;
-        int arg_count = 0;
-
-        /* Prepare arguments */
-        arg_count = prepare_x_claim_args(&args, &cmd_args, &args_len);
-        if (arg_count <= 0)
+        /* Parse the XINFO command and extract arguments */
+        enum RequestType command_type;
+        if (strcasecmp(op, "CONSUMERS") == 0)
         {
+            command_type = XInfoConsumers;
+        }
+        else if (strcasecmp(op, "GROUPS") == 0)
+        {
+            command_type = XInfoGroups;
+        }
+        else if (strcasecmp(op, "STREAM") == 0)
+        {
+            command_type = XInfoStream;
+        }
+        else
+        {
+            /* Unsupported subcommand */
             return 0;
         }
 
         /* Execute the command */
-        CommandResult *result = execute_command(
-            redis->glide_client,
-            XClaim,
-            arg_count,
-            cmd_args,
-            args_len);
+        return execute_x_generic_command(redis->glide_client, command_type, &args_struct, return_value, process_x_info_result);
+    }
 
-        /* Free command args */
-        free_command_args(cmd_args, args_len);
+    return 0;
+}
 
-        /* Process result */
-        if (result)
+/**
+ * Execute an XGROUP command
+ */
+int execute_xgroup_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *op = NULL;
+    size_t op_len = 0;
+    zval *z_args = NULL;
+    int args_count = 0;
+    int result = 0;
+
+    /* Parse using flexible parameter parsing to match PHP signature */
+    char *key = NULL, *group = NULL, *id_or_consumer = NULL;
+    size_t key_len = 0, group_len = 0, id_or_consumer_len = 0;
+    zend_bool mkstream = 0;
+    zend_long entries_read = -2;
+
+    /* Parse method parameters with defaults matching PHP signature */
+    if (zend_parse_method_parameters(argc, object, "Os|s!s!s!bl",
+                                     &object, redis_ce, &op, &op_len,
+                                     &key, &key_len, &group, &group_len,
+                                     &id_or_consumer, &id_or_consumer_len,
+                                     &mkstream, &entries_read) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Determine the command type based on the operation */
+        enum RequestType command_type;
+
+        /* Initialize the arguments structure */
+        x_command_args_t args_struct = {0};
+        args_struct.glide_client = redis->glide_client;
+        args_struct.subcommand = op;
+        args_struct.subcommand_len = op_len;
+
+        /* We need to handle parameters differently based on operation */
+        if (strcasecmp(op, "CREATE") == 0)
         {
-            if (!result->command_error && result->response)
+            /* Validate required parameters for CREATE */
+            if (!key || !group || !id_or_consumer)
             {
-                status = process_xclaim_result_adapter(result, return_value, args.claim_opts.justid);
+                return 0;
             }
-            free_command_result(result);
+
+            printf("Parsed XGROUP CREATE with key: %s, group: %s, id: %s, mkstream: %d, entries_read: %ld\n",
+                   key, group, id_or_consumer, mkstream, entries_read);
+            /* Allocate memory for arguments */
+            int max_args = 3 + (mkstream ? 1 : 0) + (entries_read != -2 ? 2 : 0);
+            z_args = emalloc(max_args * sizeof(zval));
+
+            if (!z_args)
+            {
+                return 0;
+            }
+
+            /* Add key, group, id */
+            ZVAL_STRINGL(&z_args[args_count], key, key_len);
+            args_count++;
+
+            ZVAL_STRINGL(&z_args[args_count], group, group_len);
+            args_count++;
+
+            ZVAL_STRINGL(&z_args[args_count], id_or_consumer, id_or_consumer_len);
+            args_count++;
+
+            /* Add MKSTREAM if specified */
+            if (mkstream)
+            {
+                ZVAL_STRING(&z_args[args_count], "MKSTREAM");
+                args_count++;
+            }
+
+            /* Add ENTRIESREAD and value if specified */
+            if (entries_read != -2)
+            {
+                ZVAL_STRING(&z_args[args_count], "ENTRIESREAD");
+                args_count++;
+
+                ZVAL_LONG(&z_args[args_count], entries_read);
+                args_count++;
+            }
+
+            command_type = XGroupCreate;
+        }
+        else if (strcasecmp(op, "SETID") == 0)
+        {
+            /* Validate required parameters for SETID */
+            if (!key || !group || !id_or_consumer)
+            {
+                return 0;
+            }
+
+            /* Allocate memory for arguments */
+            int max_args = 3 + (entries_read != -2 ? 2 : 0);
+            z_args = emalloc(max_args * sizeof(zval));
+
+            if (!z_args)
+            {
+                return 0;
+            }
+
+            /* Add key, group, id */
+            ZVAL_STRINGL(&z_args[args_count], key, key_len);
+            args_count++;
+
+            ZVAL_STRINGL(&z_args[args_count], group, group_len);
+            args_count++;
+
+            ZVAL_STRINGL(&z_args[args_count], id_or_consumer, id_or_consumer_len);
+            args_count++;
+
+            /* Add ENTRIESREAD and value if specified */
+            if (entries_read != -2)
+            {
+                ZVAL_STRING(&z_args[args_count], "ENTRIESREAD");
+                args_count++;
+
+                ZVAL_LONG(&z_args[args_count], entries_read);
+                args_count++;
+            }
+
+            command_type = XGroupSetId;
+        }
+        else if (strcasecmp(op, "DESTROY") == 0)
+        {
+            /* Validate required parameters for DESTROY */
+            if (!key || !group)
+            {
+                return 0;
+            }
+
+            /* Allocate memory for arguments */
+            z_args = emalloc(2 * sizeof(zval));
+
+            if (!z_args)
+            {
+                return 0;
+            }
+
+            /* Add key, group */
+            ZVAL_STRINGL(&z_args[args_count], key, key_len);
+            args_count++;
+
+            ZVAL_STRINGL(&z_args[args_count], group, group_len);
+            args_count++;
+
+            command_type = XGroupDestroy;
+        }
+        else if (strcasecmp(op, "CREATECONSUMER") == 0)
+        {
+            /* Validate required parameters for CREATECONSUMER */
+            if (!key || !group || !id_or_consumer)
+            {
+                return 0;
+            }
+
+            /* Allocate memory for arguments */
+            z_args = emalloc(3 * sizeof(zval));
+
+            if (!z_args)
+            {
+                return 0;
+            }
+
+            /* Add key, group, consumer */
+            ZVAL_STRINGL(&z_args[args_count], key, key_len);
+            args_count++;
+
+            ZVAL_STRINGL(&z_args[args_count], group, group_len);
+            args_count++;
+
+            ZVAL_STRINGL(&z_args[args_count], id_or_consumer, id_or_consumer_len);
+            args_count++;
+
+            command_type = XGroupCreateConsumer;
+        }
+        else if (strcasecmp(op, "DELCONSUMER") == 0)
+        {
+            /* Validate required parameters for DELCONSUMER */
+            if (!key || !group || !id_or_consumer)
+            {
+                return 0;
+            }
+
+            /* Allocate memory for arguments */
+            z_args = emalloc(3 * sizeof(zval));
+
+            if (!z_args)
+            {
+                return 0;
+            }
+
+            /* Add key, group, consumer */
+            ZVAL_STRINGL(&z_args[args_count], key, key_len);
+            args_count++;
+
+            ZVAL_STRINGL(&z_args[args_count], group, group_len);
+            args_count++;
+
+            ZVAL_STRINGL(&z_args[args_count], id_or_consumer, id_or_consumer_len);
+            args_count++;
+
+            command_type = XGroupDelConsumer;
+        }
+        else
+        {
+            /* Unsupported subcommand */
+            return 0;
         }
 
-        return status;
+        /* Set the args in the args_struct */
+        args_struct.args = z_args;
+        args_struct.args_count = args_count;
+
+        /* Execute the command */
+        result = execute_x_generic_command(redis->glide_client, command_type, &args_struct, return_value, process_x_group_result);
+
+        /* Clean up */
+        for (int i = 0; i < args_count; i++)
+        {
+            zval_dtor(&z_args[i]);
+        }
+        if (z_args)
+        {
+            efree(z_args);
+        }
+
+        return result;
     }
 
     return 0;

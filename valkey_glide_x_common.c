@@ -453,6 +453,13 @@ int execute_x_generic_command(const void *glide_client,
     /* Prepare arguments based on command type */
     switch (cmd_type)
     {
+    case XGroupCreate:
+    case XGroupCreateConsumer:
+    case XGroupDelConsumer:
+    case XGroupDestroy:
+    case XGroupSetId:
+        arg_count = prepare_x_group_args(args, &cmd_args, &args_len);
+        break;
     case XLen:
         arg_count = prepare_x_len_args(args, &cmd_args, &args_len);
         break;
@@ -470,6 +477,7 @@ int execute_x_generic_command(const void *glide_client,
         break;
     case XRange:
     case XRevRange:
+
         arg_count = prepare_x_range_args(args, &cmd_args, &args_len);
         break;
     case XPending:
@@ -479,6 +487,7 @@ int execute_x_generic_command(const void *glide_client,
         arg_count = prepare_x_read_args(args, &cmd_args, &args_len);
         break;
     case XReadGroup:
+
         arg_count = prepare_x_readgroup_args(args, &cmd_args, &args_len);
         break;
     case XAutoClaim:
@@ -1430,20 +1439,17 @@ int prepare_x_group_args(x_command_args_t *args, uintptr_t **args_out,
         return 0;
     }
 
-    /* Calculate total args: subcommand + args */
-    unsigned long arg_count = 1 + args->args_count;
-
     /* Allocate memory for arguments */
-    if (!allocate_command_args(arg_count, args_out, args_len_out))
+    if (!allocate_command_args(args->args_count, args_out, args_len_out))
     {
         return 0;
     }
 
     /* Set subcommand as first argument */
     unsigned int arg_idx = 0;
-    (*args_out)[arg_idx] = (uintptr_t)args->subcommand;
-    (*args_len_out)[arg_idx] = args->subcommand_len;
-    arg_idx++;
+    ////   (*args_out)[arg_idx] = (uintptr_t)args->subcommand;
+    //    (*args_len_out)[arg_idx] = args->subcommand_len;
+    //  arg_idx++;
 
     /* Add all additional arguments */
     for (int i = 0; i < args->args_count; i++)
@@ -1461,7 +1467,7 @@ int prepare_x_group_args(x_command_args_t *args, uintptr_t **args_out,
         arg_idx++;
     }
 
-    return arg_count;
+    return args->args_count;
 }
 
 /**
