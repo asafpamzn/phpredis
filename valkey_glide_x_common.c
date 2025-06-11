@@ -716,9 +716,10 @@ int process_x_readgroup_result(CommandResult *result, void *output)
  */
 int process_x_claim_result(CommandResult *result, void *output)
 {
-    zval *return_value = (zval *)output;
+    x_claim_result_context_t *ctx = (x_claim_result_context_t *)output;
+    zval *return_value = ctx->return_value;
     int status = 0;
-    int justid = 0; // TODO
+    int justid = ctx->claim_opts->justid;
     if (justid)
     {
         /* If JUSTID was specified, return an array of IDs */

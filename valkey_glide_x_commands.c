@@ -941,8 +941,12 @@ int execute_xclaim_command(zval *object, int argc, zval *return_value)
         /* Parse options for XCLAIM command */
         parse_x_claim_options(z_options, &args.claim_opts);
 
+              x_claim_result_context_t result_context = {0};
+        result_context.return_value = return_value;
+        result_context.claim_opts = &args.claim_opts;
+
         /* Use the generic command execution framework */
-        return execute_x_generic_command(redis->glide_client, XClaim, &args, return_value, process_x_claim_result);
+        return execute_x_generic_command(redis->glide_client, XClaim, &args, &result_context, process_x_claim_result);
     }
 
     return 0;
