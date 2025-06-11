@@ -28,6 +28,7 @@
 #include "redis_glide.h"
 #include "valkey_glide_z_common.h"
 #include "valkey_glide_geo_common.h"
+#include "valkey_glide_x_common.h"
 
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
@@ -282,4 +283,60 @@ GEOSEARCH_METHOD_IMPL(Redis)
 
 /* {{{ proto long Redis::geosearchstore(string dst, string src, array|string from, array|string by, string|null radius_unit, string|null count, string|null sorting, string|null storedist) */
 GEOSEARCHSTORE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::xack(string key, string group, array ids) */
+XACK_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string Redis::xadd(string key, string id, array field_values [, int maxlen [, bool approximate]]) */
+XADD_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::xautoclaim(string key, string group, string consumer, int min_idle_time, string start [, array options]) */
+XAUTOCLAIM_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::xclaim(string key, string group, string consumer, int min_idle_time, array ids [, array options]) */
+XCLAIM_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::xdel(string key, array ids) */
+XDEL_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto mixed Redis::xgroup(string op, [string key, string group, ...]) */
+XGROUP_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto mixed Redis::xinfo(string op, [string key, string group, ...]) */
+XINFO_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::xlen(string key) */
+XLEN_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::xpending(string key, string group [, array options OR string start, string end, int count [, string consumer]]) */
+XPENDING_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::xrange(string key, string start, string end [, int count [, array options]]) */
+XRANGE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::xread(array streams_and_ids [, int count [, int block]]) */
+XREAD_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::xreadgroup(string group, string consumer, array streams [, int count [, array options]]) */
+XREADGROUP_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::xrevrange(string key, string end, string start [, int count [, array options]]) */
+XREVRANGE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::xtrim(string key, string threshold, bool approx = false, bool minid = false, int limit = -1) */
+XTRIM_METHOD_IMPL(Redis)
 /* }}} */
