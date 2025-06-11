@@ -23,7 +23,6 @@
 
 extern int execute_xadd_command(zval *object, int argc, zval *return_value);
 
-extern int execute_xclaim_command(zval *object, int argc, zval *return_value);
 extern int execute_xdel_command(zval *object, int argc, zval *return_value);
 extern int execute_xgroup_command(zval *object, int argc, zval *return_value);
 extern int execute_xinfo_command(zval *object, int argc, zval *return_value);

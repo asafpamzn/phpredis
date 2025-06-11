@@ -350,17 +350,6 @@ int execute_xinfo_command(zval *object, int argc, zval *return_value);
         RETURN_FALSE;                                                             \
     }
 
-#define XCLAIM_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xclaim)                                            \
-    {                                                                         \
-        if (execute_xclaim_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                     \
-            return;                                                           \
-        }                                                                     \
-        zval_dtor(return_value);                                              \
-        RETURN_FALSE;                                                         \
-    }
-
 #define XDEL_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, xdel)                                            \
     {                                                                       \
