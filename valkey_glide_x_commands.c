@@ -900,6 +900,54 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value)
     return 0;
 }
 
+/* Execute an XCLAIM command using the Valkey Glide client */
+int execute_xclaim_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL, *group = NULL, *consumer = NULL;
+    size_t key_len = 0, group_len = 0, consumer_len = 0;
+    long min_idle_time = 0;
+    zval *z_ids = NULL, *z_options = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osssla|a",
+                                     &object, redis_ce, &key, &key_len,
+                                     &group, &group_len, &consumer, &consumer_len,
+                                     &min_idle_time, &z_ids, &z_options) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Initialize the arguments structure */
+        x_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.group = group;
+        args.group_len = group_len;
+        args.consumer = consumer;
+        args.consumer_len = consumer_len;
+        args.min_idle_time = min_idle_time;
+        args.ids = z_ids; /* Array of IDs to claim */
+        args.id_count = zend_hash_num_elements(Z_ARRVAL_P(z_ids));
+        args.options = z_options;
+
+        /* Parse options for XCLAIM command */
+        parse_x_claim_options(z_options, &args.claim_opts);
+
+        /* Use the generic command execution framework */
+        return execute_x_generic_command(redis->glide_client, XClaim, &args, return_value, process_x_claim_result);
+    }
+
+    return 0;
+}
+
 /* Execute an XAUTOCLAIM command using the Valkey Glide client */
 int execute_xautoclaim_command(zval *object, int argc, zval *return_value)
 {
@@ -1076,7 +1124,7 @@ int execute_xgroup_command(zval *object, int argc, zval *return_value)
                 return 0;
             }
 
-               /* Allocate memory for arguments */
+            /* Allocate memory for arguments */
             int max_args = 3 + (mkstream ? 1 : 0) + (entries_read != -2 ? 2 : 0);
             z_args = emalloc(max_args * sizeof(zval));
 

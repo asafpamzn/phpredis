@@ -6204,7 +6204,7 @@ class Redis_Test extends TestSuite {
         foreach ([0, 100] as $min_idle_time) 
         
         {
-            foreach ([true] as $justid) {
+            foreach ([false, true] as $justid) {
                 foreach ([0, 10] as $retrycount) 
                 {
                     /* We need to test not passing TIME/IDLE as well as passing either */
@@ -6237,10 +6237,10 @@ class Redis_Test extends TestSuite {
                         if ($justid) $opts[] = 'JUSTID';
                         if ($retrycount) $opts['RETRYCOUNT'] = $retrycount;
                         if ($tvalue !== NULL) $opts[$ttype] = $tvalue;
-
+                        
                         /* Now have pavlo XCLAIM them */
                         $cids = $this->redis->xClaim('s', 'group1', 'Pavlo', $min_idle_time, $oids, $opts);
-                    
+                        
                         if ( ! $justid) $cids = array_keys($cids);
                        
                         if ($min_idle_time == 0) {
@@ -6250,10 +6250,11 @@ class Redis_Test extends TestSuite {
                              * assigned to a PEL group */
                             $opts[] = 'FORCE';
                             $freturn = $this->redis->xClaim('f', 'group1', 'Test', 0, $fids, $opts);
-                 
+                            
                             if ( ! $justid) $freturn = array_keys($freturn);
                             
                             $this->assertEquals($freturn, $fids);
+                         
                             if ($retrycount || $tvalue !== NULL) {
                                 $pending = $this->redis->xPending('s', 'group1', 0, '+', 1, 'Pavlo');
 

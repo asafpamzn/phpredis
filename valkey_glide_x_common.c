@@ -714,11 +714,11 @@ int process_x_readgroup_result(CommandResult *result, void *output)
 /**
  * Process an XCLAIM result from a command
  */
-int process_x_claim_result(CommandResult *result, void *output, int justid)
+int process_x_claim_result(CommandResult *result, void *output)
 {
     zval *return_value = (zval *)output;
     int status = 0;
-
+    int justid = 0; // TODO
     if (justid)
     {
         /* If JUSTID was specified, return an array of IDs */

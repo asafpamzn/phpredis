@@ -270,7 +270,7 @@ int process_x_add_result(CommandResult *result, void *output);
 int process_x_group_result(CommandResult *result, void *output);
 int process_x_pending_result(CommandResult *result, void *output);
 int process_x_readgroup_result(CommandResult *result, void *output);
-int process_x_claim_result(CommandResult *result, void *output, int justid);
+int process_x_claim_result(CommandResult *result, void *output);
 int process_x_autoclaim_result(CommandResult *result, void *output);
 int process_x_info_result(CommandResult *result, void *output);
 
@@ -299,6 +299,7 @@ int execute_xread_command(zval *object, int argc, zval *return_value);
 int execute_xreadgroup_command(zval *object, int argc, zval *return_value);
 
 int execute_xautoclaim_command(zval *object, int argc, zval *return_value);
+
 int execute_xclaim_command(zval *object, int argc, zval *return_value);
 
 int execute_xgroup_command(zval *object, int argc, zval *return_value);
