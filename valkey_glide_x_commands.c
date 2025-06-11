@@ -1076,9 +1076,7 @@ int execute_xgroup_command(zval *object, int argc, zval *return_value)
                 return 0;
             }
 
-            printf("Parsed XGROUP CREATE with key: %s, group: %s, id: %s, mkstream: %d, entries_read: %ld\n",
-                   key, group, id_or_consumer, mkstream, entries_read);
-            /* Allocate memory for arguments */
+               /* Allocate memory for arguments */
             int max_args = 3 + (mkstream ? 1 : 0) + (entries_read != -2 ? 2 : 0);
             z_args = emalloc(max_args * sizeof(zval));
 
@@ -1186,6 +1184,10 @@ int execute_xgroup_command(zval *object, int argc, zval *return_value)
             if (!key || !group || !id_or_consumer)
             {
                 return 0;
+            }
+            if (argc > 4)
+            {
+                return 0; // Invalid number of arguments for CREATECONSUMER
             }
 
             /* Allocate memory for arguments */
