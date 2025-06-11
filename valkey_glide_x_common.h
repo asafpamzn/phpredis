@@ -285,16 +285,11 @@ int execute_x_generic_command(const void *glide_client,
 int execute_xlen_command(const void *glide_client, const char *key, size_t key_len,
                          long *output_value);
 
-int execute_xdel_command(const void *glide_client, const char *key, size_t key_len,
-                         zval *ids, int id_count, long *output_value);
-
-int execute_xack_command(const void *glide_client, const char *key, size_t key_len,
-                         const char *group, size_t group_len, zval *ids, int id_count,
-                         long *output_value);
-
-int execute_xadd_command(const void *glide_client, const char *key, size_t key_len,
-                         const char *id, size_t id_len, zval *field_values, int fv_count,
-                         zval *options, zval *return_value);
+int execute_xack_command(zval *object, int argc, zval *return_value);
+int execute_xadd_command(zval *object, int argc, zval *return_value);
+int execute_xautoclaim_command(zval *object, int argc, zval *return_value);
+int execute_xclaim_command(zval *object, int argc, zval *return_value);
+int execute_xdel_command(zval *object, int argc, zval *return_value);
 
 int execute_xtrim_command(const void *glide_client, const char *key, size_t key_len,
                           const char *strategy, size_t strategy_len, const char *threshold,
@@ -317,16 +312,6 @@ int execute_xread_command(const void *glide_client, zval *streams, zval *ids,
 
 int execute_xreadgroup_command(zval *object, int argc, zval *return_value);
 
-int execute_xautoclaim_command(const void *glide_client, const char *key, size_t key_len,
-                               const char *group, size_t group_len, const char *consumer,
-                               size_t consumer_len, long min_idle_time, const char *start,
-                               size_t start_len, zval *options, zval *return_value);
-
-int execute_xclaim_command(const void *glide_client, const char *key, size_t key_len,
-                           const char *group, size_t group_len, const char *consumer,
-                           size_t consumer_len, long min_idle_time, zval *ids, int id_count,
-                           zval *options, zval *return_value);
-
 int execute_xgroup_command(const void *glide_client, const char *subcommand, size_t subcommand_len,
                            zval *args, int args_count, zval *return_value);
 
@@ -346,6 +331,59 @@ int execute_xinfo_command(const void *glide_client, const char *subcommand, size
         }                                                                         \
         zval_dtor(return_value);                                                  \
         RETURN_FALSE;                                                             \
+    }
+#define XACK_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xack)                                            \
+    {                                                                       \
+        if (execute_xack_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+#define XADD_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xadd)                                            \
+    {                                                                       \
+        if (execute_xadd_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define XAUTOCLAIM_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xautoclaim)                                            \
+    {                                                                             \
+        if (execute_xautoclaim_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        zval_dtor(return_value);                                                  \
+        RETURN_FALSE;                                                             \
+    }
+
+#define XCLAIM_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xclaim)                                            \
+    {                                                                         \
+        if (execute_xclaim_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define XDEL_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, xdel)                                            \
+    {                                                                       \
+        if (execute_xdel_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
     }
 
 #endif /* VALKEY_GLIDE_X_COMMON_H */

@@ -20,11 +20,7 @@
 #include "valkey_glide_x_common.h"
 
 /* Forward declarations for the Glide execute functions */
-extern int execute_xack_command(zval *object, int argc, zval *return_value);
-extern int execute_xadd_command(zval *object, int argc, zval *return_value);
-extern int execute_xautoclaim_command(zval *object, int argc, zval *return_value);
-extern int execute_xclaim_command(zval *object, int argc, zval *return_value);
-extern int execute_xdel_command(zval *object, int argc, zval *return_value);
+
 extern int execute_xgroup_command(const void *glide_client, const char *op, size_t op_len,
                                   zval *args, int args_count, zval *return_value);
 extern int execute_xinfo_command(const void *glide_client, const char *op, size_t op_len,
