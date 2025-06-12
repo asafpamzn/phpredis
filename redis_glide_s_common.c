@@ -537,10 +537,31 @@ int process_s_bool_response(CommandResult *result, s_command_args_t *args, zval 
  */
 int process_s_set_response(CommandResult *result, s_command_args_t *args, zval *return_value)
 {
-    if (result && result->response && !result->command_error && return_value)
+    if (!result || !return_value)
     {
-        return handle_set_response(result, return_value);
+        return 0;
     }
+
+    /* Check if there was an error */
+    if (result->command_error)
+    {
+        return 0;
+    }
+
+    /* Process the result */
+    if (result->response)
+    {
+        if (result->response->response_type == Null)
+        {
+            ZVAL_NULL(return_value);
+            return 0;
+        }
+        else if (result->response->response_type == Sets)
+        {
+            return command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+        }
+    }
+
     return 0;
 }
 

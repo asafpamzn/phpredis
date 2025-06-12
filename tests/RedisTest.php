@@ -1603,7 +1603,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(1, $this->redis->scard('{set}0'));
         $this->assertEquals(1, $this->redis->scard('{set}1'));
 
-        $this->assertEquals(['val2'], $this->redis->smembers('{set}0'));
+        $this->assertEquals(['val2'], $this->redis->smembers('{set}0'));      
         $this->assertEquals(['val'], $this->redis->smembers('{set}1'));
     }
 
