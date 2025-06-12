@@ -172,8 +172,7 @@ int convert_single_zval_to_string(zval *input, const char **str_out, size_t *len
 char *alloc_long_string(long value, size_t *len_out);
 
 /* Specific command implementations */
-int execute_sadd_command(const void *glide_client, const char *key, size_t key_len,
-                         zval *members, int members_count, long *output_value);
+int execute_sadd_command(zval *object, int argc, zval *return_value);
 int execute_sadd_array_command(const void *glide_client, const char *key, size_t key_len,
                                HashTable *members_ht, long *output_value);
 int execute_scard_command(const void *glide_client, const char *key, size_t key_len,
@@ -260,5 +259,20 @@ int execute_sscan_command(const void *glide_client, const char *key, size_t key_
  */
 #define EXECUTE_S_COMMAND(client, cmd_type, category, response_type, args, return_val) \
     execute_s_generic_command((client), (cmd_type), (category), (response_type), &(args), (return_val))
+
+/* ====================================================================
+ * S COMMAND MACROS
+ * ==================================================================== */
+
+#define SADD_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sAdd)                                            \
+    {                                                                       \
+        if (execute_sadd_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
 
 #endif /* REDIS_GLIDE_S_COMMON_H */

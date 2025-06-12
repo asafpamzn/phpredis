@@ -17,10 +17,9 @@
 #include "php_redis.h"
 
 #include "redis_glide.h"
+#include "redis_glide_s_common.h"
 
 /* Forward declarations for the Glide execute functions */
-extern int execute_sadd_command(const void *glide_client, const char *key, size_t key_len,
-                                zval *members, int members_count, long *output_value);
 extern int execute_sadd_array_command(const void *glide_client, const char *key, size_t key_len,
                                       HashTable *members_ht, long *output_value);
 extern int execute_scard_command(const void *glide_client, const char *key, size_t key_len,
@@ -66,43 +65,7 @@ extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
 /* {{{ proto long Redis::sAdd(string key, string member, ...) */
-PHP_METHOD(Redis, sAdd)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_args;
-    int argc = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os+",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the SADD command using the Glide client */
-        long result_value;
-        if (execute_sadd_command(redis->glide_client, key, key_len,
-                                 z_args, argc, &result_value))
-        {
-            /* Return the number of added elements */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+SADD_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::sAddArray(string key, array values) */

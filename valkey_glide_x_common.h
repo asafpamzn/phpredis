@@ -379,17 +379,6 @@ int execute_xinfo_command(zval *object, int argc, zval *return_value);
         RETURN_FALSE;                                                       \
     }
 
-#define XADD_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xadd)                                            \
-    {                                                                       \
-        if (execute_xadd_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                   \
-            return;                                                         \
-        }                                                                   \
-        zval_dtor(return_value);                                            \
-        RETURN_FALSE;                                                       \
-    }
-
 #define XAUTOCLAIM_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, xautoclaim)                                            \
     {                                                                             \

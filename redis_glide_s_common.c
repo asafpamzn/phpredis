@@ -16,6 +16,9 @@
 
 #include "redis_glide_s_common.h"
 
+extern zend_class_entry *redis_ce;
+extern zend_class_entry *redis_exception_ce;
+
 /* ====================================================================
  * UTILITY FUNCTIONS
  * ==================================================================== */
@@ -790,22 +793,46 @@ cleanup:
  * ==================================================================== */
 
 /**
- * Execute SADD command using the generic framework
+ * Execute SADD command using the new signature pattern
  */
-int execute_sadd_command(const void *glide_client, const char *key, size_t key_len,
-                         zval *members, int members_count, long *output_value)
+int execute_sadd_command(zval *object, int argc, zval *return_value)
 {
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *z_args;
+    int members_count = 0;
 
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.members = members;
-    args.members_count = members_count;
-    args.output_long = output_value;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os+",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &members_count) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_s_generic_command(glide_client, SAdd, S_CMD_KEY_MEMBERS, S_RESPONSE_INT, &args, NULL);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        s_command_args_t args;
+        INIT_S_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.members = z_args;
+        args.members_count = members_count;
+
+        if (execute_s_generic_command(redis->glide_client, SAdd, S_CMD_KEY_MEMBERS, S_RESPONSE_INT, &args, return_value))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /**
