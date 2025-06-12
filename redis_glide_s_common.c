@@ -952,7 +952,7 @@ int execute_smismember_command(const void *glide_client, const char *key, size_t
     args.members = members;
     args.members_count = members_count;
 
-    return execute_s_generic_command(glide_client, SMIsMember, S_CMD_KEY_MEMBERS, S_RESPONSE_SET, &args, return_value);
+    return execute_s_generic_command(glide_client, SMIsMember, S_CMD_KEY_MEMBERS, S_RESPONSE_MIXED, &args, return_value);
 }
 
 /**
