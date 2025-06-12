@@ -295,12 +295,6 @@ int execute_brpoplpush_command(const void *glide_client, const char *src, size_t
         result, result_len);
 }
 
-/*
- * Note: The prepare_mpop_arguments helper function has been removed as it's
- * no longer needed after refactoring to use the common framework functions
- * provided by redis_glide_list_common.c
- */
-
 /* Execute an RPUSH command using the Valkey Glide client */
 long execute_rpush_command(const void *glide_client, const char *key, size_t key_len, zval *values, int values_count)
 {

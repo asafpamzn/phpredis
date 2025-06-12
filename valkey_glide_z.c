@@ -15,6 +15,7 @@
 */
 
 #include "valkey_glide_z_common.h"
+#include "redis_glide_list_common.h"
 #include "command_response.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
@@ -1868,6 +1869,192 @@ int execute_zdiff_command(zval *object, int argc, zval *return_value)
     /* If the command failed, clean up and return FALSE */
     zval_dtor(return_value);
     return 0;
+}
+
+/* Helper function to prepare arguments for MPOP commands */
+int prepare_mpop_arguments(
+    const void *glide_client,
+    int is_blocking,
+    double timeout,
+    zval *keys,
+    const char *from,
+    size_t from_len,
+    long count,
+    unsigned long *arg_count_ptr,
+    uintptr_t **args_ptr,
+    unsigned long **args_len_ptr,
+    char **numkeys_str_ptr,
+    char **timeout_str_ptr,
+    char **count_str_ptr)
+{
+    /* Get the number of keys */
+    int keys_count = 0;
+    if (Z_TYPE_P(keys) == IS_ARRAY)
+    {
+        keys_count = zend_hash_num_elements(Z_ARRVAL_P(keys));
+    }
+    else
+    {
+        return 0; /* Keys must be an array */
+    }
+
+    /* Check if we have at least one key */
+    if (keys_count <= 0)
+    {
+        return 0;
+    }
+
+    /* Calculate the number of arguments */
+    unsigned long arg_count = keys_count + 2; /* numkeys + keys + direction */
+    if (is_blocking)
+    {
+        arg_count++; /* Add timeout for blocking commands */
+    }
+
+    /* Allocate memory for arguments */
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!args || !args_len)
+    {
+        if (args)
+            efree(args);
+        if (args_len)
+            efree(args_len);
+        return 0;
+    }
+
+    /* Current argument index */
+    int arg_idx = 0;
+
+    /* Add timeout for blocking commands */
+    if (is_blocking)
+    {
+        /* Convert timeout to string */
+        size_t timeout_len;
+        char *timeout_str = alloc_list_double_string(timeout, &timeout_len);
+        if (!timeout_str)
+        {
+            efree(args);
+            efree(args_len);
+            return 0;
+        }
+        args[arg_idx] = (uintptr_t)timeout_str;
+        args_len[arg_idx] = timeout_len;
+        *timeout_str_ptr = timeout_str;
+        arg_idx++;
+    }
+
+    /* Add numkeys first (this should be the first argument after timeout for blocking commands) */
+    size_t numkeys_len;
+    char *numkeys_str = alloc_list_number_string(keys_count, &numkeys_len);
+    if (!numkeys_str)
+    {
+        efree(args);
+        efree(args_len);
+        if (is_blocking)
+        {
+            efree(*timeout_str_ptr);
+            *timeout_str_ptr = NULL;
+        }
+        return 0;
+    }
+    /* Debug output to see the value being passed */
+
+    args[arg_idx] = (uintptr_t)numkeys_str;
+    args_len[arg_idx] = numkeys_len;
+    *numkeys_str_ptr = numkeys_str;
+    arg_idx++;
+
+    /* Add keys */
+    HashTable *ht = Z_ARRVAL_P(keys);
+    zval *z_key;
+    ZEND_HASH_FOREACH_VAL(ht, z_key)
+    {
+        if (Z_TYPE_P(z_key) != IS_STRING)
+        {
+            efree(args);
+            efree(args_len);
+            efree(numkeys_str);
+            *numkeys_str_ptr = NULL;
+            if (is_blocking)
+            {
+                efree(*timeout_str_ptr);
+                *timeout_str_ptr = NULL;
+            }
+            return 0;
+        }
+        args[arg_idx] = (uintptr_t)Z_STRVAL_P(z_key);
+        args_len[arg_idx] = Z_STRLEN_P(z_key);
+        arg_idx++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    /* Add direction (LEFT or RIGHT) directly */
+    args[arg_idx] = (uintptr_t)from;
+    args_len[arg_idx] = from_len;
+    arg_idx++;
+
+    /* Add COUNT if count > 1 */
+    if (count > 1)
+    {
+        /* Increase arg_count for COUNT and its value */
+        arg_count += 2;
+
+        /* Reallocate args and args_len arrays */
+        uintptr_t *new_args = (uintptr_t *)erealloc(args, arg_count * sizeof(uintptr_t));
+        unsigned long *new_args_len = (unsigned long *)erealloc(args_len, arg_count * sizeof(unsigned long));
+
+        if (!new_args || !new_args_len)
+        {
+            efree(args);
+            efree(args_len);
+            efree(numkeys_str);
+            *numkeys_str_ptr = NULL;
+            if (is_blocking)
+            {
+                efree(*timeout_str_ptr);
+                *timeout_str_ptr = NULL;
+            }
+            return 0;
+        }
+
+        args = new_args;
+        args_len = new_args_len;
+
+        /* Add COUNT keyword */
+        args[arg_idx] = (uintptr_t)"COUNT";
+        args_len[arg_idx] = 5;
+        arg_idx++;
+
+        /* Add count value */
+        size_t count_len;
+        char *count_str = alloc_list_number_string(count, &count_len);
+        if (!count_str)
+        {
+            efree(args);
+            efree(args_len);
+            efree(numkeys_str);
+            *numkeys_str_ptr = NULL;
+            if (is_blocking)
+            {
+                efree(*timeout_str_ptr);
+                *timeout_str_ptr = NULL;
+            }
+            return 0;
+        }
+        args[arg_idx] = (uintptr_t)count_str;
+        args_len[arg_idx] = count_len;
+        *count_str_ptr = count_str;
+        arg_idx++;
+    }
+
+    /* Set output parameters */
+    *arg_count_ptr = arg_count;
+    *args_ptr = args;
+    *args_len_ptr = args_len;
+
+    return keys_count;
 }
 
 /* Execute a ZMPOP or BZMPOP command (for sorted set operations) using the Valkey Glide client */
