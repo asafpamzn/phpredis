@@ -14,7 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
-#include "redis_glide_s_common.h"
+#include "valkey_glide_s_common.h"
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
