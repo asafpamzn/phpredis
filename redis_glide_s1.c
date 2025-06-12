@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
+#if 0
 /* Execute an SADD command using the Valkey Glide client */
 int execute_sadd_command(const void *glide_client, const char *key, size_t key_len,
                          zval *members, int members_count, long *output_value)
@@ -689,3 +689,4 @@ int execute_smismember_command(const void *glide_client, const char *key, size_t
 
     return 0;
 }
+#endif

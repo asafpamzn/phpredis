@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
+#if 0
 /* Execute an SINTER command using the Valkey Glide client */
 int execute_sinter_command(const void *glide_client, zval *keys, int keys_count, zval *return_value)
 {
@@ -859,3 +859,4 @@ int execute_sscan_command(const void *glide_client, const char *key, size_t key_
     /* Check if client and key are valid */
     return 0;
 }
+#endif
