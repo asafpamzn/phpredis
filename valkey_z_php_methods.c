@@ -29,6 +29,7 @@
 #include "valkey_glide_z_common.h"
 #include "valkey_glide_geo_common.h"
 #include "valkey_glide_x_common.h"
+#include "valkey_glide_s_common.h"
 
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
@@ -339,4 +340,72 @@ XREVRANGE_METHOD_IMPL(Redis)
 
 /* {{{ proto long Redis::xtrim(string key, string threshold, bool approx = false, bool minid = false, int limit = -1) */
 XTRIM_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::sAdd(string key, string member, ...) */
+SADD_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::sAddArray(string key, array values) */
+SADD_ARRAY_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::scard(string key) */
+SCARD_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::srem(string key, string member, ...) */
+SREM_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto bool Redis::sMove(string src, string dst, string member) */
+SMOVE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string|array Redis::sPop(string key, [long count]) */
+SPOP_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string|array Redis::sRandMember(string key, [long count]) */
+SRANDMEMBER_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto bool Redis::sismember(string key, string member) */
+SISMEMBER_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::sMembers(string key) */
+SMEMBERS_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::sMisMember(string key, array members) */
+SMISMEMBER_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::sInter(string key, ...) */
+SINTER_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::sintercard(array keys, [long limit]) */
+SINTERCARD_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::sInterStore(string dst, string key1, ...) */
+SINTERSTORE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::sUnion(string key, ...) */
+SUNION_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::sUnionStore(string dst, string key1, ...) */
+SUNIONSTORE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::sDiff(string key, ...) */
+SDIFF_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::sDiffStore(string dst, string key1, ...) */
+SDIFFSTORE_METHOD_IMPL(Redis)
 /* }}} */
