@@ -184,14 +184,11 @@ int execute_smembers_command(zval *object, int argc, zval *return_value);
 int execute_smismember_command(zval *object, int argc, zval *return_value);
 int execute_sinter_command(zval *object, int argc, zval *return_value);
 int execute_sintercard_command(zval *object, int argc, zval *return_value);
-int execute_sinterstore_command(const void *glide_client, const char *dst, size_t dst_len,
-                                zval *keys, int keys_count, long *output_value);
-int execute_sunion_command(const void *glide_client, zval *keys, int keys_count, zval *return_value);
-int execute_sunionstore_command(const void *glide_client, const char *dst, size_t dst_len,
-                                zval *keys, int keys_count, long *output_value);
-int execute_sdiff_command(const void *glide_client, zval *keys, int keys_count, zval *return_value);
-int execute_sdiffstore_command(const void *glide_client, const char *dst, size_t dst_len,
-                               zval *keys, int keys_count, long *output_value);
+int execute_sinterstore_command(zval *object, int argc, zval *return_value);
+int execute_sunion_command(zval *object, int argc, zval *return_value);
+int execute_sunionstore_command(zval *object, int argc, zval *return_value);
+int execute_sdiff_command(zval *object, int argc, zval *return_value);
+int execute_sdiffstore_command(zval *object, int argc, zval *return_value);
 int execute_servername_command(const void *glide_client, char **output, size_t *output_len);
 int execute_serverversion_command(const void *glide_client, char **output, size_t *output_len);
 int execute_scan_command(const void *glide_client, long *it, const char *pattern, size_t pattern_len,
@@ -384,6 +381,61 @@ int execute_sscan_command(const void *glide_client, const char *key, size_t key_
         }                                                                         \
         zval_dtor(return_value);                                                  \
         RETURN_FALSE;                                                             \
+    }
+
+#define SINTERSTORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sInterStore)                                            \
+    {                                                                              \
+        if (execute_sinterstore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                          \
+            return;                                                                \
+        }                                                                          \
+        zval_dtor(return_value);                                                   \
+        RETURN_FALSE;                                                              \
+    }
+
+#define SUNION_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sUnion)                                            \
+    {                                                                         \
+        if (execute_sunion_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define SDIFF_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sDiff)                                            \
+    {                                                                        \
+        if (execute_sdiff_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+#define SDIFFSTORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sDiffStore)                                            \
+    {                                                                             \
+        if (execute_sdiffstore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        zval_dtor(return_value);                                                  \
+        RETURN_FALSE;                                                             \
+    }
+
+#define SUNIONSTORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sUnionStore)                                            \
+    {                                                                              \
+        if (execute_sunionstore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                          \
+            return;                                                                \
+        }                                                                          \
+        zval_dtor(return_value);                                                   \
+        RETURN_FALSE;                                                              \
     }
 
 #endif /* REDIS_GLIDE_S_COMMON_H */
