@@ -175,13 +175,9 @@ char *alloc_long_string(long value, size_t *len_out);
 int execute_sadd_command(zval *object, int argc, zval *return_value);
 int execute_sadd_array_command(zval *object, int argc, zval *return_value);
 int execute_scard_command(zval *object, int argc, zval *return_value);
-int execute_srem_command(const void *glide_client, const char *key, size_t key_len,
-                         zval *members, int members_count, long *output_value);
-int execute_smove_command(const void *glide_client, const char *src, size_t src_len,
-                          const char *dst, size_t dst_len, const char *member,
-                          size_t member_len, int *output_value);
-int execute_spop_command(const void *glide_client, const char *key, size_t key_len,
-                         long count, zval *return_value);
+int execute_srem_command(zval *object, int argc, zval *return_value);
+int execute_smove_command(zval *object, int argc, zval *return_value);
+int execute_spop_command(zval *object, int argc, zval *return_value);
 int execute_srandmember_command(const void *glide_client, const char *key, size_t key_len,
                                 long count, zval *return_value);
 int execute_sismember_command(const void *glide_client, const char *key, size_t key_len,
@@ -293,6 +289,39 @@ int execute_sscan_command(const void *glide_client, const char *key, size_t key_
         }                                                                    \
         zval_dtor(return_value);                                             \
         RETURN_FALSE;                                                        \
+    }
+
+#define SREM_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, srem)                                            \
+    {                                                                       \
+        if (execute_srem_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define SMOVE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sMove)                                            \
+    {                                                                        \
+        if (execute_smove_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+#define SPOP_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sPop)                                            \
+    {                                                                       \
+        if (execute_spop_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
     }
 
 #endif /* REDIS_GLIDE_S_COMMON_H */

@@ -21,13 +21,6 @@
 
 /* Forward declarations for the Glide execute functions */
 
-extern int execute_srem_command(const void *glide_client, const char *key, size_t key_len,
-                                zval *members, int members_count, long *output_value);
-extern int execute_smove_command(const void *glide_client, const char *src, size_t src_len,
-                                 const char *dst, size_t dst_len, const char *member,
-                                 size_t member_len, int *output_value);
-extern int execute_spop_command(const void *glide_client, const char *key, size_t key_len,
-                                long count, zval *return_value);
 extern int execute_srandmember_command(const void *glide_client, const char *key, size_t key_len,
                                        long count, zval *return_value);
 extern int execute_sismember_command(const void *glide_client, const char *key, size_t key_len,
@@ -74,126 +67,15 @@ SCARD_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::srem(string key, string member, ...) */
-PHP_METHOD(Redis, srem)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_args;
-    int argc = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os+",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the SREM command using the Glide client */
-        long result_value;
-        if (execute_srem_command(redis->glide_client, key, key_len,
-                                 z_args, argc, &result_value))
-        {
-            /* Return the number of removed elements */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+SREM_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto bool Redis::sMove(string src, string dst, string member) */
-PHP_METHOD(Redis, sMove)
-{
-    zval *object;
-    redis_object *redis;
-    char *src = NULL, *dst = NULL, *member = NULL;
-    size_t src_len, dst_len, member_len;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss",
-                                     &object, redis_ce, &src, &src_len,
-                                     &dst, &dst_len, &member, &member_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the SMOVE command using the Glide client */
-        int result_value;
-        if (execute_smove_command(redis->glide_client, src, src_len, dst, dst_len,
-                                  member, member_len, &result_value))
-        {
-            /* Return whether the member was moved */
-            RETURN_BOOL(result_value);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+SMOVE_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto string|array Redis::sPop(string key, [long count]) */
-PHP_METHOD(Redis, sPop)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zend_long count = 0;
-    int has_count = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|l",
-                                     &object, redis_ce, &key, &key_len,
-                                     &count) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Check if count parameter was provided */
-    has_count = (ZEND_NUM_ARGS() > 1);
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Use count=1 if not specified, otherwise use the provided count */
-        long pop_count = has_count ? count : 1;
-
-        /* Execute the SPOP command using the Glide client */
-        if (execute_spop_command(redis->glide_client, key, key_len,
-                                 pop_count, return_value))
-        {
-            /* Return value already set in execute_spop_command */
-            return;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+SPOP_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto string|array Redis::sRandMember(string key, [long count]) */

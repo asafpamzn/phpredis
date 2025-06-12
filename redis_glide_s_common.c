@@ -966,62 +966,135 @@ int execute_sismember_command(const void *glide_client, const char *key, size_t 
 }
 
 /**
- * Execute SREM command using the generic framework
+ * Execute SREM command using the new signature pattern
  */
-int execute_srem_command(const void *glide_client, const char *key, size_t key_len,
-                         zval *members, int members_count, long *output_value)
+int execute_srem_command(zval *object, int argc, zval *return_value)
 {
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *z_args;
+    int members_count = 0;
 
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.members = members;
-    args.members_count = members_count;
-    args.output_long = output_value;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os+",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &members_count) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_s_generic_command(glide_client, SRem, S_CMD_KEY_MEMBERS, S_RESPONSE_INT, &args, NULL);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        s_command_args_t args;
+        INIT_S_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.members = z_args;
+        args.members_count = members_count;
+
+        if (execute_s_generic_command(redis->glide_client, SRem, S_CMD_KEY_MEMBERS, S_RESPONSE_INT, &args, return_value))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /**
- * Execute SMOVE command using the generic framework
+ * Execute SMOVE command using the new signature pattern
  */
-int execute_smove_command(const void *glide_client, const char *src, size_t src_len,
-                          const char *dst, size_t dst_len, const char *member,
-                          size_t member_len, int *output_value)
+int execute_smove_command(zval *object, int argc, zval *return_value)
 {
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *src = NULL, *dst = NULL, *member = NULL;
+    size_t src_len, dst_len, member_len;
 
-    args.glide_client = glide_client;
-    args.src_key = src;
-    args.src_key_len = src_len;
-    args.dst_key = dst;
-    args.dst_key_len = dst_len;
-    args.member = member;
-    args.member_len = member_len;
-    args.output_int = output_value;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osss",
+                                     &object, redis_ce, &src, &src_len,
+                                     &dst, &dst_len, &member, &member_len) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_s_generic_command(glide_client, SMove, S_CMD_TWO_KEY_MEMBER, S_RESPONSE_BOOL, &args, NULL);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        s_command_args_t args;
+        INIT_S_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.src_key = src;
+        args.src_key_len = src_len;
+        args.dst_key = dst;
+        args.dst_key_len = dst_len;
+        args.member = member;
+        args.member_len = member_len;
+
+        if (execute_s_generic_command(redis->glide_client, SMove, S_CMD_TWO_KEY_MEMBER, S_RESPONSE_BOOL, &args, return_value))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /**
- * Execute SPOP command using the generic framework
+ * Execute SPOP command using the new signature pattern
  */
-int execute_spop_command(const void *glide_client, const char *key, size_t key_len,
-                         long count, zval *return_value)
+int execute_spop_command(zval *object, int argc, zval *return_value)
 {
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long count = 0;
+    int has_count = 0;
 
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.count = count;
-    args.has_count = (count > 1);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|l",
+                                     &object, redis_ce, &key, &key_len,
+                                     &count) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_s_generic_command(glide_client, SPop, S_CMD_KEY_COUNT, S_RESPONSE_MIXED, &args, return_value);
+    /* Check if count parameter was provided */
+    has_count = (argc > 1);
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        s_command_args_t args;
+        INIT_S_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.count = has_count ? count : 1;
+        args.has_count = has_count;
+
+        if (execute_s_generic_command(redis->glide_client, SPop, S_CMD_KEY_COUNT, S_RESPONSE_MIXED, &args, return_value))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /**
