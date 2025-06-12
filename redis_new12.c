@@ -595,6 +595,12 @@ PHP_METHOD(Redis, sintercard)
 
     /* Check if limit parameter was provided */
     has_limit = (ZEND_NUM_ARGS() > 1);
+    if (has_limit && limit < 0)
+    {
+        php_error_docref(NULL, E_WARNING, "Limit must be a non-negative integer");
+        RETURN_FALSE;
+    }
+    /* Check if keys parameter is an array */
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);

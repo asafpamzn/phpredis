@@ -2204,7 +2204,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(2, $this->redis->zintercard($zsets, 2));
 
         $this->assertFalse(@$this->redis->sintercard($ssets, -1));
-        return;
+   
         $this->assertFalse(@$this->redis->zintercard($ssets, -1));
 
         $this->assertFalse(@$this->redis->sintercard([]));
