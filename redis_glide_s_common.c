@@ -1204,53 +1204,231 @@ int execute_spop_command(zval *object, int argc, zval *return_value)
 }
 
 /**
- * Execute SMISMEMBER command using the generic framework
+ * Execute SMISMEMBER command using the new signature pattern
  */
-int execute_smismember_command(const void *glide_client, const char *key, size_t key_len,
-                               zval *members, int members_count, zval *return_value)
+int execute_smismember_command(zval *object, int argc, zval *return_value)
 {
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *z_args;
+    int members_count = 0;
 
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.members = members;
-    args.members_count = members_count;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os+",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &members_count) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_s_generic_command(glide_client, SMIsMember, S_CMD_KEY_MEMBERS, S_RESPONSE_MIXED, &args, return_value);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        s_command_args_t args;
+        INIT_S_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.members = z_args;
+        args.members_count = members_count;
+
+        if (execute_s_generic_command(redis->glide_client, SMIsMember, S_CMD_KEY_MEMBERS, S_RESPONSE_MIXED, &args, return_value))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /**
- * Execute SINTER command using the generic framework
+ * Execute SINTER command using the new signature pattern
  */
-int execute_sinter_command(const void *glide_client, zval *keys, int keys_count, zval *return_value)
+int execute_sinter_command(zval *object, int argc, zval *return_value)
 {
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
+    redis_object *redis;
+    zval *z_args = NULL;
+    int keys_count = 0;
+    zval *z_keys_arr = NULL;
+    HashTable *ht_keys = NULL;
+    zval *z_extracted_keys = NULL;
 
-    args.glide_client = glide_client;
-    args.keys = keys;
-    args.keys_count = keys_count;
+    /* Check if we have a single array argument or variadic string arguments */
+    if (argc == 1)
+    {
+        /* Try to parse as a single array argument */
+        if (zend_parse_method_parameters(argc, object, "Oa",
+                                         &object, redis_ce, &z_keys_arr) == SUCCESS)
+        {
+            /* We have an array of keys */
+            ht_keys = Z_ARRVAL_P(z_keys_arr);
+            keys_count = zend_hash_num_elements(ht_keys);
 
-    return execute_s_generic_command(glide_client, SInter, S_CMD_MULTI_KEY, S_RESPONSE_SET, &args, return_value);
+            /* If array is empty, return FALSE */
+            if (keys_count == 0)
+            {
+                return 0;
+            }
+
+            /* Allocate memory for array of zvals */
+            z_extracted_keys = ecalloc(keys_count, sizeof(zval));
+
+            /* Copy array values to sequential array */
+            zval *data;
+            int idx = 0;
+            ZEND_HASH_FOREACH_VAL(ht_keys, data)
+            {
+                ZVAL_COPY(&z_extracted_keys[idx], data);
+                idx++;
+            }
+            ZEND_HASH_FOREACH_END();
+
+            /* Set for later use */
+            z_args = z_extracted_keys;
+        }
+    }
+
+    /* If we didn't get an array, parse as variadic arguments */
+    if (!z_args)
+    {
+        if (zend_parse_method_parameters(argc, object, "O+",
+                                         &object, redis_ce, &z_args, &keys_count) == FAILURE)
+        {
+            return 0;
+        }
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        s_command_args_t args;
+        INIT_S_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.keys = z_args;
+        args.keys_count = keys_count;
+
+        int result = execute_s_generic_command(redis->glide_client, SInter, S_CMD_MULTI_KEY, S_RESPONSE_SET, &args, return_value);
+
+        /* Clean up if we allocated memory for the array keys */
+        if (z_extracted_keys)
+        {
+            for (int i = 0; i < keys_count; i++)
+            {
+                zval_dtor(&z_extracted_keys[i]);
+            }
+            efree(z_extracted_keys);
+        }
+
+        return result;
+    }
+
+    /* Clean up if we allocated memory for the array keys but didn't execute the command */
+    if (z_extracted_keys)
+    {
+        for (int i = 0; i < keys_count; i++)
+        {
+            zval_dtor(&z_extracted_keys[i]);
+        }
+        efree(z_extracted_keys);
+    }
+
+    return 0;
 }
 
 /**
- * Execute SINTERCARD command using the generic framework
+ * Execute SINTERCARD command using the new signature pattern
  */
-int execute_sintercard_command(const void *glide_client, zval *keys, int keys_count, long limit, zval *return_value)
+int execute_sintercard_command(zval *object, int argc, zval *return_value)
 {
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
+    redis_object *redis;
+    zval *z_keys;
+    zend_long limit = 0;
+    int has_limit = 0;
+    HashTable *ht_keys;
+    zval *z_args;
+    int keys_count;
 
-    args.glide_client = glide_client;
-    args.keys = keys;
-    args.keys_count = keys_count;
-    args.limit = limit;
-    args.has_limit = (limit > 0);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oa|l",
+                                     &object, redis_ce, &z_keys, &limit) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_s_generic_command(glide_client, SInterCard, S_CMD_MULTI_KEY_LIMIT, S_RESPONSE_INT, &args, return_value);
+    /* Check if limit parameter was provided */
+    has_limit = (argc > 1);
+    if (has_limit && limit < 0)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* Get keys count and convert HashTable to zval array */
+    ht_keys = Z_ARRVAL_P(z_keys);
+    keys_count = zend_hash_num_elements(ht_keys);
+
+    /* If we have no keys, return false */
+    if (keys_count == 0)
+    {
+        return 0;
+    }
+
+    /* Allocate memory for array of zvals */
+    z_args = ecalloc(keys_count, sizeof(zval));
+
+    /* Copy array values to sequential array */
+    zval *data;
+    int idx = 0;
+    ZEND_HASH_FOREACH_VAL(ht_keys, data)
+    {
+        ZVAL_COPY(&z_args[idx], data);
+        idx++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        s_command_args_t args;
+        INIT_S_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.keys = z_args;
+        args.keys_count = keys_count;
+        args.limit = has_limit ? limit : 0;
+        args.has_limit = has_limit;
+
+        int result = execute_s_generic_command(redis->glide_client, SInterCard, S_CMD_MULTI_KEY_LIMIT, S_RESPONSE_INT, &args, return_value);
+
+        /* Clean up allocated array */
+        for (int i = 0; i < keys_count; i++)
+        {
+            zval_dtor(&z_args[i]);
+        }
+        efree(z_args);
+
+        return result;
+    }
+
+    /* Clean up allocated array */
+    for (int i = 0; i < keys_count; i++)
+    {
+        zval_dtor(&z_args[i]);
+    }
+    efree(z_args);
+
+    return 0;
 }
 
 /**

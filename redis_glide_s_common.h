@@ -181,10 +181,9 @@ int execute_spop_command(zval *object, int argc, zval *return_value);
 int execute_srandmember_command(zval *object, int argc, zval *return_value);
 int execute_sismember_command(zval *object, int argc, zval *return_value);
 int execute_smembers_command(zval *object, int argc, zval *return_value);
-int execute_smismember_command(const void *glide_client, const char *key, size_t key_len,
-                               zval *members, int members_count, zval *return_value);
-int execute_sinter_command(const void *glide_client, zval *keys, int keys_count, zval *return_value);
-int execute_sintercard_command(const void *glide_client, zval *keys, int keys_count, long limit, zval *return_value);
+int execute_smismember_command(zval *object, int argc, zval *return_value);
+int execute_sinter_command(zval *object, int argc, zval *return_value);
+int execute_sintercard_command(zval *object, int argc, zval *return_value);
 int execute_sinterstore_command(const void *glide_client, const char *dst, size_t dst_len,
                                 zval *keys, int keys_count, long *output_value);
 int execute_sunion_command(const void *glide_client, zval *keys, int keys_count, zval *return_value);
@@ -352,6 +351,39 @@ int execute_sscan_command(const void *glide_client, const char *key, size_t key_
         }                                                                       \
         zval_dtor(return_value);                                                \
         RETURN_FALSE;                                                           \
+    }
+
+#define SMISMEMBER_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sMisMember)                                            \
+    {                                                                             \
+        if (execute_smismember_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        zval_dtor(return_value);                                                  \
+        RETURN_FALSE;                                                             \
+    }
+
+#define SINTER_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sInter)                                            \
+    {                                                                         \
+        if (execute_sinter_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define SINTERCARD_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sintercard)                                            \
+    {                                                                             \
+        if (execute_sintercard_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        zval_dtor(return_value);                                                  \
+        RETURN_FALSE;                                                             \
     }
 
 #endif /* REDIS_GLIDE_S_COMMON_H */
