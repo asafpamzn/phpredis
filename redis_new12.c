@@ -20,10 +20,7 @@
 #include "redis_glide_s_common.h"
 
 /* Forward declarations for the Glide execute functions */
-extern int execute_sadd_array_command(const void *glide_client, const char *key, size_t key_len,
-                                      HashTable *members_ht, long *output_value);
-extern int execute_scard_command(const void *glide_client, const char *key, size_t key_len,
-                                 long *output_value);
+
 extern int execute_srem_command(const void *glide_client, const char *key, size_t key_len,
                                 zval *members, int members_count, long *output_value);
 extern int execute_smove_command(const void *glide_client, const char *src, size_t src_len,
@@ -69,82 +66,11 @@ SADD_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::sAddArray(string key, array values) */
-PHP_METHOD(Redis, sAddArray)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_arr;
-    HashTable *ht_arr;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osa",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_arr) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* Get HashTable from array */
-    ht_arr = Z_ARRVAL_P(z_arr);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the SADD command using the Glide client */
-        long result_value;
-        if (execute_sadd_array_command(redis->glide_client, key, key_len,
-                                       ht_arr, &result_value))
-        {
-            /* Return the number of added elements */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+SADD_ARRAY_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::scard(string key) */
-PHP_METHOD(Redis, scard)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the SCARD command using the Glide client */
-        long result_value;
-        if (execute_scard_command(redis->glide_client, key, key_len, &result_value))
-        {
-            /* Return the set cardinality */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+SCARD_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::srem(string key, string member, ...) */

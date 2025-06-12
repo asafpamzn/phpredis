@@ -836,20 +836,114 @@ int execute_sadd_command(zval *object, int argc, zval *return_value)
 }
 
 /**
- * Execute SCARD command using the generic framework
+ * Execute SADD array command using the new signature pattern
  */
-int execute_scard_command(const void *glide_client, const char *key, size_t key_len,
-                          long *output_value)
+int execute_sadd_array_command(zval *object, int argc, zval *return_value)
 {
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *z_arr;
+    HashTable *ht_arr;
 
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.output_long = output_value;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osa",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_arr) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_s_generic_command(glide_client, SCard, S_CMD_KEY_ONLY, S_RESPONSE_INT, &args, NULL);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* Get HashTable from array */
+    ht_arr = Z_ARRVAL_P(z_arr);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Convert HashTable to zval array for generic processing */
+        int members_count = zend_hash_num_elements(ht_arr);
+        if (members_count == 0)
+        {
+            ZVAL_LONG(return_value, 0);
+            return 1;
+        }
+
+        /* Allocate memory for zval array */
+        zval *z_members = ecalloc(members_count, sizeof(zval));
+
+        /* Copy HashTable values to zval array */
+        zval *data;
+        int idx = 0;
+        ZEND_HASH_FOREACH_VAL(ht_arr, data)
+        {
+            ZVAL_COPY(&z_members[idx], data);
+            idx++;
+        }
+        ZEND_HASH_FOREACH_END();
+
+        s_command_args_t args;
+        INIT_S_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.members = z_members;
+        args.members_count = members_count;
+
+        int result = execute_s_generic_command(redis->glide_client, SAdd, S_CMD_KEY_MEMBERS, S_RESPONSE_INT, &args, return_value);
+
+        /* Clean up allocated array */
+        for (int i = 0; i < members_count; i++)
+        {
+            zval_dtor(&z_members[i]);
+        }
+        efree(z_members);
+
+        return result;
+    }
+
+    return 0;
+}
+
+/**
+ * Execute SCARD command using the new signature pattern
+ */
+int execute_scard_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        s_command_args_t args;
+        INIT_S_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+
+        if (execute_s_generic_command(redis->glide_client, SCard, S_CMD_KEY_ONLY, S_RESPONSE_INT, &args, return_value))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /**
@@ -1171,25 +1265,5 @@ int execute_serverversion_command(const void *glide_client, char **output, size_
     args.output_string_len = output_len;
 
     /* This is a special case that needs custom implementation due to INFO parsing */
-    return 0; /* Fallback to original implementation */
-}
-
-/**
- * Execute SADD array command using the generic framework
- */
-int execute_sadd_array_command(const void *glide_client, const char *key, size_t key_len,
-                               HashTable *members_ht, long *output_value)
-{
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
-
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.members_ht = members_ht;
-    args.members_count = zend_hash_num_elements(members_ht);
-    args.output_long = output_value;
-
-    /* This needs special handling for HashTable conversion */
     return 0; /* Fallback to original implementation */
 }

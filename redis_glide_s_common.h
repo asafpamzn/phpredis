@@ -173,10 +173,8 @@ char *alloc_long_string(long value, size_t *len_out);
 
 /* Specific command implementations */
 int execute_sadd_command(zval *object, int argc, zval *return_value);
-int execute_sadd_array_command(const void *glide_client, const char *key, size_t key_len,
-                               HashTable *members_ht, long *output_value);
-int execute_scard_command(const void *glide_client, const char *key, size_t key_len,
-                          long *output_value);
+int execute_sadd_array_command(zval *object, int argc, zval *return_value);
+int execute_scard_command(zval *object, int argc, zval *return_value);
 int execute_srem_command(const void *glide_client, const char *key, size_t key_len,
                          zval *members, int members_count, long *output_value);
 int execute_smove_command(const void *glide_client, const char *src, size_t src_len,
@@ -273,6 +271,28 @@ int execute_sscan_command(const void *glide_client, const char *key, size_t key_
         }                                                                   \
         zval_dtor(return_value);                                            \
         RETURN_FALSE;                                                       \
+    }
+
+#define SADD_ARRAY_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sAddArray)                                             \
+    {                                                                             \
+        if (execute_sadd_array_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        zval_dtor(return_value);                                                  \
+        RETURN_FALSE;                                                             \
+    }
+
+#define SCARD_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, scard)                                            \
+    {                                                                        \
+        if (execute_scard_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
     }
 
 #endif /* REDIS_GLIDE_S_COMMON_H */
