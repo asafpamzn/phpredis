@@ -947,22 +947,128 @@ int execute_scard_command(zval *object, int argc, zval *return_value)
 }
 
 /**
- * Execute SISMEMBER command using the generic framework
+ * Execute SRANDMEMBER command using the new signature pattern
  */
-int execute_sismember_command(const void *glide_client, const char *key, size_t key_len,
-                              const char *member, size_t member_len, int *output_value)
+int execute_srandmember_command(zval *object, int argc, zval *return_value)
 {
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long count = 0;
+    int has_count = 0;
 
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.member = member;
-    args.member_len = member_len;
-    args.output_int = output_value;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|l",
+                                     &object, redis_ce, &key, &key_len,
+                                     &count) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_s_generic_command(glide_client, SIsMember, S_CMD_KEY_MEMBER, S_RESPONSE_BOOL, &args, NULL);
+    /* Check if count parameter was provided */
+    has_count = (argc > 1);
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        s_command_args_t args;
+        INIT_S_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.count = has_count ? count : 1;
+        args.has_count = has_count;
+
+        if (execute_s_generic_command(redis->glide_client, SRandMember, S_CMD_KEY_COUNT, S_RESPONSE_MIXED, &args, return_value))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * Execute SISMEMBER command using the new signature pattern
+ */
+int execute_sismember_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL, *member = NULL;
+    size_t key_len, member_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &member, &member_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        s_command_args_t args;
+        INIT_S_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+        args.member = member;
+        args.member_len = member_len;
+
+        if (execute_s_generic_command(redis->glide_client, SIsMember, S_CMD_KEY_MEMBER, S_RESPONSE_BOOL, &args, return_value))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * Execute SMEMBERS command using the new signature pattern
+ */
+int execute_smembers_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        s_command_args_t args;
+        INIT_S_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.key = key;
+        args.key_len = key_len;
+
+        if (execute_s_generic_command(redis->glide_client, SMembers, S_CMD_KEY_ONLY, S_RESPONSE_SET, &args, return_value))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /**
@@ -1095,40 +1201,6 @@ int execute_spop_command(zval *object, int argc, zval *return_value)
     }
 
     return 0;
-}
-
-/**
- * Execute SRANDMEMBER command using the generic framework
- */
-int execute_srandmember_command(const void *glide_client, const char *key, size_t key_len,
-                                long count, zval *return_value)
-{
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
-
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-    args.count = count;
-    args.has_count = (count != 1);
-
-    return execute_s_generic_command(glide_client, SRandMember, S_CMD_KEY_COUNT, S_RESPONSE_MIXED, &args, return_value);
-}
-
-/**
- * Execute SMEMBERS command using the generic framework
- */
-int execute_smembers_command(const void *glide_client, const char *key, size_t key_len,
-                             zval *return_value)
-{
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
-
-    args.glide_client = glide_client;
-    args.key = key;
-    args.key_len = key_len;
-
-    return execute_s_generic_command(glide_client, SMembers, S_CMD_KEY_ONLY, S_RESPONSE_SET, &args, return_value);
 }
 
 /**

@@ -21,12 +21,6 @@
 
 /* Forward declarations for the Glide execute functions */
 
-extern int execute_srandmember_command(const void *glide_client, const char *key, size_t key_len,
-                                       long count, zval *return_value);
-extern int execute_sismember_command(const void *glide_client, const char *key, size_t key_len,
-                                     const char *member, size_t member_len, int *output_value);
-extern int execute_smembers_command(const void *glide_client, const char *key, size_t key_len,
-                                    zval *return_value);
 extern int execute_smismember_command(const void *glide_client, const char *key, size_t key_len,
                                       zval *members, int members_count, zval *return_value);
 extern int execute_sinter_command(const void *glide_client, zval *keys, int keys_count,
@@ -79,122 +73,15 @@ SPOP_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto string|array Redis::sRandMember(string key, [long count]) */
-PHP_METHOD(Redis, sRandMember)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zend_long count = 0;
-    int has_count = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|l",
-                                     &object, redis_ce, &key, &key_len,
-                                     &count) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Check if count parameter was provided */
-    has_count = (ZEND_NUM_ARGS() > 1);
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* If no count is specified, use count=1 */
-        long rand_count = has_count ? count : 1;
-
-        /* Execute the SRANDMEMBER command using the Glide client */
-        if (execute_srandmember_command(redis->glide_client, key, key_len,
-                                        rand_count, return_value))
-        {
-            /* Return value already set in execute_srandmember_command */
-            return;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+SRANDMEMBER_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto bool Redis::sismember(string key, string member) */
-PHP_METHOD(Redis, sismember)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *member = NULL;
-    size_t key_len, member_len;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
-                                     &object, redis_ce, &key, &key_len,
-                                     &member, &member_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the SISMEMBER command using the Glide client */
-        int result_value;
-        if (execute_sismember_command(redis->glide_client, key, key_len,
-                                      member, member_len, &result_value))
-        {
-            /* Return whether the member exists in the set */
-            RETURN_BOOL(result_value);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+SISMEMBER_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::sMembers(string key) */
-PHP_METHOD(Redis, sMembers)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the SMEMBERS command using the Glide client */
-        if (execute_smembers_command(redis->glide_client, key, key_len,
-                                     return_value))
-        {
-            /* Return value already set in execute_smembers_command */
-            return;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+SMEMBERS_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::sMisMember(string key, array members) */
