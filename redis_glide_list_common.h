@@ -226,7 +226,7 @@ int process_list_mpop_result(CommandResult *result, void *output);
 /* High-level command execution functions */
 int execute_list_push_command(const void *glide_client, enum RequestType cmd_type,
                               const char *key, size_t key_len,
-                              zval *values, long *output_value);
+                              zval *values, int values_count, long *output_value);
 
 int execute_list_pop_command(const void *glide_client, enum RequestType cmd_type,
                              const char *key, size_t key_len,
@@ -274,6 +274,10 @@ int execute_list_move_command(const void *glide_client, enum RequestType cmd_typ
 int execute_list_mpop_command(const void *glide_client, enum RequestType cmd_type,
                               zval *keys, const char *direction, size_t direction_len,
                               long count, double timeout, zval *return_value);
+
+int execute_list_position_command(const void *glide_client, const char *key,
+                                  size_t key_len, const char *element, size_t element_len,
+                                  zval *options, zval *return_value);
 
 /* ====================================================================
  * HELPER MACROS

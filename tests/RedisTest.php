@@ -323,8 +323,9 @@ class Redis_Test extends TestSuite {
         $this->redis->del($key1, $key2);
 
         $this->assertEquals(6, $this->redis->rpush($key1, 'A', 'B', 'C', 'D', 'E', 'F'));
+   
         $this->assertEquals(6, $this->redis->rpush($key2, 'F', 'E', 'D', 'C', 'B', 'A'));
-
+        
         $this->assertEquals([$key1, ['A']], $this->redis->lmpop([$key1, $key2], 'LEFT'));
         $this->assertEquals([$key1, ['F']], $this->redis->lmpop([$key1, $key2], 'RIGHT'));
         $this->assertEquals([$key1, ['B', 'C', 'D']], $this->redis->lmpop([$key1, $key2], 'LEFT',  3));

@@ -41,6 +41,17 @@ int allocate_list_command_args(int count, uintptr_t **args_out, unsigned long **
 }
 
 /**
+ * Free command arguments arrays
+ */
+void free_list_command_args(uintptr_t *args, unsigned long *args_len)
+{
+    if (args)
+        efree(args);
+    if (args_len)
+        efree(args_len);
+}
+
+/**
  * Process a blocking result from a command
  */
 int process_list_blocking_result(CommandResult *result, void *output)
@@ -171,6 +182,24 @@ cleanup:
     free_list_command_args(cmd_args, args_len);
 
     return status;
+}
+
+/**
+ * Allocate a string representation of a long integer
+ */
+char *alloc_list_number_string(long value, size_t *len_out)
+{
+    char temp[32];
+    size_t len = snprintf(temp, sizeof(temp), "%ld", value);
+    char *result = emalloc(len + 1);
+    if (result)
+    {
+        memcpy(result, temp, len);
+        result[len] = '\0';
+        if (len_out)
+            *len_out = len;
+    }
+    return result;
 }
 
 /**
@@ -512,9 +541,10 @@ int process_list_int_result(CommandResult *result, void *output)
     {
         return 0;
     }
-
+    printf("Processing integer result: %p\n", result->response);
     if (result->response->response_type == Int)
     {
+        printf("Integer value: %ld\n", result->response->int_value);
         *output_value = result->response->int_value;
         return 1;
     }
@@ -1390,7 +1420,7 @@ int prepare_list_mpop_args(list_command_args_t *args, uintptr_t **args_out,
  */
 int execute_list_push_command(const void *glide_client, enum RequestType cmd_type,
                               const char *key, size_t key_len,
-                              zval *values, long *output_value)
+                              zval *values, int values_count, long *output_value)
 {
     list_command_args_t args;
     INIT_LIST_COMMAND_ARGS(args);
@@ -1398,7 +1428,7 @@ int execute_list_push_command(const void *glide_client, enum RequestType cmd_typ
     args.glide_client = glide_client;
     SET_LIST_KEY(args, key, key_len);
     args.values = values;
-    args.value_count = 1;
+    args.value_count = values_count; /* Use the passed values count instead of hardcoded 1 */
 
     return execute_list_generic_command(glide_client, cmd_type, &args, output_value, process_list_int_result);
 }
@@ -1633,9 +1663,17 @@ int process_list_mpop_result(CommandResult *result, void *output)
 
     if (!result || !result->response)
     {
-        return 0;
+        ZVAL_FALSE(return_value);
+        return 1; /* Return success but with FALSE value when no results */
+    }
+
+    /* Handle NULL response (empty list or list doesn't exist) */
+    if (result->response->response_type == Null)
+    {
+        ZVAL_FALSE(return_value);
+        return 1; /* Return success but with FALSE value */
     }
 
     /* MPOP returns associative array format for the values */
-    return command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
+    return command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
 }
