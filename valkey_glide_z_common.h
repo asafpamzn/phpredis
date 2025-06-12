@@ -318,6 +318,20 @@ int handle_rank_response(CommandResult *result, long *rank, double *score, int w
  */
 int flatten_withscores_array(zval *return_value);
 
+int prepare_mpop_arguments(
+    const void *glide_client,
+    int is_blocking,
+    double timeout,
+    zval *keys,
+    const char *from,
+    size_t from_len,
+    long count,
+    unsigned long *arg_count_ptr,
+    uintptr_t **args_ptr,
+    unsigned long **args_len_ptr,
+    char **numkeys_str_ptr,
+    char **timeout_str_ptr,
+    char **count_str_ptr);
 /* ====================================================================
  * Z COMMAND IMPLEMENTATION FUNCTIONS (THIN WRAPPERS)
  * ==================================================================== */

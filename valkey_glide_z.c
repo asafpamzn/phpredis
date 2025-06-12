@@ -1870,6 +1870,87 @@ int execute_zdiff_command(zval *object, int argc, zval *return_value)
     return 0;
 }
 
+/* Execute a ZMPOP or BZMPOP command (for sorted set operations) using the Valkey Glide client */
+int execute_zmpop_command1(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result)
+{
+    /* Check if client, keys, and from are valid */
+    if (!glide_client || !keys || !from)
+    {
+        return 0;
+    }
+
+    /* Determine if this is a blocking command */
+    int is_blocking = (strncmp(cmd, "B", 1) == 0);
+
+    /* Prepare for argument construction */
+    unsigned long arg_count = 0;
+    uintptr_t *args = NULL;
+    unsigned long *args_len = NULL;
+    char *numkeys_str = NULL;
+    char *timeout_str = NULL;
+    char *count_str = NULL;
+
+    /* Prepare the arguments */
+    int keys_count = prepare_mpop_arguments(
+        glide_client, is_blocking, timeout, keys, from, from_len, count,
+        &arg_count, &args, &args_len,
+        &numkeys_str, &timeout_str, &count_str);
+
+    if (keys_count < 0)
+    {
+        return 0;
+    }
+
+    /* Determine the command type */
+    enum RequestType cmd_type = is_blocking ? BZMPop : ZMPop;
+
+    /* Execute the command */
+    CommandResult *cmd_result = command(
+        glide_client,
+        0,         /* channel */
+        cmd_type,  /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len,  /* argument lengths */
+        NULL,      /* route bytes */
+        0          /* route bytes length */
+    );
+
+    /* Free the argument strings */
+    if (numkeys_str)
+        efree(numkeys_str);
+    if (timeout_str)
+        efree(timeout_str);
+    if (count_str)
+        efree(count_str);
+    efree(args);
+    efree(args_len);
+
+    /* Check if the command was successful */
+    if (!cmd_result)
+    {
+        return 0;
+    }
+
+    /* Check if there was an error */
+    if (cmd_result->command_error)
+    {
+        printf("Error executing %s command: %s\n", cmd, cmd_result->command_error->command_error_message);
+        free_command_result(cmd_result);
+        return 0;
+    }
+
+    /* Process the result */
+    /* For ZMPOP, use associative array format for the values */
+    int use_assoc = COMMAND_RESPONSE_ASSOSIATIVE_ARRAY; /* Always use associative arrays for sorted set responses */
+    int ret_val = command_response_to_zval(cmd_result->response, result, use_assoc, false);
+
+    /* Free the result */
+    free_command_result(cmd_result);
+
+    return ret_val;
+}
+
 /* Execute a ZINTER command using the Valkey Glide client */
 int execute_zinter_command(zval *object, int argc, zval *return_value)
 {
