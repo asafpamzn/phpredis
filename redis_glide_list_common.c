@@ -468,6 +468,32 @@ int prepare_list_key_values_args(list_command_args_t *args, uintptr_t **args_out
 }
 
 /**
+ * Process an integer result for LPOS and other commands that return to zval
+ */
+int process_list_zval_int_result(CommandResult *result, void *output)
+{
+    zval *return_value = (zval *)output;
+
+    if (!result || !result->response)
+    {
+        return 0;
+    }
+
+    if (result->response->response_type == Int)
+    {
+        ZVAL_LONG(return_value, result->response->int_value);
+        return 1;
+    }
+    else if (result->response->response_type == Null)
+    {
+        ZVAL_NULL(return_value);
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
  * Prepare arguments for key+count commands (LPOP, RPOP)
  */
 int prepare_list_key_count_args(list_command_args_t *args, uintptr_t **args_out,
@@ -541,10 +567,9 @@ int process_list_int_result(CommandResult *result, void *output)
     {
         return 0;
     }
-    printf("Processing integer result: %p\n", result->response);
+
     if (result->response->response_type == Int)
     {
-        printf("Integer value: %ld\n", result->response->int_value);
         *output_value = result->response->int_value;
         return 1;
     }
@@ -1584,8 +1609,10 @@ int execute_list_position_command(const void *glide_client, const char *key,
         parse_list_position_options(options, &args.position_opts);
     }
 
-    return execute_list_generic_command(glide_client, LPos, &args, return_value,
-                                        args.position_opts.has_count ? process_list_array_result : process_list_int_result);
+    /* Use the correct processor depending on whether COUNT option is used */
+    list_result_processor_t processor = args.position_opts.has_count ? process_list_array_result : process_list_zval_int_result;
+
+    return execute_list_generic_command(glide_client, LPos, &args, return_value, processor);
 }
 
 /**
