@@ -23,69 +23,6 @@
 #include <string.h>
 #include <stdio.h>
 
-/* Execute a BLMOVE command using the Valkey Glide client */
-int execute_blmove_command(const void *glide_client, const char *src, size_t src_len,
-                           const char *dst, size_t dst_len, const char *wherefrom,
-                           size_t wherefrom_len, const char *whereto, size_t whereto_len,
-                           double timeout, char **output_value, size_t *output_len)
-{
-    /* Check if client and parameters are valid */
-    if (!glide_client || !src || !dst || !wherefrom || !whereto || !output_value || !output_len)
-    {
-        return -1;
-    }
-
-    /* Call the common framework function */
-    return execute_list_move_command(
-        glide_client,
-        BLMove,
-        src, src_len,
-        dst, dst_len,
-        wherefrom, wherefrom_len,
-        whereto, whereto_len,
-        timeout,
-        output_value, output_len);
-}
-
-/* Execute an LMOVE command using the Valkey Glide client */
-int execute_lmove_command(const void *glide_client, const char *src, size_t src_len,
-                          const char *dst, size_t dst_len, const char *wherefrom,
-                          size_t wherefrom_len, const char *whereto, size_t whereto_len,
-                          char **output_value, size_t *output_len)
-{
-    /* Check if client and parameters are valid */
-    if (!glide_client || !src || !dst || !wherefrom || !whereto || !output_value || !output_len)
-    {
-        return -1;
-    }
-
-    /* Call the common framework function with timeout -1.0 to indicate non-blocking */
-    return execute_list_move_command(
-        glide_client,
-        LMove,
-        src, src_len,
-        dst, dst_len,
-        wherefrom, wherefrom_len,
-        whereto, whereto_len,
-        -1.0,
-        output_value, output_len);
-}
-
-/* Execute an LREM command using the Valkey Glide client */
-int execute_lrem_command(const void *glide_client, const char *key, size_t key_len,
-                         long count, const char *value, size_t value_len,
-                         long *output_value)
-{
-    /* Check if client and parameters are valid */
-    if (!glide_client || !key || !value || !output_value)
-    {
-        return 0;
-    }
-
-    /* Call the common framework function */
-    return execute_list_rem_command(glide_client, key, key_len, count, value, value_len, output_value);
-}
-
 /* Execute an LTRIM command using the Valkey Glide client */
 int execute_ltrim_command(const void *glide_client, const char *key, size_t key_len,
                           long start, long end)

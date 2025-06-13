@@ -17,19 +17,7 @@
 #include "php_redis.h"
 
 #include "redis_glide.h"
-
-/* Forward declarations for the Glide execute functions */
-extern int execute_blmove_command(const void *glide_client, const char *src, size_t src_len,
-                                  const char *dst, size_t dst_len, const char *wherefrom,
-                                  size_t wherefrom_len, const char *whereto, size_t whereto_len,
-                                  double timeout, char **output_value, size_t *output_len);
-extern int execute_lmove_command(const void *glide_client, const char *src, size_t src_len,
-                                 const char *dst, size_t dst_len, const char *wherefrom,
-                                 size_t wherefrom_len, const char *whereto, size_t whereto_len,
-                                 char **output_value, size_t *output_len);
-extern int execute_lrem_command(const void *glide_client, const char *key, size_t key_len,
-                                long count, const char *value, size_t value_len,
-                                long *output_value);
+#include "redis_glide_list_common.h"
 extern int execute_ltrim_command(const void *glide_client, const char *key, size_t key_len,
                                  long start, long end);
 extern int execute_lindex_command(const void *glide_client, const char *key, size_t key_len,
@@ -76,12 +64,15 @@ PHP_METHOD(Redis, blmove)
         int status;
 
         /* Execute the BLMOVE command using the Glide client */
-        status = execute_blmove_command(redis->glide_client,
-                                        src, src_len,
-                                        dst, dst_len,
-                                        wherefrom, wherefrom_len,
-                                        whereto, whereto_len,
-                                        timeout, &output_value, &output_len);
+        status = execute_list_move_command(
+            redis->glide_client,
+            BLMove,
+            src, src_len,
+            dst, dst_len,
+            wherefrom, wherefrom_len,
+            whereto, whereto_len,
+            timeout,
+            &output_value, &output_len);
 
         if (status > 0)
         {
@@ -144,12 +135,15 @@ PHP_METHOD(Redis, lMove)
         int status;
 
         /* Execute the LMOVE command using the Glide client */
-        status = execute_lmove_command(redis->glide_client,
-                                       src, src_len,
-                                       dst, dst_len,
-                                       wherefrom, wherefrom_len,
-                                       whereto, whereto_len,
-                                       &output_value, &output_len);
+        status = execute_list_move_command(
+            redis->glide_client,
+            LMove,
+            src, src_len,
+            dst, dst_len,
+            wherefrom, wherefrom_len,
+            whereto, whereto_len,
+            -1.0,
+            &output_value, &output_len);
 
         if (status > 0)
         {
@@ -211,11 +205,7 @@ PHP_METHOD(Redis, lrem)
         int status;
 
         /* Execute the LREM command using the Glide client */
-        status = execute_lrem_command(redis->glide_client,
-                                      key, key_len,
-                                      count, /* count is now the 3rd parameter in PHP, but still passed as 3rd param to C function */
-                                      value, value_len,
-                                      &output_value);
+        status = execute_list_rem_command(redis->glide_client, key, key_len, count, value, value_len, &output_value);
 
         if (status)
         {
