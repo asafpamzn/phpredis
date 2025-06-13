@@ -10,7 +10,7 @@ SHLIB_SUFFIX_NAME = dylib
 SHLIB_DL_SUFFIX_NAME = so
 AWK = awk
 REDIS_SHARED_LIBADD = ../ffi/target/release/libglide_ffi.a -lresolv -lSystem
-shared_objects_redis = redis.lo redis_new.lo redis_new1.lo  redis_new3.lo redis_new4.lo redis_new5.lo redis_new6.lo redis_new7.lo redis_new10.lo redis_new11.lo  redis_new13.lo redis_new20.lo redis_new21.lo redis_new22.lo redis_new32.lo redis_session.lo redis_cluster.lo cluster_library.lo  redis_glide.lo redis_glide_var.lo redis_glide_var2.lo redis_glide_var4.lo redis_glide_var5.lo redis_glide_var6.lo redis_glide_var10.lo redis_glide_var11.lo redis_expire_glide.lo lcs_command.lo rpush_command.lo command_response.lo redis_hash_glide.lo valkey_glide_geo_commands.lo redis_glide_commands.lo valkey_glide_z.lo valkey_z_php_methods.lo redis_glide_keys.lo  redis_glide_list1.lo valkey_glide_list_common.lo  valkey_glide_s_common.lo redis_glide_str.lo valkey_glide_z_common.lo valkey_glide_geo_common.lo valkey_glide_x_common.lo valkey_glide_x_commands.lo src/connection_request.pb-c.lo src/command_request.pb-c.lo src/response.pb-c.lo
+shared_objects_redis = redis.lo redis_new.lo redis_new1.lo  redis_new3.lo redis_new4.lo redis_new5.lo redis_new6.lo redis_new7.lo redis_new10.lo redis_new11.lo  redis_new13.lo redis_new20.lo redis_new21.lo redis_new22.lo redis_new32.lo redis_session.lo redis_cluster.lo cluster_library.lo  redis_glide.lo redis_glide_var.lo redis_glide_var2.lo redis_glide_var4.lo redis_glide_var5.lo redis_glide_var6.lo redis_glide_var10.lo redis_glide_var11.lo redis_expire_glide.lo lcs_command.lo rpush_command.lo command_response.lo redis_hash_glide.lo valkey_glide_hash_common.lo valkey_glide_geo_commands.lo redis_glide_commands.lo valkey_glide_z.lo valkey_z_php_methods.lo redis_glide_keys.lo  redis_glide_list1.lo valkey_glide_list_common.lo  valkey_glide_s_common.lo redis_glide_str.lo valkey_glide_z_common.lo valkey_glide_geo_common.lo valkey_glide_x_common.lo valkey_glide_x_commands.lo src/connection_request.pb-c.lo src/command_request.pb-c.lo src/response.pb-c.lo
 PHP_PECL_EXTENSION = redis
 PHP_MODULES = $(phplibdir)/redis.la
 PHP_ZEND_EX =
@@ -298,6 +298,9 @@ command_response.lo: /Users/asafp/work/valkey-glide-php/phpredis/command_respons
 -include redis_hash_glide.dep
 redis_hash_glide.lo: /Users/asafp/work/valkey-glide-php/phpredis/redis_hash_glide.c
 	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/redis_hash_glide.c -o redis_hash_glide.lo  -MMD -MF redis_hash_glide.dep -MT redis_hash_glide.lo
+-include valkey_glide_hash_common.dep
+valkey_glide_hash_common.lo: /Users/asafp/work/valkey-glide-php/phpredis/valkey_glide_hash_common.c
+	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/valkey_glide_hash_common.c -o valkey_glide_hash_common.lo  -MMD -MF valkey_glide_hash_common.dep -MT valkey_glide_hash_common.lo
 -include valkey_glide_geo_commands.dep
 valkey_glide_geo_commands.lo: /Users/asafp/work/valkey-glide-php/phpredis/valkey_glide_geo_commands.c
 	$(LIBTOOL) --tag=CC --mode=compile $(CC) -I. -I/Users/asafp/work/valkey-glide-php/phpredis $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)   -DZEND_COMPILE_DL_EXT=1 -c /Users/asafp/work/valkey-glide-php/phpredis/valkey_glide_geo_commands.c -o valkey_glide_geo_commands.lo  -MMD -MF valkey_glide_geo_commands.dep -MT valkey_glide_geo_commands.lo
