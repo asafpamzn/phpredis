@@ -27,6 +27,7 @@
 #include "redis_cluster.h"
 
 #include "redis_glide.h"
+#include "redis_glide_list_common.h"
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
@@ -267,8 +268,15 @@ PHP_METHOD(Redis, rpoplpush)
     if (redis->glide_client)
     {
         /* Execute the RPOPLPUSH command using the Glide client */
-        int result = execute_rpoplpush_command(redis->glide_client, src, src_len, dst, dst_len, &response, &response_len);
-
+        int result = execute_list_move_command(
+            redis->glide_client,
+            RPopLPush,
+            src, src_len,
+            dst, dst_len,
+            "RIGHT", 5,
+            "LEFT", 4,
+            -1.0, /* No timeout for non-blocking version */
+            &response, &response_len);
         /* Process the result */
         if (result == 1 && response != NULL)
         {
@@ -317,8 +325,15 @@ PHP_METHOD(Redis, brpoplpush)
     if (redis->glide_client)
     {
         /* Execute the BRPOPLPUSH command using the Glide client */
-        int result = execute_brpoplpush_command(redis->glide_client, src, src_len, dst, dst_len, timeout, &response, &response_len);
-
+        int result = execute_list_move_command(
+            redis->glide_client,
+            BRPopLPush,
+            src, src_len,
+            dst, dst_len,
+            "RIGHT", 5,
+            "LEFT", 4,
+            (double)timeout, /* Convert timeout to double for the framework */
+            &response, &response_len);
         /* Process the result */
         if (result == 1 && response != NULL)
         {

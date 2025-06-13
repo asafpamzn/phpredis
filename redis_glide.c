@@ -17,6 +17,7 @@
 #include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
+#include "redis_glide_list_common.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>
@@ -1404,7 +1405,23 @@ int execute_mpop_command(const void *glide_client, const char *cmd, double timeo
     /* Check for list-based commands (LMPOP, BLMPOP) */
     if (strcmp(cmd, "LMPOP") == 0 || strcmp(cmd, "BLMPOP") == 0)
     {
-        return execute_lmpop_command(glide_client, cmd, timeout, keys, from, from_len, count, result);
+        /* Determine if this is a blocking command */
+        int is_blocking = (strncmp(cmd, "B", 1) == 0);
+        enum RequestType cmd_type = is_blocking ? BLMPop : LMPop;
+
+        /* Only pass timeout for blocking commands, and only pass count if it's greater than 0 */
+        double actual_timeout = is_blocking ? timeout : -1.0;
+        long actual_count = count > 0 ? count : 0;
+
+        /* Use the common framework function directly */
+        return execute_list_mpop_command(
+            glide_client,
+            cmd_type,
+            keys,
+            from, from_len,
+            actual_count,   /* Only pass non-zero count */
+            actual_timeout, /* Only pass timeout for blocking version */
+            result);
     }
 
     /* Unknown command type */

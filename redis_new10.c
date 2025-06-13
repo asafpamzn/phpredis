@@ -15,22 +15,13 @@
 */
 
 #include "php_redis.h"
-
 #include "redis_glide.h"
+#include "redis_glide_list_common.h"
 
-/* Forward declarations for the Glide execute functions */
+/* Forward declarations for the non-list Glide execute functions */
 extern int execute_watch_command(const void *glide_client, zval *keys, int keys_count);
 extern int execute_unwatch_command(const void *glide_client);
 extern int execute_acl_command(const void *glide_client, zval *args, int args_count, zval *return_value);
-extern int execute_linsert_command(const void *glide_client, const char *key, size_t key_len,
-                                   const char *position, size_t position_len,
-                                   const char *pivot, size_t pivot_len,
-                                   const char *value, size_t value_len,
-                                   long *output_value);
-extern int execute_lpos_command(const void *glide_client, const char *key, size_t key_len,
-                                const char *element, size_t element_len, zval *options,
-                                zval *return_value);
-extern int execute_llen_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
@@ -187,10 +178,10 @@ PHP_METHOD(Redis, lInsert)
 
         /* Execute the LINSERT command using the Glide client */
         long result_value;
-        if (execute_linsert_command(redis->glide_client, key, key_len,
-                                    upper_pos, strlen(upper_pos),
-                                    pivot, pivot_len, val, val_len,
-                                    &result_value))
+        if (execute_list_insert_command(redis->glide_client, key, key_len,
+                                        upper_pos, strlen(upper_pos),
+                                        pivot, pivot_len, val, val_len,
+                                        &result_value))
         {
 
             /* Clean up */
@@ -248,8 +239,8 @@ PHP_METHOD(Redis, lPos)
         }
 
         /* Execute the LPOS command using the Glide client */
-        if (execute_lpos_command(redis->glide_client, key, key_len,
-                                 val, val_len, z_opts, return_value))
+        if (execute_list_position_command(redis->glide_client, key, key_len,
+                                          val, val_len, z_opts, return_value))
         {
             /* Free allocated memory */
 
@@ -295,7 +286,7 @@ PHP_METHOD(Redis, lLen)
 
         /* Execute the LLEN command using the Glide client */
         long result_value;
-        if (execute_llen_command(redis->glide_client, key, key_len, &result_value))
+        if (execute_list_len_command(redis->glide_client, key, key_len, &result_value))
         {
 
             /* Return the value */

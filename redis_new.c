@@ -28,6 +28,7 @@
 
 #include "redis_glide.h"
 #include "valkey_glide_z_common.h"
+#include "redis_glide_list_common.h"
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
@@ -1212,7 +1213,12 @@ PHP_METHOD(Redis, rPush)
     if (redis->glide_client)
     {
         /* Execute the RPUSH command using the Glide client */
-        long result = execute_rpush_command(redis->glide_client, key, key_len, z_args, argc);
+        long result = 0;
+        long output_value = 0;
+        if (execute_list_push_command(redis->glide_client, RPush, key, key_len, z_args, argc, &output_value))
+        {
+            result = output_value;
+        }
 
         /* If the result is -1, there was an error */
         if (result == 0)
