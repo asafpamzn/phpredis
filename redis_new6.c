@@ -41,13 +41,6 @@
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
-/* Import the execute functions */
-extern long execute_rpushx_command(const void *glide_client, const char *key, size_t key_len, zval *values, int values_count);
-extern int execute_lpop_command(const void *glide_client, const char *key, size_t key_len, zend_long count, zval *return_value);
-extern int execute_rpop_command(const void *glide_client, const char *key, size_t key_len, zend_long count, zval *return_value);
-extern int execute_blpop_command(const void *glide_client, zval *keys, double timeout, zval *return_value);
-extern int execute_brpop_command(const void *glide_client, zval *keys, double timeout, zval *return_value);
-
 /* {{{ proto long Redis::lPush(string key, mixed value1, mixed value2, mixed valueN) */
 PHP_METHOD(Redis, lPush)
 {
@@ -174,7 +167,12 @@ PHP_METHOD(Redis, rPushx)
     if (redis->glide_client)
     {
         /* Execute the RPUSHX command using the Glide client */
-        long result = execute_rpushx_command(redis->glide_client, key, key_len, z_args, argc);
+        long output_value = 0;
+        long result = 0;
+        if (execute_list_push_command(redis->glide_client, RPushX, key, key_len, z_args, argc, &output_value))
+        {
+            result = output_value;
+        }
 
         /* Return the result directly if successful (list length), or 0 if the list didn't exist */
         RETURN_LONG(result);
@@ -214,10 +212,9 @@ PHP_METHOD(Redis, lPop)
             /* When count > 1, return an array */
             array_init(return_value);
         }
+        int result = execute_list_pop_command(redis->glide_client, LPop, key, key_len, has_count ? count : 0, return_value);
 
-        int result = execute_lpop_command(redis->glide_client, key, key_len, has_count ? count : 0, return_value);
-
-        /* Return value is already set by execute_lpop_command if successful */
+        /* Return value is already set by execute_list_pop_command if successful */
         if (result != 1)
         {
             /* Command failed */
@@ -263,10 +260,9 @@ PHP_METHOD(Redis, rPop)
             /* When count > 1, return an array */
             array_init(return_value);
         }
+        int result = execute_list_pop_command(redis->glide_client, RPop, key, key_len, has_count ? count : 0, return_value);
 
-        int result = execute_rpop_command(redis->glide_client, key, key_len, has_count ? count : 0, return_value);
-
-        /* Return value is already set by execute_rpop_command if successful */
+        /* Return value is already set by execute_list_pop_command if successful */
         if (result != 1)
         {
             /* Command failed */
@@ -302,9 +298,9 @@ PHP_METHOD(Redis, blPop)
     if (redis->glide_client)
     {
         /* Execute the BLPOP command using the Glide client */
-        int result = execute_blpop_command(redis->glide_client, keys, timeout, return_value);
 
-        /* Return value is already set by execute_blpop_command if successful */
+        int result = execute_list_blocking_pop_command(redis->glide_client, BLPop, keys, timeout, return_value);
+        /* Return value is already set by execute_list_blocking_pop_command if successful */
         if (result != 1)
         {
             /* Command failed */
@@ -336,9 +332,9 @@ PHP_METHOD(Redis, brPop)
     if (redis->glide_client)
     {
         /* Execute the BRPOP command using the Glide client */
-        int result = execute_brpop_command(redis->glide_client, keys, timeout, return_value);
+        int result = execute_list_blocking_pop_command(redis->glide_client, BRPop, keys, timeout, return_value);
 
-        /* Return value is already set by execute_brpop_command if successful */
+        /* Return value is already set by execute_list_blocking_pop_command if successful */
         if (result != 1)
         {
             /* Command failed */
