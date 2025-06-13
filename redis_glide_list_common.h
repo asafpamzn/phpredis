@@ -226,12 +226,9 @@ int process_list_mpop_result(CommandResult *result, void *output);
 /* High-level command execution functions */
 int execute_list_push_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type);
 
-int execute_list_pop_command(const void *glide_client, enum RequestType cmd_type,
-                             const char *key, size_t key_len,
-                             long count, zval *return_value);
+int execute_list_pop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type);
 
-int execute_list_blocking_pop_command(const void *glide_client, enum RequestType cmd_type,
-                                      zval *keys, double timeout, zval *return_value);
+int execute_list_blocking_pop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type);
 
 int execute_list_len_command(const void *glide_client, const char *key,
                              size_t key_len, long *output_value);
@@ -403,6 +400,50 @@ int execute_list_position_command(const void *glide_client, const char *key,
         }                                                                                \
         zval_dtor(return_value);                                                         \
         RETURN_FALSE;                                                                    \
+    }
+
+#define LPOP_METHOD_IMPL(class_name)                                                  \
+    PHP_METHOD(class_name, lPop)                                                      \
+    {                                                                                 \
+        if (execute_list_pop_command(getThis(), ZEND_NUM_ARGS(), return_value, LPop)) \
+        {                                                                             \
+            return;                                                                   \
+        }                                                                             \
+        zval_dtor(return_value);                                                      \
+        RETURN_FALSE;                                                                 \
+    }
+
+#define RPOP_METHOD_IMPL(class_name)                                                  \
+    PHP_METHOD(class_name, rPop)                                                      \
+    {                                                                                 \
+        if (execute_list_pop_command(getThis(), ZEND_NUM_ARGS(), return_value, RPop)) \
+        {                                                                             \
+            return;                                                                   \
+        }                                                                             \
+        zval_dtor(return_value);                                                      \
+        RETURN_FALSE;                                                                 \
+    }
+
+#define BLPOP_METHOD_IMPL(class_name)                                                           \
+    PHP_METHOD(class_name, blPop)                                                               \
+    {                                                                                           \
+        if (execute_list_blocking_pop_command(getThis(), ZEND_NUM_ARGS(), return_value, BLPop)) \
+        {                                                                                       \
+            return;                                                                             \
+        }                                                                                       \
+        zval_dtor(return_value);                                                                \
+        RETURN_FALSE;                                                                           \
+    }
+
+#define BRPOP_METHOD_IMPL(class_name)                                                           \
+    PHP_METHOD(class_name, brPop)                                                               \
+    {                                                                                           \
+        if (execute_list_blocking_pop_command(getThis(), ZEND_NUM_ARGS(), return_value, BRPop)) \
+        {                                                                                       \
+            return;                                                                             \
+        }                                                                                       \
+        zval_dtor(return_value);                                                                \
+        RETURN_FALSE;                                                                           \
     }
 
 #endif /* REDIS_GLIDE_LIST_COMMON_H */

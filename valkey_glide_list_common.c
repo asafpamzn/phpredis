@@ -1503,35 +1503,103 @@ int execute_list_push_command(zval *object, int argc, zval *return_value, enum R
 /**
  * Execute list pop command (LPOP, RPOP)
  */
-int execute_list_pop_command(const void *glide_client, enum RequestType cmd_type,
-                             const char *key, size_t key_len,
-                             long count, zval *return_value)
+int execute_list_pop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long count = 0;
+    int has_count = 0;
 
-    args.glide_client = glide_client;
-    SET_LIST_KEY(args, key, key_len);
-    SET_LIST_COUNT(args, count);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|l",
+                                     &object, redis_ce, &key, &key_len, &count) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_list_generic_command(glide_client, cmd_type, &args, return_value, process_list_pop_result);
+    /* Check if count parameter was provided */
+    has_count = (argc > 1);
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        list_command_args_t args;
+        INIT_LIST_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        SET_LIST_KEY(args, key, key_len);
+        SET_LIST_COUNT(args, has_count ? count : 0);
+
+        /* Execute the command */
+        if (has_count && count > 1)
+        {
+            /* When count > 1, return an array */
+            array_init(return_value);
+        }
+        int result = execute_list_generic_command(redis->glide_client, cmd_type, &args, return_value, process_list_pop_result);
+
+        /* Return value is already set by execute_list_generic_command if successful */
+        if (result != 1)
+        {
+            /* Command failed */
+            if (has_count && count > 1)
+            {
+                zval_dtor(return_value);
+            }
+            return 0;
+        }
+        return 1;
+    }
+
+    return 0;
 }
 
 /**
  * Execute list blocking pop command (BLPOP, BRPOP)
  */
-int execute_list_blocking_pop_command(const void *glide_client, enum RequestType cmd_type,
-                                      zval *keys, double timeout, zval *return_value)
+int execute_list_blocking_pop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    zval *keys;
+    double timeout = 0;
 
-    args.glide_client = glide_client;
-    args.keys = keys;
-    args.blocking_opts.timeout = timeout;
-    args.blocking_opts.has_timeout = 1;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Ozd",
+                                     &object, redis_ce, &keys, &timeout) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_list_generic_command(glide_client, cmd_type, &args, return_value, process_list_blocking_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        list_command_args_t args;
+        INIT_LIST_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.keys = keys;
+        args.blocking_opts.timeout = timeout;
+        args.blocking_opts.has_timeout = 1;
+
+        int result = execute_list_generic_command(redis->glide_client, cmd_type, &args, return_value, process_list_blocking_result);
+
+        /* Return value is already set by execute_list_generic_command if successful */
+        if (result != 1)
+        {
+            /* Command failed */
+            return 0;
+        }
+        return 1;
+    }
+
+    return 0;
 }
 
 /**
