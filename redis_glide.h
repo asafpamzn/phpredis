@@ -154,21 +154,6 @@ extern int execute_pexpiretime_command(const void *glide_client, const char *key
 /* Sorted set operations */
 
 /* Hash operations */
-extern int execute_hset_command(const void *glide_client, const char *key, size_t key_len, zval *z_args, int argc, long *output_value, int is_arg_array);
-extern int execute_hsetnx_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, char *value, size_t value_len, int *output_value);
-extern int execute_hget_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, char **result, size_t *result_len);
-extern int execute_hlen_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
-extern int execute_hdel_command(const void *glide_client, const char *key, size_t key_len, zval *fields, int fields_count, long *output_value);
-extern int execute_hexists_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, int *output_value);
-extern int execute_hkeys_command(const void *glide_client, const char *key, size_t key_len, zval *return_value);
-extern int execute_hvals_command(const void *glide_client, const char *key, size_t key_len, zval *return_value);
-extern int execute_hgetall_command(const void *glide_client, const char *key, size_t key_len, zval *return_value);
-extern int execute_hincrby_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, long increment, long *output_value);
-extern int execute_hincrbyfloat_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, double increment, double *output_value);
-extern int execute_hmget_command(const void *glide_client, const char *key, size_t key_len, zval *fields, int fields_count, zval *return_value);
-extern int execute_hmset_command(const void *glide_client, const char *key, size_t key_len, zval *keyvals, int keyvals_count);
-extern int execute_hrandfield_command(const void *glide_client, const char *key, size_t key_len, long count, int withvalues, zval *return_value);
-extern int execute_hstrlen_command(const void *glide_client, const char *key, size_t key_len, char *field, size_t field_len, long *output_value);
 
 int execute_mget_command(const void *glide_client, zval *keys, zval *return_value);
 int execute_exists_command(const void *glide_client, zval *keys, int keys_count, long *output_value);

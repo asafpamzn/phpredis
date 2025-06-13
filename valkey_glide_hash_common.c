@@ -16,6 +16,8 @@
 
 #include "valkey_glide_hash_common.h"
 
+extern zend_class_entry *redis_ce;
+extern zend_class_entry *redis_exception_ce;
 /* ====================================================================
  * CORE FRAMEWORK FUNCTIONS
  * ==================================================================== */
@@ -1182,4 +1184,646 @@ int execute_h_randfield_command(const void *glide_client, const char *key, size_
 
     void *output[2] = {&args, return_value};
     return execute_h_generic_command(glide_client, HRandField, &args, output, process_h_randfield_result);
+}
+
+/* ====================================================================
+ * UNIFIED HASH COMMAND EXECUTORS FOR MACROS
+ * ==================================================================== */
+
+/**
+ * Execute HGET command with unified signature
+ */
+int execute_hget_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL, *field = NULL, *response = NULL;
+    size_t key_len, field_len, response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &field, &field_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the HGET command */
+    int result = execute_h_get_command(redis->glide_client, key, key_len, field, field_len, &response, &response_len);
+
+    /* Process the result */
+    if (result == 1 && response != NULL)
+    {
+        ZVAL_STRINGL(return_value, response, response_len);
+        efree(response);
+        return 1;
+    }
+    else if (result == 0)
+    {
+        ZVAL_FALSE(return_value);
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Execute HLEN command with unified signature
+ */
+int execute_hlen_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the HLEN command */
+    if (execute_h_len_command(redis->glide_client, key, key_len, &result_value))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Execute HEXISTS command with unified signature
+ */
+int execute_hexists_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL, *field = NULL;
+    size_t key_len, field_len;
+    int result;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &field, &field_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the HEXISTS command */
+    if (execute_h_exists_command(redis->glide_client, key, key_len, field, field_len, &result))
+    {
+        ZVAL_BOOL(return_value, result == 1);
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Execute HDEL command with unified signature
+ */
+int execute_hdel_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *fields = NULL;
+    int fields_count = 0;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os*",
+                                     &object, redis_ce, &key, &key_len,
+                                     &fields, &fields_count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the HDEL command */
+    if (execute_h_del_command(redis->glide_client, key, key_len, fields, fields_count, &result_value))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Execute HSET command with unified signature
+ */
+int execute_hset_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *z_args = NULL;
+    int arg_count;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os*",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &arg_count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Check if we have a single array argument */
+    int is_array_arg = 0;
+    if (arg_count == 1 && Z_TYPE(z_args[0]) == IS_ARRAY)
+    {
+        is_array_arg = 1;
+    }
+
+    /* Execute the HSET command */
+    if (execute_h_set_command(redis->glide_client, key, key_len, z_args, arg_count, &result_value, is_array_arg))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Execute HSETNX command with unified signature
+ */
+int execute_hsetnx_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL, *field = NULL, *val = NULL;
+    size_t key_len, field_len, val_len;
+    int result;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &field, &field_len, &val, &val_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the HSETNX command */
+    if (execute_h_setnx_command(redis->glide_client, key, key_len, field, field_len, val, val_len, &result))
+    {
+        ZVAL_BOOL(return_value, result == 1);
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Execute HMSET command with unified signature
+ */
+int execute_hmset_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *arr_keyvals;
+    HashTable *keyvals_hash;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osa",
+                                     &object, redis_ce, &key, &key_len,
+                                     &arr_keyvals) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the HMSET command */
+    keyvals_hash = Z_ARRVAL_P(arr_keyvals);
+    int keyvals_count = zend_hash_num_elements(keyvals_hash) * 2;
+
+    if (keyvals_count > 0)
+    {
+        if (execute_h_mset_command(redis->glide_client, key, key_len, arr_keyvals, keyvals_count))
+        {
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * Execute HINCRBY command with unified signature
+ */
+int execute_hincrby_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL, *field = NULL;
+    size_t key_len, field_len;
+    zend_long increment;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Ossl",
+                                     &object, redis_ce, &key, &key_len,
+                                     &field, &field_len, &increment) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the HINCRBY command */
+    if (execute_h_incrby_command(redis->glide_client, key, key_len, field, field_len, increment, &result_value))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Execute HINCRBYFLOAT command with unified signature
+ */
+int execute_hincrbyfloat_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL, *field = NULL;
+    size_t key_len, field_len;
+    double increment, result;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Ossd",
+                                     &object, redis_ce, &key, &key_len,
+                                     &field, &field_len, &increment) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the HINCRBYFLOAT command */
+    if (execute_h_incrbyfloat_command(redis->glide_client, key, key_len, field, field_len, increment, &result))
+    {
+        ZVAL_DOUBLE(return_value, result);
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Execute HMGET command with unified signature
+ */
+int execute_hmget_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *fields = NULL;
+    HashTable *fields_hash;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osa",
+                                     &object, redis_ce, &key, &key_len,
+                                     &fields) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Process fields array similar to original implementation */
+    fields_hash = Z_ARRVAL_P(fields);
+    int fields_count = zend_hash_num_elements(fields_hash);
+    if (fields_count == 0)
+    {
+        return 0;
+    }
+
+    /* Count valid fields and create field array */
+    int valid_fields_count = 0;
+    zval *data, *real_data;
+    zend_string *hash_key;
+    zend_ulong num_idx;
+
+    ZEND_HASH_FOREACH_KEY_VAL(fields_hash, num_idx, hash_key, data)
+    {
+        real_data = Z_ISREF_P(data) ? Z_REFVAL_P(data) : data;
+        if (hash_key || (Z_TYPE_P(real_data) == IS_STRING && Z_STRLEN_P(real_data) > 0) ||
+            Z_TYPE_P(real_data) == IS_LONG || Z_TYPE_P(real_data) == IS_DOUBLE || Z_TYPE_P(real_data) == IS_TRUE)
+        {
+            valid_fields_count++;
+        }
+    }
+    ZEND_HASH_FOREACH_END();
+
+    if (valid_fields_count == 0)
+    {
+        return 0;
+    }
+
+    /* Create field array */
+    zval *field_array = ecalloc(fields_count, sizeof(zval));
+    if (!field_array)
+    {
+        return 0;
+    }
+
+    /* Fill field array */
+    int i = 0;
+    ZEND_HASH_FOREACH_KEY_VAL(fields_hash, num_idx, hash_key, data)
+    {
+        zval *real_data = Z_ISREF_P(data) ? Z_REFVAL_P(data) : data;
+        if (hash_key)
+        {
+            ZVAL_STR_COPY(&field_array[i], hash_key);
+            i++;
+        }
+        else if (Z_TYPE_P(real_data) == IS_STRING && Z_STRLEN_P(real_data) > 0)
+        {
+            ZVAL_COPY(&field_array[i], real_data);
+            i++;
+        }
+        else if (Z_TYPE_P(real_data) == IS_LONG || Z_TYPE_P(real_data) == IS_DOUBLE || Z_TYPE_P(real_data) == IS_TRUE)
+        {
+            ZVAL_COPY(&field_array[i], real_data);
+            i++;
+        }
+    }
+    ZEND_HASH_FOREACH_END();
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Execute the HMGET command */
+    int result = execute_h_mget_command(redis->glide_client, key, key_len, field_array, i, return_value);
+
+    /* Free field array */
+    for (int j = 0; j < i; j++)
+    {
+        zval_ptr_dtor(&field_array[j]);
+    }
+    efree(field_array);
+
+    return result;
+}
+
+/**
+ * Execute HKEYS command with unified signature
+ */
+int execute_hkeys_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Execute the HKEYS command */
+    return execute_h_keys_command(redis->glide_client, key, key_len, return_value);
+}
+
+/**
+ * Execute HVALS command with unified signature
+ */
+int execute_hvals_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Execute the HVALS command */
+    return execute_h_vals_command(redis->glide_client, key, key_len, return_value);
+}
+
+/**
+ * Execute HGETALL command with unified signature
+ */
+int execute_hgetall_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Execute the HGETALL command */
+    return execute_h_getall_command(redis->glide_client, key, key_len, return_value);
+}
+
+/**
+ * Execute HSTRLEN command with unified signature
+ */
+int execute_hstrlen_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL, *field = NULL;
+    size_t key_len, field_len;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &field, &field_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the HSTRLEN command */
+    if (execute_h_strlen_command(redis->glide_client, key, key_len, field, field_len, &result_value))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Execute HRANDFIELD command with unified signature
+ */
+int execute_hrandfield_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *z_opts = NULL;
+    zend_long count = 1;
+    zend_bool withvalues = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|a",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_opts) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Process options if provided */
+    if (z_opts)
+    {
+        HashTable *htopts = Z_ARRVAL_P(z_opts);
+        zval *z_count = zend_hash_str_find(htopts, "count", sizeof("count") - 1);
+        zval *z_withvalues = zend_hash_str_find(htopts, "withvalues", sizeof("withvalues") - 1);
+
+        if (z_count)
+        {
+            count = zval_get_long(z_count);
+        }
+
+        if (z_withvalues)
+        {
+            withvalues = zval_is_true(z_withvalues);
+        }
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Execute the HRANDFIELD command */
+    if (execute_h_randfield_command(redis->glide_client, key, key_len, count, withvalues, return_value))
+    {
+        /* If count is 1 and not withvalues, return single value */
+        if (count == 1 && !withvalues && zend_hash_num_elements(Z_ARRVAL_P(return_value)) == 1)
+        {
+            zval *z_ele, z_copy;
+            zend_hash_internal_pointer_reset(Z_ARRVAL_P(return_value));
+            z_ele = zend_hash_get_current_data(Z_ARRVAL_P(return_value));
+            if (z_ele)
+            {
+                ZVAL_COPY(&z_copy, z_ele);
+                zval_dtor(return_value);
+                ZVAL_COPY_VALUE(return_value, &z_copy);
+            }
+        }
+        return 1;
+    }
+
+    return 0;
 }
