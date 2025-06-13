@@ -17,7 +17,7 @@
 #include "php_redis.h"
 
 #include "redis_glide.h"
-#include "redis_glide_list_common.h"
+#include "valkey_glide_list_common.h"
 extern int execute_flushdb_command(const void *glide_client, int async);
 extern int execute_flushall_command(const void *glide_client, int async);
 extern int execute_time_command(const void *glide_client, zval *return_value);

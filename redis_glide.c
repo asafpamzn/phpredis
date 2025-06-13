@@ -17,7 +17,7 @@
 #include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
-#include "redis_glide_list_common.h"
+#include "valkey_glide_list_common.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>

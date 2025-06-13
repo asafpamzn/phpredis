@@ -16,7 +16,7 @@
 
 #include "php_redis.h"
 #include "redis_glide.h"
-#include "redis_glide_list_common.h"
+#include "valkey_glide_list_common.h"
 
 /* Forward declarations for the non-list Glide execute functions */
 extern int execute_watch_command(const void *glide_client, zval *keys, int keys_count);

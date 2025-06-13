@@ -30,7 +30,7 @@
 #include "valkey_glide_geo_common.h"
 #include "valkey_glide_x_common.h"
 #include "valkey_glide_s_common.h"
-#include "redis_glide_list_common.h"
+#include "valkey_glide_list_common.h"
 
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>

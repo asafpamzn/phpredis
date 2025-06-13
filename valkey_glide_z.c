@@ -15,7 +15,7 @@
 */
 
 #include "valkey_glide_z_common.h"
-#include "redis_glide_list_common.h"
+#include "valkey_glide_list_common.h"
 #include "command_response.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
