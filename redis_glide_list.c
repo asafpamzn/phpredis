@@ -23,48 +23,6 @@
 #include <string.h>
 #include <stdio.h>
 
-/* Execute an LPUSH command using the Valkey Glide client */
-long execute_lpush_command(const void *glide_client, const char *key, size_t key_len, zval *values, int values_count)
-{
-    /* Check if client and key are valid */
-    if (!glide_client || !key || !values || values_count <= 0)
-    {
-        return 0;
-    }
-
-    /* Call the common framework function */
-    long output_value = 0;
-    if (execute_list_push_command(glide_client, LPush, key, key_len, values, values_count, &output_value))
-    {
-        return output_value;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-/* Execute an LPUSHX command using the Valkey Glide client */
-long execute_lpushx_command(const void *glide_client, const char *key, size_t key_len, zval *values, int values_count)
-{
-    /* Check if client and key are valid */
-    if (!glide_client || !key || !values || values_count <= 0)
-    {
-        return 0;
-    }
-
-    /* Call the common framework function */
-    long output_value = 0;
-    if (execute_list_push_command(glide_client, LPushX, key, key_len, values, values_count, &output_value))
-    {
-        return output_value;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
 /* Execute an RPUSHX command using the Valkey Glide client */
 long execute_rpushx_command(const void *glide_client, const char *key, size_t key_len, zval *values, int values_count)
 {

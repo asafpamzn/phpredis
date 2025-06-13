@@ -27,6 +27,7 @@
 #include "redis_cluster.h"
 
 #include "redis_glide.h"
+#include "redis_glide_list_common.h"
 #include "command_response.h"
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
@@ -41,8 +42,6 @@ extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
 /* Import the execute functions */
-extern long execute_lpush_command(const void *glide_client, const char *key, size_t key_len, zval *values, int values_count);
-extern long execute_lpushx_command(const void *glide_client, const char *key, size_t key_len, zval *values, int values_count);
 extern long execute_rpushx_command(const void *glide_client, const char *key, size_t key_len, zval *values, int values_count);
 extern int execute_lpop_command(const void *glide_client, const char *key, size_t key_len, zend_long count, zval *return_value);
 extern int execute_rpop_command(const void *glide_client, const char *key, size_t key_len, zend_long count, zval *return_value);
@@ -80,7 +79,12 @@ PHP_METHOD(Redis, lPush)
     if (redis->glide_client)
     {
         /* Execute the LPUSH command using the Glide client */
-        long result = execute_lpush_command(redis->glide_client, key, key_len, z_args, argc);
+        long result = 0;
+        long output_value = 0;
+        if (execute_list_push_command(redis->glide_client, LPush, key, key_len, z_args, argc, &output_value))
+        {
+            result = output_value;
+        }
 
         /* Return the result directly if successful, otherwise return FALSE */
         if (result > 0)
@@ -126,7 +130,12 @@ PHP_METHOD(Redis, lPushx)
     if (redis->glide_client)
     {
         /* Execute the LPUSHX command using the Glide client */
-        long result = execute_lpushx_command(redis->glide_client, key, key_len, z_args, argc);
+        long output_value = 0;
+        long result = 0;
+        if (execute_list_push_command(redis->glide_client, LPushX, key, key_len, z_args, argc, &output_value))
+        {
+            result = output_value;
+        }
 
         /* Return the result directly if successful (list length), or 0 if the list didn't exist */
         RETURN_LONG(result);
