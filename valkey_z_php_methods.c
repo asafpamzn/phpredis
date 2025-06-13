@@ -30,6 +30,7 @@
 #include "valkey_glide_geo_common.h"
 #include "valkey_glide_x_common.h"
 #include "valkey_glide_s_common.h"
+#include "redis_glide_list_common.h"
 
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
@@ -408,4 +409,32 @@ SDIFF_METHOD_IMPL(Redis)
 
 /* {{{ proto long Redis::sDiffStore(string dst, string key1, ...) */
 SDIFFSTORE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::lPush(string key, mixed value1, mixed value2, mixed valueN) */
+LPUSH_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::lPushx(string key, mixed value) */
+LPUSHX_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::rPushx(string key, mixed value) */
+RPUSHX_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string|array Redis::lPop(string key [, int count]) */
+LPOP_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string|array Redis::rPop(string key [, int count]) */
+RPOP_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::blPop(array keys, double timeout) */
+BLPOP_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::brPop(array keys, double timeout) */
+BRPOP_METHOD_IMPL(Redis)
 /* }}} */

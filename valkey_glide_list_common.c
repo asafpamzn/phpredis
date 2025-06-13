@@ -1637,41 +1637,125 @@ int execute_list_range_command(const void *glide_client, const char *key,
 /**
  * Execute list index command (LINDEX)
  */
-int execute_list_index_command(const void *glide_client, const char *key,
-                               size_t key_len, long index,
-                               char **output_value, size_t *output_len)
+int execute_list_index_command(zval *object, int argc, zval *return_value)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long index;
+    char *output_value = NULL;
+    size_t output_len;
 
-    args.glide_client = glide_client;
-    SET_LIST_KEY(args, key, key_len);
-    args.index = index;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osl",
+                                     &object, redis_ce,
+                                     &key, &key_len,
+                                     &index) == FAILURE)
+    {
+        return 0;
+    }
 
-    /* Create array to pass both output_value and output_len */
-    void *output_array[2] = {output_value, output_len};
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    return execute_list_generic_command(glide_client, LIndex, &args, output_array, process_list_string_result);
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        list_command_args_t args;
+        INIT_LIST_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        SET_LIST_KEY(args, key, key_len);
+        args.index = index;
+
+        /* Create array to pass both output_value and output_len */
+        void *output_array[2] = {&output_value, &output_len};
+
+        int result = execute_list_generic_command(redis->glide_client, LIndex, &args, output_array, process_list_string_result);
+
+        if (result > 0)
+        {
+            /* Success with data */
+            if (output_value)
+            {
+                ZVAL_STRINGL(return_value, output_value, output_len);
+                efree(output_value);
+                return 1;
+            }
+            else
+            {
+                ZVAL_FALSE(return_value);
+                return 1;
+            }
+        }
+        else if (result == 0)
+        {
+            /* Index is out of range or key doesn't exist */
+            ZVAL_FALSE(return_value);
+            return 1;
+        }
+        else
+        {
+            /* Error */
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
 /**
  * Execute list set command (LSET)
  */
-int execute_list_set_command(const void *glide_client, const char *key,
-                             size_t key_len, long index,
-                             const char *value, size_t value_len)
+int execute_list_set_command(zval *object, int argc, zval *return_value)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+    zend_long index;
 
-    args.glide_client = glide_client;
-    SET_LIST_KEY(args, key, key_len);
-    args.index = index;
-    args.value = value;
-    args.value_len = value_len;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osls",
+                                     &object, redis_ce,
+                                     &key, &key_len,
+                                     &index,
+                                     &val, &val_len) == FAILURE)
+    {
+        return 0;
+    }
 
-    int status;
-    return execute_list_generic_command(glide_client, LSet, &args, &status, process_list_ok_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        list_command_args_t args;
+        INIT_LIST_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        SET_LIST_KEY(args, key, key_len);
+        args.index = index;
+        args.value = val;
+        args.value_len = val_len;
+
+        int status;
+        int result = execute_list_generic_command(redis->glide_client, LSet, &args, &status, process_list_ok_result);
+
+        if (result)
+        {
+            /* Success */
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+        else
+        {
+            /* Error */
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
 /**
@@ -1748,18 +1832,52 @@ int execute_list_rem_command(const void *glide_client, const char *key,
 /**
  * Execute list trim command (LTRIM)
  */
-int execute_list_trim_command(const void *glide_client, const char *key,
-                              size_t key_len, long start, long end)
+int execute_list_trim_command(zval *object, int argc, zval *return_value)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long start, end;
 
-    args.glide_client = glide_client;
-    SET_LIST_KEY(args, key, key_len);
-    SET_LIST_RANGE(args, start, end);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osll",
+                                     &object, redis_ce,
+                                     &key, &key_len,
+                                     &start, &end) == FAILURE)
+    {
+        return 0;
+    }
 
-    int status;
-    return execute_list_generic_command(glide_client, LTrim, &args, &status, process_list_ok_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        list_command_args_t args;
+        INIT_LIST_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        SET_LIST_KEY(args, key, key_len);
+        SET_LIST_RANGE(args, start, end);
+
+        int status;
+        int result = execute_list_generic_command(redis->glide_client, LTrim, &args, &status, process_list_ok_result);
+
+        if (result)
+        {
+            /* Success */
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+        else
+        {
+            /* Error */
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
 /**

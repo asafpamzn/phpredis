@@ -237,13 +237,9 @@ int execute_list_range_command(const void *glide_client, const char *key,
                                size_t key_len, long start, long end,
                                zval *return_value);
 
-int execute_list_index_command(const void *glide_client, const char *key,
-                               size_t key_len, long index,
-                               char **output_value, size_t *output_len);
+int execute_list_index_command(zval *object, int argc, zval *return_value);
 
-int execute_list_set_command(const void *glide_client, const char *key,
-                             size_t key_len, long index,
-                             const char *value, size_t value_len);
+int execute_list_set_command(zval *object, int argc, zval *return_value);
 
 int execute_list_insert_command(const void *glide_client, const char *key,
                                 size_t key_len, const char *position,
@@ -256,8 +252,7 @@ int execute_list_rem_command(const void *glide_client, const char *key,
                              const char *value, size_t value_len,
                              long *output_value);
 
-int execute_list_trim_command(const void *glide_client, const char *key,
-                              size_t key_len, long start, long end);
+int execute_list_trim_command(zval *object, int argc, zval *return_value);
 
 int execute_list_move_command(const void *glide_client, enum RequestType cmd_type,
                               const char *src_key, size_t src_key_len,
@@ -444,6 +439,39 @@ int execute_list_position_command(const void *glide_client, const char *key,
         }                                                                                       \
         zval_dtor(return_value);                                                                \
         RETURN_FALSE;                                                                           \
+    }
+
+#define LSET_METHOD_IMPL(class_name)                                            \
+    PHP_METHOD(class_name, lSet)                                                \
+    {                                                                           \
+        if (execute_list_set_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        zval_dtor(return_value);                                                \
+        RETURN_FALSE;                                                           \
+    }
+
+#define LINDEX_METHOD_IMPL(class_name)                                            \
+    PHP_METHOD(class_name, lindex)                                                \
+    {                                                                             \
+        if (execute_list_index_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        zval_dtor(return_value);                                                  \
+        RETURN_FALSE;                                                             \
+    }
+
+#define LTRIM_METHOD_IMPL(class_name)                                            \
+    PHP_METHOD(class_name, ltrim)                                                \
+    {                                                                            \
+        if (execute_list_trim_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                        \
+            return;                                                              \
+        }                                                                        \
+        zval_dtor(return_value);                                                 \
+        RETURN_FALSE;                                                            \
     }
 
 #endif /* REDIS_GLIDE_LIST_COMMON_H */
