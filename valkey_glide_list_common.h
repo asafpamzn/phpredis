@@ -244,9 +244,7 @@ int execute_list_rem_command(zval *object, int argc, zval *return_value);
 int execute_list_len_command(zval *object, int argc, zval *return_value);
 int execute_list_trim_command(zval *object, int argc, zval *return_value);
 
-int execute_list_mpop_command(const void *glide_client, enum RequestType cmd_type,
-                              zval *keys, const char *direction, size_t direction_len,
-                              long count, double timeout, zval *return_value);
+int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type);
 
 /* ====================================================================
  * HELPER MACROS
@@ -539,6 +537,28 @@ int execute_list_mpop_command(const void *glide_client, enum RequestType cmd_typ
         }                                                                            \
         zval_dtor(return_value);                                                     \
         RETURN_FALSE;                                                                \
+    }
+
+#define LMPOP_METHOD_IMPL(class_name)                                                   \
+    PHP_METHOD(class_name, lmpop)                                                       \
+    {                                                                                   \
+        if (execute_list_mpop_command(getThis(), ZEND_NUM_ARGS(), return_value, LMPop)) \
+        {                                                                               \
+            return;                                                                     \
+        }                                                                               \
+        zval_dtor(return_value);                                                        \
+        RETURN_FALSE;                                                                   \
+    }
+
+#define BLMPOP_METHOD_IMPL(class_name)                                                   \
+    PHP_METHOD(class_name, blmpop)                                                       \
+    {                                                                                    \
+        if (execute_list_mpop_command(getThis(), ZEND_NUM_ARGS(), return_value, BLMPop)) \
+        {                                                                                \
+            return;                                                                      \
+        }                                                                                \
+        zval_dtor(return_value);                                                         \
+        RETURN_FALSE;                                                                    \
     }
 
 #endif /* REDIS_GLIDE_LIST_COMMON_H */

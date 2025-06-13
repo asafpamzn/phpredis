@@ -139,7 +139,6 @@ int execute_unlink_array(const void *glide_client, HashTable *keys_hash, long *o
 extern int execute_strlen_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
 extern int execute_setrange_command(const void *glide_client, const char *key, size_t key_len, long offset, const char *value, size_t value_len, long *output_value);
 extern int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_len, const char *key2, size_t key2_len, zval *options, zval *result);
-extern int execute_mpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
 
 /* Time to live operations */
 extern int execute_ttl_command(const void *glide_client, const char *key, size_t key_len, long *output_value);

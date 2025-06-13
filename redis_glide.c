@@ -1393,44 +1393,6 @@ static void process_sorted_set_elements(struct CommandResponse *elements_resp, z
     }
 }
 
-/* Execute an MPOP command (LMPOP, BLMPOP, ZMPOP, BZMPOP) using the Valkey Glide client */
-int execute_mpop_command(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result)
-{
-    /* Check if client is valid */
-    if (!glide_client)
-    {
-        return 0;
-    }
-
-    /* Check for list-based commands (LMPOP, BLMPOP) */
-    if (strcmp(cmd, "LMPOP") == 0 || strcmp(cmd, "BLMPOP") == 0)
-    {
-        /* Determine if this is a blocking command */
-        int is_blocking = (strncmp(cmd, "B", 1) == 0);
-        enum RequestType cmd_type = is_blocking ? BLMPop : LMPop;
-
-        /* Only pass timeout for blocking commands, and only pass count if it's greater than 0 */
-        double actual_timeout = is_blocking ? timeout : -1.0;
-        long actual_count = count > 0 ? count : 0;
-
-        /* Use the common framework function directly */
-        return execute_list_mpop_command(
-            glide_client,
-            cmd_type,
-            keys,
-            from, from_len,
-            actual_count,   /* Only pass non-zero count */
-            actual_timeout, /* Only pass timeout for blocking version */
-            result);
-    }
-
-    /* Unknown command type */
-    else
-    {
-        return 0;
-    }
-}
-
 /* Execute a TTL command using the Valkey Glide client */
 int execute_ttl_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
 {

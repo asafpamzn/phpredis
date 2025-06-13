@@ -867,23 +867,70 @@ int execute_list_move_command(zval *object, int argc, zval *return_value, enum R
 /**
  * Execute list MPOP command (LMPOP, BLMPOP)
  */
-int execute_list_mpop_command(const void *glide_client, enum RequestType cmd_type,
-                              zval *keys, const char *direction, size_t direction_len,
-                              long count, double timeout, zval *return_value)
+int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    zval *keys = NULL;
+    char *from = NULL;
+    size_t from_len;
+    zend_long count = 1;
+    double timeout = 0.0;
 
-    args.glide_client = glide_client;
-    args.keys = keys;
-    args.mpop_opts.direction = direction;
-    args.mpop_opts.direction_len = direction_len;
-    args.mpop_opts.count = count;
-    args.mpop_opts.timeout = timeout;
-    args.mpop_opts.has_count = (count > 0);
-    args.mpop_opts.has_timeout = (timeout >= 0.0);
+    /* Parse parameters based on command type */
+    if (cmd_type == BLMPop)
+    {
+        /* BLMPOP: timeout, keys, from, count */
+        if (zend_parse_method_parameters(argc, object, "Odas|l",
+                                         &object, redis_ce, &timeout, &keys, &from, &from_len,
+                                         &count) == FAILURE)
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        /* LMPOP: keys, from, count */
+        if (zend_parse_method_parameters(argc, object, "Oas|l",
+                                         &object, redis_ce, &keys, &from, &from_len,
+                                         &count) == FAILURE)
+        {
+            return 0;
+        }
+    }
 
-    return execute_list_generic_command(glide_client, cmd_type, &args, return_value, process_list_mpop_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        list_command_args_t args;
+        INIT_LIST_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        args.keys = keys;
+        args.mpop_opts.direction = from;
+        args.mpop_opts.direction_len = from_len;
+        args.mpop_opts.count = count;
+        args.mpop_opts.timeout = timeout;
+        args.mpop_opts.has_count = (count > 0);
+        args.mpop_opts.has_timeout = (cmd_type == BLMPop);
+
+        int result = execute_list_generic_command(redis->glide_client, cmd_type, &args, return_value, process_list_mpop_result);
+
+        if (result)
+        {
+            /* Return value already set by process function */
+            return 1;
+        }
+        else
+        {
+            /* Error */
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
 /**
