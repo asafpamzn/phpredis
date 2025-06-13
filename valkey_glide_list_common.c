@@ -768,33 +768,100 @@ int prepare_list_blocking_args(list_command_args_t *args, uintptr_t **args_out,
 }
 
 /**
- * Execute list move command (LMOVE, BLMOVE, RPOPLPUSH, BRPOPLPUSH)
+ * Execute list move command (LMOVE, BLMOVE)
  */
-int execute_list_move_command(const void *glide_client, enum RequestType cmd_type,
-                              const char *src_key, size_t src_key_len,
-                              const char *dest_key, size_t dest_key_len,
-                              const char *src_dir, size_t src_dir_len,
-                              const char *dest_dir, size_t dest_dir_len,
-                              double timeout, char **output_value, size_t *output_len)
+int execute_list_move_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *src = NULL, *dst = NULL, *wherefrom = NULL, *whereto = NULL;
+    size_t src_len, dst_len, wherefrom_len, whereto_len;
+    double timeout = -1.0;
+    char *output_value = NULL;
+    size_t output_len;
 
-    args.glide_client = glide_client;
-    SET_LIST_KEY(args, src_key, src_key_len);
-    args.move_opts.dest_key = dest_key;
-    args.move_opts.dest_key_len = dest_key_len;
-    args.move_opts.source_direction = src_dir;
-    args.move_opts.source_direction_len = src_dir_len;
-    args.move_opts.dest_direction = dest_dir;
-    args.move_opts.dest_direction_len = dest_dir_len;
-    args.move_opts.timeout = timeout;
-    args.move_opts.has_timeout = (timeout >= 0.0);
+    /* Parse parameters based on command type */
+    if (cmd_type == BLMove)
+    {
+        /* BLMOVE: src, dst, wherefrom, whereto, timeout */
+        if (zend_parse_method_parameters(argc, object, "Ossssd",
+                                         &object, redis_ce,
+                                         &src, &src_len,
+                                         &dst, &dst_len,
+                                         &wherefrom, &wherefrom_len,
+                                         &whereto, &whereto_len,
+                                         &timeout) == FAILURE)
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        /* LMOVE: src, dst, wherefrom, whereto */
+        if (zend_parse_method_parameters(argc, object, "Ossss",
+                                         &object, redis_ce,
+                                         &src, &src_len,
+                                         &dst, &dst_len,
+                                         &wherefrom, &wherefrom_len,
+                                         &whereto, &whereto_len) == FAILURE)
+        {
+            return 0;
+        }
+    }
 
-    /* Create array to pass both output_value and output_len */
-    void *output_array[2] = {output_value, output_len};
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    return execute_list_generic_command(glide_client, cmd_type, &args, output_array, process_list_string_result);
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        list_command_args_t args;
+        INIT_LIST_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        SET_LIST_KEY(args, src, src_len);
+        args.move_opts.dest_key = dst;
+        args.move_opts.dest_key_len = dst_len;
+        args.move_opts.source_direction = wherefrom;
+        args.move_opts.source_direction_len = wherefrom_len;
+        args.move_opts.dest_direction = whereto;
+        args.move_opts.dest_direction_len = whereto_len;
+        args.move_opts.timeout = timeout;
+        args.move_opts.has_timeout = (timeout >= 0.0);
+
+        /* Create array to pass both output_value and output_len */
+        void *output_array[2] = {&output_value, &output_len};
+
+        int result = execute_list_generic_command(redis->glide_client, cmd_type, &args, output_array, process_list_string_result);
+
+        if (result > 0)
+        {
+            /* Success with data */
+            if (output_value)
+            {
+                ZVAL_STRINGL(return_value, output_value, output_len);
+                efree(output_value);
+                return 1;
+            }
+            else
+            {
+                ZVAL_FALSE(return_value);
+                return 1;
+            }
+        }
+        else if (result == 0)
+        {
+            /* Key didn't exist or list was empty */
+            ZVAL_FALSE(return_value);
+            return 1;
+        }
+        else
+        {
+            /* Error */
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
 /**
@@ -1812,21 +1879,55 @@ int execute_list_position_command(const void *glide_client, const char *key,
 /**
  * Execute list remove command (LREM)
  */
-int execute_list_rem_command(const void *glide_client, const char *key,
-                             size_t key_len, long count,
-                             const char *value, size_t value_len,
-                             long *output_value)
+int execute_list_rem_command(zval *object, int argc, zval *return_value)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL, *value = NULL;
+    size_t key_len, value_len;
+    zend_long count = 0;
+    long output_value;
 
-    args.glide_client = glide_client;
-    SET_LIST_KEY(args, key, key_len);
-    SET_LIST_COUNT(args, count);
-    args.value = value;
-    args.value_len = value_len;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss|l",
+                                     &object, redis_ce,
+                                     &key, &key_len,
+                                     &value, &value_len,
+                                     &count) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_list_generic_command(glide_client, LRem, &args, output_value, process_list_int_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        list_command_args_t args;
+        INIT_LIST_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        SET_LIST_KEY(args, key, key_len);
+        SET_LIST_COUNT(args, count);
+        args.value = value;
+        args.value_len = value_len;
+
+        int result = execute_list_generic_command(redis->glide_client, LRem, &args, &output_value, process_list_int_result);
+
+        if (result)
+        {
+            /* Return the number of removed elements */
+            ZVAL_LONG(return_value, output_value);
+            return 1;
+        }
+        else
+        {
+            /* Error */
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
 /**
