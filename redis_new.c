@@ -1189,45 +1189,5 @@ PHP_METHOD(Redis, pttl)
 
 /* {{{ proto boolean Redis::rPush(string key, string value)
  */
-PHP_METHOD(Redis, rPush)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_args;
-    int argc;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os*",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the RPUSH command using the Glide client */
-        long result = 0;
-        long output_value = 0;
-        if (execute_list_push_command(redis->glide_client, RPush, key, key_len, z_args, argc, &output_value))
-        {
-            result = output_value;
-        }
-
-        /* If the result is -1, there was an error */
-        if (result == 0)
-        {
-            RETURN_FALSE;
-        }
-
-        /* Return the result */
-        RETURN_LONG(result);
-    }
-}
+RPUSH_METHOD_IMPL(Redis)
 /* }}} */

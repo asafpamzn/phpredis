@@ -224,9 +224,7 @@ int process_list_ok_result(CommandResult *result, void *output);
 int process_list_mpop_result(CommandResult *result, void *output);
 
 /* High-level command execution functions */
-int execute_list_push_command(const void *glide_client, enum RequestType cmd_type,
-                              const char *key, size_t key_len,
-                              zval *values, int values_count, long *output_value);
+int execute_list_push_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type);
 
 int execute_list_pop_command(const void *glide_client, enum RequestType cmd_type,
                              const char *key, size_t key_len,
@@ -358,5 +356,53 @@ int execute_list_position_command(const void *glide_client, const char *key,
         free_list_command_args((args), (args_len));                   \
         FREE_LIST_ALLOCATED_STRINGS((strings), (str_count));          \
     } while (0)
+
+/* ====================================================================
+ * LIST COMMAND MACROS
+ * ==================================================================== */
+
+#define LPUSH_METHOD_IMPL(class_name)                                                   \
+    PHP_METHOD(class_name, lPush)                                                       \
+    {                                                                                   \
+        if (execute_list_push_command(getThis(), ZEND_NUM_ARGS(), return_value, LPush)) \
+        {                                                                               \
+            return;                                                                     \
+        }                                                                               \
+        zval_dtor(return_value);                                                        \
+        RETURN_FALSE;                                                                   \
+    }
+
+#define RPUSH_METHOD_IMPL(class_name)                                                   \
+    PHP_METHOD(class_name, rPush)                                                       \
+    {                                                                                   \
+        if (execute_list_push_command(getThis(), ZEND_NUM_ARGS(), return_value, RPush)) \
+        {                                                                               \
+            return;                                                                     \
+        }                                                                               \
+        zval_dtor(return_value);                                                        \
+        RETURN_FALSE;                                                                   \
+    }
+
+#define LPUSHX_METHOD_IMPL(class_name)                                                   \
+    PHP_METHOD(class_name, lPushx)                                                       \
+    {                                                                                    \
+        if (execute_list_push_command(getThis(), ZEND_NUM_ARGS(), return_value, LPushX)) \
+        {                                                                                \
+            return;                                                                      \
+        }                                                                                \
+        zval_dtor(return_value);                                                         \
+        RETURN_FALSE;                                                                    \
+    }
+
+#define RPUSHX_METHOD_IMPL(class_name)                                                   \
+    PHP_METHOD(class_name, rPushx)                                                       \
+    {                                                                                    \
+        if (execute_list_push_command(getThis(), ZEND_NUM_ARGS(), return_value, RPushX)) \
+        {                                                                                \
+            return;                                                                      \
+        }                                                                                \
+        zval_dtor(return_value);                                                         \
+        RETURN_FALSE;                                                                    \
+    }
 
 #endif /* REDIS_GLIDE_LIST_COMMON_H */

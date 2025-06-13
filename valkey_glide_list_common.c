@@ -15,6 +15,8 @@
 */
 
 #include "redis_glide_list_common.h"
+extern zend_class_entry *redis_ce;
+extern zend_class_entry *redis_exception_ce;
 
 /* ====================================================================
  * UTILITY FUNCTIONS
@@ -1443,19 +1445,59 @@ int prepare_list_mpop_args(list_command_args_t *args, uintptr_t **args_out,
 /**
  * Execute list push command (LPUSH, RPUSH, LPUSHX, RPUSHX)
  */
-int execute_list_push_command(const void *glide_client, enum RequestType cmd_type,
-                              const char *key, size_t key_len,
-                              zval *values, int values_count, long *output_value)
+int execute_list_push_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *z_args;
+    int arg_count = 0;
 
-    args.glide_client = glide_client;
-    SET_LIST_KEY(args, key, key_len);
-    args.values = values;
-    args.value_count = values_count; /* Use the passed values count instead of hardcoded 1 */
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os+",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_args, &arg_count) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_list_generic_command(glide_client, cmd_type, &args, output_value, process_list_int_result);
+    /* Make sure we have at least one value to push */
+    if (arg_count < 1)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        list_command_args_t args;
+        INIT_LIST_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        SET_LIST_KEY(args, key, key_len);
+        args.values = z_args;
+        args.value_count = arg_count;
+
+        long output_value = 0;
+        int result = execute_list_generic_command(redis->glide_client, cmd_type, &args, &output_value, process_list_int_result);
+
+        /* Return the result directly if successful, otherwise return FALSE */
+        if (result)
+        {
+            ZVAL_LONG(return_value, output_value);
+            return 1;
+        }
+        else
+        {
+
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
 /**

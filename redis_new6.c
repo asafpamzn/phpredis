@@ -42,142 +42,15 @@ extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
 /* {{{ proto long Redis::lPush(string key, mixed value1, mixed value2, mixed valueN) */
-PHP_METHOD(Redis, lPush)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_args;
-    int argc = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os+",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Make sure we have at least one value to push */
-    if (argc < 1)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the LPUSH command using the Glide client */
-        long result = 0;
-        long output_value = 0;
-        if (execute_list_push_command(redis->glide_client, LPush, key, key_len, z_args, argc, &output_value))
-        {
-            result = output_value;
-        }
-
-        /* Return the result directly if successful, otherwise return FALSE */
-        if (result > 0)
-        {
-            RETURN_LONG(result);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+LPUSH_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::lPushx(string key, mixed value) */
-PHP_METHOD(Redis, lPushx)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_args;
-    int argc = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os+",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Make sure we have at least one value to push */
-    if (argc < 1)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the LPUSHX command using the Glide client */
-        long output_value = 0;
-        long result = 0;
-        if (execute_list_push_command(redis->glide_client, LPushX, key, key_len, z_args, argc, &output_value))
-        {
-            result = output_value;
-        }
-
-        /* Return the result directly if successful (list length), or 0 if the list didn't exist */
-        RETURN_LONG(result);
-    }
-}
+LPUSHX_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::rPushx(string key, mixed value) */
-PHP_METHOD(Redis, rPushx)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zval *z_args;
-    int argc = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os+",
-                                     &object, redis_ce, &key, &key_len,
-                                     &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Make sure we have at least one value to push */
-    if (argc < 1)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the RPUSHX command using the Glide client */
-        long output_value = 0;
-        long result = 0;
-        if (execute_list_push_command(redis->glide_client, RPushX, key, key_len, z_args, argc, &output_value))
-        {
-            result = output_value;
-        }
-
-        /* Return the result directly if successful (list length), or 0 if the list didn't exist */
-        RETURN_LONG(result);
-    }
-}
+RPUSHX_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto string|array Redis::lPop(string key [, int count]) */
