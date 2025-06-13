@@ -18,12 +18,6 @@
 
 #include "redis_glide.h"
 #include "redis_glide_list_common.h"
-extern int execute_ltrim_command(const void *glide_client, const char *key, size_t key_len,
-                                 long start, long end);
-extern int execute_lindex_command(const void *glide_client, const char *key, size_t key_len,
-                                  long index, char **output_value, size_t *output_len);
-extern int execute_lset_command(const void *glide_client, const char *key, size_t key_len,
-                                long index, const char *value, size_t value_len);
 extern int execute_flushdb_command(const void *glide_client, int async);
 extern int execute_flushall_command(const void *glide_client, int async);
 extern int execute_time_command(const void *glide_client, zval *return_value);
@@ -251,9 +245,7 @@ PHP_METHOD(Redis, ltrim)
         int status;
 
         /* Execute the LTRIM command using the Glide client */
-        status = execute_ltrim_command(redis->glide_client,
-                                       key, key_len,
-                                       start, end);
+        status = execute_list_trim_command(redis->glide_client, key, key_len, start, end);
 
         if (status)
         {
@@ -300,10 +292,7 @@ PHP_METHOD(Redis, lindex)
         int status;
 
         /* Execute the LINDEX command using the Glide client */
-        status = execute_lindex_command(redis->glide_client,
-                                        key, key_len,
-                                        index,
-                                        &output_value, &output_len);
+        status = execute_list_index_command(redis->glide_client, key, key_len, index, &output_value, &output_len);
 
         if (status > 0)
         {
@@ -364,10 +353,7 @@ PHP_METHOD(Redis, lSet)
         int status;
 
         /* Execute the LSET command using the Glide client */
-        status = execute_lset_command(redis->glide_client,
-                                      key, key_len,
-                                      index,
-                                      val, val_len);
+        status = execute_list_set_command(redis->glide_client, key, key_len, index, val, val_len);
 
         if (status)
         {
