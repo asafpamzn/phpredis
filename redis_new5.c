@@ -89,9 +89,6 @@ PHP_METHOD(Redis, keys)
 }
 /* }}} */
 
-/* {{{ proto array Redis::lrange(string key, long start, long end) */
-LRANGE_METHOD_IMPL(Redis)
-/* }}} */
 /* {{{ proto boolean Redis::setOption(long option, mixed value) */
 PHP_METHOD(Redis, setOption)
 {
@@ -206,12 +203,4 @@ PHP_METHOD(Redis, msetnx)
         }
     }
 }
-/* }}} */
-
-/* {{{ proto string Redis::rpoplpush(string srckey, string dstkey) */
-RPOPLPUSH_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto string Redis::brpoplpush(string src, string dst, int timeout) */
-BRPOPLPUSH_METHOD_IMPL(Redis)
 /* }}} */

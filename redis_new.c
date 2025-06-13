@@ -924,14 +924,6 @@ PHP_METHOD(Redis, strlen)
     }
 }
 
-/* {{{ proto Redis|array|false Redis::lmpop(array $keys, string $from, int $count = 1) */
-LMPOP_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto Redis|array|false Redis::blmpop(double $timeout, array $keys, string $from, int $count = 1) */
-BLMPOP_METHOD_IMPL(Redis)
-/* }}} */
-
 static void
 redis_parse_info_response(char *response, zval *z_ret)
 {
@@ -1108,9 +1100,4 @@ PHP_METHOD(Redis, pttl)
         }
     }
 }
-/* }}} */
-
-/* {{{ proto boolean Redis::rPush(string key, string value)
- */
-RPUSH_METHOD_IMPL(Redis)
 /* }}} */

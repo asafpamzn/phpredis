@@ -26,30 +26,6 @@ extern int execute_role_command(const void *glide_client, zval *return_value);
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
-/* {{{ proto string Redis::blmove(string src, string dst, string wherefrom, string whereto, int timeout) */
-BLMOVE_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto string Redis::lMove(string src, string dst, string wherefrom, string whereto) */
-LMOVE_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto long Redis::lrem(string key, string value [, long count = 0]) */
-LREM_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto boolean Redis::ltrim(string key, long start, long end) */
-LTRIM_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto string Redis::lindex(string key, long index) */
-LINDEX_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto boolean Redis::lSet(string key, long index, string value) */
-LSET_METHOD_IMPL(Redis)
-/* }}} */
-
 /* {{{ proto boolean Redis::flushDB([boolean async]) */
 PHP_METHOD(Redis, flushDB)
 {

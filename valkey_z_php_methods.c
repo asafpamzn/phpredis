@@ -438,3 +438,61 @@ BLPOP_METHOD_IMPL(Redis)
 /* {{{ proto array Redis::brPop(array keys, double timeout) */
 BRPOP_METHOD_IMPL(Redis)
 /* }}} */
+/* {{{ proto boolean Redis::rPush(string key, string value)
+ */
+RPUSH_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto array Redis::lrange(string key, long start, long end) */
+LRANGE_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto Redis|array|false Redis::lmpop(array $keys, string $from, int $count = 1) */
+LMPOP_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto Redis|array|false Redis::blmpop(double $timeout, array $keys, string $from, int $count = 1) */
+BLMPOP_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto long Redis::lInsert(string key, string position, string pivot, string value) */
+LINSERT_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string Redis::lPos(string key, mixed value, [array options = null]) */
+LPOS_METHOD_IMPL(Redis)
+
+/* }}} */
+
+/* {{{ proto int Redis::lLen(string key) */
+LLEN_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string Redis::rpoplpush(string srckey, string dstkey) */
+RPOPLPUSH_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string Redis::brpoplpush(string src, string dst, int timeout) */
+BRPOPLPUSH_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string Redis::blmove(string src, string dst, string wherefrom, string whereto, int timeout) */
+BLMOVE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string Redis::lMove(string src, string dst, string wherefrom, string whereto) */
+LMOVE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::lrem(string key, string value [, long count = 0]) */
+LREM_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto boolean Redis::ltrim(string key, long start, long end) */
+LTRIM_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string Redis::lindex(string key, long index) */
+LINDEX_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto boolean Redis::lSet(string key, long index, string value) */
+LSET_METHOD_IMPL(Redis)
+/* }}} */

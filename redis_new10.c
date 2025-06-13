@@ -128,16 +128,3 @@ PHP_METHOD(Redis, acl)
     }
 }
 /* }}} */
-
-/* {{{ proto long Redis::lInsert(string key, string position, string pivot, string value) */
-LINSERT_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto string Redis::lPos(string key, mixed value, [array options = null]) */
-LPOS_METHOD_IMPL(Redis)
-
-/* }}} */
-
-/* {{{ proto int Redis::lLen(string key) */
-LLEN_METHOD_IMPL(Redis)
-/* }}} */

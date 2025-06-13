@@ -189,7 +189,6 @@ int execute_object_command(const void *glide_client,
 
 /* Import the execute functions from redis_glide_keys.c */
 int execute_keys_command(const void *glide_client, const char *pattern, size_t pattern_len, zval *return_value);
-int execute_lrange_command(const void *glide_client, const char *key, size_t key_len, long start, long end, zval *return_value);
 
 /* Don't include command_response.h here to avoid circular dependencies */
 
