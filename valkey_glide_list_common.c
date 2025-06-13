@@ -1763,21 +1763,118 @@ int execute_list_len_command(zval *object, int argc, zval *return_value)
     return 0;
 }
 
-/**
- * Execute list range command (LRANGE)
- */
-int execute_list_range_command(const void *glide_client, const char *key,
-                               size_t key_len, long start, long end,
-                               zval *return_value)
+/* Execute an LRANGE command using the Valkey Glide client - New pattern */
+int execute_list_range_command(zval *object, int argc, zval *return_value)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long start, end;
 
-    args.glide_client = glide_client;
-    SET_LIST_KEY(args, key, key_len);
-    SET_LIST_RANGE(args, start, end);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osll",
+                                     &object, redis_ce, &key, &key_len, &start, &end) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_list_generic_command(glide_client, LRange, &args, return_value, process_list_array_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Prepare command arguments */
+        unsigned long arg_count = 3;
+        uintptr_t args[3];
+        unsigned long args_len[3];
+
+        /* First argument: key */
+        args[0] = (uintptr_t)key;
+        args_len[0] = key_len;
+
+        /* Second argument: start index */
+        size_t start_len;
+        char *start_str = long_to_string(start, &start_len);
+        if (!start_str)
+        {
+            return 0;
+        }
+        args[1] = (uintptr_t)start_str;
+        args_len[1] = start_len;
+
+        /* Third argument: end index */
+        size_t end_len;
+        char *end_str = long_to_string(end, &end_len);
+        if (!end_str)
+        {
+            efree(start_str);
+            return 0;
+        }
+        args[2] = (uintptr_t)end_str;
+        args_len[2] = end_len;
+
+        /* Execute the command */
+        CommandResult *result = execute_command(
+            redis->glide_client,
+            LRange,    /* command type */
+            arg_count, /* number of arguments */
+            args,      /* arguments */
+            args_len   /* argument lengths */
+        );
+
+        /* Free the allocated strings */
+        efree(start_str);
+        efree(end_str);
+
+        /* Check if the command was successful */
+        if (!result)
+        {
+            return 0;
+        }
+
+        /* Check if there was an error */
+        if (result->command_error)
+        {
+            printf("Error executing LRANGE command: %s\n", result->command_error->command_error_message);
+            free_command_result(result);
+            return 0;
+        }
+
+        /* Process the result */
+        int ret_val = 0;
+        if (result->response && result->response->response_type == Array)
+        {
+            /* Initialize the return array */
+            array_init(return_value);
+
+            /* Add array elements to the result */
+            for (int i = 0; i < result->response->array_value_len; i++)
+            {
+                CommandResponse *element = &result->response->array_value[i];
+
+                /* Process each element based on its type */
+                if (element->response_type == String)
+                {
+                    add_next_index_stringl(return_value, element->string_value, element->string_value_len);
+                }
+                else if (element->response_type == Null)
+                {
+                    add_next_index_null(return_value);
+                }
+            }
+
+            /* Command succeeded */
+            ret_val = 1;
+        }
+
+        /* Free the result */
+        free_command_result(result);
+
+        return ret_val;
+    }
+
+    return 0;
 }
 
 /**

@@ -230,9 +230,7 @@ int execute_list_pop_command(zval *object, int argc, zval *return_value, enum Re
 
 int execute_list_blocking_pop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type);
 
-int execute_list_range_command(const void *glide_client, const char *key,
-                               size_t key_len, long start, long end,
-                               zval *return_value);
+int execute_list_range_command(zval *object, int argc, zval *return_value);
 
 int execute_list_index_command(zval *object, int argc, zval *return_value);
 
@@ -559,6 +557,17 @@ int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum R
         }                                                                                \
         zval_dtor(return_value);                                                         \
         RETURN_FALSE;                                                                    \
+    }
+
+#define LRANGE_METHOD_IMPL(class_name)                                            \
+    PHP_METHOD(class_name, lrange)                                                \
+    {                                                                             \
+        if (execute_list_range_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        zval_dtor(return_value);                                                  \
+        RETURN_FALSE;                                                             \
     }
 
 #endif /* REDIS_GLIDE_LIST_COMMON_H */
