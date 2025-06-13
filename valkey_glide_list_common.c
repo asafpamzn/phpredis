@@ -1672,16 +1672,48 @@ int execute_list_blocking_pop_command(zval *object, int argc, zval *return_value
 /**
  * Execute list length command (LLEN)
  */
-int execute_list_len_command(const void *glide_client, const char *key,
-                             size_t key_len, long *output_value)
+int execute_list_len_command(zval *object, int argc, zval *return_value)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    long output_value;
 
-    args.glide_client = glide_client;
-    SET_LIST_KEY(args, key, key_len);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_list_generic_command(glide_client, LLen, &args, output_value, process_list_int_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        list_command_args_t args;
+        INIT_LIST_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        SET_LIST_KEY(args, key, key_len);
+
+        int result = execute_list_generic_command(redis->glide_client, LLen, &args, &output_value, process_list_int_result);
+
+        if (result)
+        {
+            /* Return the length */
+            ZVAL_LONG(return_value, output_value);
+            return 1;
+        }
+        else
+        {
+            /* Error */
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
 /**
@@ -1828,52 +1860,157 @@ int execute_list_set_command(zval *object, int argc, zval *return_value)
 /**
  * Execute list insert command (LINSERT)
  */
-int execute_list_insert_command(const void *glide_client, const char *key,
-                                size_t key_len, const char *position,
-                                size_t position_len, const char *pivot,
-                                size_t pivot_len, const char *value,
-                                size_t value_len, long *output_value)
+int execute_list_insert_command(zval *object, int argc, zval *return_value)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL, *pos = NULL, *pivot = NULL, *val = NULL;
+    size_t key_len, pos_len, pivot_len, val_len;
+    long output_value;
+    char *upper_pos = NULL;
 
-    args.glide_client = glide_client;
-    SET_LIST_KEY(args, key, key_len);
-    args.position_opts.position = position;
-    args.position_opts.position_len = position_len;
-    args.position_opts.pivot = pivot;
-    args.position_opts.pivot_len = pivot_len;
-    args.value = value;
-    args.value_len = value_len;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Ossss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &pos, &pos_len, &pivot, &pivot_len,
+                                     &val, &val_len) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_list_generic_command(glide_client, LInsert, &args, output_value, process_list_int_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Make position uppercase for comparison */
+        if (pos_len > 0)
+        {
+            upper_pos = emalloc(pos_len + 1);
+            int i;
+            for (i = 0; i < pos_len; i++)
+            {
+                upper_pos[i] = toupper(pos[i]);
+            }
+            upper_pos[pos_len] = '\0';
+        }
+
+        /* Check if position is BEFORE or AFTER */
+        if (upper_pos == NULL ||
+            (strcmp(upper_pos, "BEFORE") != 0 && strcmp(upper_pos, "AFTER") != 0))
+        {
+            if (upper_pos)
+                efree(upper_pos);
+            return 0;
+        }
+
+        list_command_args_t args;
+        INIT_LIST_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        SET_LIST_KEY(args, key, key_len);
+        args.position_opts.position = upper_pos;
+        args.position_opts.position_len = strlen(upper_pos);
+        args.position_opts.pivot = pivot;
+        args.position_opts.pivot_len = pivot_len;
+        args.value = val;
+        args.value_len = val_len;
+
+        int result = execute_list_generic_command(redis->glide_client, LInsert, &args, &output_value, process_list_int_result);
+
+        /* Clean up */
+        if (upper_pos)
+            efree(upper_pos);
+
+        if (result)
+        {
+            /* Return the result value */
+            ZVAL_LONG(return_value, output_value);
+            return 1;
+        }
+        else
+        {
+            /* Error */
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
 /**
  * Execute list position command (LPOS)
  */
-int execute_list_position_command(const void *glide_client, const char *key,
-                                  size_t key_len, const char *element, size_t element_len,
-                                  zval *options, zval *return_value)
+int execute_list_position_command(zval *object, int argc, zval *return_value)
 {
-    list_command_args_t args;
-    INIT_LIST_COMMAND_ARGS(args);
+    redis_object *redis;
+    zval *z_value, *z_opts = NULL;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+    int val_free = 0;
 
-    args.glide_client = glide_client;
-    SET_LIST_KEY(args, key, key_len);
-    args.element = element;
-    args.element_len = element_len;
-
-    /* Parse position options */
-    if (options && Z_TYPE_P(options) == IS_ARRAY)
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osz|a",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_value, &z_opts) == FAILURE)
     {
-        parse_list_position_options(options, &args.position_opts);
+        return 0;
     }
 
-    /* Use the correct processor depending on whether COUNT option is used */
-    list_result_processor_t processor = args.position_opts.has_count ? process_list_array_result : process_list_zval_int_result;
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    return execute_list_generic_command(glide_client, LPos, &args, return_value, processor);
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Convert value to string if needed */
+        switch (Z_TYPE_P(z_value))
+        {
+        case IS_STRING:
+            val = Z_STRVAL_P(z_value);
+            val_len = Z_STRLEN_P(z_value);
+            break;
+        default:
+            /* For now, only handle string values */
+            return 0;
+        }
+
+        list_command_args_t args;
+        INIT_LIST_COMMAND_ARGS(args);
+
+        args.glide_client = redis->glide_client;
+        SET_LIST_KEY(args, key, key_len);
+        args.element = val;
+        args.element_len = val_len;
+
+        /* Parse position options */
+        if (z_opts && Z_TYPE_P(z_opts) == IS_ARRAY)
+        {
+            parse_list_position_options(z_opts, &args.position_opts);
+        }
+
+        /* Use the correct processor depending on whether COUNT option is used */
+        list_result_processor_t processor = args.position_opts.has_count ? process_list_array_result : process_list_zval_int_result;
+
+        int result = execute_list_generic_command(redis->glide_client, LPos, &args, return_value, processor);
+
+        /* Free allocated memory */
+        if (val_free)
+            efree(val);
+
+        if (result)
+        {
+            /* Return value already set in execute function */
+            return 1;
+        }
+        else
+        {
+            /* Error */
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
 /**

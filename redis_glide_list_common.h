@@ -230,9 +230,6 @@ int execute_list_pop_command(zval *object, int argc, zval *return_value, enum Re
 
 int execute_list_blocking_pop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type);
 
-int execute_list_len_command(const void *glide_client, const char *key,
-                             size_t key_len, long *output_value);
-
 int execute_list_range_command(const void *glide_client, const char *key,
                                size_t key_len, long start, long end,
                                zval *return_value);
@@ -240,24 +237,16 @@ int execute_list_range_command(const void *glide_client, const char *key,
 int execute_list_index_command(zval *object, int argc, zval *return_value);
 
 int execute_list_set_command(zval *object, int argc, zval *return_value);
-
-int execute_list_insert_command(const void *glide_client, const char *key,
-                                size_t key_len, const char *position,
-                                size_t position_len, const char *pivot,
-                                size_t pivot_len, const char *value,
-                                size_t value_len, long *output_value);
+int execute_list_position_command(zval *object, int argc, zval *return_value);
+int execute_list_insert_command(zval *object, int argc, zval *return_value);
 
 int execute_list_rem_command(zval *object, int argc, zval *return_value);
-
+int execute_list_len_command(zval *object, int argc, zval *return_value);
 int execute_list_trim_command(zval *object, int argc, zval *return_value);
 
 int execute_list_mpop_command(const void *glide_client, enum RequestType cmd_type,
                               zval *keys, const char *direction, size_t direction_len,
                               long count, double timeout, zval *return_value);
-
-int execute_list_position_command(const void *glide_client, const char *key,
-                                  size_t key_len, const char *element, size_t element_len,
-                                  zval *options, zval *return_value);
 
 /* ====================================================================
  * HELPER MACROS
@@ -517,6 +506,39 @@ int execute_list_position_command(const void *glide_client, const char *key,
         }                                                                                    \
         zval_dtor(return_value);                                                             \
         RETURN_FALSE;                                                                        \
+    }
+
+#define LLEN_METHOD_IMPL(class_name)                                            \
+    PHP_METHOD(class_name, lLen)                                                \
+    {                                                                           \
+        if (execute_list_len_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        zval_dtor(return_value);                                                \
+        RETURN_FALSE;                                                           \
+    }
+
+#define LINSERT_METHOD_IMPL(class_name)                                            \
+    PHP_METHOD(class_name, lInsert)                                                \
+    {                                                                              \
+        if (execute_list_insert_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                          \
+            return;                                                                \
+        }                                                                          \
+        zval_dtor(return_value);                                                   \
+        RETURN_FALSE;                                                              \
+    }
+
+#define LPOS_METHOD_IMPL(class_name)                                                 \
+    PHP_METHOD(class_name, lPos)                                                     \
+    {                                                                                \
+        if (execute_list_position_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                            \
+            return;                                                                  \
+        }                                                                            \
+        zval_dtor(return_value);                                                     \
+        RETURN_FALSE;                                                                \
     }
 
 #endif /* REDIS_GLIDE_LIST_COMMON_H */
