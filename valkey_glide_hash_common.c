@@ -149,6 +149,12 @@ int execute_h_simple_command(const void *glide_client,
     case HDel:
         arg_count = prepare_h_multi_field_args(args, &cmd_args, &args_len, &allocated_strings, &allocated_count);
         break;
+    case HSet:
+        arg_count = prepare_h_set_args(args, &cmd_args, &args_len, &allocated_strings, &allocated_count);
+        break;
+    case HMSet:
+        arg_count = prepare_h_mset_args(args, &cmd_args, &args_len, &allocated_strings, &allocated_count);
+        break;
     case HIncrBy:
         arg_count = prepare_h_incr_args(args, &cmd_args, &args_len, &allocated_strings, &allocated_count);
         break;
