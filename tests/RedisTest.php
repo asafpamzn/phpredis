@@ -3093,7 +3093,7 @@ class Redis_Test extends TestSuite {
         $all = $this->redis->hGetAll('h');
         
         $this->assertEqualsCanonicalizing(['x' => 'a', 'y' => 'b'], $all, true);
-          return;
+         
         // hExists
         $this->assertTrue($this->redis->hExists('h', 'x'));
         
@@ -3119,7 +3119,7 @@ class Redis_Test extends TestSuite {
             // hIncrByFloat
             $this->redis->del('h');
             $this->assertEquals(1.5, $this->redis->hIncrByFloat('h', 'x', 1.5));
-            
+        
             $this->assertEquals(3.0, $this->redis->hincrByFloat('h', 'x', 1.5));
             $this->assertEquals(1.5, $this->redis->hincrByFloat('h', 'x', -1.5));
             $this->assertEquals(1000000000001.5, $this->redis->hincrByFloat('h', 'x', 1000000000000));
@@ -3127,7 +3127,7 @@ class Redis_Test extends TestSuite {
             $this->redis->hset('h', 'y', 'not-a-number');
             $this->assertFalse($this->redis->hIncrByFloat('h', 'y', 1.5));
         }
-
+ 
         // hmset
         $this->redis->del('h');
         $this->assertTrue($this->redis->hMset('h', ['x' => 123, 'y' => 456, 'z' => 'abc']));
@@ -3145,7 +3145,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(['x' => '123', 't' => FALSE, 'y' => '456'], $this->redis->hMget('h', ['x', 't', 'y']));
         $this->assertNotEquals([123 => 'x'], $this->redis->hMget('h', [123]));
         $this->assertEquals([123 => FALSE], $this->redis->hMget('h', [123]));
-        
+       
         // Test with an array populated with things we can't use as keys
         $this->assertFalse($this->redis->hmget('h', [false,NULL,false]));
        
@@ -3170,14 +3170,15 @@ class Redis_Test extends TestSuite {
         $this->assertEquals([123 => 'x', 'y' => '456'], $this->redis->hMget('h', $keys));
           
         // check non-string types.
-        
+         
         $this->redis->del('h1');
         $this->assertTrue($this->redis->hMSet('h1', ['x' => 0, 'y' => [], 'z' => new stdclass(), 't' => NULL]));
+        
         $h1 = $this->redis->hGetAll('h1');
         $this->assertEquals('0', $h1['x']);
-        // $this->assertEquals('Array', $h1['y']); TODO
+        $this->assertEquals('Array', $h1['y']);
         
-       // $this->assertEquals('Object', $h1['z']); TODO
+       // $this->assertEquals('Object', $h1['z']); //TODO
         $this->assertEquals('', $h1['t']);
         
         // hset with fields + values as an associative array

@@ -799,17 +799,53 @@ int process_h_incrbyfloat_result(CommandResult *result, void *output)
     /* Use command_response_to_zval to get the string result */
     zval temp_result;
     int ret_val = command_response_to_zval(result->response, &temp_result, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
-
-    if (ret_val && Z_TYPE(temp_result) == IS_STRING)
+    // php_var_dump(&temp_result, 2);
+    if (ret_val)
     {
-        /* Convert string to double */
-        *output_value = strtod(Z_STRVAL(temp_result), NULL);
+        if (Z_TYPE(temp_result) == IS_STRING)
+        {
+            /* Convert string to double */
+            *output_value = strtod(Z_STRVAL(temp_result), NULL);
+        }
+        else if (Z_TYPE(temp_result) == IS_DOUBLE)
+        {
+            *output_value = Z_DVAL(temp_result);
+        }
+        else if (Z_TYPE(temp_result) == IS_LONG)
+        {
+            /* Convert long to double */
+            *output_value = (double)Z_LVAL(temp_result);
+        }
+        else
+        {
+            zval_dtor(&temp_result);
+            return 0;
+        }
+
         zval_dtor(&temp_result);
         return 1;
     }
 
     zval_dtor(&temp_result);
     return 0;
+}
+
+/**
+ * Process results for HGETALL (convert flat array to associative)
+ */
+int process_h_getall_result(CommandResult *result, void *output)
+{
+    zval *return_value = (zval *)output;
+
+    /* Check if the command was successful */
+    if (!result || result->command_error)
+    {
+        return 0;
+    }
+
+    /* Convert response to associative array */
+    return command_response_to_zval(result->response, return_value,
+                                    COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
 }
 
 /* ====================================================================
@@ -888,14 +924,102 @@ int process_field_value_pairs(zval *field_values, uintptr_t *args, unsigned long
         }
         arg_idx++;
 
-        /* Add value */
+        /* Add value with enhanced type handling */
         size_t str_len;
         int need_free;
-        char *str_val = zval_to_string_safe(data, &str_len, &need_free);
+        char *str_val = NULL;
+
+        /* Handle different zval types appropriately */
+        switch (Z_TYPE_P(data))
+        {
+        case IS_NULL:
+            /* Convert NULL to empty string */
+            str_val = estrdup("");
+            str_len = 0;
+            need_free = 1;
+            break;
+
+        case IS_FALSE:
+            /* Convert false to "0" */
+            str_val = estrdup("0");
+            str_len = 1;
+            need_free = 1;
+            break;
+
+        case IS_TRUE:
+            /* Convert true to "1" */
+            str_val = estrdup("1");
+            str_len = 1;
+            need_free = 1;
+            break;
+
+        case IS_ARRAY:
+            /* Convert array to JSON representation */
+            {
+
+                smart_str json_str = {0};
+
+                {
+                    /* Fallback to "Array" if JSON encoding fails */
+                    str_val = estrdup("Array");
+                    str_len = 5;
+                    need_free = 1;
+                    if (json_str.s)
+                        smart_str_free(&json_str);
+                }
+            }
+            break;
+
+        case IS_OBJECT:
+            /* Try to convert object to string */
+            if (Z_OBJ_HT_P(data)->cast_object)
+            {
+                zval tmp;
+                if (Z_OBJ_HT_P(data)->cast_object(Z_OBJ_P(data), &tmp, IS_STRING) == SUCCESS)
+                {
+                    str_val = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
+                    str_len = Z_STRLEN(tmp);
+                    need_free = 1;
+                    zval_ptr_dtor(&tmp);
+                }
+                else
+                {
+                    /* Fallback to object class name */
+                    zend_string *class_name = Z_OBJCE_P(data)->name;
+                    str_val = estrndup(ZSTR_VAL(class_name), ZSTR_LEN(class_name));
+                    str_len = ZSTR_LEN(class_name);
+                    need_free = 1;
+                }
+            }
+            else
+            {
+                /* No cast_object handler, use class name */
+                zend_string *class_name = Z_OBJCE_P(data)->name;
+                str_val = estrndup(ZSTR_VAL(class_name), ZSTR_LEN(class_name));
+                str_len = ZSTR_LEN(class_name);
+                need_free = 1;
+            }
+            break;
+
+        case IS_RESOURCE:
+            /* Convert resource to string representation */
+            str_val = estrdup("Resource");
+            str_len = 8;
+            need_free = 1;
+            break;
+
+        default:
+            /* Use standard conversion for strings, numbers, etc. */
+            str_val = zval_to_string_safe(data, &str_len, &need_free);
+            break;
+        }
 
         if (!str_val)
         {
-            return 0;
+            /* Final fallback - should not happen with above handling */
+            str_val = estrdup("unknown");
+            str_len = 7;
+            need_free = 1;
         }
 
         args[arg_idx] = (uintptr_t)str_val;
@@ -1156,7 +1280,7 @@ int execute_h_getall_command(const void *glide_client, const char *key, size_t k
     args.key = key;
     args.key_len = key_len;
 
-    return execute_h_simple_command(glide_client, HGetAll, &args, return_value, H_RESPONSE_MAP);
+    return execute_h_generic_command(glide_client, HGetAll, &args, return_value, process_h_getall_result);
 }
 
 /**
