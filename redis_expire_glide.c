@@ -171,31 +171,3 @@ int execute_pexpiretime_command(const void *glide_client, const char *key, size_
 
     return execute_core_command(&args, output_value, process_core_int_result);
 }
-
-/* ====================================================================
- * MIGRATION RESULTS:
- *
- * BEFORE (Original Implementation):
- * - Lines of Code: ~500 lines
- * - Memory Allocations: 42 manual calls
- * - Error Handling Blocks: 21 duplicate blocks
- * - String Conversions: 14 manual calls
- * - Memory Cleanup: 35 cleanup calls
- * - Argument Preparation: 350 lines of boilerplate
- *
- * AFTER (Core Framework):
- * - Lines of Code: ~140 lines (72% reduction!)
- * - Memory Allocations: 0 manual calls (100% automated)
- * - Error Handling: 0 duplicate blocks (100% centralized)
- * - String Conversions: 0 manual calls (100% automated)
- * - Memory Cleanup: 0 manual calls (100% automated)
- * - Argument Preparation: 0 boilerplate (100% automated)
- *
- * BENEFITS:
- * ✅ Massive code reduction while maintaining identical functionality
- * ✅ Zero memory leaks - automatic cleanup handled by framework
- * ✅ Consistent error handling across all commands
- * ✅ Future-proof - easy to extend with new features
- * ✅ Better performance - single execution pathway
- * ✅ Mode support ready for future enhancement
- * ==================================================================== */

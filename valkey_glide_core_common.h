@@ -85,8 +85,12 @@ typedef struct
     /* Expiry options */
     long expire_seconds;
     long expire_milliseconds;
+    long expire_at_seconds;      /* EXAT - expire at unix timestamp in seconds */
+    long expire_at_milliseconds; /* PXAT - expire at unix timestamp in milliseconds */
     int has_expire;
     int has_pexpire;
+    int has_exat;
+    int has_pxat;
 
     /* Conditional options */
     int nx; /* Only if not exists */
@@ -103,8 +107,14 @@ typedef struct
 
     /* Special flags */
     int get_old_value; /* GET flag for SET commands */
+    int keep_ttl;      /* KEEPTTL flag for SET commands */
     int bybit;         /* BYBIT flag for bit commands */
     int approximate;   /* ~ flag for approximate operations */
+
+    /* SET command specific options */
+    char *ifeq_value; /* IFEQ comparison value */
+    size_t ifeq_len;  /* IFEQ value length */
+    int has_ifeq;     /* IFEQ flag */
 } core_options_t;
 
 /* Core command arguments structure */

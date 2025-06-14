@@ -243,7 +243,7 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
     /* Add option arguments */
     if (args->options.has_expire)
     {
-        total_args += 2; /* EX/PX + value */
+        total_args += 2; /* EX/PX/EXAT/PXAT + value */
     }
     if (args->options.nx)
     {
@@ -256,6 +256,14 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
     if (args->options.get_old_value)
     {
         total_args++; /* GET */
+    }
+    if (args->options.keep_ttl)
+    {
+        total_args++; /* KEEPTTL */
+    }
+    if (args->options.has_ifeq)
+    {
+        total_args += 2; /* IFEQ + value */
     }
 
     if (!allocate_core_arg_arrays(total_args, cmd_args, cmd_args_len))
@@ -330,7 +338,39 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
     /* Add options */
     if (args->options.has_expire)
     {
-        if (args->options.has_pexpire)
+        if (args->options.has_pxat)
+        {
+            (*cmd_args)[arg_idx] = (uintptr_t)"PXAT";
+            (*cmd_args_len)[arg_idx] = 4;
+            arg_idx++;
+
+            size_t len;
+            char *str = core_long_to_string(args->options.expire_at_milliseconds, &len);
+            if (str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)str;
+                (*cmd_args_len)[arg_idx] = len;
+                add_tracked_string(*allocated_strings, allocated_count, str);
+                arg_idx++;
+            }
+        }
+        else if (args->options.has_exat)
+        {
+            (*cmd_args)[arg_idx] = (uintptr_t)"EXAT";
+            (*cmd_args_len)[arg_idx] = 4;
+            arg_idx++;
+
+            size_t len;
+            char *str = core_long_to_string(args->options.expire_at_seconds, &len);
+            if (str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)str;
+                (*cmd_args_len)[arg_idx] = len;
+                add_tracked_string(*allocated_strings, allocated_count, str);
+                arg_idx++;
+            }
+        }
+        else if (args->options.has_pexpire)
         {
             (*cmd_args)[arg_idx] = (uintptr_t)"PX";
             (*cmd_args_len)[arg_idx] = 2;
@@ -382,6 +422,24 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
     {
         (*cmd_args)[arg_idx] = (uintptr_t)"GET";
         (*cmd_args_len)[arg_idx] = 3;
+        arg_idx++;
+    }
+
+    if (args->options.keep_ttl)
+    {
+        (*cmd_args)[arg_idx] = (uintptr_t)"KEEPTTL";
+        (*cmd_args_len)[arg_idx] = 7;
+        arg_idx++;
+    }
+
+    if (args->options.has_ifeq)
+    {
+        (*cmd_args)[arg_idx] = (uintptr_t)"IFEQ";
+        (*cmd_args_len)[arg_idx] = 4;
+        arg_idx++;
+
+        (*cmd_args)[arg_idx] = (uintptr_t)args->options.ifeq_value;
+        (*cmd_args_len)[arg_idx] = args->options.ifeq_len;
         arg_idx++;
     }
 
@@ -1093,13 +1151,125 @@ int parse_core_options(zval *options, core_options_t *opts)
  */
 int parse_set_options(zval *options, core_options_t *opts)
 {
-    /* Use common option parsing as base */
-    if (!parse_core_options(options, opts))
+    if (!opts)
     {
         return 0;
     }
 
-    /* SET command specific parsing can be added here */
+    /* Initialize options */
+    memset(opts, 0, sizeof(core_options_t));
+
+    if (!options || Z_TYPE_P(options) != IS_ARRAY)
+    {
+        return 1;
+    }
+
+    HashTable *options_ht = Z_ARRVAL_P(options);
+    zval *z_option;
+    zend_string *option_key;
+    zend_ulong num_key;
+
+    /* Iterate through all options */
+    ZEND_HASH_FOREACH_KEY_VAL(options_ht, num_key, option_key, z_option)
+    {
+        if (option_key == NULL)
+        {
+            /* Handle numeric keys - these are option flags without values */
+            if (Z_TYPE_P(z_option) == IS_STRING)
+            {
+                zend_string *opt_str = Z_STR_P(z_option);
+                char *opt = ZSTR_VAL(opt_str);
+
+                /* NX option */
+                if (strcasecmp(opt, "NX") == 0)
+                {
+                    opts->nx = 1;
+                }
+                /* XX option */
+                else if (strcasecmp(opt, "XX") == 0)
+                {
+                    opts->xx = 1;
+                }
+                /* GET option */
+                else if (strcasecmp(opt, "GET") == 0)
+                {
+                    opts->get_old_value = 1;
+                }
+                /* KEEPTTL option */
+                else if (strcasecmp(opt, "KEEPTTL") == 0)
+                {
+                    opts->keep_ttl = 1;
+                }
+            }
+        }
+        else
+        {
+            /* Handle string keys - these are options with values */
+            char *opt = ZSTR_VAL(option_key);
+
+            /* Check for time-based options */
+            if (strcasecmp(opt, "EX") == 0)
+            {
+                /* EX option - seconds */
+                if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
+                {
+                    opts->expire_seconds = zval_get_long(z_option);
+                    opts->has_expire = 1;
+                    /* Reset other time options */
+                    opts->has_pexpire = opts->has_exat = opts->has_pxat = 0;
+                }
+            }
+            else if (strcasecmp(opt, "PX") == 0)
+            {
+                /* PX option - milliseconds */
+                if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
+                {
+                    opts->expire_milliseconds = zval_get_long(z_option);
+                    opts->has_expire = 1;
+                    opts->has_pexpire = 1;
+                    /* Reset other time options */
+                    opts->has_exat = opts->has_pxat = 0;
+                }
+            }
+            else if (strcasecmp(opt, "EXAT") == 0)
+            {
+                /* EXAT option - unix time in seconds */
+                if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
+                {
+                    opts->expire_at_seconds = zval_get_long(z_option);
+                    opts->has_expire = 1;
+                    opts->has_exat = 1;
+                    /* Reset other time options */
+                    opts->has_pexpire = opts->has_pxat = 0;
+                }
+            }
+            else if (strcasecmp(opt, "PXAT") == 0)
+            {
+                /* PXAT option - unix time in milliseconds */
+                if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
+                {
+                    opts->expire_at_milliseconds = zval_get_long(z_option);
+                    opts->has_expire = 1;
+                    opts->has_pxat = 1;
+                    /* Reset other time options */
+                    opts->has_pexpire = opts->has_exat = 0;
+                }
+            }
+            /* IFEQ option */
+            else if (strcasecmp(opt, "IFEQ") == 0)
+            {
+                /* IFEQ option - comparison value */
+                if (Z_TYPE_P(z_option) == IS_STRING)
+                {
+                    opts->ifeq_value = Z_STRVAL_P(z_option);
+                    opts->ifeq_len = Z_STRLEN_P(z_option);
+                    opts->has_ifeq = 1;
+                }
+            }
+        }
+    }
+    ZEND_HASH_FOREACH_END();
+
     return 1;
 }
 

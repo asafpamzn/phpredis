@@ -127,6 +127,47 @@ const void *create_glide_client(ClientConfig *config)
     return client;
 }
 
+/* Custom result processor for SET commands with GET option support */
+struct set_result_data
+{
+    char **old_val;
+    size_t *old_val_len;
+    int has_get;
+};
+
+static int process_set_result(CommandResult *result, void *output)
+{
+    struct set_result_data *data = (struct set_result_data *)output;
+
+    if (!result || !result->response)
+    {
+        return 0;
+    }
+
+    switch (result->response->response_type)
+    {
+    case Ok:
+        return 1; /* Success */
+    case Null:
+        return 0; /* Not set (NX/XX condition not met) */
+    case String:
+        /* GET option returned a value */
+        if (data->has_get && data->old_val && data->old_val_len && result->response->string_value)
+        {
+            *data->old_val = emalloc(result->response->string_value_len + 1);
+            if (*data->old_val)
+            {
+                memcpy(*data->old_val, result->response->string_value, result->response->string_value_len);
+                (*data->old_val)[result->response->string_value_len] = '\0';
+                *data->old_val_len = result->response->string_value_len;
+            }
+        }
+        return 2; /* GET option returned a value */
+    default:
+        return 0; /* Error */
+    }
+}
+
 /* These functions are now defined in command_response.c */
 
 /* Execute a BITCOUNT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
@@ -196,338 +237,39 @@ int execute_bitpos_command(const void *glide_client, const char *key, size_t key
     return execute_core_command(&args, output_value, process_core_int_result);
 }
 
-/* Execute a SET command using the Valkey Glide client */
+/* Execute a SET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_set_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, long expire, zval *opts, char **old_val, size_t *old_val_len)
 {
-    /* Check if client, key, and value are valid */
-    if (!glide_client || !key || !val)
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Set;
+    args.key = key;
+    args.key_len = key_len;
+    args.raw_options = opts;
+
+    /* Add value argument */
+    args.args[0].type = CORE_ARG_TYPE_STRING;
+    args.args[0].data.string_arg.value = val;
+    args.args[0].data.string_arg.len = val_len;
+    args.arg_count = 1;
+
+    /* Parse options */
+    if (opts)
     {
-        return 0;
+        parse_set_options(opts, &args.options);
     }
 
-    /* Initialize output parameters */
-    if (old_val)
-    {
-        *old_val = NULL;
-    }
-    if (old_val_len)
-    {
-        *old_val_len = 0;
-    }
-
-    /* Count the number of arguments */
-    unsigned long arg_count = 2; /* key + value */
-    int has_ex = 0, has_px = 0, has_exat = 0, has_pxat = 0;
-    int has_nx = 0, has_xx = 0, has_get = 0, has_keepttl = 0, has_ifeq = 0;
-    char *ifeq_value = NULL;
-    size_t ifeq_len = 0;
-
-    /* Check if we have an expiry time */
+    /* Set expire if provided */
     if (expire > 0)
     {
-        arg_count += 2; /* EX/PX + seconds/milliseconds */
-        has_ex = 1;     /* Default to EX (seconds) */
+        args.options.expire_seconds = expire;
+        args.options.has_expire = 1;
     }
 
-    /* Check if we have options */
-    if (opts && Z_TYPE_P(opts) == IS_ARRAY)
-    {
-        HashTable *options_ht = Z_ARRVAL_P(opts);
-        zval *z_option;
-        zend_string *option_key;
-        zend_ulong num_key;
+    /* Prepare result data for GET option */
+    struct set_result_data result_data = {old_val, old_val_len, args.options.get_old_value};
 
-        /* Iterate through all options */
-        ZEND_HASH_FOREACH_KEY_VAL(options_ht, num_key, option_key, z_option)
-        {
-            if (option_key == NULL)
-            {
-                /* Handle numeric keys - these are option flags without values */
-                if (Z_TYPE_P(z_option) == IS_STRING)
-                {
-                    zend_string *opt_str = Z_STR_P(z_option);
-                    char *opt = ZSTR_VAL(opt_str);
-                    size_t opt_len = ZSTR_LEN(opt_str);
-
-                    /* NX option */
-                    if (strcasecmp(opt, "NX") == 0)
-                    {
-                        arg_count++;
-                        has_nx = 1;
-                    }
-                    /* XX option */
-                    else if (strcasecmp(opt, "XX") == 0)
-                    {
-                        arg_count++;
-                        has_xx = 1;
-                    }
-                    /* GET option */
-                    else if (strcasecmp(opt, "GET") == 0)
-                    {
-                        arg_count++;
-                        has_get = 1;
-                    }
-                    /* KEEPTTL option */
-                    else if (strcasecmp(opt, "KEEPTTL") == 0)
-                    {
-                        arg_count++;
-                        has_keepttl = 1;
-                    }
-                }
-            }
-            else
-            {
-                /* Handle string keys - these are options with values */
-                char *opt = ZSTR_VAL(option_key);
-
-                /* Check for time-based options */
-                if (strcasecmp(opt, "EX") == 0)
-                {
-                    /* EX option - seconds */
-                    if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
-                    {
-                        arg_count += 2;
-                        has_ex = 1;
-                        expire = zval_get_long(z_option);
-                        /* Reset other time options */
-                        has_px = has_exat = has_pxat = 0;
-                    }
-                    else
-                    {
-                        /* Invalid value type for EX option - should be numeric */
-                        return 0;
-                    }
-                }
-                else if (strcasecmp(opt, "PX") == 0)
-                {
-                    /* PX option - milliseconds */
-                    if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
-                    {
-                        arg_count += 2;
-                        has_px = 1;
-                        expire = zval_get_long(z_option);
-                        /* Reset other time options */
-                        has_ex = has_exat = has_pxat = 0;
-                    }
-                    else
-                    {
-                        /* Invalid value type for PX option - should be numeric */
-                        return 0;
-                    }
-                }
-                else if (strcasecmp(opt, "EXAT") == 0)
-                {
-                    /* EXAT option - unix time in seconds */
-                    if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
-                    {
-                        arg_count += 2;
-                        has_exat = 1;
-                        expire = zval_get_long(z_option);
-                        /* Reset other time options */
-                        has_ex = has_px = has_pxat = 0;
-                    }
-                    else
-                    {
-                        /* Invalid value type for EXAT option - should be numeric */
-                        return 0;
-                    }
-                }
-                else if (strcasecmp(opt, "PXAT") == 0)
-                {
-                    /* PXAT option - unix time in milliseconds */
-                    if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
-                    {
-                        arg_count += 2;
-                        has_pxat = 1;
-                        expire = zval_get_long(z_option);
-                        /* Reset other time options */
-                        has_ex = has_px = has_exat = 0;
-                    }
-                    else
-                    {
-                        /* Invalid value type for PXAT option - should be numeric */
-                        return 0;
-                    }
-                }
-                /* IFEQ option */
-                else if (strcasecmp(opt, "IFEQ") == 0)
-                {
-                    /* IFEQ option - comparison value */
-                    if (Z_TYPE_P(z_option) == IS_STRING)
-                    {
-                        arg_count += 2;
-                        has_ifeq = 1;
-                        ifeq_value = Z_STRVAL_P(z_option);
-                        ifeq_len = Z_STRLEN_P(z_option);
-                    }
-                }
-            }
-        }
-        ZEND_HASH_FOREACH_END();
-    }
-
-    /* Allocate memory for arguments */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Second argument: value */
-    args[1] = (uintptr_t)val;
-    args_len[1] = val_len;
-
-    /* Current argument index */
-    int arg_idx = 2;
-
-    /* Add EX/PX option if we have an expiry time */
-    if (has_ex || has_px)
-    {
-        /* Add EX/PX keyword */
-        args[arg_idx] = (uintptr_t)(has_ex ? "EX" : "PX");
-        args_len[arg_idx] = 2;
-        arg_idx++;
-
-        /* Add expiry time */
-        size_t expire_len;
-        char *expire_str = long_to_string(expire, &expire_len);
-        if (!expire_str)
-        {
-            efree(args);
-            efree(args_len);
-            return 0;
-        }
-        args[arg_idx] = (uintptr_t)expire_str;
-        args_len[arg_idx] = expire_len;
-        arg_idx++;
-    }
-
-    /* Add NX option */
-    if (has_nx)
-    {
-        args[arg_idx] = (uintptr_t)"NX";
-        args_len[arg_idx] = 2;
-        arg_idx++;
-    }
-
-    /* Add XX option */
-    if (has_xx)
-    {
-        args[arg_idx] = (uintptr_t)"XX";
-        args_len[arg_idx] = 2;
-        arg_idx++;
-    }
-
-    /* Add GET option */
-    if (has_get)
-    {
-        args[arg_idx] = (uintptr_t)"GET";
-        args_len[arg_idx] = 3;
-        arg_idx++;
-    }
-
-    /* Add KEEPTTL option */
-    if (has_keepttl)
-    {
-        args[arg_idx] = (uintptr_t)"KEEPTTL";
-        args_len[arg_idx] = 7;
-        arg_idx++;
-    }
-
-    /* Add IFEQ option and value */
-    if (has_ifeq)
-    {
-        args[arg_idx] = (uintptr_t)"IFEQ";
-        args_len[arg_idx] = 4;
-        arg_idx++;
-
-        args[arg_idx] = (uintptr_t)ifeq_value;
-        args_len[arg_idx] = ifeq_len;
-        arg_idx++;
-    }
-
-    /* Execute the command */
-    CommandResult *result = command(
-        glide_client,
-        0,         /* channel */
-        Set,       /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len,  /* argument lengths */
-        NULL,      /* route bytes */
-        0          /* route bytes length */
-    );
-
-    /* Free the argument arrays */
-    if (has_ex || has_px)
-    {
-        efree((void *)args[3]); /* Free the expire string */
-    }
-    efree(args);
-    efree(args_len);
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing SET command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Process the result */
-    int ret_val = 0;
-    if (result->response)
-    {
-        switch (result->response->response_type)
-        {
-        case Ok:
-            ret_val = 1; /* Success */
-            break;
-        case Null:
-            ret_val = 0; /* Not set (NX/XX condition not met) */
-            break;
-        case String:
-            /* GET option returned a value */
-            ret_val = 2; /* GET option returned a value */
-
-            /* Extract the string value for the caller if requested */
-            if (has_get && old_val != NULL && old_val_len != NULL && result->response->string_value != NULL)
-            {
-                *old_val = emalloc(result->response->string_value_len + 1);
-                if (*old_val)
-                {
-                    memcpy(*old_val, result->response->string_value, result->response->string_value_len);
-                    (*old_val)[result->response->string_value_len] = '\0'; /* Null-terminate for safety */
-                    *old_val_len = result->response->string_value_len;
-                }
-            }
-            break;
-        default:
-            ret_val = 0; /* Error */
-            break;
-        }
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    return execute_core_command(&args, &result_data, process_set_result);
 }
 
 /* Execute a SETEX command using the Valkey Glide client */
