@@ -32,7 +32,7 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
 {
     if (!args || !args->glide_client || !processor)
     {
-        return CORE_ERROR_INVALID_ARGS;
+        return 0;
     }
 
     uintptr_t *cmd_args = NULL;
@@ -40,7 +40,7 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
     char **allocated_strings = NULL;
     int allocated_count = 0;
     int arg_count = 0;
-    int success = CORE_ERROR_COMMAND_EXECUTION;
+    int success = 0;
 
     debug_print_core_args(args);
 
@@ -50,7 +50,7 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
 
     if (arg_count <= 0)
     {
-        return CORE_ERROR_INVALID_ARGS;
+        return 0;
     }
 
     /* Execute the command */
@@ -71,11 +71,11 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
             success = processor(result, result_ptr);
             if (success)
             {
-                success = CORE_SUCCESS;
+                success = 1;
             }
             else
             {
-                success = CORE_ERROR_RESULT_PROCESSING;
+                success = 0;
             }
         }
         free_command_result(result);
@@ -111,6 +111,7 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case PTTL:
     case ExpireTime:
     case PExpireTime:
+    case Persist:
         return prepare_key_only_args(args, cmd_args, cmd_args_len);
 
     /* Key-value operations */
@@ -153,7 +154,6 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case ExpireAt:
     case PExpire:
     case PExpireAt:
-    case Persist:
         return prepare_expire_args(args, cmd_args, cmd_args_len,
                                    allocated_strings, allocated_count);
 
@@ -785,6 +785,7 @@ int process_core_string_result(CommandResult *result, void *output)
 
 /**
  * Process boolean result
+ * Handles Bool, Int, and Ok response types from Redis/Valkey
  */
 int process_core_bool_result(CommandResult *result, void *output)
 {
@@ -796,6 +797,12 @@ int process_core_bool_result(CommandResult *result, void *output)
     if (result->response->response_type == Bool)
     {
         return result->response->bool_value ? 1 : 0;
+    }
+    else if (result->response->response_type == Int)
+    {
+        /* Handle Redis integer responses: 0 = false, non-zero = true */
+        /* This handles EXPIRE commands with NX/XX modes correctly */
+        return result->response->int_value ? 1 : 0;
     }
     else if (result->response->response_type == Ok)
     {

@@ -266,16 +266,6 @@ int execute_bit_command(const void *glide_client, enum RequestType cmd_type,
  * ERROR HANDLING AND DEBUGGING
  * ==================================================================== */
 
-/* Error codes */
-typedef enum
-{
-    CORE_SUCCESS = 1,
-    CORE_ERROR_INVALID_ARGS = -1,
-    CORE_ERROR_MEMORY_ALLOCATION = -2,
-    CORE_ERROR_COMMAND_EXECUTION = -3,
-    CORE_ERROR_RESULT_PROCESSING = -4
-} core_error_code_t;
-
 /* Debug helpers (only active in debug builds) */
 #ifdef DEBUG
 void debug_print_core_args(core_command_args_t *args);
