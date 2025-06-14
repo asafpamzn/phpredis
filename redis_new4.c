@@ -380,3 +380,157 @@ PHP_METHOD(Redis, pexpiretime)
     }
 }
 /* }}} */
+
+/* {{{ proto array Redis::keys(string pattern) */
+PHP_METHOD(Redis, keys)
+{
+    zval *object;
+    redis_object *redis;
+    char *pattern = NULL;
+    size_t pattern_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
+                                     &object, redis_ce, &pattern, &pattern_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the KEYS command using the Glide client */
+        int result = execute_keys_command(redis->glide_client, pattern, pattern_len, return_value);
+
+        /* Return the result directly if successful, otherwise return FALSE */
+        if (result == 1)
+        {
+            return; /* Return value already set by execute_keys_command */
+        }
+        else
+        {
+
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto boolean Redis::setOption(long option, mixed value) */
+PHP_METHOD(Redis, setOption)
+{
+    zval *object;
+    redis_object *redis;
+    zend_long option;
+    zval *value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Olz",
+                                     &object, redis_ce, &option, &value) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the setOption command using the Glide client */
+        int result = execute_setOption_command(redis->glide_client, option, value);
+
+        /* Return TRUE if successful, FALSE otherwise */
+        if (result == 1)
+        {
+            RETURN_TRUE;
+        }
+        else
+        {
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto boolean Redis::mset(array key_values) */
+PHP_METHOD(Redis, mset)
+{
+    zval *object;
+    redis_object *redis;
+    zval *z_arr;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa",
+                                     &object, redis_ce, &z_arr) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the MSET command using the Glide client */
+        int result = execute_mset_command(redis->glide_client, z_arr);
+
+        /* Return TRUE if successful, FALSE otherwise */
+        if (result == 1)
+        {
+            RETURN_TRUE;
+        }
+        else
+        {
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
+
+/* {{{ proto boolean Redis::msetnx(array key_values) */
+PHP_METHOD(Redis, msetnx)
+{
+    zval *object;
+    redis_object *redis;
+    zval *z_arr;
+    int output_value = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa",
+                                     &object, redis_ce, &z_arr) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the MSETNX command using the Glide client */
+        if (execute_msetnx_command(redis->glide_client, z_arr, &output_value))
+        {
+            /* Return TRUE if all keys were set (output_value == 1), FALSE otherwise */
+            if (output_value == 1)
+            {
+                RETURN_TRUE;
+            }
+            else
+            {
+                RETURN_FALSE;
+            }
+        }
+        else
+        {
+            /* Command failed */
+            RETURN_FALSE;
+        }
+    }
+}
+/* }}} */
