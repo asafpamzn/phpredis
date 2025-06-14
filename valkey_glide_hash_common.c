@@ -782,7 +782,48 @@ int process_h_randfield_result(CommandResult *result, void *output)
         /* Fields with values (associative) */
         else if (args->withvalues)
         {
-            ret_val = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
+            // ret_val = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
+            size_t i;
+            for (i = 0; i < result->response->array_value_len; i++)
+            {
+                ret_val = 1;
+                struct CommandResponse *element = &result->response->array_value[i];
+
+                // Each element should be an array with a field and value
+                if (element->response_type == Array && element->array_value_len == 2)
+                {
+                    struct CommandResponse *field = &element->array_value[0];
+                    struct CommandResponse *value = &element->array_value[1];
+
+                    if (field->response_type == String)
+                    {
+                        if (value->response_type == String)
+                        {
+                            add_assoc_stringl_ex(return_value, field->string_value, field->string_value_len,
+                                                 value->string_value, value->string_value_len);
+                        }
+                        else if (value->response_type == Null)
+                        {
+                            add_assoc_null_ex(return_value, field->string_value, field->string_value_len);
+                        }
+                        else if (value->response_type == Int)
+                        {
+                            add_assoc_long_ex(return_value, field->string_value, field->string_value_len,
+                                              value->int_value);
+                        }
+                        else if (value->response_type == Float)
+                        {
+                            add_assoc_double_ex(return_value, field->string_value, field->string_value_len,
+                                                value->float_value);
+                        }
+                        else if (value->response_type == Bool)
+                        {
+                            add_assoc_bool_ex(return_value, field->string_value, field->string_value_len,
+                                              value->bool_value);
+                        }
+                    }
+                }
+            }
         }
     }
 

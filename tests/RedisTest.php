@@ -3225,9 +3225,11 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(array_intersect($result, ['a', 'b', 'c', 'd', 'e']), $result);
 
         $result = $this->redis->hRandField('key', ['count' => 2, 'withvalues' => true]);
+     
         $this->assertEquals(2, count($result));
         $xx = ['a' => 0, 'b' => 1, 'c' => 'foo', 'd' => 'bar', 'e' => null];
         $this->assertEquals(array_intersect_key($result, $xx), $result);
+        
         /* Make sure PhpRedis sends COUNt (1) when `WITHVALUES` is set */
         $result = $this->redis->hRandField('key', ['withvalues' => true]);
         $this->assertNull($this->redis->getLastError());
