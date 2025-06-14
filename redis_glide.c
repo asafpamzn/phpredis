@@ -18,6 +18,7 @@
 #include "redis_glide.h"
 #include "command_response.h"
 #include "valkey_glide_list_common.h"
+#include "valkey_glide_core_common.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>
@@ -128,206 +129,71 @@ const void *create_glide_client(ClientConfig *config)
 
 /* These functions are now defined in command_response.c */
 
-/* Execute a BITCOUNT command using the Valkey Glide client */
+/* Execute a BITCOUNT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_bitcount_command(const void *glide_client, const char *key, size_t key_len, long start, long end, int bybit, long *output_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = BitCount;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = bybit ? 4 : 3;
-    uintptr_t args[4];
-    unsigned long args_len[4];
+    /* Set range options */
+    args.options.start = start;
+    args.options.end = end;
+    args.options.has_range = 1;
+    args.options.bybit = bybit;
 
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Second argument: start */
-    size_t start_len;
-    char *start_str = long_to_string(start, &start_len);
-    if (!start_str)
-    {
-        return 0;
-    }
-    args[1] = (uintptr_t)start_str;
-    args_len[1] = start_len;
-
-    /* Third argument: end */
-    size_t end_len;
-    char *end_str = long_to_string(end, &end_len);
-    if (!end_str)
-    {
-        efree(start_str);
-        return 0;
-    }
-    args[2] = (uintptr_t)end_str;
-    args_len[2] = end_len;
-
-    /* Fourth argument: BYTE|BIT (if bybit is true) */
-    if (bybit)
-    {
-        args[3] = (uintptr_t)"BIT";
-        args_len[3] = 3;
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        BitCount,  /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument strings */
-    efree(start_str);
-    efree(end_str);
-
-    /* Use the generic handler to process the result using the new signature */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
-/* Execute a BITOP command using the Valkey Glide client */
+/* Execute a BITOP command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_bitop_command(const void *glide_client, const char *op, size_t op_len, const char *dst, size_t dst_len, zval *keys, int keys_count, long *output_value)
 {
-    /* Check if client, op, dst, and keys are valid */
-    if (!glide_client || !op || !dst || !keys || keys_count <= 0)
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = BitOp;
+    args.key = dst; /* destination key */
+    args.key_len = dst_len;
+
+    /* Add operation as first argument */
+    args.args[0].type = CORE_ARG_TYPE_STRING;
+    args.args[0].data.string_arg.value = op;
+    args.args[0].data.string_arg.len = op_len;
+
+    /* Add source keys as remaining arguments */
+    for (int i = 0; i < keys_count && i < 7; i++)
     {
-        return 0;
+        args.args[i + 1].type = CORE_ARG_TYPE_STRING;
+        args.args[i + 1].data.string_arg.value = Z_STRVAL(keys[i]);
+        args.args[i + 1].data.string_arg.len = Z_STRLEN(keys[i]);
     }
+    args.arg_count = 1 + keys_count; /* operation + source keys */
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 2 + keys_count; /* op + dst + keys */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* First argument: operation (AND, OR, XOR, NOT) */
-    args[0] = (uintptr_t)op;
-    args_len[0] = op_len;
-
-    /* Second argument: destination key */
-    args[1] = (uintptr_t)dst;
-    args_len[1] = dst_len;
-
-    /* Remaining arguments: source keys */
-    int i;
-    for (i = 0; i < keys_count; i++)
-    {
-        zval *key = &keys[i];
-        if (Z_TYPE_P(key) != IS_STRING)
-        {
-            efree(args);
-            efree(args_len);
-            return 0;
-        }
-        args[2 + i] = (uintptr_t)Z_STRVAL_P(key);
-        args_len[2 + i] = Z_STRLEN_P(key);
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        BitOp,     /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
-/* Execute a BITPOS command using the Valkey Glide client */
+/* Execute a BITPOS command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_bitpos_command(const void *glide_client, const char *key, size_t key_len, long bit, long start, long end, int bybit, long *output_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        return 0; /* False - failure */
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = BitPos;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = bybit ? 5 : 4;
-    uintptr_t args[5];
-    unsigned long args_len[5];
+    /* Add bit value argument */
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = bit;
+    args.arg_count = 1;
 
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
+    /* Set range options */
+    args.options.start = start;
+    args.options.end = end;
+    args.options.has_range = 1;
+    args.options.bybit = bybit;
 
-    /* Second argument: bit (0 or 1) */
-    size_t bit_len;
-    char *bit_str = long_to_string(bit, &bit_len);
-    if (!bit_str)
-    {
-        return 0; /* False - failure */
-    }
-    args[1] = (uintptr_t)bit_str;
-    args_len[1] = bit_len;
-
-    /* Third argument: start */
-    size_t start_len;
-    char *start_str = long_to_string(start, &start_len);
-    if (!start_str)
-    {
-        efree(bit_str);
-        return 0; /* False - failure */
-    }
-    args[2] = (uintptr_t)start_str;
-    args_len[2] = start_len;
-
-    /* Fourth argument: end */
-    size_t end_len;
-    char *end_str = long_to_string(end, &end_len);
-    if (!end_str)
-    {
-        efree(bit_str);
-        efree(start_str);
-        return 0; /* False - failure */
-    }
-    args[3] = (uintptr_t)end_str;
-    args_len[3] = end_len;
-
-    /* Fifth argument: BYTE|BIT (if bybit is true) */
-    if (bybit)
-    {
-        args[4] = (uintptr_t)"BIT";
-        args_len[4] = 3;
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        BitPos,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument strings */
-    efree(bit_str);
-    efree(start_str);
-    efree(end_str);
-
-    /* Use the generic handler to process the result with output parameter */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
 /* Execute a SET command using the Valkey Glide client */

@@ -40,7 +40,7 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
     char **allocated_strings = NULL;
     int allocated_count = 0;
     int arg_count = 0;
-    int success = 0;
+    int res = 0;
 
     debug_print_core_args(args);
 
@@ -68,23 +68,15 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
     {
         if (!result->command_error && result->response)
         {
-            success = processor(result, result_ptr);
-            if (success)
-            {
-                success = 1;
-            }
-            else
-            {
-                success = 0;
-            }
-        }
-        free_command_result(result);
-    }
+            res = processor(result, result_ptr);
 
+            free_command_result(result);
+        }
+    }
     /* Cleanup */
     free_core_args(cmd_args, cmd_args_len, allocated_strings, allocated_count);
 
-    return success;
+    return res;
 }
 
 /**
@@ -565,7 +557,7 @@ int prepare_bit_operation_args(core_command_args_t *args, uintptr_t **cmd_args,
         /* Add BYBIT flag if present */
         if (args->options.bybit)
         {
-            (*cmd_args)[arg_idx] = (uintptr_t)"BYBIT";
+            (*cmd_args)[arg_idx] = (uintptr_t)"BIT";
             (*cmd_args_len)[arg_idx] = 5;
             arg_idx++;
         }
