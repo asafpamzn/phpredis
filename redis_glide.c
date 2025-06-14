@@ -168,6 +168,62 @@ static int process_set_result(CommandResult *result, void *output)
     }
 }
 
+/* Custom result processor for PING command */
+static int process_ping_result(CommandResult *result, void *output)
+{
+    struct
+    {
+        char **result;
+        size_t *result_len;
+    } *string_output = output;
+
+    if (!result || !result->response || !string_output)
+    {
+        return 0;
+    }
+
+    if (result->response->response_type == Ok)
+    {
+        /* PONG response with no message */
+        *string_output->result = estrdup("PONG");
+        *string_output->result_len = 4;
+        return 1;
+    }
+    else if (result->response->response_type == String)
+    {
+        /* PING with message - echo the message back */
+        if (result->response->string_value_len == 0)
+        {
+            *string_output->result = emalloc(1);
+            if (*string_output->result)
+            {
+                (*string_output->result)[0] = '\0';
+            }
+            *string_output->result_len = 0;
+        }
+        else
+        {
+            *string_output->result = emalloc(result->response->string_value_len + 1);
+            if (*string_output->result)
+            {
+                memcpy(*string_output->result, result->response->string_value,
+                       result->response->string_value_len);
+                (*string_output->result)[result->response->string_value_len] = '\0';
+            }
+            *string_output->result_len = result->response->string_value_len;
+        }
+        return *string_output->result ? 1 : 0;
+    }
+    else if (result->response->response_type == Null)
+    {
+        *string_output->result = NULL;
+        *string_output->result_len = 0;
+        return 0;
+    }
+
+    return 0;
+}
+
 /* These functions are now defined in command_response.c */
 
 /* Execute a BITCOUNT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
@@ -337,81 +393,53 @@ void close_glide_client(const void *glide_client)
     close_client(glide_client);
 }
 
-/* Execute an ECHO command using the Valkey Glide client */
+/* Execute an ECHO command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_echo_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len)
 {
-    /* Check if client is valid */
-    if (!glide_client || !msg)
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Echo;
+
+    /* Add message argument */
+    args.args[0].type = CORE_ARG_TYPE_STRING;
+    args.args[0].data.string_arg.value = msg;
+    args.args[0].data.string_arg.len = msg_len;
+    args.arg_count = 1;
+
+    /* Use string result processor */
+    struct
     {
-        return -1;
-    }
+        char **result;
+        size_t *result_len;
+    } output = {result, result_len};
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1;
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* First argument: message */
-    args[0] = (uintptr_t)msg;
-    args_len[0] = msg_len;
-
-    /* Execute the command */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        Echo,      /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Use the generic handler to process the result */
-    return handle_string_response(cmd_result, result, result_len);
+    return execute_core_command(&args, &output, process_core_string_result);
 }
 
-/* Execute a PING command using the Valkey Glide client */
+/* Execute a PING command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_ping_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len)
 {
-    /* Check if client is valid */
-    if (!glide_client)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Ping;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = msg ? 1 : 0;
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* Add message argument if provided */
+    /* Add optional message argument */
     if (msg)
     {
-        args[0] = (uintptr_t)msg;
-        args_len[0] = msg_len;
+        args.args[0].type = CORE_ARG_TYPE_STRING;
+        args.args[0].data.string_arg.value = msg;
+        args.args[0].data.string_arg.len = msg_len;
+        args.arg_count = 1;
     }
 
-    /* Execute the command */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        Ping,      /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
+    /* Custom result processor to handle PONG response */
+    struct
+    {
+        char **result;
+        size_t *result_len;
+    } output = {result, result_len};
 
-    /* Special handling for PING command */
-    if (cmd_result && cmd_result->response && cmd_result->response->response_type == Ok)
-    {
-        /* PONG response with no message */
-        *result = estrdup("PONG");
-        *result_len = 4;
-        free_command_result(cmd_result);
-        return 1;
-    }
-    else
-    {
-        /* Use the generic handler for string responses */
-        return handle_string_response(cmd_result, result, result_len);
-    }
+    return execute_core_command(&args, &output, process_ping_result);
 }
 
 /* Execute an INFO command using the Valkey Glide client */

@@ -155,6 +155,11 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
         return prepare_range_args(args, cmd_args, cmd_args_len,
                                   allocated_strings, allocated_count);
 
+    /* Message operations (no key, just arguments) */
+    case Echo:
+        return prepare_message_args(args, cmd_args, cmd_args_len,
+                                    allocated_strings, allocated_count);
+
     default:
         return 0;
     }
@@ -441,6 +446,105 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
         (*cmd_args)[arg_idx] = (uintptr_t)args->options.ifeq_value;
         (*cmd_args_len)[arg_idx] = args->options.ifeq_len;
         arg_idx++;
+    }
+
+    return arg_idx;
+}
+
+/**
+ * Prepare arguments for message operations (ECHO, etc.)
+ */
+int prepare_message_args(core_command_args_t *args, uintptr_t **cmd_args,
+                         unsigned long **cmd_args_len, char ***allocated_strings,
+                         int *allocated_count)
+{
+    if (args->arg_count == 0)
+    {
+        return 0;
+    }
+
+    /* Calculate total argument count - just the arguments, no key */
+    int total_args = 0;
+
+    for (int i = 0; i < args->arg_count; i++)
+    {
+        switch (args->args[i].type)
+        {
+        case CORE_ARG_TYPE_STRING:
+        case CORE_ARG_TYPE_LONG:
+        case CORE_ARG_TYPE_DOUBLE:
+            total_args++;
+            break;
+        case CORE_ARG_TYPE_MULTI_STRING:
+            total_args += args->args[i].data.multi_string_arg.count;
+            break;
+        default:
+            break;
+        }
+    }
+
+    if (!allocate_core_arg_arrays(total_args, cmd_args, cmd_args_len))
+    {
+        return 0;
+    }
+
+    /* Initialize string tracking */
+    *allocated_strings = create_string_tracker(total_args);
+    *allocated_count = 0;
+
+    int arg_idx = 0;
+
+    /* Add all arguments */
+    for (int i = 0; i < args->arg_count; i++)
+    {
+        switch (args->args[i].type)
+        {
+        case CORE_ARG_TYPE_STRING:
+            (*cmd_args)[arg_idx] = (uintptr_t)args->args[i].data.string_arg.value;
+            (*cmd_args_len)[arg_idx] = args->args[i].data.string_arg.len;
+            arg_idx++;
+            break;
+
+        case CORE_ARG_TYPE_LONG:
+        {
+            size_t len;
+            char *str = core_long_to_string(args->args[i].data.long_arg.value, &len);
+            if (str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)str;
+                (*cmd_args_len)[arg_idx] = len;
+                add_tracked_string(*allocated_strings, allocated_count, str);
+                arg_idx++;
+            }
+            break;
+        }
+
+        case CORE_ARG_TYPE_DOUBLE:
+        {
+            size_t len;
+            char *str = core_double_to_string(args->args[i].data.double_arg.value, &len);
+            if (str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)str;
+                (*cmd_args_len)[arg_idx] = len;
+                add_tracked_string(*allocated_strings, allocated_count, str);
+                arg_idx++;
+            }
+            break;
+        }
+
+        case CORE_ARG_TYPE_MULTI_STRING:
+            for (int j = 0; j < args->args[i].data.multi_string_arg.count; j++)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)args->args[i].data.multi_string_arg.values[j];
+                (*cmd_args_len)[arg_idx] = args->args[i].data.multi_string_arg.lengths[j];
+                arg_idx++;
+            }
+            break;
+
+        default:
+            break;
+        }
     }
 
     return arg_idx;
@@ -798,7 +902,6 @@ int process_core_string_result(CommandResult *result, void *output)
     {
         return 0;
     }
-
     if (result->response->response_type == String)
     {
         if (result->response->string_value_len == 0)
