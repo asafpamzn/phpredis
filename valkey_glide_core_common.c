@@ -586,7 +586,8 @@ int prepare_expire_args(core_command_args_t *args, uintptr_t **cmd_args,
         return 0;
     }
 
-    int total_args = 2; /* key + value */
+    /* Calculate total arguments: key + time + optional mode */
+    int total_args = 1 + args->arg_count; /* key + all provided arguments */
 
     if (!allocate_core_arg_arrays(total_args, cmd_args, cmd_args_len))
     {
@@ -596,24 +597,42 @@ int prepare_expire_args(core_command_args_t *args, uintptr_t **cmd_args,
     *allocated_strings = create_string_tracker(total_args);
     *allocated_count = 0;
 
-    /* Add key */
-    (*cmd_args)[0] = (uintptr_t)args->key;
-    (*cmd_args_len)[0] = args->key_len;
+    int arg_idx = 0;
 
-    /* Add value (time) */
-    if (args->args[0].type == CORE_ARG_TYPE_LONG)
+    /* Add key */
+    (*cmd_args)[arg_idx] = (uintptr_t)args->key;
+    (*cmd_args_len)[arg_idx] = args->key_len;
+    arg_idx++;
+
+    /* Add all arguments (time value and optional mode) */
+    for (int i = 0; i < args->arg_count; i++)
     {
-        size_t len;
-        char *str = core_long_to_string(args->args[0].data.long_arg.value, &len);
-        if (str)
+        switch (args->args[i].type)
         {
-            (*cmd_args)[1] = (uintptr_t)str;
-            (*cmd_args_len)[1] = len;
-            add_tracked_string(*allocated_strings, allocated_count, str);
+        case CORE_ARG_TYPE_LONG:
+        {
+            size_t len;
+            char *str = core_long_to_string(args->args[i].data.long_arg.value, &len);
+            if (str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)str;
+                (*cmd_args_len)[arg_idx] = len;
+                add_tracked_string(*allocated_strings, allocated_count, str);
+                arg_idx++;
+            }
+            break;
+        }
+        case CORE_ARG_TYPE_STRING:
+            (*cmd_args)[arg_idx] = (uintptr_t)args->args[i].data.string_arg.value;
+            (*cmd_args_len)[arg_idx] = args->args[i].data.string_arg.len;
+            arg_idx++;
+            break;
+        default:
+            break;
         }
     }
 
-    return 2;
+    return arg_idx;
 }
 
 /**

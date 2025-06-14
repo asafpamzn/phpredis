@@ -771,9 +771,10 @@ class Redis_Test extends TestSuite {
         $this->assertTrue($this->redis->expire('eopts', 1000, 'NX'));
         
         $this->assertFalse($this->redis->expire('eopts', 1000, 'NX'));
-
+        
         /* XX -- Only set if the key has an existing expiry */
         $this->assertTrue($this->redis->expire('eopts', 1000, 'XX'));
+     
         $this->assertTrue($this->redis->persist('eopts'));
         $this->assertFalse($this->redis->expire('eopts', 1000, 'XX'));
 
