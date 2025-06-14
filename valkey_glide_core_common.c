@@ -1,0 +1,1324 @@
+/*
+  +----------------------------------------------------------------------+
+  | Valkey Glide Core Common Framework                                   |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2023-2025 The PHP Group                                |
+  +----------------------------------------------------------------------+
+  | This source file is subject to version 3.01 of the PHP license,      |
+  | that is bundled with this package in the file LICENSE, and is        |
+  | available through the world-wide-web at the following url:           |
+  | http://www.php.net/license/3_01.txt                                  |
+  | If you did not receive a copy of the PHP license and are unable to   |
+  | obtain it through the world-wide-web, please send a note to          |
+  | license@php.net so we can mail you a copy immediately.               |
+  +----------------------------------------------------------------------+
+*/
+
+#include "valkey_glide_core_common.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+/* ====================================================================
+ * CORE FRAMEWORK IMPLEMENTATION
+ * ==================================================================== */
+
+/**
+ * Main command execution framework
+ * This is the central function that handles all Redis/Valkey commands
+ */
+int execute_core_command(core_command_args_t *args, void *result_ptr,
+                         core_result_processor_t processor)
+{
+    if (!args || !args->glide_client || !processor)
+    {
+        return CORE_ERROR_INVALID_ARGS;
+    }
+
+    uintptr_t *cmd_args = NULL;
+    unsigned long *cmd_args_len = NULL;
+    char **allocated_strings = NULL;
+    int allocated_count = 0;
+    int arg_count = 0;
+    int success = CORE_ERROR_COMMAND_EXECUTION;
+
+    debug_print_core_args(args);
+
+    /* Prepare command arguments based on command type */
+    arg_count = prepare_core_args(args, &cmd_args, &cmd_args_len,
+                                  &allocated_strings, &allocated_count);
+
+    if (arg_count <= 0)
+    {
+        return CORE_ERROR_INVALID_ARGS;
+    }
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        args->glide_client,
+        args->cmd_type,
+        arg_count,
+        cmd_args,
+        cmd_args_len);
+
+    debug_print_command_result(result);
+
+    /* Process result */
+    if (result)
+    {
+        if (!result->command_error && result->response)
+        {
+            success = processor(result, result_ptr);
+            if (success)
+            {
+                success = CORE_SUCCESS;
+            }
+            else
+            {
+                success = CORE_ERROR_RESULT_PROCESSING;
+            }
+        }
+        free_command_result(result);
+    }
+
+    /* Cleanup */
+    free_core_args(cmd_args, cmd_args_len, allocated_strings, allocated_count);
+
+    return success;
+}
+
+/**
+ * Prepare command arguments based on command type and structure
+ */
+int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
+                      unsigned long **cmd_args_len, char ***allocated_strings,
+                      int *allocated_count)
+{
+    if (!args)
+    {
+        return 0;
+    }
+
+    /* Determine preparation strategy based on command type */
+    switch (args->cmd_type)
+    {
+    /* Single key operations */
+    case Ping:
+    case RandomKey:
+    case StrLen:
+    case Type:
+    case TTL:
+    case PTTL:
+    case ExpireTime:
+    case PExpireTime:
+        return prepare_key_only_args(args, cmd_args, cmd_args_len);
+
+    /* Key-value operations */
+    case Set:
+    case SetEx:
+    case PSetEx:
+    case SetNX:
+    case Get:
+    case GetSet:
+    case GetDel:
+    case GetEx:
+    case Append:
+    case Incr:
+    case Decr:
+    case IncrBy:
+    case DecrBy:
+    case IncrByFloat:
+        return prepare_key_value_args(args, cmd_args, cmd_args_len,
+                                      allocated_strings, allocated_count);
+
+    /* Multi-key operations */
+    case Del:
+    case Unlink:
+    case Exists:
+    case Touch:
+    case MGet:
+        return prepare_multi_key_args(args, cmd_args, cmd_args_len);
+
+    /* Bit operations */
+    case BitCount:
+    case BitPos:
+    case GetBit:
+    case SetBit:
+    case BitOp:
+        return prepare_bit_operation_args(args, cmd_args, cmd_args_len,
+                                          allocated_strings, allocated_count);
+
+    /* Expire operations */
+    case Expire:
+    case ExpireAt:
+    case PExpire:
+    case PExpireAt:
+    case Persist:
+        return prepare_expire_args(args, cmd_args, cmd_args_len,
+                                   allocated_strings, allocated_count);
+
+    /* Range operations */
+    case GetRange:
+    case SetRange:
+        return prepare_range_args(args, cmd_args, cmd_args_len,
+                                  allocated_strings, allocated_count);
+
+    default:
+        return 0;
+    }
+}
+
+/**
+ * Free all allocated command arguments and strings
+ */
+void free_core_args(uintptr_t *cmd_args, unsigned long *cmd_args_len,
+                    char **allocated_strings, int allocated_count)
+{
+    if (cmd_args)
+    {
+        efree(cmd_args);
+    }
+    if (cmd_args_len)
+    {
+        efree(cmd_args_len);
+    }
+    if (allocated_strings)
+    {
+        free_tracked_strings(allocated_strings, allocated_count);
+        efree(allocated_strings);
+    }
+}
+
+/* ====================================================================
+ * ARGUMENT PREPARATION HELPERS
+ * ==================================================================== */
+
+/**
+ * Prepare arguments for single key operations
+ */
+int prepare_key_only_args(core_command_args_t *args, uintptr_t **cmd_args,
+                          unsigned long **cmd_args_len)
+{
+    if (!args->key || args->key_len == 0)
+    {
+        return 0;
+    }
+
+    if (!allocate_core_arg_arrays(1, cmd_args, cmd_args_len))
+    {
+        return 0;
+    }
+
+    (*cmd_args)[0] = (uintptr_t)args->key;
+    (*cmd_args_len)[0] = args->key_len;
+
+    return 1;
+}
+
+/**
+ * Prepare arguments for key-value operations
+ */
+int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
+                           unsigned long **cmd_args_len, char ***allocated_strings,
+                           int *allocated_count)
+{
+    if (!args->key || args->key_len == 0 || args->arg_count == 0)
+    {
+        return 0;
+    }
+
+    /* Calculate total argument count */
+    int total_args = 1; /* key */
+
+    /* Add primary arguments */
+    for (int i = 0; i < args->arg_count; i++)
+    {
+        switch (args->args[i].type)
+        {
+        case CORE_ARG_TYPE_STRING:
+        case CORE_ARG_TYPE_LONG:
+        case CORE_ARG_TYPE_DOUBLE:
+            total_args++;
+            break;
+        case CORE_ARG_TYPE_MULTI_STRING:
+            total_args += args->args[i].data.multi_string_arg.count;
+            break;
+        default:
+            break;
+        }
+    }
+
+    /* Add option arguments */
+    if (args->options.has_expire)
+    {
+        total_args += 2; /* EX/PX + value */
+    }
+    if (args->options.nx)
+    {
+        total_args++; /* NX */
+    }
+    if (args->options.xx)
+    {
+        total_args++; /* XX */
+    }
+    if (args->options.get_old_value)
+    {
+        total_args++; /* GET */
+    }
+
+    if (!allocate_core_arg_arrays(total_args, cmd_args, cmd_args_len))
+    {
+        return 0;
+    }
+
+    /* Initialize string tracking */
+    *allocated_strings = create_string_tracker(total_args);
+    *allocated_count = 0;
+
+    int arg_idx = 0;
+
+    /* Add key */
+    (*cmd_args)[arg_idx] = (uintptr_t)args->key;
+    (*cmd_args_len)[arg_idx] = args->key_len;
+    arg_idx++;
+
+    /* Add primary arguments */
+    for (int i = 0; i < args->arg_count; i++)
+    {
+        switch (args->args[i].type)
+        {
+        case CORE_ARG_TYPE_STRING:
+            (*cmd_args)[arg_idx] = (uintptr_t)args->args[i].data.string_arg.value;
+            (*cmd_args_len)[arg_idx] = args->args[i].data.string_arg.len;
+            arg_idx++;
+            break;
+
+        case CORE_ARG_TYPE_LONG:
+        {
+            size_t len;
+            char *str = core_long_to_string(args->args[i].data.long_arg.value, &len);
+            if (str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)str;
+                (*cmd_args_len)[arg_idx] = len;
+                add_tracked_string(*allocated_strings, allocated_count, str);
+                arg_idx++;
+            }
+            break;
+        }
+
+        case CORE_ARG_TYPE_DOUBLE:
+        {
+            size_t len;
+            char *str = core_double_to_string(args->args[i].data.double_arg.value, &len);
+            if (str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)str;
+                (*cmd_args_len)[arg_idx] = len;
+                add_tracked_string(*allocated_strings, allocated_count, str);
+                arg_idx++;
+            }
+            break;
+        }
+
+        case CORE_ARG_TYPE_MULTI_STRING:
+            for (int j = 0; j < args->args[i].data.multi_string_arg.count; j++)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)args->args[i].data.multi_string_arg.values[j];
+                (*cmd_args_len)[arg_idx] = args->args[i].data.multi_string_arg.lengths[j];
+                arg_idx++;
+            }
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    /* Add options */
+    if (args->options.has_expire)
+    {
+        if (args->options.has_pexpire)
+        {
+            (*cmd_args)[arg_idx] = (uintptr_t)"PX";
+            (*cmd_args_len)[arg_idx] = 2;
+            arg_idx++;
+
+            size_t len;
+            char *str = core_long_to_string(args->options.expire_milliseconds, &len);
+            if (str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)str;
+                (*cmd_args_len)[arg_idx] = len;
+                add_tracked_string(*allocated_strings, allocated_count, str);
+                arg_idx++;
+            }
+        }
+        else
+        {
+            (*cmd_args)[arg_idx] = (uintptr_t)"EX";
+            (*cmd_args_len)[arg_idx] = 2;
+            arg_idx++;
+
+            size_t len;
+            char *str = core_long_to_string(args->options.expire_seconds, &len);
+            if (str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)str;
+                (*cmd_args_len)[arg_idx] = len;
+                add_tracked_string(*allocated_strings, allocated_count, str);
+                arg_idx++;
+            }
+        }
+    }
+
+    if (args->options.nx)
+    {
+        (*cmd_args)[arg_idx] = (uintptr_t)"NX";
+        (*cmd_args_len)[arg_idx] = 2;
+        arg_idx++;
+    }
+
+    if (args->options.xx)
+    {
+        (*cmd_args)[arg_idx] = (uintptr_t)"XX";
+        (*cmd_args_len)[arg_idx] = 2;
+        arg_idx++;
+    }
+
+    if (args->options.get_old_value)
+    {
+        (*cmd_args)[arg_idx] = (uintptr_t)"GET";
+        (*cmd_args_len)[arg_idx] = 3;
+        arg_idx++;
+    }
+
+    return arg_idx;
+}
+
+/**
+ * Prepare arguments for multi-key operations
+ */
+int prepare_multi_key_args(core_command_args_t *args, uintptr_t **cmd_args,
+                           unsigned long **cmd_args_len)
+{
+    if (args->arg_count == 0 || args->args[0].type != CORE_ARG_TYPE_ARRAY)
+    {
+        return 0;
+    }
+
+    zval *keys = args->args[0].data.array_arg.array;
+    int key_count = args->args[0].data.array_arg.count;
+
+    if (!allocate_core_arg_arrays(key_count, cmd_args, cmd_args_len))
+    {
+        return 0;
+    }
+
+    HashTable *keys_hash = Z_ARRVAL_P(keys);
+    zval *key;
+    int idx = 0;
+
+    ZEND_HASH_FOREACH_VAL(keys_hash, key)
+    {
+        if (Z_TYPE_P(key) != IS_STRING)
+        {
+            convert_to_string(key);
+        }
+        (*cmd_args)[idx] = (uintptr_t)Z_STRVAL_P(key);
+        (*cmd_args_len)[idx] = Z_STRLEN_P(key);
+        idx++;
+    }
+    ZEND_HASH_FOREACH_END();
+
+    return idx;
+}
+
+/**
+ * Prepare arguments for bit operations
+ */
+int prepare_bit_operation_args(core_command_args_t *args, uintptr_t **cmd_args,
+                               unsigned long **cmd_args_len, char ***allocated_strings,
+                               int *allocated_count)
+{
+    if (!args->key || args->key_len == 0)
+    {
+        return 0;
+    }
+
+    int total_args = 1; /* key */
+
+    /* Calculate arguments based on command type */
+    switch (args->cmd_type)
+    {
+    case BitCount:
+        total_args += (args->options.has_range ? 2 : 0); /* start, end */
+        total_args += (args->options.bybit ? 1 : 0);     /* BYBIT */
+        break;
+    case BitPos:
+        total_args += 1;                                 /* bit value */
+        total_args += (args->options.has_range ? 2 : 0); /* start, end */
+        total_args += (args->options.bybit ? 1 : 0);     /* BYBIT */
+        break;
+    case GetBit:
+        total_args += 1; /* offset */
+        break;
+    case SetBit:
+        total_args += 2; /* offset, value */
+        break;
+    case BitOp:
+        total_args += 1;               /* operation */
+        total_args += 1;               /* destination */
+        total_args += args->arg_count; /* source keys */
+        break;
+    default:
+        return 0;
+    }
+
+    if (!allocate_core_arg_arrays(total_args, cmd_args, cmd_args_len))
+    {
+        return 0;
+    }
+
+    *allocated_strings = create_string_tracker(total_args);
+    *allocated_count = 0;
+
+    int arg_idx = 0;
+
+    /* Handle BitOp differently - operation comes first */
+    if (args->cmd_type == BitOp)
+    {
+        /* Add operation */
+        (*cmd_args)[arg_idx] = (uintptr_t)args->args[0].data.string_arg.value;
+        (*cmd_args_len)[arg_idx] = args->args[0].data.string_arg.len;
+        arg_idx++;
+
+        /* Add destination key */
+        (*cmd_args)[arg_idx] = (uintptr_t)args->key;
+        (*cmd_args_len)[arg_idx] = args->key_len;
+        arg_idx++;
+
+        /* Add source keys */
+        for (int i = 1; i < args->arg_count; i++)
+        {
+            if (args->args[i].type == CORE_ARG_TYPE_STRING)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)args->args[i].data.string_arg.value;
+                (*cmd_args_len)[arg_idx] = args->args[i].data.string_arg.len;
+                arg_idx++;
+            }
+        }
+    }
+    else
+    {
+        /* Add key first for other bit operations */
+        (*cmd_args)[arg_idx] = (uintptr_t)args->key;
+        (*cmd_args_len)[arg_idx] = args->key_len;
+        arg_idx++;
+
+        /* Add arguments based on command type */
+        for (int i = 0; i < args->arg_count; i++)
+        {
+            switch (args->args[i].type)
+            {
+            case CORE_ARG_TYPE_LONG:
+            {
+                size_t len;
+                char *str = core_long_to_string(args->args[i].data.long_arg.value, &len);
+                if (str)
+                {
+                    (*cmd_args)[arg_idx] = (uintptr_t)str;
+                    (*cmd_args_len)[arg_idx] = len;
+                    add_tracked_string(*allocated_strings, allocated_count, str);
+                    arg_idx++;
+                }
+                break;
+            }
+            default:
+                break;
+            }
+        }
+
+        /* Add range arguments if present */
+        if (args->options.has_range)
+        {
+            size_t len;
+            char *start_str = core_long_to_string(args->options.start, &len);
+            if (start_str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)start_str;
+                (*cmd_args_len)[arg_idx] = len;
+                add_tracked_string(*allocated_strings, allocated_count, start_str);
+                arg_idx++;
+            }
+
+            char *end_str = core_long_to_string(args->options.end, &len);
+            if (end_str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)end_str;
+                (*cmd_args_len)[arg_idx] = len;
+                add_tracked_string(*allocated_strings, allocated_count, end_str);
+                arg_idx++;
+            }
+        }
+
+        /* Add BYBIT flag if present */
+        if (args->options.bybit)
+        {
+            (*cmd_args)[arg_idx] = (uintptr_t)"BYBIT";
+            (*cmd_args_len)[arg_idx] = 5;
+            arg_idx++;
+        }
+    }
+
+    return arg_idx;
+}
+
+/**
+ * Prepare arguments for expire operations
+ */
+int prepare_expire_args(core_command_args_t *args, uintptr_t **cmd_args,
+                        unsigned long **cmd_args_len, char ***allocated_strings,
+                        int *allocated_count)
+{
+    if (!args->key || args->key_len == 0 || args->arg_count == 0)
+    {
+        return 0;
+    }
+
+    int total_args = 2; /* key + value */
+
+    if (!allocate_core_arg_arrays(total_args, cmd_args, cmd_args_len))
+    {
+        return 0;
+    }
+
+    *allocated_strings = create_string_tracker(total_args);
+    *allocated_count = 0;
+
+    /* Add key */
+    (*cmd_args)[0] = (uintptr_t)args->key;
+    (*cmd_args_len)[0] = args->key_len;
+
+    /* Add value (time) */
+    if (args->args[0].type == CORE_ARG_TYPE_LONG)
+    {
+        size_t len;
+        char *str = core_long_to_string(args->args[0].data.long_arg.value, &len);
+        if (str)
+        {
+            (*cmd_args)[1] = (uintptr_t)str;
+            (*cmd_args_len)[1] = len;
+            add_tracked_string(*allocated_strings, allocated_count, str);
+        }
+    }
+
+    return 2;
+}
+
+/**
+ * Prepare arguments for range operations
+ */
+int prepare_range_args(core_command_args_t *args, uintptr_t **cmd_args,
+                       unsigned long **cmd_args_len, char ***allocated_strings,
+                       int *allocated_count)
+{
+    if (!args->key || args->key_len == 0)
+    {
+        return 0;
+    }
+
+    int total_args = 1; /* key */
+
+    /* Add arguments based on command type */
+    switch (args->cmd_type)
+    {
+    case GetRange:
+        total_args += 2; /* start, end */
+        break;
+    case SetRange:
+        total_args += 2; /* offset, value */
+        break;
+    default:
+        return 0;
+    }
+
+    if (!allocate_core_arg_arrays(total_args, cmd_args, cmd_args_len))
+    {
+        return 0;
+    }
+
+    *allocated_strings = create_string_tracker(total_args);
+    *allocated_count = 0;
+
+    int arg_idx = 0;
+
+    /* Add key */
+    (*cmd_args)[arg_idx] = (uintptr_t)args->key;
+    (*cmd_args_len)[arg_idx] = args->key_len;
+    arg_idx++;
+
+    /* Add range-specific arguments */
+    for (int i = 0; i < args->arg_count && arg_idx < total_args; i++)
+    {
+        switch (args->args[i].type)
+        {
+        case CORE_ARG_TYPE_LONG:
+        {
+            size_t len;
+            char *str = core_long_to_string(args->args[i].data.long_arg.value, &len);
+            if (str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)str;
+                (*cmd_args_len)[arg_idx] = len;
+                add_tracked_string(*allocated_strings, allocated_count, str);
+                arg_idx++;
+            }
+            break;
+        }
+        case CORE_ARG_TYPE_STRING:
+            (*cmd_args)[arg_idx] = (uintptr_t)args->args[i].data.string_arg.value;
+            (*cmd_args_len)[arg_idx] = args->args[i].data.string_arg.len;
+            arg_idx++;
+            break;
+        default:
+            break;
+        }
+    }
+
+    return arg_idx;
+}
+
+/* ====================================================================
+ * RESULT PROCESSORS
+ * ==================================================================== */
+
+/**
+ * Process integer result
+ */
+int process_core_int_result(CommandResult *result, void *output)
+{
+    long *output_value = (long *)output;
+
+    if (!result || !result->response || !output_value)
+    {
+        return 0;
+    }
+
+    if (result->response->response_type == Int)
+    {
+        *output_value = result->response->int_value;
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Process string result
+ */
+int process_core_string_result(CommandResult *result, void *output)
+{
+    struct
+    {
+        char **result;
+        size_t *result_len;
+    } *string_output = output;
+
+    if (!result || !result->response || !string_output)
+    {
+        return 0;
+    }
+
+    if (result->response->response_type == String)
+    {
+        if (result->response->string_value_len == 0)
+        {
+            *string_output->result = emalloc(1);
+            if (*string_output->result)
+            {
+                (*string_output->result)[0] = '\0';
+            }
+            *string_output->result_len = 0;
+        }
+        else
+        {
+            *string_output->result = emalloc(result->response->string_value_len + 1);
+            if (*string_output->result)
+            {
+                memcpy(*string_output->result, result->response->string_value,
+                       result->response->string_value_len);
+                (*string_output->result)[result->response->string_value_len] = '\0';
+            }
+            *string_output->result_len = result->response->string_value_len;
+        }
+        return *string_output->result ? 1 : 0;
+    }
+    else if (result->response->response_type == Null)
+    {
+        *string_output->result = NULL;
+        *string_output->result_len = 0;
+        return 0;
+    }
+
+    return 0;
+}
+
+/**
+ * Process boolean result
+ */
+int process_core_bool_result(CommandResult *result, void *output)
+{
+    if (!result || !result->response)
+    {
+        return -1;
+    }
+
+    if (result->response->response_type == Bool)
+    {
+        return result->response->bool_value ? 1 : 0;
+    }
+    else if (result->response->response_type == Ok)
+    {
+        return 1;
+    }
+
+    return -1;
+}
+
+/**
+ * Process array result
+ */
+int process_core_array_result(CommandResult *result, void *output)
+{
+    zval *return_value = (zval *)output;
+
+    if (!result || !result->response || !return_value)
+    {
+        return 0;
+    }
+
+    return command_response_to_zval(result->response, return_value,
+                                    COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+}
+
+/**
+ * Process double result
+ */
+int process_core_double_result(CommandResult *result, void *output)
+{
+    double *output_value = (double *)output;
+
+    if (!result || !result->response || !output_value)
+    {
+        return 0;
+    }
+
+    if (result->response->response_type == Float)
+    {
+        *output_value = result->response->float_value;
+        return 1;
+    }
+    else if (result->response->response_type == String)
+    {
+        char *endptr;
+        *output_value = strtod(result->response->string_value, &endptr);
+        if (endptr != result->response->string_value &&
+            *endptr == '\0')
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * Process null-or-value result
+ */
+int process_core_null_or_value_result(CommandResult *result, void *output)
+{
+    struct
+    {
+        char **result;
+        size_t *result_len;
+    } *string_output = output;
+
+    if (!result || !result->response || !string_output)
+    {
+        return -1;
+    }
+
+    if (result->response->response_type == Null)
+    {
+        *string_output->result = NULL;
+        *string_output->result_len = 0;
+        return 0;
+    }
+
+    return process_core_string_result(result, output);
+}
+
+/* ====================================================================
+ * MEMORY MANAGEMENT UTILITIES
+ * ==================================================================== */
+
+/**
+ * Allocate command argument arrays
+ */
+int allocate_core_arg_arrays(int count, uintptr_t **args_out,
+                             unsigned long **args_len_out)
+{
+    *args_out = (uintptr_t *)emalloc(count * sizeof(uintptr_t));
+    *args_len_out = (unsigned long *)emalloc(count * sizeof(unsigned long));
+
+    if (!*args_out || !*args_len_out)
+    {
+        if (*args_out)
+            efree(*args_out);
+        if (*args_len_out)
+            efree(*args_len_out);
+        return 0;
+    }
+
+    return 1;
+}
+
+/**
+ * Free command argument arrays
+ */
+void free_core_arg_arrays(uintptr_t *args, unsigned long *args_len)
+{
+    if (args)
+        efree(args);
+    if (args_len)
+        efree(args_len);
+}
+
+/**
+ * Create string tracker for memory management
+ */
+char **create_string_tracker(int max_strings)
+{
+    return (char **)ecalloc(max_strings, sizeof(char *));
+}
+
+/**
+ * Add string to tracker
+ */
+void add_tracked_string(char **tracker, int *count, char *str)
+{
+    if (tracker && str)
+    {
+        tracker[*count] = str;
+        (*count)++;
+    }
+}
+
+/**
+ * Free all tracked strings
+ */
+void free_tracked_strings(char **tracker, int count)
+{
+    if (!tracker)
+        return;
+
+    for (int i = 0; i < count; i++)
+    {
+        if (tracker[i])
+        {
+            efree(tracker[i]);
+        }
+    }
+}
+
+/**
+ * Convert long to string
+ */
+char *core_long_to_string(long value, size_t *len)
+{
+    char buffer[32];
+    *len = snprintf(buffer, sizeof(buffer), "%ld", value);
+    char *str = (char *)emalloc(*len + 1);
+    if (str)
+    {
+        memcpy(str, buffer, *len);
+        str[*len] = '\0';
+    }
+    return str;
+}
+
+/**
+ * Convert double to string
+ */
+char *core_double_to_string(double value, size_t *len)
+{
+    char buffer[64];
+    *len = snprintf(buffer, sizeof(buffer), "%.17g", value);
+    char *str = (char *)emalloc(*len + 1);
+    if (str)
+    {
+        memcpy(str, buffer, *len);
+        str[*len] = '\0';
+    }
+    return str;
+}
+
+/**
+ * Convert zval to string safely
+ */
+char *core_zval_to_string(zval *z, size_t *len, int *need_free)
+{
+    return zval_to_string_safe(z, len, need_free);
+}
+
+/* ====================================================================
+ * OPTION PARSING UTILITIES
+ * ==================================================================== */
+
+/**
+ * Parse common command options
+ */
+int parse_core_options(zval *options, core_options_t *opts)
+{
+    if (!opts)
+    {
+        return 0;
+    }
+
+    /* Initialize options */
+    memset(opts, 0, sizeof(core_options_t));
+
+    if (!options || Z_TYPE_P(options) != IS_ARRAY)
+    {
+        return 1;
+    }
+
+    HashTable *ht = Z_ARRVAL_P(options);
+    zval *entry;
+
+    /* Parse expiry options */
+    if ((entry = zend_hash_str_find(ht, "EX", 2)) != NULL && Z_TYPE_P(entry) == IS_LONG)
+    {
+        opts->expire_seconds = Z_LVAL_P(entry);
+        opts->has_expire = 1;
+    }
+
+    if ((entry = zend_hash_str_find(ht, "PX", 2)) != NULL && Z_TYPE_P(entry) == IS_LONG)
+    {
+        opts->expire_milliseconds = Z_LVAL_P(entry);
+        opts->has_expire = 1;
+        opts->has_pexpire = 1;
+    }
+
+    /* Parse conditional options */
+    if ((entry = zend_hash_str_find(ht, "NX", 2)) != NULL)
+    {
+        opts->nx = zval_is_true(entry);
+    }
+
+    if ((entry = zend_hash_str_find(ht, "XX", 2)) != NULL)
+    {
+        opts->xx = zval_is_true(entry);
+    }
+
+    if ((entry = zend_hash_str_find(ht, "CH", 2)) != NULL)
+    {
+        opts->ch = zval_is_true(entry);
+    }
+
+    if ((entry = zend_hash_str_find(ht, "GET", 3)) != NULL)
+    {
+        opts->get_old_value = zval_is_true(entry);
+    }
+
+    /* Parse range options */
+    if ((entry = zend_hash_str_find(ht, "START", 5)) != NULL && Z_TYPE_P(entry) == IS_LONG)
+    {
+        opts->start = Z_LVAL_P(entry);
+        opts->has_range = 1;
+    }
+
+    if ((entry = zend_hash_str_find(ht, "END", 3)) != NULL && Z_TYPE_P(entry) == IS_LONG)
+    {
+        opts->end = Z_LVAL_P(entry);
+        opts->has_range = 1;
+    }
+
+    if ((entry = zend_hash_str_find(ht, "OFFSET", 6)) != NULL && Z_TYPE_P(entry) == IS_LONG)
+    {
+        opts->offset = Z_LVAL_P(entry);
+    }
+
+    if ((entry = zend_hash_str_find(ht, "COUNT", 5)) != NULL && Z_TYPE_P(entry) == IS_LONG)
+    {
+        opts->count = Z_LVAL_P(entry);
+        opts->has_limit = 1;
+    }
+
+    /* Parse special flags */
+    if ((entry = zend_hash_str_find(ht, "BYBIT", 5)) != NULL)
+    {
+        opts->bybit = zval_is_true(entry);
+    }
+
+    if ((entry = zend_hash_str_find(ht, "APPROXIMATE", 11)) != NULL)
+    {
+        opts->approximate = zval_is_true(entry);
+    }
+
+    return 1;
+}
+
+/**
+ * Parse SET command specific options
+ */
+int parse_set_options(zval *options, core_options_t *opts)
+{
+    /* Use common option parsing as base */
+    if (!parse_core_options(options, opts))
+    {
+        return 0;
+    }
+
+    /* SET command specific parsing can be added here */
+    return 1;
+}
+
+/**
+ * Parse bit operation options
+ */
+int parse_bit_options(zval *options, core_options_t *opts)
+{
+    /* Use common option parsing as base */
+    if (!parse_core_options(options, opts))
+    {
+        return 0;
+    }
+
+    /* Bit operation specific parsing can be added here */
+    return 1;
+}
+
+/**
+ * Parse expire command options
+ */
+int parse_expire_options(zval *options, core_options_t *opts)
+{
+    /* Use common option parsing as base */
+    if (!parse_core_options(options, opts))
+    {
+        return 0;
+    }
+
+    /* Expire command specific parsing can be added here */
+    return 1;
+}
+
+/* ====================================================================
+ * SPECIALIZED COMMAND HELPERS
+ * ==================================================================== */
+
+/**
+ * Execute string commands (SET, GET, GETSET, etc.)
+ */
+int execute_string_command(const void *glide_client, enum RequestType cmd_type,
+                           const char *key, size_t key_len, const char *value,
+                           size_t value_len, long expire, zval *options,
+                           void *result, core_result_processor_t processor)
+{
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = cmd_type;
+    args.key = key;
+    args.key_len = key_len;
+    args.raw_options = options;
+
+    /* Parse options */
+    if (options)
+    {
+        parse_set_options(options, &args.options);
+    }
+
+    /* Set expire if provided */
+    if (expire > 0)
+    {
+        args.options.expire_seconds = expire;
+        args.options.has_expire = 1;
+    }
+
+    /* Add value argument if provided */
+    if (value && value_len > 0)
+    {
+        args.args[0].type = CORE_ARG_TYPE_STRING;
+        args.args[0].data.string_arg.value = value;
+        args.args[0].data.string_arg.len = value_len;
+        args.arg_count = 1;
+    }
+
+    return execute_core_command(&args, result, processor);
+}
+
+/**
+ * Execute key management commands (DEL, EXISTS, etc.)
+ */
+int execute_key_command(const void *glide_client, enum RequestType cmd_type,
+                        zval *keys, int key_count, void *result,
+                        core_result_processor_t processor)
+{
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = cmd_type;
+
+    /* Set up array argument for keys */
+    args.args[0].type = CORE_ARG_TYPE_ARRAY;
+    args.args[0].data.array_arg.array = keys;
+    args.args[0].data.array_arg.count = key_count;
+    args.arg_count = 1;
+
+    return execute_core_command(&args, result, processor);
+}
+
+/**
+ * Execute expire commands (EXPIRE, EXPIREAT, etc.)
+ */
+int execute_expire_command_core(const void *glide_client, enum RequestType cmd_type,
+                                const char *key, size_t key_len, long value,
+                                void *result, core_result_processor_t processor)
+{
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = cmd_type;
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Add time value argument */
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = value;
+    args.arg_count = 1;
+
+    return execute_core_command(&args, result, processor);
+}
+
+/**
+ * Execute bit commands (BITCOUNT, BITOP, etc.)
+ */
+int execute_bit_command(const void *glide_client, enum RequestType cmd_type,
+                        const char *key, size_t key_len, core_arg_t *cmd_args,
+                        int arg_count, zval *options, void *result,
+                        core_result_processor_t processor)
+{
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = cmd_type;
+    args.key = key;
+    args.key_len = key_len;
+    args.raw_options = options;
+
+    /* Parse options */
+    if (options)
+    {
+        parse_bit_options(options, &args.options);
+    }
+
+    /* Copy command arguments */
+    for (int i = 0; i < arg_count && i < 8; i++)
+    {
+        args.args[i] = cmd_args[i];
+    }
+    args.arg_count = arg_count;
+
+    return execute_core_command(&args, result, processor);
+}
+
+/* ====================================================================
+ * DEBUG FUNCTIONS (only in debug builds)
+ * ==================================================================== */
+
+#ifdef DEBUG
+void debug_print_core_args(core_command_args_t *args)
+{
+    if (!args)
+    {
+        printf("DEBUG: core_args is NULL\n");
+        return;
+    }
+
+    printf("DEBUG: Core Command Args:\n");
+    printf("  cmd_type: %d\n", args->cmd_type);
+    printf("  key: %.*s (len: %zu)\n", (int)args->key_len, args->key ? args->key : "NULL", args->key_len);
+    printf("  arg_count: %d\n", args->arg_count);
+
+    for (int i = 0; i < args->arg_count; i++)
+    {
+        printf("  arg[%d]: type=%d\n", i, args->args[i].type);
+        switch (args->args[i].type)
+        {
+        case CORE_ARG_TYPE_STRING:
+            printf("    string: %.*s (len: %zu)\n",
+                   (int)args->args[i].data.string_arg.len,
+                   args->args[i].data.string_arg.value,
+                   args->args[i].data.string_arg.len);
+            break;
+        case CORE_ARG_TYPE_LONG:
+            printf("    long: %ld\n", args->args[i].data.long_arg.value);
+            break;
+        case CORE_ARG_TYPE_DOUBLE:
+            printf("    double: %f\n", args->args[i].data.double_arg.value);
+            break;
+        default:
+            printf("    (other type)\n");
+            break;
+        }
+    }
+
+    printf("  options: has_expire=%d, nx=%d, xx=%d\n",
+           args->options.has_expire, args->options.nx, args->options.xx);
+}
+
+void debug_print_command_result(CommandResult *result)
+{
+    if (!result)
+    {
+        printf("DEBUG: CommandResult is NULL\n");
+        return;
+    }
+
+    printf("DEBUG: CommandResult:\n");
+    printf("  command_error: %s\n", result->command_error ? "YES" : "NO");
+    if (result->command_error)
+    {
+        printf("  error_message: %s\n", result->command_error->command_error_message ? result->command_error->command_error_message : "NULL");
+    }
+
+    if (result->response)
+    {
+        printf("  response_type: %d\n", result->response->response_type);
+        switch (result->response->response_type)
+        {
+        case Int:
+            printf("  int_value: %ld\n", result->response->int_value);
+            break;
+        case String:
+            printf("  string_value: %.*s (len: %ld)\n",
+                   (int)result->response->string_value_len,
+                   result->response->string_value,
+                   result->response->string_value_len);
+            break;
+        case Bool:
+            printf("  bool_value: %s\n", result->response->bool_value ? "true" : "false");
+            break;
+        case Float:
+            printf("  float_value: %f\n", result->response->float_value);
+            break;
+        default:
+            printf("  (other response type)\n");
+            break;
+        }
+    }
+    else
+    {
+        printf("  response: NULL\n");
+    }
+}
+#endif
