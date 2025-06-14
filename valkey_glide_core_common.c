@@ -1213,10 +1213,24 @@ int parse_set_options(zval *options, core_options_t *opts)
                 /* EX option - seconds */
                 if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
                 {
-                    opts->expire_seconds = zval_get_long(z_option);
-                    opts->has_expire = 1;
-                    /* Reset other time options */
-                    opts->has_pexpire = opts->has_exat = opts->has_pxat = 0;
+                    long expire_val = zval_get_long(z_option);
+                    if (expire_val > 0)
+                    {
+                        opts->expire_seconds = expire_val;
+                        opts->has_expire = 1;
+                        /* Reset other time options */
+                        opts->has_pexpire = opts->has_exat = opts->has_pxat = 0;
+                    }
+                    else
+                    {
+                        /* Invalid expire value */
+                        return 0;
+                    }
+                }
+                else
+                {
+                    /* Invalid value type for EX option - should be numeric */
+                    return 0;
                 }
             }
             else if (strcasecmp(opt, "PX") == 0)
@@ -1224,11 +1238,25 @@ int parse_set_options(zval *options, core_options_t *opts)
                 /* PX option - milliseconds */
                 if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
                 {
-                    opts->expire_milliseconds = zval_get_long(z_option);
-                    opts->has_expire = 1;
-                    opts->has_pexpire = 1;
-                    /* Reset other time options */
-                    opts->has_exat = opts->has_pxat = 0;
+                    long expire_val = zval_get_long(z_option);
+                    if (expire_val > 0)
+                    {
+                        opts->expire_milliseconds = expire_val;
+                        opts->has_expire = 1;
+                        opts->has_pexpire = 1;
+                        /* Reset other time options */
+                        opts->has_exat = opts->has_pxat = 0;
+                    }
+                    else
+                    {
+                        /* Invalid expire value */
+                        return 0;
+                    }
+                }
+                else
+                {
+                    /* Invalid value type for PX option - should be numeric */
+                    return 0;
                 }
             }
             else if (strcasecmp(opt, "EXAT") == 0)
@@ -1236,11 +1264,25 @@ int parse_set_options(zval *options, core_options_t *opts)
                 /* EXAT option - unix time in seconds */
                 if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
                 {
-                    opts->expire_at_seconds = zval_get_long(z_option);
-                    opts->has_expire = 1;
-                    opts->has_exat = 1;
-                    /* Reset other time options */
-                    opts->has_pexpire = opts->has_pxat = 0;
+                    long expire_val = zval_get_long(z_option);
+                    if (expire_val > 0)
+                    {
+                        opts->expire_at_seconds = expire_val;
+                        opts->has_expire = 1;
+                        opts->has_exat = 1;
+                        /* Reset other time options */
+                        opts->has_pexpire = opts->has_pxat = 0;
+                    }
+                    else
+                    {
+                        /* Invalid expire value */
+                        return 0;
+                    }
+                }
+                else
+                {
+                    /* Invalid value type for EXAT option - should be numeric */
+                    return 0;
                 }
             }
             else if (strcasecmp(opt, "PXAT") == 0)
@@ -1248,11 +1290,25 @@ int parse_set_options(zval *options, core_options_t *opts)
                 /* PXAT option - unix time in milliseconds */
                 if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
                 {
-                    opts->expire_at_milliseconds = zval_get_long(z_option);
-                    opts->has_expire = 1;
-                    opts->has_pxat = 1;
-                    /* Reset other time options */
-                    opts->has_pexpire = opts->has_exat = 0;
+                    long expire_val = zval_get_long(z_option);
+                    if (expire_val > 0)
+                    {
+                        opts->expire_at_milliseconds = expire_val;
+                        opts->has_expire = 1;
+                        opts->has_pxat = 1;
+                        /* Reset other time options */
+                        opts->has_pexpire = opts->has_exat = 0;
+                    }
+                    else
+                    {
+                        /* Invalid expire value */
+                        return 0;
+                    }
+                }
+                else
+                {
+                    /* Invalid value type for PXAT option - should be numeric */
+                    return 0;
                 }
             }
             /* IFEQ option */
@@ -1264,6 +1320,11 @@ int parse_set_options(zval *options, core_options_t *opts)
                     opts->ifeq_value = Z_STRVAL_P(z_option);
                     opts->ifeq_len = Z_STRLEN_P(z_option);
                     opts->has_ifeq = 1;
+                }
+                else
+                {
+                    /* Invalid value type for IFEQ option - should be string */
+                    return 0;
                 }
             }
         }
@@ -1325,7 +1386,11 @@ int execute_string_command(const void *glide_client, enum RequestType cmd_type,
     /* Parse options */
     if (options)
     {
-        parse_set_options(options, &args.options);
+        if (parse_set_options(options, &args.options) == 0)
+        {
+            printf("Invalid options provided for SET command\n");
+            return 0; /* Invalid options */
+        }
     }
 
     /* Set expire if provided */

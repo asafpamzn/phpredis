@@ -602,7 +602,7 @@ class Redis_Test extends TestSuite {
         $this->assertTrue($this->redis->set('foo', 'bar', [NULL, 'EX' => 60]));
         $this->assertTrue($this->redis->set('foo', 'bar', [NULL, new stdClass(), 'EX' => 60]));
         $this->assertFalse(@$this->redis->set('foo', 'bar', [NULL, 'EX' => []]));
-
+        
         if (version_compare($this->version, '6.0.0') < 0)
             return;
 

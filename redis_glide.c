@@ -256,7 +256,11 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
     /* Parse options */
     if (opts)
     {
-        parse_set_options(opts, &args.options);
+        if (parse_set_options(opts, &args.options) == 0)
+        {
+            /* If parsing failed, return error */
+            return 0;
+        }
     }
 
     /* Set expire if provided */
