@@ -105,7 +105,7 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     /* Single key operations */
     case Ping:
     case RandomKey:
-    case StrLen:
+    case Strlen:
     case Type:
     case TTL:
     case PTTL:
