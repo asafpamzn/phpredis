@@ -31,6 +31,7 @@
 #include "valkey_glide_x_common.h"
 #include "valkey_glide_s_common.h"
 #include "valkey_glide_list_common.h"
+#include "valkey_glide_hash_common.h" /* Include hash command framework */
 
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
@@ -495,4 +496,67 @@ LINDEX_METHOD_IMPL(Redis)
 
 /* {{{ proto boolean Redis::lSet(string key, long index, string value) */
 LSET_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::hSet(string key, string field, string value) */
+HSET_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto bool Redis::hSetNx(string key, string field, string value) */
+HSETNX_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string Redis::hGet(string key, string field) */
+HGET_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::hLen(string key) */
+HLEN_METHOD_IMPL(Redis);
+/* }}} */
+
+/* {{{ proto long Redis::hDel(string key, string field1, ... fieldN) */
+HDEL_METHOD_IMPL(Redis);
+/* }}} */
+
+/* {{{ proto bool Redis::hExists(string key, string field) */
+HEXISTS_METHOD_IMPL(Redis);
+/* }}} */
+
+/* {{{ proto array Redis::hKeys(string key) */
+HKEYS_METHOD_IMPL(Redis);
+/* }}} */
+
+/* {{{ proto array Redis::hVals(string key) */
+HVALS_METHOD_IMPL(Redis);
+
+/* }}} */
+
+/* {{{ proto array Redis::hGetAll(string key) */
+HGETALL_METHOD_IMPL(Redis);
+
+/* }}} */
+
+/* {{{ proto double Redis::hIncrByFloat(string key, string field, double increment) */
+HINCRBYFLOAT_METHOD_IMPL(Redis);
+/* }}} */
+
+/* {{{ proto long Redis::hIncrBy(string key, string field, long increment) */
+HINCRBY_METHOD_IMPL(Redis);
+/* }}} */
+
+/* {{{ proto array Redis::hMget(string key, array fields) */
+HMGET_METHOD_IMPL(Redis);
+/* }}} */
+
+/* {{{ proto boolean Redis::hMset(string key, array key_values) */
+HMSET_METHOD_IMPL(Redis);
+/* }}} */
+
+/* {{{ proto array|string Redis::hRandField(string key [, array options]) */
+HRANDFIELD_METHOD_IMPL(Redis);
+
+/* }}} */
+
+/* {{{ proto long Redis::hStrLen(string key, string field) */
+HSTRLEN_METHOD_IMPL(Redis);
 /* }}} */

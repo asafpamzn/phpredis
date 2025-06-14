@@ -1101,3 +1101,66 @@ PHP_METHOD(Redis, pttl)
     }
 }
 /* }}} */
+
+/* {{{ proto string Redis::ping([string message])
+ */
+PHP_METHOD(Redis, ping)
+{
+    zval *object;
+    redis_object *redis;
+    char *msg = NULL, *response = NULL;
+    size_t msg_len = 0, response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|s",
+                                     &object, redis_ce, &msg, &msg_len) == FAILURE)
+    {
+        RETURN_FALSE;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the PING command using the Glide client */
+        int result = execute_ping_command(redis->glide_client, msg, msg_len, &response, &response_len);
+
+        /* If the result is -1, there was an error */
+        if (result == -1)
+        {
+            RETURN_FALSE;
+        }
+
+        /* Return the response */
+        if (response)
+        {
+            if (strncmp(response, "PONG", 4) == 0)
+            {
+                efree(response);
+                RETURN_TRUE;
+            }
+
+            /* Return the response */
+            RETVAL_STRINGL(response, response_len);
+            efree(response);
+            return;
+        }
+        else
+        {
+            RETURN_TRUE;
+        }
+    }
+    RETURN_FALSE;
+}
+/* }}} */
+
+/** {{{ proto bool Redis::reset()
+ */
+PHP_METHOD(Redis, reset)
+{
+    RETURN_FALSE;
+    // TODO
+}
+/* }}} */
