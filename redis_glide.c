@@ -579,152 +579,78 @@ int execute_getset_command(const void *glide_client, const char *key, size_t key
     return handle_string_response(cmd_result, result, result_len);
 }
 
-/* Execute a GET command using the Valkey Glide client */
+/* Execute a GET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_get_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Get;
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Use string result processor */
+    struct
     {
-        return -1;
-    }
+        char **result;
+        size_t *result_len;
+    } output = {result, result_len};
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1; /* key */
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Execute the command */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        Get,       /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Use the generic handler to process the result */
-    return handle_string_response(cmd_result, result, result_len);
+    return execute_core_command(&args, &output, process_core_string_result);
 }
 
-/* Execute a RANDOMKEY command using the Valkey Glide client */
+/* Execute a RANDOMKEY command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_randomkey_command(const void *glide_client, char **result, size_t *result_len)
 {
-    /* Check if client is valid */
-    if (!glide_client)
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = RandomKey;
+
+    /* Use string result processor */
+    struct
     {
-        return -1;
-    }
+        char **result;
+        size_t *result_len;
+    } output = {result, result_len};
 
-    /* Execute the command (no arguments needed) */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        RandomKey, /* command type */
-        0,         /* number of arguments */
-        NULL,      /* arguments */
-        NULL       /* argument lengths */
-    );
-
-    /* Use the generic handler to process the result */
-    return handle_string_response(cmd_result, result, result_len);
+    return execute_core_command(&args, &output, process_core_string_result);
 }
 
-/* Execute a GETBIT command using the Valkey Glide client */
+/* Execute a GETBIT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_getbit_command(const void *glide_client, const char *key, size_t key_len, long offset, long *output_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = GetBit;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 2;
-    uintptr_t args[2];
-    unsigned long args_len[2];
+    /* Add offset argument */
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = offset;
+    args.arg_count = 1;
 
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Second argument: offset */
-    size_t offset_len;
-    char *offset_str = long_to_string(offset, &offset_len);
-    if (!offset_str)
-    {
-        return 0;
-    }
-    args[1] = (uintptr_t)offset_str;
-    args_len[1] = offset_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        GetBit,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument strings */
-    efree(offset_str);
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
-/* Execute a SETBIT command using the Valkey Glide client */
+/* Execute a SETBIT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_setbit_command(const void *glide_client, const char *key, size_t key_len, long offset, int value, long *output_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = SetBit;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 3;
-    uintptr_t args[3];
-    unsigned long args_len[3];
+    /* Add offset argument */
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = offset;
 
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
+    /* Add value argument (0 or 1) */
+    args.args[1].type = CORE_ARG_TYPE_LONG;
+    args.args[1].data.long_arg.value = value ? 1 : 0;
+    args.arg_count = 2;
 
-    /* Second argument: offset */
-    size_t offset_len;
-    char *offset_str = long_to_string(offset, &offset_len);
-    if (!offset_str)
-    {
-        return 0;
-    }
-    args[1] = (uintptr_t)offset_str;
-    args_len[1] = offset_len;
-
-    /* Third argument: value (0 or 1) */
-    char value_str[2] = {'0', '\0'};
-    if (value)
-        value_str[0] = '1';
-    args[2] = (uintptr_t)value_str;
-    args_len[2] = 1;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        SetBit,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument strings */
-    efree(offset_str);
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
 /* Helper function to execute del_command with arrays */
@@ -912,35 +838,16 @@ int execute_unlink_array(const void *glide_client, HashTable *keys_hash, long *o
     return handle_int_response(result, output_value);
 }
 
-/* Execute a STRLEN command using the Valkey Glide client */
+/* Execute a STRLEN command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_strlen_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Strlen;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1;
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Strlen,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
 /* Execute a SETRANGE command using the Valkey Glide client */

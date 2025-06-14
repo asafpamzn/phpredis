@@ -48,7 +48,7 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
     arg_count = prepare_core_args(args, &cmd_args, &cmd_args_len,
                                   &allocated_strings, &allocated_count);
 
-    if (arg_count <= 0)
+    if (arg_count < 0)
     {
         return 0;
     }
@@ -94,9 +94,13 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     /* Determine preparation strategy based on command type */
     switch (args->cmd_type)
     {
+    /* Zero argument operations */
+    case RandomKey:
+        return prepare_zero_args(args, cmd_args, cmd_args_len);
+
     /* Single key operations */
     case Ping:
-    case RandomKey:
+    case Get:
     case Strlen:
     case Type:
     case TTL:
@@ -111,7 +115,7 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case SetEx:
     case PSetEx:
     case SetNX:
-    case Get:
+
     case GetSet:
     case GetDel:
     case GetEx:
@@ -189,6 +193,18 @@ void free_core_args(uintptr_t *cmd_args, unsigned long *cmd_args_len,
 /* ====================================================================
  * ARGUMENT PREPARATION HELPERS
  * ==================================================================== */
+
+/**
+ * Prepare arguments for zero-argument operations (RANDOMKEY, etc.)
+ */
+int prepare_zero_args(core_command_args_t *args, uintptr_t **cmd_args,
+                      unsigned long **cmd_args_len)
+{
+    /* No arguments needed - just return 0 to indicate success but no args */
+    *cmd_args = NULL;
+    *cmd_args_len = NULL;
+    return 0; /* Zero arguments */
+}
 
 /**
  * Prepare arguments for single key operations

@@ -192,6 +192,9 @@ int prepare_range_args(core_command_args_t *args, uintptr_t **cmd_args,
                        unsigned long **cmd_args_len, char ***allocated_strings,
                        int *allocated_count);
 
+int prepare_zero_args(core_command_args_t *args, uintptr_t **cmd_args,
+                      unsigned long **cmd_args_len);
+
 /* ====================================================================
  * RESULT PROCESSORS
  * ==================================================================== */
