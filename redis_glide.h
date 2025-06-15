@@ -104,7 +104,6 @@ extern int execute_set_command(const void *glide_client, const char *key, size_t
 extern int execute_setex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len);
 extern int execute_psetex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len);
 extern int execute_setnx_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len);
-extern int execute_getset_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, char **result, size_t *result_len);
 extern int execute_get_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);
 extern int execute_getwithmeta_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);
 extern int execute_getdel_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);

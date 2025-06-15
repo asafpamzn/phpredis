@@ -53,7 +53,7 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
         return 0;
     }
 
-        /* Execute the command */
+    /* Execute the command */
     CommandResult *result = execute_command(
         args->glide_client,
         args->cmd_type,

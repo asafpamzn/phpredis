@@ -675,9 +675,6 @@ int execute_del_array(const void *glide_client, HashTable *keys_hash, long *outp
 
     int result = execute_core_command(&args, output_value, process_core_int_result);
 
-    /* Clean up temporary array */
-    zval_dtor(&keys_array);
-
     return result;
 }
 
@@ -722,13 +719,8 @@ int execute_del_command(const void *glide_client, zval *keys, int keys_count, lo
         args.args[0].data.array_arg.count = keys_count;
         args.arg_count = 1; /* Triggers multi-key mode in core framework */
 
-        /* Execute command */
-        int result = execute_core_command(&args, output_value, process_core_int_result);
-
-        /* Clean up temporary array */
-        zval_dtor(&temp_array);
-
-        return result;
+        /* Execute command and return result */
+        return execute_core_command(&args, output_value, process_core_int_result);
     }
     else
     {
@@ -769,12 +761,7 @@ int execute_unlink_array(const void *glide_client, HashTable *keys_hash, long *o
     args.args[0].data.array_arg.count = zend_hash_num_elements(keys_hash);
     args.arg_count = 1;
 
-    int result = execute_core_command(&args, output_value, process_core_int_result);
-
-    /* Clean up temporary array */
-    zval_dtor(&keys_array);
-
-    return result;
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
 /* Execute a STRLEN command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
