@@ -102,6 +102,7 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
 
     /* Single key operations */
     case Ping:
+    case GetDel:
     case Get:
     case Strlen:
     case Type:
@@ -128,13 +129,15 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case SetNX:
 
     case GetSet:
-    case GetDel:
+
     case GetEx:
     case Append:
     case Incr:
     case Decr:
     case IncrBy:
     case DecrBy:
+    case Rename:
+    case RenameNX:
     case IncrByFloat:
         return prepare_key_value_args(args, cmd_args, cmd_args_len,
                                       allocated_strings, allocated_count);

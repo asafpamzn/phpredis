@@ -139,393 +139,104 @@ int execute_object_command(const void *glide_client,
     return ret_val;
 }
 
-/* Execute a RENAME command using the Valkey Glide client */
+/* Execute a RENAME command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_rename_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len)
 {
-    /* Check if client and keys are valid */
-    if (!glide_client || !src || !dst)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Rename;
+    args.key = src;
+    args.key_len = src_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 2;
-    uintptr_t args[2];
-    unsigned long args_len[2];
+    /* Add destination key as argument */
+    args.args[0].type = CORE_ARG_TYPE_STRING;
+    args.args[0].data.string_arg.value = dst;
+    args.args[0].data.string_arg.len = dst_len;
+    args.arg_count = 1;
 
-    /* First argument: source key */
-    args[0] = (uintptr_t)src;
-    args_len[0] = src_len;
-
-    /* Second argument: destination key */
-    args[1] = (uintptr_t)dst;
-    args_len[1] = dst_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Rename,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing RENAME command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Success is indicated by an OK response */
-    int success = 0;
-    if (result->response && result->response->response_type == Ok)
-    {
-        success = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return success;
+    return execute_core_command(&args, NULL, process_core_bool_result);
 }
 
-/* Execute a RENAMENX command using the Valkey Glide client */
+/* Execute a RENAMENX command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_renamenx_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len)
 {
-    /* Check if client and keys are valid */
-    if (!glide_client || !src || !dst)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = RenameNX;
+    args.key = src;
+    args.key_len = src_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 2;
-    uintptr_t args[2];
-    unsigned long args_len[2];
+    /* Add destination key as argument */
+    args.args[0].type = CORE_ARG_TYPE_STRING;
+    args.args[0].data.string_arg.value = dst;
+    args.args[0].data.string_arg.len = dst_len;
+    args.arg_count = 1;
 
-    /* First argument: source key */
-    args[0] = (uintptr_t)src;
-    args_len[0] = src_len;
-
-    /* Second argument: destination key */
-    args[1] = (uintptr_t)dst;
-    args_len[1] = dst_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        RenameNX,  /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Use the generic handler to process the result */
-    long output_value = 0;
-    return handle_bool_response(result);
+    return execute_core_command(&args, NULL, process_core_bool_result);
 }
 
-/* Execute a GETWITHMETA command using the Valkey Glide client */
+/* Execute a GETWITHMETA command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_getwithmeta_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Get; /* Using GET for now, replace with GETWITHMETA when available */
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Use string result processor */
+    struct
     {
-        return -1;
-    }
+        char **result;
+        size_t *result_len;
+    } output = {result, result_len};
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1; /* key */
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Execute the command */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        Get,       /* command type - using GET for now, replace with GETWITHMETA when available */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Use the generic handler to process the result */
-    return handle_string_response(cmd_result, result, result_len);
+    return execute_core_command(&args, &output, process_core_string_result);
 }
 
-/* Execute a GETDEL command using the Valkey Glide client */
+/* Execute a GETDEL command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_getdel_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = GetDel;
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Use string result processor */
+    struct
     {
-        return -1;
-    }
+        char **result;
+        size_t *result_len;
+    } output = {result, result_len};
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1; /* key */
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Execute the command */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        GetDel,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Use the generic handler to process the result */
-    return handle_string_response(cmd_result, result, result_len);
+    return execute_core_command(&args, &output, process_core_string_result);
 }
 
-/* Execute a GETEX command using the Valkey Glide client */
+/* Execute a GETEX command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_getex_command(const void *glide_client, const char *key, size_t key_len, zval *opts, char **result, size_t *result_len)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = GetEx;
+    args.key = key;
+    args.key_len = key_len;
+    args.raw_options = opts;
+
+    /* Parse options using existing core framework option parsing */
+    if (opts)
     {
-        return -1;
+        parse_core_options(opts, &args.options);
     }
 
-    /* Count the number of arguments */
-    unsigned long arg_count = 1; /* Start with the key */
-    int has_ex = 0, has_px = 0, has_exat = 0, has_pxat = 0, has_persist = 0;
-    long expire = 0;
-
-    /* Check if we have options */
-    if (opts && Z_TYPE_P(opts) == IS_ARRAY)
+    /* Use string result processor */
+    struct
     {
-        HashTable *options_ht = Z_ARRVAL_P(opts);
-        zval *z_option;
-        zend_string *option_key;
-        zend_ulong num_key;
+        char **result;
+        size_t *result_len;
+    } output = {result, result_len};
 
-        /* Iterate through all options */
-        ZEND_HASH_FOREACH_KEY_VAL(options_ht, num_key, option_key, z_option)
-        {
-            if (option_key)
-            {
-                /* Handle string keys - these are options with values */
-                char *opt = ZSTR_VAL(option_key);
-
-                /* Check for time-based options */
-                if (strcasecmp(opt, "EX") == 0)
-                {
-                    /* EX option - seconds */
-                    if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
-                    {
-                        arg_count += 2;
-                        has_ex = 1;
-                        expire = zval_get_long(z_option);
-                        /* Reset other time options */
-                        has_px = has_exat = has_pxat = has_persist = 0;
-                    }
-                }
-                else if (strcasecmp(opt, "PX") == 0)
-                {
-                    /* PX option - milliseconds */
-                    if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
-                    {
-                        arg_count += 2;
-                        has_px = 1;
-                        expire = zval_get_long(z_option);
-                        /* Reset other time options */
-                        has_ex = has_exat = has_pxat = has_persist = 0;
-                    }
-                }
-                else if (strcasecmp(opt, "EXAT") == 0)
-                {
-                    /* EXAT option - unix time in seconds */
-                    if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
-                    {
-                        arg_count += 2;
-                        has_exat = 1;
-                        expire = zval_get_long(z_option);
-                        /* Reset other time options */
-                        has_ex = has_px = has_pxat = has_persist = 0;
-                    }
-                }
-                else if (strcasecmp(opt, "PXAT") == 0)
-                {
-                    /* PXAT option - unix time in milliseconds */
-                    if (Z_TYPE_P(z_option) == IS_LONG || Z_TYPE_P(z_option) == IS_DOUBLE)
-                    {
-                        arg_count += 2;
-                        has_pxat = 1;
-                        expire = zval_get_long(z_option);
-                        /* Reset other time options */
-                        has_ex = has_px = has_exat = has_persist = 0;
-                    }
-                }
-                else if (strcasecmp(opt, "PERSIST") == 0 && zval_is_true(z_option))
-                {
-                    /* PERSIST option */
-                    arg_count += 1;
-                    has_persist = 1;
-                    /* Reset other time options */
-                    has_ex = has_px = has_exat = has_pxat = 0;
-                }
-            }
-            else if (Z_TYPE_P(z_option) == IS_STRING)
-            {
-                /* Handle numeric keys with string values - could be ['PERSIST'] format */
-                if (strcasecmp(Z_STRVAL_P(z_option), "PERSIST") == 0)
-                {
-                    /* PERSIST option */
-                    arg_count += 1;
-                    has_persist = 1;
-                    /* Reset other time options */
-                    has_ex = has_px = has_exat = has_pxat = 0;
-                }
-            }
-        }
-        ZEND_HASH_FOREACH_END();
-    }
-
-    /* Allocate memory for arguments */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return -1;
-    }
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Current argument index */
-    int arg_idx = 1;
-
-    /* Add EX option */
-    if (has_ex)
-    {
-        args[arg_idx] = (uintptr_t)"EX";
-        args_len[arg_idx] = 2;
-        arg_idx++;
-
-        /* Add expiry time */
-        size_t expire_len;
-        char *expire_str = long_to_string(expire, &expire_len);
-        if (!expire_str)
-        {
-            efree(args);
-            efree(args_len);
-            return -1;
-        }
-        args[arg_idx] = (uintptr_t)expire_str;
-        args_len[arg_idx] = expire_len;
-        arg_idx++;
-    }
-    /* Add PX option */
-    else if (has_px)
-    {
-        args[arg_idx] = (uintptr_t)"PX";
-        args_len[arg_idx] = 2;
-        arg_idx++;
-
-        /* Add expiry time */
-        size_t expire_len;
-        char *expire_str = long_to_string(expire, &expire_len);
-        if (!expire_str)
-        {
-            efree(args);
-            efree(args_len);
-            return -1;
-        }
-        args[arg_idx] = (uintptr_t)expire_str;
-        args_len[arg_idx] = expire_len;
-        arg_idx++;
-    }
-    /* Add EXAT option */
-    else if (has_exat)
-    {
-        args[arg_idx] = (uintptr_t)"EXAT";
-        args_len[arg_idx] = 4;
-        arg_idx++;
-
-        /* Add expiry time */
-        size_t expire_len;
-        char *expire_str = long_to_string(expire, &expire_len);
-        if (!expire_str)
-        {
-            efree(args);
-            efree(args_len);
-            return -1;
-        }
-        args[arg_idx] = (uintptr_t)expire_str;
-        args_len[arg_idx] = expire_len;
-        arg_idx++;
-    }
-    /* Add PXAT option */
-    else if (has_pxat)
-    {
-        args[arg_idx] = (uintptr_t)"PXAT";
-        args_len[arg_idx] = 4;
-        arg_idx++;
-
-        /* Add expiry time */
-        size_t expire_len;
-        char *expire_str = long_to_string(expire, &expire_len);
-        if (!expire_str)
-        {
-            efree(args);
-            efree(args_len);
-            return -1;
-        }
-        args[arg_idx] = (uintptr_t)expire_str;
-        args_len[arg_idx] = expire_len;
-        arg_idx++;
-    }
-    /* Add PERSIST option */
-    else if (has_persist)
-    {
-        args[arg_idx] = (uintptr_t)"PERSIST";
-        args_len[arg_idx] = 7;
-        arg_idx++;
-    }
-
-    /* Execute the command */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        GetEx,     /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the allocated arguments */
-    if (has_ex || has_px || has_exat || has_pxat)
-    {
-        efree((void *)args[2]); /* Free the expire string */
-    }
-    efree(args);
-    efree(args_len);
-
-    /* Use the generic handler to process the result */
-    return handle_string_response(cmd_result, result, result_len);
+    return execute_core_command(&args, &output, process_core_string_result);
 }
 
 /* Execute an INCR command using the Valkey Glide client */

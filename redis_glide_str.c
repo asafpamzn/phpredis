@@ -415,106 +415,48 @@ int execute_sort_ro_command(const void *glide_client, const char *key, size_t ke
     return ret_val;
 }
 
-/* Execute an EXPIREMEMBER command using the Valkey Glide client (custom command) */
+/* Execute an EXPIREMEMBER command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_expiremember_command(const void *glide_client, const char *key, size_t key_len,
                                  const char *member, size_t member_len, long seconds, long *output_value)
 {
-    /* Check if client, key and member are valid */
-    if (!glide_client || !key || !member)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = CustomCommand; /* Custom command type */
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 3; /* key + member + seconds */
-    uintptr_t args[3];
-    unsigned long args_len[3];
+    /* Add member argument */
+    args.args[0].type = CORE_ARG_TYPE_STRING;
+    args.args[0].data.string_arg.value = member;
+    args.args[0].data.string_arg.len = member_len;
 
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
+    /* Add seconds argument */
+    args.args[1].type = CORE_ARG_TYPE_LONG;
+    args.args[1].data.long_arg.value = seconds;
+    args.arg_count = 2;
 
-    /* Second argument: member */
-    args[1] = (uintptr_t)member;
-    args_len[1] = member_len;
-
-    /* Third argument: seconds */
-    size_t seconds_len;
-    char *seconds_str = long_to_string(seconds, &seconds_len);
-    if (!seconds_str)
-    {
-        return 0;
-    }
-    args[2] = (uintptr_t)seconds_str;
-    args_len[2] = seconds_len;
-
-    /* Execute the custom command */
-    CommandResult *result = command(
-        glide_client,
-        0,                               /* channel */
-        CustomCommand,                   /* command type */
-        arg_count,                       /* number of arguments */
-        args,                            /* arguments */
-        args_len,                        /* argument lengths */
-        (unsigned char *)"EXPIREMEMBER", /* command name */
-        11                               /* command name length */
-    );
-
-    /* Free the argument strings */
-    efree(seconds_str);
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
-/* Execute an EXPIREMEMBERAT command using the Valkey Glide client (custom command) */
+/* Execute an EXPIREMEMBERAT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_expirememberat_command(const void *glide_client, const char *key, size_t key_len,
                                    const char *member, size_t member_len, long timestamp, long *output_value)
 {
-    /* Check if client, key and member are valid */
-    if (!glide_client || !key || !member)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = CustomCommand; /* Custom command type */
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 3; /* key + member + timestamp */
-    uintptr_t args[3];
-    unsigned long args_len[3];
+    /* Add member argument */
+    args.args[0].type = CORE_ARG_TYPE_STRING;
+    args.args[0].data.string_arg.value = member;
+    args.args[0].data.string_arg.len = member_len;
 
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
+    /* Add timestamp argument */
+    args.args[1].type = CORE_ARG_TYPE_LONG;
+    args.args[1].data.long_arg.value = timestamp;
+    args.arg_count = 2;
 
-    /* Second argument: member */
-    args[1] = (uintptr_t)member;
-    args_len[1] = member_len;
-
-    /* Third argument: timestamp */
-    size_t timestamp_len;
-    char *timestamp_str = long_to_string(timestamp, &timestamp_len);
-    if (!timestamp_str)
-    {
-        return 0;
-    }
-    args[2] = (uintptr_t)timestamp_str;
-    args_len[2] = timestamp_len;
-
-    /* Execute the custom command */
-    CommandResult *result = command(
-        glide_client,
-        0,                                 /* channel */
-        CustomCommand,                     /* command type */
-        arg_count,                         /* number of arguments */
-        args,                              /* arguments */
-        args_len,                          /* argument lengths */
-        (unsigned char *)"EXPIREMEMBERAT", /* command name */
-        14                                 /* command name length */
-    );
-
-    /* Free the argument strings */
-    efree(timestamp_str);
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
