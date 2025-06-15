@@ -276,6 +276,10 @@ int execute_key_command(const void *glide_client, enum RequestType cmd_type,
                         zval *keys, int key_count, void *result,
                         core_result_processor_t processor);
 
+/* Multi-key commands (DEL, UNLINK) with all usage patterns */
+int execute_multi_key_command(const void *glide_client, enum RequestType cmd_type,
+                              zval *keys, int keys_count, long *output_value);
+
 /* Expire commands (EXPIRE, EXPIREAT, etc.) */
 int execute_expire_command_core(const void *glide_client, enum RequestType cmd_type,
                                 const char *key, size_t key_len, long value,
