@@ -53,7 +53,7 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
         return 0;
     }
 
-    /* Execute the command */
+        /* Execute the command */
     CommandResult *result = execute_command(
         args->glide_client,
         args->cmd_type,
@@ -108,6 +108,7 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case ExpireTime:
     case PExpireTime:
     case Persist:
+
         return prepare_key_only_args(args, cmd_args, cmd_args_len);
 
     /* Key-value operations */
@@ -128,9 +129,25 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
         return prepare_key_value_args(args, cmd_args, cmd_args_len,
                                       allocated_strings, allocated_count);
 
-    /* Multi-key operations */
+    /* DEL and UNLINK: Support both single-key and multi-key operations */
     case Del:
     case Unlink:
+        /* Check if single key or multi-key operation */
+        if (args->key && args->key_len > 0 && args->arg_count == 0)
+        {
+            /* Single key: DEL key */
+
+            return prepare_key_only_args(args, cmd_args, cmd_args_len);
+        }
+        else if (args->arg_count > 0 && args->args[0].type == CORE_ARG_TYPE_ARRAY)
+        {
+            /* Multi-key: DEL key1 key2 key3 */
+
+            return prepare_multi_key_args(args, cmd_args, cmd_args_len);
+        }
+        return 0;
+
+    /* Multi-key operations */
     case Exists:
     case Touch:
     case MGet:

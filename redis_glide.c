@@ -544,39 +544,29 @@ int execute_info_sections_command(const void *glide_client, zval *sections, int 
     return handle_string_response(cmd_result, result, result_len);
 }
 
-/* Execute a GETSET command using the Valkey Glide client */
+/* Execute a GETSET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_getset_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, char **result, size_t *result_len)
 {
-    /* Check if client, key, and value are valid */
-    if (!glide_client || !key || !val)
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = GetSet;
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Add value argument */
+    args.args[0].type = CORE_ARG_TYPE_STRING;
+    args.args[0].data.string_arg.value = val;
+    args.args[0].data.string_arg.len = val_len;
+    args.arg_count = 1;
+
+    /* Use string result processor */
+    struct
     {
-        return -1;
-    }
+        char **result;
+        size_t *result_len;
+    } output = {result, result_len};
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 2; /* key + value */
-    uintptr_t args[2];
-    unsigned long args_len[2];
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Second argument: value */
-    args[1] = (uintptr_t)val;
-    args_len[1] = val_len;
-
-    /* Execute the command */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        GetSet,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Use the generic handler to process the result */
-    return handle_string_response(cmd_result, result, result_len);
+    return execute_core_command(&args, &output, process_core_string_result);
 }
 
 /* Execute a GET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
@@ -653,189 +643,112 @@ int execute_setbit_command(const void *glide_client, const char *key, size_t key
     return execute_core_command(&args, output_value, process_core_int_result);
 }
 
-/* Helper function to execute del_command with arrays */
+/* Helper function to execute del_command with arrays - MIGRATED TO CORE FRAMEWORK */
 int execute_del_array(const void *glide_client, HashTable *keys_hash, long *output_value)
 {
-    /* Check if client and hash are valid */
+    /* Convert HashTable to zval array for core framework */
     if (!glide_client || !keys_hash || zend_hash_num_elements(keys_hash) <= 0)
     {
         return 0;
     }
 
-    /* Prepare command arguments */
-    unsigned long arg_count = zend_hash_num_elements(keys_hash);
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    /* Create temporary zval array from HashTable */
+    zval keys_array;
+    array_init(&keys_array);
 
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Add keys from hash table as arguments */
     zval *key;
-    unsigned long idx = 0;
     ZEND_HASH_FOREACH_VAL(keys_hash, key)
     {
-        /* Convert to string if needed */
-        zval tmp;
-        ZVAL_NULL(&tmp);
-        if (Z_TYPE_P(key) != IS_STRING)
-        {
-            /* Convert to string */
-            ZVAL_COPY(&tmp, key);
-            convert_to_string(&tmp);
-            args[idx] = (uintptr_t)Z_STRVAL(tmp);
-            args_len[idx] = Z_STRLEN(tmp);
-        }
-        else
-        {
-            args[idx] = (uintptr_t)Z_STRVAL_P(key);
-            args_len[idx] = Z_STRLEN_P(key);
-        }
-        idx++;
+        add_next_index_zval(&keys_array, key);
     }
     ZEND_HASH_FOREACH_END();
 
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Del,       /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
+    /* Use core framework with converted array */
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Del;
 
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
+    args.args[0].type = CORE_ARG_TYPE_ARRAY;
+    args.args[0].data.array_arg.array = &keys_array;
+    args.args[0].data.array_arg.count = zend_hash_num_elements(keys_hash);
+    args.arg_count = 1;
 
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    int result = execute_core_command(&args, output_value, process_core_int_result);
+
+    /* Clean up temporary array */
+    zval_dtor(&keys_array);
+
+    return result;
 }
 
-/* Execute a DEL command using the Valkey Glide client */
+/* Execute a DEL command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_del_command(const void *glide_client, zval *keys, int keys_count, long *output_value)
 {
-    /* Check if client and keys are valid */
-    if (!glide_client || !keys || keys_count <= 0)
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Del;
+
+    /* Detect single key vs multi-key scenario */
+    if (keys_count == 1 && Z_TYPE_P(keys) == IS_STRING)
     {
+        /* Single key case - use single-key mode for efficiency */
+        args.key = Z_STRVAL_P(keys);
+        args.key_len = Z_STRLEN_P(keys);
+        args.arg_count = 0; /* Triggers single-key mode in core framework */
+    }
+    else if (keys_count > 0 && Z_TYPE_P(keys) == IS_ARRAY)
+    {
+        /* Multi-key array case */
+        args.args[0].type = CORE_ARG_TYPE_ARRAY;
+        args.args[0].data.array_arg.array = keys;
+        args.args[0].data.array_arg.count = keys_count;
+        args.arg_count = 1; /* Triggers multi-key mode in core framework */
+    }
+    else
+    {
+        /* Invalid input - neither single string nor array */
         return 0;
     }
 
-    /* Prepare command arguments */
-    unsigned long arg_count = keys_count;
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Add keys as arguments */
-    int i;
-    for (i = 0; i < keys_count; i++)
-    {
-        zval *key = &keys[i];
-        if (Z_TYPE_P(key) != IS_STRING)
-        {
-            efree(args);
-            efree(args_len);
-            return 0;
-        }
-        args[i] = (uintptr_t)Z_STRVAL_P(key);
-        args_len[i] = Z_STRLEN_P(key);
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Del,       /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
-/* Helper function to execute unlink_command with arrays */
+/* Helper function to execute unlink_command with arrays - MIGRATED TO CORE FRAMEWORK */
 int execute_unlink_array(const void *glide_client, HashTable *keys_hash, long *output_value)
 {
-    /* Check if client and hash are valid */
+    /* Convert HashTable to zval array for core framework */
     if (!glide_client || !keys_hash || zend_hash_num_elements(keys_hash) <= 0)
     {
         return 0;
     }
 
-    /* Prepare command arguments */
-    unsigned long arg_count = zend_hash_num_elements(keys_hash);
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    /* Create temporary zval array from HashTable */
+    zval keys_array;
+    array_init(&keys_array);
 
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Add keys from hash table as arguments */
     zval *key;
-    unsigned long idx = 0;
     ZEND_HASH_FOREACH_VAL(keys_hash, key)
     {
-        /* Convert to string if needed */
-        zval tmp;
-        ZVAL_NULL(&tmp);
-        if (Z_TYPE_P(key) != IS_STRING)
-        {
-            /* Convert to string */
-            ZVAL_COPY(&tmp, key);
-            convert_to_string(&tmp);
-            args[idx] = (uintptr_t)Z_STRVAL(tmp);
-            args_len[idx] = Z_STRLEN(tmp);
-        }
-        else
-        {
-            args[idx] = (uintptr_t)Z_STRVAL_P(key);
-            args_len[idx] = Z_STRLEN_P(key);
-        }
-        idx++;
+        add_next_index_zval(&keys_array, key);
     }
     ZEND_HASH_FOREACH_END();
 
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Unlink,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
+    /* Use core framework with converted array */
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Unlink;
 
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
+    args.args[0].type = CORE_ARG_TYPE_ARRAY;
+    args.args[0].data.array_arg.array = &keys_array;
+    args.args[0].data.array_arg.count = zend_hash_num_elements(keys_hash);
+    args.arg_count = 1;
 
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    int result = execute_core_command(&args, output_value, process_core_int_result);
+
+    /* Clean up temporary array */
+    zval_dtor(&keys_array);
+
+    return result;
 }
 
 /* Execute a STRLEN command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
@@ -850,52 +763,26 @@ int execute_strlen_command(const void *glide_client, const char *key, size_t key
     return execute_core_command(&args, output_value, process_core_int_result);
 }
 
-/* Execute a SETRANGE command using the Valkey Glide client */
+/* Execute a SETRANGE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_setrange_command(const void *glide_client, const char *key, size_t key_len, long offset, const char *value, size_t value_len, long *output_value)
 {
-    /* Check if client, key, and value are valid */
-    if (!glide_client || !key || !value)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = SetRange;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 3;
-    uintptr_t args[3];
-    unsigned long args_len[3];
+    /* Add offset argument */
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = offset;
 
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
+    /* Add value argument */
+    args.args[1].type = CORE_ARG_TYPE_STRING;
+    args.args[1].data.string_arg.value = value;
+    args.args[1].data.string_arg.len = value_len;
+    args.arg_count = 2;
 
-    /* Second argument: offset */
-    size_t offset_len;
-    char *offset_str = long_to_string(offset, &offset_len);
-    if (!offset_str)
-    {
-        return 0;
-    }
-    args[1] = (uintptr_t)offset_str;
-    args_len[1] = offset_len;
-
-    /* Third argument: value */
-    args[2] = (uintptr_t)value;
-    args_len[2] = value_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        SetRange,  /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument strings */
-    efree(offset_str);
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
 /* Process list elements from LMPOP/BLMPOP response */
@@ -969,6 +856,19 @@ int execute_ttl_command(const void *glide_client, const char *key, size_t key_le
 
     /* Use the generic handler to process the result */
     return handle_int_response(result, output_value);
+}
+
+/* Execute a single-key DEL command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
+int execute_del_single_key(const void *glide_client, const char *key, size_t key_len, long *output_value)
+{
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Del;
+    args.key = key;
+    args.key_len = key_len;
+    /* arg_count = 0 for single key mode */
+
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
 /* Execute a PTTL command using the Valkey Glide client */
