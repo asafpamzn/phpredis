@@ -818,6 +818,7 @@ class Redis_Test extends TestSuite {
         $this->assertTrue($this->redis->set('key', 'value'));
 
         $this->assertEquals('value', $this->redis->getEx('key', ['EX' => 100]));
+        
         $this->assertBetween($this->redis->ttl('key'), 95, 100);
 
         $this->assertEquals('value', $this->redis->getEx('key', ['PX' => 100000]));

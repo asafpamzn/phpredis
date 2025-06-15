@@ -110,6 +110,7 @@ typedef struct
     int keep_ttl;      /* KEEPTTL flag for SET commands */
     int bybit;         /* BYBIT flag for bit commands */
     int approximate;   /* ~ flag for approximate operations */
+    int persist;       /* PERSIST flag for GETEX commands */
 
     /* SET command specific options */
     char *ifeq_value; /* IFEQ comparison value */

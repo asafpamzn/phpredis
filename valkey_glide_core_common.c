@@ -272,11 +272,15 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
                            unsigned long **cmd_args_len, char ***allocated_strings,
                            int *allocated_count)
 {
-    if (!args->key || args->key_len == 0 || args->arg_count == 0)
+    printf("Preparing key-value arguments for command type: %d\n", args->cmd_type);
+    if (!args->key || args->key_len == 0)
     {
+        printf("args->key= %p, args->key_len = %zu, args->arg_count = %d\n",
+               (void *)args->key, args->key_len, args->arg_count);
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         return 0;
     }
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* Calculate total argument count */
     int total_args = 1; /* key */
 
@@ -297,35 +301,47 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
             break;
         }
     }
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* Add option arguments */
     if (args->options.has_expire)
     {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         total_args += 2; /* EX/PX/EXAT/PXAT + value */
     }
     if (args->options.nx)
     {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         total_args++; /* NX */
     }
     if (args->options.xx)
     {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         total_args++; /* XX */
     }
     if (args->options.get_old_value)
     {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         total_args++; /* GET */
     }
     if (args->options.keep_ttl)
     {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         total_args++; /* KEEPTTL */
     }
     if (args->options.has_ifeq)
     {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         total_args += 2; /* IFEQ + value */
     }
-
+    if (args->options.persist)
+    {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+        total_args++; /* PERSIST */
+    }
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     if (!allocate_core_arg_arrays(total_args, cmd_args, cmd_args_len))
     {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         return 0;
     }
 
@@ -343,9 +359,11 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
     /* Add primary arguments */
     for (int i = 0; i < args->arg_count; i++)
     {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         switch (args->args[i].type)
         {
         case CORE_ARG_TYPE_STRING:
+            printf("file = %s, line = %d\n", __FILE__, __LINE__);
             (*cmd_args)[arg_idx] = (uintptr_t)args->args[i].data.string_arg.value;
             (*cmd_args_len)[arg_idx] = args->args[i].data.string_arg.len;
             arg_idx++;
@@ -353,6 +371,7 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
 
         case CORE_ARG_TYPE_LONG:
         {
+            printf("file = %s, line = %d\n", __FILE__, __LINE__);
             size_t len;
             char *str = core_long_to_string(args->args[i].data.long_arg.value, &len);
             if (str)
@@ -368,6 +387,7 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
         case CORE_ARG_TYPE_DOUBLE:
         {
             size_t len;
+            printf("file = %s, line = %d\n", __FILE__, __LINE__);
             char *str = core_double_to_string(args->args[i].data.double_arg.value, &len);
             if (str)
             {
@@ -380,6 +400,7 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
         }
 
         case CORE_ARG_TYPE_MULTI_STRING:
+            printf("file = %s, line = %d\n", __FILE__, __LINE__);
             for (int j = 0; j < args->args[i].data.multi_string_arg.count; j++)
             {
                 (*cmd_args)[arg_idx] = (uintptr_t)args->args[i].data.multi_string_arg.values[j];
@@ -461,7 +482,7 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
             }
         }
     }
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     if (args->options.nx)
     {
         (*cmd_args)[arg_idx] = (uintptr_t)"NX";
@@ -501,6 +522,13 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
         arg_idx++;
     }
 
+    if (args->options.persist)
+    {
+        (*cmd_args)[arg_idx] = (uintptr_t)"PERSIST";
+        (*cmd_args_len)[arg_idx] = 7;
+        arg_idx++;
+    }
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     return arg_idx;
 }
 
@@ -1396,6 +1424,28 @@ int parse_core_options(zval *options, core_options_t *opts)
         opts->expire_milliseconds = Z_LVAL_P(entry);
         opts->has_expire = 1;
         opts->has_pexpire = 1;
+    }
+
+    /* Parse EXAT option - unix timestamp in seconds */
+    if ((entry = zend_hash_str_find(ht, "EXAT", 4)) != NULL && Z_TYPE_P(entry) == IS_LONG)
+    {
+        opts->expire_at_seconds = Z_LVAL_P(entry);
+        opts->has_expire = 1;
+        opts->has_exat = 1;
+    }
+
+    /* Parse PXAT option - unix timestamp in milliseconds */
+    if ((entry = zend_hash_str_find(ht, "PXAT", 4)) != NULL && Z_TYPE_P(entry) == IS_LONG)
+    {
+        opts->expire_at_milliseconds = Z_LVAL_P(entry);
+        opts->has_expire = 1;
+        opts->has_pxat = 1;
+    }
+
+    /* Parse PERSIST option */
+    if ((entry = zend_hash_str_find(ht, "PERSIST", 7)) != NULL)
+    {
+        opts->persist = zval_is_true(entry);
     }
 
     /* Parse conditional options */
