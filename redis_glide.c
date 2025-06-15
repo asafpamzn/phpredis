@@ -704,9 +704,35 @@ int execute_del_command(const void *glide_client, zval *keys, int keys_count, lo
         args.args[0].data.array_arg.count = keys_count;
         args.arg_count = 1; /* Triggers multi-key mode in core framework */
     }
+    else if (keys_count > 1 && Z_TYPE_P(keys) == IS_STRING)
+    {
+        /* Multiple separate string arguments case: del('x', 'y', 'z') */
+        /* Convert to temporary array for multi-key processing */
+        zval temp_array;
+        array_init(&temp_array);
+
+        for (int i = 0; i < keys_count; i++)
+        {
+            add_next_index_zval(&temp_array, &keys[i]);
+        }
+
+        /* Use multi-key mode with temporary array */
+        args.args[0].type = CORE_ARG_TYPE_ARRAY;
+        args.args[0].data.array_arg.array = &temp_array;
+        args.args[0].data.array_arg.count = keys_count;
+        args.arg_count = 1; /* Triggers multi-key mode in core framework */
+
+        /* Execute command */
+        int result = execute_core_command(&args, output_value, process_core_int_result);
+
+        /* Clean up temporary array */
+        zval_dtor(&temp_array);
+
+        return result;
+    }
     else
     {
-        /* Invalid input - neither single string nor array */
+        /* Invalid input - neither single string, array, nor multiple strings */
         return 0;
     }
 

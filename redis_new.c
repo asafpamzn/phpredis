@@ -254,11 +254,13 @@ PHP_METHOD(Redis, del)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
+
         /* Check if we have a single array argument */
         if (argc == 1 && Z_TYPE(args[0]) == IS_ARRAY)
         {
             /* Use array elements as keys */
             long result_value = 0;
+
             if (execute_del_array(redis->glide_client, Z_ARRVAL(args[0]), &result_value))
             {
                 /* Command succeeded, return the value */
@@ -269,6 +271,7 @@ PHP_METHOD(Redis, del)
         {
             /* Multiple arguments - use standard del command */
             long result_value = 0;
+
             if (execute_del_command(redis->glide_client, args, argc, &result_value))
             {
                 /* Command succeeded, return the value */

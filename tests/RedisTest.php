@@ -1027,6 +1027,7 @@ class Redis_Test extends TestSuite {
         $this->redis->set('y', 1);
         $this->redis->set('z', 2);
         $this->assertEquals(3, $this->redis->$cmd('x', 'y', 'z'));
+        
         $this->assertFalse($this->redis->get('x'));
         $this->assertFalse($this->redis->get('y'));
         $this->assertFalse($this->redis->get('z'));
