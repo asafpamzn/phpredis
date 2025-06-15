@@ -575,87 +575,48 @@ PHP_METHOD(Redis, exists)
         /* Check if we received an array as a single argument */
         if (argc == 1 && Z_TYPE_P(z_args) == IS_ARRAY)
         {
-            /* Extract keys from the array */
-            HashTable *ht = Z_ARRVAL_P(z_args);
-            int num_keys = zend_hash_num_elements(ht);
-
-            if (num_keys == 0)
+            /* Single array argument - pass directly to EXISTS command */
+            if (execute_exists_command(redis->glide_client, z_args, argc, &result_value))
             {
-                /* Empty array, return 0 */
-                RETURN_LONG(0);
-            }
-
-            /* Allocate memory for keys */
-            zval *keys = ecalloc(num_keys, sizeof(zval));
-            if (!keys)
-            {
-                RETURN_FALSE;
-            }
-
-            /* Copy each array value to our keys array */
-            zval *entry;
-            int i = 0;
-
-            ZEND_HASH_FOREACH_VAL(ht, entry)
-            {
-                /* Convert any non-string values to string */
-                if (Z_TYPE_P(entry) != IS_STRING)
-                {
-                    zval tmp;
-                    ZVAL_DUP(&tmp, entry);
-                    convert_to_string(&tmp);
-                    ZVAL_COPY_VALUE(&keys[i], &tmp);
-                }
-                else
-                {
-                    ZVAL_COPY(&keys[i], entry);
-                }
-                i++;
-            }
-            ZEND_HASH_FOREACH_END();
-
-            /* Execute the EXISTS command with the array elements as keys */
-            if (execute_exists_command(redis->glide_client, keys, num_keys, &result_value))
-            {
-                /* Free the keys array */
-                for (i = 0; i < num_keys; i++)
-                {
-                    zval_ptr_dtor(&keys[i]);
-                }
-                efree(keys);
-
-                /* Command succeeded, return the value */
                 RETURN_LONG(result_value);
             }
             else
             {
-                /* Free the keys array */
-                for (i = 0; i < num_keys; i++)
-                {
-                    zval_ptr_dtor(&keys[i]);
-                }
-                efree(keys);
-
-                /* Command failed */
                 RETURN_FALSE;
             }
         }
         else
         {
-            /* Normal case - one or more arguments directly passed */
-            /* Execute the EXISTS command using the Glide client */
-            if (execute_exists_command(redis->glide_client, z_args, argc, &result_value))
+            /* Single string key or multiple arguments - create temporary array */
+            zval temp_array;
+            array_init(&temp_array);
+
+            /* Add all arguments to the temporary array */
+            for (int i = 0; i < argc; i++)
             {
-                /* Command succeeded, return the value */
+                /* Create safe copy and convert to string if needed */
+                zval copy;
+                ZVAL_COPY(&copy, &z_args[i]);
+                convert_to_string(&copy);
+                add_next_index_zval(&temp_array, &copy);
+            }
+
+            /* Execute the EXISTS command with the temporary array */
+            int actual_key_count = zend_hash_num_elements(Z_ARRVAL(temp_array));
+            if (execute_exists_command(redis->glide_client, &temp_array, actual_key_count, &result_value))
+            {
+                zval_dtor(&temp_array);
                 RETURN_LONG(result_value);
             }
             else
             {
-                /* Command failed */
+                zval_dtor(&temp_array);
                 RETURN_FALSE;
             }
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
 
@@ -681,18 +642,51 @@ PHP_METHOD(Redis, touch)
     /* If we have a Glide client, use it */
     if (redis->glide_client)
     {
-        /* Execute the TOUCH command using the Glide client */
-        if (execute_touch_command(redis->glide_client, z_args, argc, &result_value))
+        /* Check if we received an array as a single argument */
+        if (argc == 1 && Z_TYPE_P(z_args) == IS_ARRAY)
         {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
+            /* Single array argument - pass directly to TOUCH command */
+            if (execute_touch_command(redis->glide_client, z_args, argc, &result_value))
+            {
+                RETURN_LONG(result_value);
+            }
+            else
+            {
+                RETURN_FALSE;
+            }
         }
         else
         {
-            /* Command failed */
-            RETURN_FALSE;
+            /* Single string key or multiple arguments - create temporary array */
+            zval temp_array;
+            array_init(&temp_array);
+
+            /* Add all arguments to the temporary array */
+            for (int i = 0; i < argc; i++)
+            {
+                /* Create safe copy and convert to string if needed */
+                zval copy;
+                ZVAL_COPY(&copy, &z_args[i]);
+                convert_to_string(&copy);
+                add_next_index_zval(&temp_array, &copy);
+            }
+
+            /* Execute the TOUCH command with the temporary array */
+            int actual_key_count = zend_hash_num_elements(Z_ARRVAL(temp_array));
+            if (execute_touch_command(redis->glide_client, &temp_array, actual_key_count, &result_value))
+            {
+                zval_dtor(&temp_array);
+                RETURN_LONG(result_value);
+            }
+            else
+            {
+                zval_dtor(&temp_array);
+                RETURN_FALSE;
+            }
         }
     }
+
+    RETURN_FALSE;
 }
 /* }}} */
 

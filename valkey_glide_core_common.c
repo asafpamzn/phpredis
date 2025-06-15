@@ -1141,7 +1141,7 @@ int process_core_array_result(CommandResult *result, void *output)
     }
 
     return command_response_to_zval(result->response, return_value,
-                                    COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+                                    COMMAND_RESPONSE_NOT_ASSOSIATIVE, true);
 }
 
 /**
