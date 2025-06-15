@@ -17,189 +17,66 @@
 #include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
+#include "valkey_glide_core_common.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
-/* Execute a TYPE command using the Valkey Glide client */
+/* Execute a TYPE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_type_command(const void *glide_client, const char *key, size_t key_len, long *result)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        return -1;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Type;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1; /* key */
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Execute the command */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        Type,      /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Get the string result first */
-    char *type_str = NULL;
-    size_t type_len = 0;
-    int ret = handle_string_response(cmd_result, &type_str, &type_len);
-
-    /* If we have a valid string response, map it to the appropriate constant */
-    if (ret == 1 && type_str != NULL)
-    {
-
-        if (strncmp(type_str, "string", 6) == 0)
-        {
-            *result = 1; /* REDIS_STRING */
-        }
-        else if (strncmp(type_str, "list", 4) == 0)
-        {
-            *result = 3; /* REDIS_LIST */
-        }
-        else if (strncmp(type_str, "set", 3) == 0)
-        {
-            *result = 2; /* REDIS_SET */
-        }
-        else if (strncmp(type_str, "zset", 4) == 0)
-        {
-            *result = 4; /* REDIS_ZSET */
-        }
-        else if (strncmp(type_str, "hash", 4) == 0)
-        {
-            *result = 5; /* REDIS_HASH */
-        }
-        else if (strncmp(type_str, "stream", 6) == 0)
-        {
-            *result = 6; /* REDIS_STREAM */
-        }
-        else if (strncmp(type_str, "none", 4) == 0)
-        {
-            *result = 0; /* REDIS_NOT_FOUND */
-        }
-        else
-        {
-            /* Unknown type, default to NOT_FOUND */
-            *result = 0;
-        }
-
-        /* Free the string response */
-        if (type_str)
-        {
-            efree(type_str);
-        }
-
-        return 1; /* Success */
-    }
-    else if (ret == 0)
-    {
-        /* Key doesn't exist */
-        *result = 0; /* REDIS_NOT_FOUND */
-        return 1;
-    }
-
-    /* Error occurred */
-    return ret;
+    return execute_core_command(&args, result, process_core_type_result);
 }
 
-/* Execute an APPEND command using the Valkey Glide client */
+/* Execute an APPEND command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_append_command(const void *glide_client, const char *key, size_t key_len, const char *value, size_t value_len, long *output_value)
 {
-    /* Check if client, key, and value are valid */
-    if (!glide_client || !key || !value)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Append;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 2; /* key + value */
-    uintptr_t args[2];
-    unsigned long args_len[2];
+    /* Add value argument */
+    args.args[0].type = CORE_ARG_TYPE_STRING;
+    args.args[0].data.string_arg.value = value;
+    args.args[0].data.string_arg.len = value_len;
+    args.arg_count = 1;
 
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Second argument: value */
-    args[1] = (uintptr_t)value;
-    args_len[1] = value_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Append,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
-/* Execute a GETRANGE command using the Valkey Glide client */
+/* Execute a GETRANGE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_getrange_command(const void *glide_client, const char *key, size_t key_len, long start, long end, char **result, size_t *result_len)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = GetRange;
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Add start and end arguments */
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = start;
+    args.args[1].type = CORE_ARG_TYPE_LONG;
+    args.args[1].data.long_arg.value = end;
+    args.arg_count = 2;
+
+    /* Use string result processor */
+    struct
     {
-        return -1;
-    }
+        char **result;
+        size_t *result_len;
+    } output = {result, result_len};
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 3; /* key + start + end */
-    uintptr_t args[3];
-    unsigned long args_len[3];
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Second argument: start */
-    size_t start_len;
-    char *start_str = long_to_string(start, &start_len);
-    if (!start_str)
-    {
-        return -1;
-    }
-    args[1] = (uintptr_t)start_str;
-    args_len[1] = start_len;
-
-    /* Third argument: end */
-    size_t end_len;
-    char *end_str = long_to_string(end, &end_len);
-    if (!end_str)
-    {
-        efree(start_str);
-        return -1;
-    }
-    args[2] = (uintptr_t)end_str;
-    args_len[2] = end_len;
-
-    /* Execute the command */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        GetRange,  /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument strings */
-    efree(start_str);
-    efree(end_str);
-
-    /* Use the generic handler to process the result */
-    return handle_string_response(cmd_result, result, result_len);
+    return execute_core_command(&args, &output, process_core_string_result);
 }
 
 /* Helper function to build SORT command arguments */

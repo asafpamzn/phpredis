@@ -17,6 +17,7 @@
 #include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
+#include "valkey_glide_core_common.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>
@@ -1147,57 +1148,18 @@ int execute_touch_command(const void *glide_client, zval *keys, int keys_count, 
     return handle_int_response(result, output_value);
 }
 
-/* Execute an UNLINK command using the Valkey Glide client */
+/* Execute an UNLINK command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_unlink_command(const void *glide_client, zval *keys, int keys_count, long *output_value)
 {
-    /* Check if client and keys are valid */
-    if (!glide_client || !keys || keys_count <= 0 || !output_value)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Unlink;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = keys_count;
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    /* Set up array argument for keys */
+    args.args[0].type = CORE_ARG_TYPE_ARRAY;
+    args.args[0].data.array_arg.array = keys;
+    args.args[0].data.array_arg.count = keys_count;
+    args.arg_count = 1;
 
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Add keys as arguments */
-    int i;
-    for (i = 0; i < keys_count; i++)
-    {
-        zval *key = &keys[i];
-        if (Z_TYPE_P(key) != IS_STRING)
-        {
-            efree(args);
-            efree(args_len);
-            return 0;
-        }
-        args[i] = (uintptr_t)Z_STRVAL_P(key);
-        args_len[i] = Z_STRLEN_P(key);
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Unlink,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }

@@ -221,6 +221,9 @@ int process_core_double_result(CommandResult *result, void *output);
 /* Null-or-value result processor */
 int process_core_null_or_value_result(CommandResult *result, void *output);
 
+/* Core type result processor */
+int process_core_type_result(CommandResult *result, void *output);
+
 /* ====================================================================
  * MEMORY MANAGEMENT UTILITIES
  * ==================================================================== */

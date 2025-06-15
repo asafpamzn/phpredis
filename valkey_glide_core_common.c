@@ -1180,6 +1180,69 @@ int process_core_null_or_value_result(CommandResult *result, void *output)
     return process_core_string_result(result, output);
 }
 
+/**
+ * Process TYPE command result (maps Redis type strings to PHP constants)
+ */
+int process_core_type_result(CommandResult *result, void *output)
+{
+    long *type_code = (long *)output;
+
+    if (!result || !result->response || !type_code)
+    {
+        return -1;
+    }
+
+    if (result->response->response_type == String && result->response->string_value)
+    {
+        char *type_str = result->response->string_value;
+
+        /* Map Redis type strings to PHP constants */
+        if (strncmp(type_str, "string", 6) == 0)
+        {
+            *type_code = 1; /* REDIS_STRING */
+        }
+        else if (strncmp(type_str, "list", 4) == 0)
+        {
+            *type_code = 3; /* REDIS_LIST */
+        }
+        else if (strncmp(type_str, "set", 3) == 0)
+        {
+            *type_code = 2; /* REDIS_SET */
+        }
+        else if (strncmp(type_str, "zset", 4) == 0)
+        {
+            *type_code = 4; /* REDIS_ZSET */
+        }
+        else if (strncmp(type_str, "hash", 4) == 0)
+        {
+            *type_code = 5; /* REDIS_HASH */
+        }
+        else if (strncmp(type_str, "stream", 6) == 0)
+        {
+            *type_code = 6; /* REDIS_STREAM */
+        }
+        else if (strncmp(type_str, "none", 4) == 0)
+        {
+            *type_code = 0; /* REDIS_NOT_FOUND */
+        }
+        else
+        {
+            /* Unknown type, default to NOT_FOUND */
+            *type_code = 0;
+        }
+
+        return 1; /* Success */
+    }
+    else if (result->response->response_type == Null)
+    {
+        /* Key doesn't exist */
+        *type_code = 0; /* REDIS_NOT_FOUND */
+        return 1;
+    }
+
+    return -1; /* Error */
+}
+
 /* ====================================================================
  * MEMORY MANAGEMENT UTILITIES
  * ==================================================================== */
