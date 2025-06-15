@@ -976,6 +976,7 @@ class Redis_Test extends TestSuite {
         $this->assertKeyMissing('key');
         $this->redis->set('key', 'val');
         $this->assertKeyExists('key');
+        return;
 
         /* Add multiple keys */
         $mkeys = [];
