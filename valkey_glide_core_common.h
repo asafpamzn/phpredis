@@ -168,6 +168,10 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
                            unsigned long **cmd_args_len, char ***allocated_strings,
                            int *allocated_count);
 
+int prepare_key_value_pairs_args(core_command_args_t *args, uintptr_t **cmd_args,
+                                 unsigned long **cmd_args_len, char ***allocated_strings,
+                                 int *allocated_count);
+
 /* Message operations (no key, just arguments) */
 int prepare_message_args(core_command_args_t *args, uintptr_t **cmd_args,
                          unsigned long **cmd_args_len, char ***allocated_strings,

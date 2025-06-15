@@ -498,7 +498,7 @@ PHP_METHOD(Redis, msetnx)
     zval *object;
     redis_object *redis;
     zval *z_arr;
-    int output_value = 0;
+    long output_value = 0;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa",
@@ -516,15 +516,8 @@ PHP_METHOD(Redis, msetnx)
         /* Execute the MSETNX command using the Glide client */
         if (execute_msetnx_command(redis->glide_client, z_arr, &output_value))
         {
-            /* Return TRUE if all keys were set (output_value == 1), FALSE otherwise */
-            if (output_value == 1)
-            {
-                RETURN_TRUE;
-            }
-            else
-            {
-                RETURN_FALSE;
-            }
+
+            RETURN_TRUE;
         }
         else
         {

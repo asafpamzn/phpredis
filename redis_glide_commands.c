@@ -17,6 +17,7 @@
 #include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
+#include "valkey_glide_core_common.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>
@@ -36,404 +37,38 @@ int execute_setOption_command(const void *glide_client, zend_long option, zval *
     return 1;
 }
 
-/* Execute an MSET command using the Valkey Glide client */
+/* Execute an MSET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_mset_command(const void *glide_client, zval *arr)
 {
-    /* Check if client and array are valid */
-    if (!glide_client || !arr || Z_TYPE_P(arr) != IS_ARRAY)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = MSet;
 
-    /* Get the hash table from the array */
-    HashTable *ht = Z_ARRVAL_P(arr);
-    int key_count = zend_hash_num_elements(ht);
+    /* Set up array argument for key-value pairs */
+    args.args[0].type = CORE_ARG_TYPE_ARRAY;
+    args.args[0].data.array_arg.array = arr;
+    args.args[0].data.array_arg.count = zend_hash_num_elements(Z_ARRVAL_P(arr));
+    args.arg_count = 1;
 
-    if (key_count == 0)
-    {
-        return 0;
-    }
-
-    /* Prepare command arguments - each key-value pair requires 2 arguments */
-    unsigned long arg_count = key_count * 2;
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Track allocated strings that need to be freed after command execution */
-    char **allocated_strings = (char **)ecalloc(arg_count, sizeof(char *));
-    int allocated_count = 0;
-
-    if (!allocated_strings)
-    {
-        efree(args);
-        efree(args_len);
-        return 0;
-    }
-
-    /* Add keys and values as arguments */
-    zval *data;
-    zend_string *key;
-    zend_ulong num_key;
-    int arg_idx = 0;
-
-    ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, key, data)
-    {
-        if (!key)
-        {
-            /* Not a string key - convert numeric key to string */
-            size_t key_len;
-            char *key_str = long_to_string((long)num_key, &key_len);
-            if (!key_str)
-            {
-                /* Free any previously allocated strings */
-                int i;
-                for (i = 0; i < allocated_count; i++)
-                {
-                    efree(allocated_strings[i]);
-                }
-                efree(allocated_strings);
-                efree(args);
-                efree(args_len);
-                return 0;
-            }
-
-            /* Add key */
-            args[arg_idx] = (uintptr_t)key_str;
-            args_len[arg_idx] = key_len;
-
-            /* Track this allocated string */
-            allocated_strings[allocated_count++] = key_str;
-
-            arg_idx++;
-
-            /* Add value */
-            if (Z_TYPE_P(data) == IS_STRING)
-            {
-                args[arg_idx] = (uintptr_t)Z_STRVAL_P(data);
-                args_len[arg_idx] = Z_STRLEN_P(data);
-                arg_idx++;
-            }
-            else
-            {
-                /* Convert non-string value to string */
-                zval copy;
-                size_t value_len;
-                char *value_str = NULL;
-
-                /* Make a copy of the zval as a string */
-                ZVAL_COPY(&copy, data);
-                convert_to_string(&copy);
-
-                /* Add value */
-                args[arg_idx] = (uintptr_t)Z_STRVAL(copy);
-                args_len[arg_idx] = Z_STRLEN(copy);
-                arg_idx++;
-
-                /* We will free this when we free the arguments */
-                zval_dtor(&copy);
-            }
-        }
-        else
-        {
-            /* Add key */
-            args[arg_idx] = (uintptr_t)ZSTR_VAL(key);
-            args_len[arg_idx] = ZSTR_LEN(key);
-            arg_idx++;
-
-            /* Add value */
-            if (Z_TYPE_P(data) == IS_STRING)
-            {
-                args[arg_idx] = (uintptr_t)Z_STRVAL_P(data);
-                args_len[arg_idx] = Z_STRLEN_P(data);
-                arg_idx++;
-            }
-            else
-            {
-                /* Convert non-string value to string */
-                zval copy;
-                size_t value_len;
-                char *value_str = NULL;
-
-                /* Make a copy of the zval as a string */
-                ZVAL_COPY(&copy, data);
-                convert_to_string(&copy);
-
-                /* Add value */
-                args[arg_idx] = (uintptr_t)Z_STRVAL(copy);
-                args_len[arg_idx] = Z_STRLEN(copy);
-                arg_idx++;
-
-                /* We will free this when we free the arguments */
-                zval_dtor(&copy);
-            }
-        }
-    }
-    ZEND_HASH_FOREACH_END();
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        MSet,      /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free all allocated key strings */
-    int i;
-    for (i = 0; i < allocated_count; i++)
-    {
-        efree(allocated_strings[i]);
-    }
-    efree(allocated_strings);
-
-    /* Free the allocated arguments */
-    efree(args);
-    efree(args_len);
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing MSET command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Success is indicated by an OK response */
-    int success = 0;
-    if (result->response && result->response->response_type == Ok)
-    {
-        success = 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return success;
+    return execute_core_command(&args, NULL, process_core_bool_result);
 }
 
-/* Execute an MSETNX command using the Valkey Glide client */
-int execute_msetnx_command(const void *glide_client, zval *arr, int *output_value)
+/* Execute an MSETNX command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
+int execute_msetnx_command(const void *glide_client, zval *arr, long *output_value)
 {
-    /* Check if client and array are valid */
-    if (!glide_client || !arr || Z_TYPE_P(arr) != IS_ARRAY || !output_value)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = MSetNX;
 
-    /* Get the hash table from the array */
-    HashTable *ht = Z_ARRVAL_P(arr);
-    int key_count = zend_hash_num_elements(ht);
+    /* Set up array argument for key-value pairs */
+    args.args[0].type = CORE_ARG_TYPE_ARRAY;
+    args.args[0].data.array_arg.array = arr;
+    args.args[0].data.array_arg.count = zend_hash_num_elements(Z_ARRVAL_P(arr));
+    args.arg_count = 1;
 
-    if (key_count == 0)
-    {
-        return 0;
-    }
+    /* Convert output to long for compatibility */
 
-    /* Prepare command arguments - each key-value pair requires 2 arguments */
-    unsigned long arg_count = key_count * 2;
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    int result = execute_core_command(&args, output_value, process_core_bool_result);
 
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Track allocated strings that need to be freed after command execution */
-    char **allocated_strings = (char **)ecalloc(arg_count, sizeof(char *));
-    int allocated_count = 0;
-
-    if (!allocated_strings)
-    {
-        efree(args);
-        efree(args_len);
-        return 0;
-    }
-
-    /* Add keys and values as arguments */
-    zval *data;
-    zend_string *key;
-    zend_ulong num_key;
-    int arg_idx = 0;
-
-    ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, key, data)
-    {
-        if (!key)
-        {
-            /* Not a string key - convert numeric key to string */
-            size_t key_len;
-            char *key_str = long_to_string((long)num_key, &key_len);
-            if (!key_str)
-            {
-                /* Free any previously allocated strings */
-                int i;
-                for (i = 0; i < allocated_count; i++)
-                {
-                    efree(allocated_strings[i]);
-                }
-                efree(allocated_strings);
-                efree(args);
-                efree(args_len);
-                return 0;
-            }
-
-            /* Add key */
-            args[arg_idx] = (uintptr_t)key_str;
-            args_len[arg_idx] = key_len;
-
-            /* Track this allocated string */
-            allocated_strings[allocated_count++] = key_str;
-
-            arg_idx++;
-
-            /* Add value */
-            if (Z_TYPE_P(data) == IS_STRING)
-            {
-                args[arg_idx] = (uintptr_t)Z_STRVAL_P(data);
-                args_len[arg_idx] = Z_STRLEN_P(data);
-                arg_idx++;
-            }
-            else
-            {
-                /* Convert non-string value to string */
-                zval copy;
-                size_t value_len;
-                char *value_str = NULL;
-
-                /* Make a copy of the zval as a string */
-                ZVAL_COPY(&copy, data);
-                convert_to_string(&copy);
-
-                /* Add value */
-                args[arg_idx] = (uintptr_t)Z_STRVAL(copy);
-                args_len[arg_idx] = Z_STRLEN(copy);
-                arg_idx++;
-
-                /* We will free this when we free the arguments */
-                zval_dtor(&copy);
-            }
-        }
-        else
-        {
-            /* Add key */
-            args[arg_idx] = (uintptr_t)ZSTR_VAL(key);
-            args_len[arg_idx] = ZSTR_LEN(key);
-            arg_idx++;
-
-            /* Add value */
-            if (Z_TYPE_P(data) == IS_STRING)
-            {
-                args[arg_idx] = (uintptr_t)Z_STRVAL_P(data);
-                args_len[arg_idx] = Z_STRLEN_P(data);
-                arg_idx++;
-            }
-            else
-            {
-                /* Convert non-string value to string */
-                zval copy;
-                size_t value_len;
-                char *value_str = NULL;
-
-                /* Make a copy of the zval as a string */
-                ZVAL_COPY(&copy, data);
-                convert_to_string(&copy);
-
-                /* Add value */
-                args[arg_idx] = (uintptr_t)Z_STRVAL(copy);
-                args_len[arg_idx] = Z_STRLEN(copy);
-                arg_idx++;
-
-                /* We will free this when we free the arguments */
-                zval_dtor(&copy);
-            }
-        }
-    }
-    ZEND_HASH_FOREACH_END();
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        MSetNX,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free all allocated key strings */
-    int i;
-    for (i = 0; i < allocated_count; i++)
-    {
-        efree(allocated_strings[i]);
-    }
-    efree(allocated_strings);
-
-    /* Free the allocated arguments */
-    efree(args);
-    efree(args_len);
-
-    /* Check if the command was successful */
-    int ret = 0;
-
-    if (!result)
-    {
-        return 0; /* Failed to execute command */
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing MSETNX command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Process the result based on its type */
-    if (result->response)
-    {
-        switch (result->response->response_type)
-        {
-        case Int:
-            /* Handle integer response */
-            *output_value = (int)result->response->int_value;
-            ret = 1;
-            break;
-
-        case Bool:
-            /* Handle boolean response */
-            *output_value = result->response->bool_value ? 1 : 0;
-            ret = 1;
-            break;
-
-        default:
-            /* Unexpected response type */
-            printf("Unexpected response type for MSETNX command: %d\n", result->response->response_type);
-            ret = 0;
-            break;
-        }
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret;
+    return result;
 }

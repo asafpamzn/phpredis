@@ -544,31 +544,6 @@ int execute_info_sections_command(const void *glide_client, zval *sections, int 
     return handle_string_response(cmd_result, result, result_len);
 }
 
-/* Execute a GETSET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_getset_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, char **result, size_t *result_len)
-{
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = GetSet;
-    args.key = key;
-    args.key_len = key_len;
-
-    /* Add value argument */
-    args.args[0].type = CORE_ARG_TYPE_STRING;
-    args.args[0].data.string_arg.value = val;
-    args.args[0].data.string_arg.len = val_len;
-    args.arg_count = 1;
-
-    /* Use string result processor */
-    struct
-    {
-        char **result;
-        size_t *result_len;
-    } output = {result, result_len};
-
-    return execute_core_command(&args, &output, process_core_string_result);
-}
-
 /* Execute a GET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_get_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len)
 {
@@ -840,35 +815,16 @@ static void process_sorted_set_elements(struct CommandResponse *elements_resp, z
     }
 }
 
-/* Execute a TTL command using the Valkey Glide client */
+/* Execute a TTL command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_ttl_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = TTL;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1;
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        TTL,       /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
 
 /* Execute a single-key DEL command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
@@ -884,33 +840,14 @@ int execute_del_single_key(const void *glide_client, const char *key, size_t key
     return execute_core_command(&args, output_value, process_core_int_result);
 }
 
-/* Execute a PTTL command using the Valkey Glide client */
+/* Execute a PTTL command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_pttl_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = PTTL;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1;
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        PTTL,      /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }

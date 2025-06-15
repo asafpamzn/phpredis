@@ -2423,7 +2423,7 @@ class Redis_Test extends TestSuite {
     public function testMsetNX() {
         $this->redis->del('x', 'y', 'z');    // remove x y z
         $this->assertTrue($this->redis->msetnx(['x' => 'a', 'y' => 'b', 'z' => 'c']));    // set x y z
-
+        
         $this->assertEquals(['a', 'b', 'c'], $this->redis->mget(['x', 'y', 'z']));    // check x y z
 
         $this->redis->del('x');  // delete just x

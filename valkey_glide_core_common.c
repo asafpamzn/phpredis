@@ -64,8 +64,10 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
     debug_print_command_result(result);
 
     /* Process result */
+
     if (result)
     {
+
         if (!result->command_error && result->response)
         {
             res = processor(result, result_ptr);
@@ -108,8 +110,16 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case ExpireTime:
     case PExpireTime:
     case Persist:
-
         return prepare_key_only_args(args, cmd_args, cmd_args_len);
+
+    /* Pattern-based operations */
+    case Keys:
+        return prepare_message_args(args, cmd_args, cmd_args_len,
+                                    allocated_strings, allocated_count);
+
+    /* Zero-argument operations */
+    case UnWatch:
+        return prepare_zero_args(args, cmd_args, cmd_args_len);
 
     /* Key-value operations */
     case Set:
@@ -151,6 +161,7 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case Exists:
     case Touch:
     case MGet:
+    case Watch:
         return prepare_multi_key_args(args, cmd_args, cmd_args_len);
 
     /* Bit operations */
@@ -180,6 +191,12 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case Echo:
         return prepare_message_args(args, cmd_args, cmd_args_len,
                                     allocated_strings, allocated_count);
+
+    /* Key-value pair operations */
+    case MSet:
+    case MSetNX:
+        return prepare_key_value_pairs_args(args, cmd_args, cmd_args_len,
+                                            allocated_strings, allocated_count);
 
     default:
         return 0;
@@ -584,6 +601,97 @@ int prepare_message_args(core_command_args_t *args, uintptr_t **cmd_args,
 }
 
 /**
+ * Prepare arguments for key-value pairs operations (MSET, MSETNX)
+ */
+int prepare_key_value_pairs_args(core_command_args_t *args, uintptr_t **cmd_args,
+                                 unsigned long **cmd_args_len, char ***allocated_strings,
+                                 int *allocated_count)
+{
+    if (args->arg_count == 0 || args->args[0].type != CORE_ARG_TYPE_ARRAY)
+    {
+        return 0;
+    }
+
+    zval *arr = args->args[0].data.array_arg.array;
+    if (Z_TYPE_P(arr) != IS_ARRAY)
+    {
+        return 0;
+    }
+
+    HashTable *ht = Z_ARRVAL_P(arr);
+    int key_count = zend_hash_num_elements(ht);
+
+    if (key_count == 0)
+    {
+        return 0;
+    }
+
+    /* Each key-value pair requires 2 arguments */
+    int total_args = key_count * 2;
+
+    if (!allocate_core_arg_arrays(total_args, cmd_args, cmd_args_len))
+    {
+        return 0;
+    }
+
+    /* Initialize string tracking */
+    *allocated_strings = create_string_tracker(total_args);
+    *allocated_count = 0;
+
+    int arg_idx = 0;
+    zval *data;
+    zend_string *key;
+    zend_ulong num_key;
+
+    ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, key, data)
+    {
+        /* Add key */
+        if (!key)
+        {
+            /* Numeric key - convert to string */
+            size_t key_len;
+            char *key_str = core_long_to_string((long)num_key, &key_len);
+            if (key_str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)key_str;
+                (*cmd_args_len)[arg_idx] = key_len;
+                add_tracked_string(*allocated_strings, allocated_count, key_str);
+                arg_idx++;
+            }
+        }
+        else
+        {
+            /* String key */
+            (*cmd_args)[arg_idx] = (uintptr_t)ZSTR_VAL(key);
+            (*cmd_args_len)[arg_idx] = ZSTR_LEN(key);
+            arg_idx++;
+        }
+
+        /* Add value */
+        if (Z_TYPE_P(data) == IS_STRING)
+        {
+            (*cmd_args)[arg_idx] = (uintptr_t)Z_STRVAL_P(data);
+            (*cmd_args_len)[arg_idx] = Z_STRLEN_P(data);
+            arg_idx++;
+        }
+        else
+        {
+            /* Convert non-string value to string using safe method */
+            zend_string *str = zval_get_string(data);
+            if (str)
+            {
+                (*cmd_args)[arg_idx] = (uintptr_t)ZSTR_VAL(str);
+                (*cmd_args_len)[arg_idx] = ZSTR_LEN(str);
+                arg_idx++;
+            }
+        }
+    }
+    ZEND_HASH_FOREACH_END();
+
+    return arg_idx;
+}
+
+/**
  * Prepare arguments for multi-key operations
  */
 int prepare_multi_key_args(core_command_args_t *args, uintptr_t **cmd_args,
@@ -914,6 +1022,7 @@ int process_core_int_result(CommandResult *result, void *output)
     if (result->response->response_type == Int)
     {
         *output_value = result->response->int_value;
+
         return 1;
     }
 
