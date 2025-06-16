@@ -17,6 +17,7 @@
 #include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
+#include "valkey_glide_core_common.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>
@@ -232,305 +233,53 @@ int execute_hscan_command(const void *glide_client, const char *key, size_t key_
     return status;
 }
 
-/* Execute a PFADD command using the Valkey Glide client */
+/* Execute a PFADD command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_pfadd_command(const void *glide_client, const char *key, size_t key_len,
                           zval *elements, int elements_count, int *output_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key || !elements || elements_count <= 0 || !output_value)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = PfAdd;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Calculate the number of arguments */
-    unsigned long arg_count = 1 + elements_count; /* key + elements */
+    /* Add elements array argument */
+    args.args[0].type = CORE_ARG_TYPE_ARRAY;
+    args.args[0].data.array_arg.array = elements;
+    args.args[0].data.array_arg.count = elements_count;
+    args.arg_count = 1;
 
-    /* Allocate argument arrays */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Add elements */
-    HashTable *ht = Z_ARRVAL_P(elements);
-    zval *data;
-    zend_ulong num_idx;
-    zend_string *str_key;
-    int arg_idx = 1;
-
-    /* Keep track of allocated strings for cleanup */
-    char **allocated = (char **)emalloc(elements_count * sizeof(char *));
-    int allocated_idx = 0;
-
-    ZEND_HASH_FOREACH_KEY_VAL(ht, num_idx, str_key, data)
-    {
-        if (arg_idx >= arg_count)
-            break;
-
-        /* Convert to string if needed */
-        if (Z_TYPE_P(data) == IS_STRING)
-        {
-            args[arg_idx] = (uintptr_t)Z_STRVAL_P(data);
-            args_len[arg_idx] = Z_STRLEN_P(data);
-        }
-        else
-        {
-            /* Convert non-string types to string */
-            zval copy;
-            size_t str_len;
-            char *str;
-
-            ZVAL_DUP(&copy, data);
-            convert_to_string(&copy);
-
-            str_len = Z_STRLEN(copy);
-            str = emalloc(str_len + 1);
-            memcpy(str, Z_STRVAL(copy), str_len);
-            str[str_len] = '\0';
-
-            args[arg_idx] = (uintptr_t)str;
-            args_len[arg_idx] = str_len;
-
-            /* Track allocated string for cleanup */
-            allocated[allocated_idx++] = str;
-
-            zval_dtor(&copy);
-        }
-
-        arg_idx++;
-    }
-    ZEND_HASH_FOREACH_END();
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        PfAdd,     /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free any allocated strings */
-    for (int i = 0; i < allocated_idx; i++)
-    {
-        efree(allocated[i]);
-    }
-    efree(allocated);
-
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Process the result */
-    int status = 0;
-    long result_value = 0;
-
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
-            return 0;
-        }
-
-        if (result->response && result->response->response_type == Int)
-        {
-            /* Success */
-            result_value = result->response->int_value;
-            *output_value = (int)result_value;
-            status = 1;
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    long result;
+    int success = execute_core_command(&args, &result, process_core_int_result);
+    if (success)
+        *output_value = (int)result;
+    return success;
 }
 
-/* Execute a PFCOUNT command using the Valkey Glide client */
+/* Execute a PFCOUNT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_pfcount_command(const void *glide_client, zval *keys, int keys_count, long *output_value)
 {
-    /* Check if client and keys are valid */
-    if (!glide_client || !keys || keys_count <= 0 || !output_value)
-    {
-        return 0;
-    }
-
-    /* Prepare command arguments */
-    unsigned long arg_count = keys_count;
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Add keys as arguments */
-    int i;
-    for (i = 0; i < keys_count; i++)
-    {
-        zval *key = &keys[i];
-        if (Z_TYPE_P(key) != IS_STRING)
-        {
-            efree(args);
-            efree(args_len);
-            return 0;
-        }
-        args[i] = (uintptr_t)Z_STRVAL_P(key);
-        args_len[i] = Z_STRLEN_P(key);
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        PfCount,   /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    /* Use the existing multi-key handler that properly handles both single strings and arrays */
+    return execute_multi_key_command(glide_client, PfCount, keys, keys_count, output_value);
 }
 
-/* Execute a PFMERGE command using the Valkey Glide client */
+/* Execute a PFMERGE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_pfmerge_command(const void *glide_client, const char *dst, size_t dst_len,
                             zval *keys, int keys_count)
 {
-    /* Check if client, destination and keys are valid */
-    if (!glide_client || !dst || !keys || keys_count <= 0)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = PfMerge;
+    args.key = dst; /* Destination key */
+    args.key_len = dst_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1 + keys_count; /* destination + source keys */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    /* Add source keys array */
+    args.args[0].type = CORE_ARG_TYPE_ARRAY;
+    args.args[0].data.array_arg.array = keys;
+    args.args[0].data.array_arg.count = keys_count;
+    args.arg_count = 1;
 
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* First argument: destination key */
-    args[0] = (uintptr_t)dst;
-    args_len[0] = dst_len;
-
-    /* Add source keys */
-    HashTable *ht = Z_ARRVAL_P(keys);
-    zval *data;
-    zend_ulong num_idx;
-    zend_string *str_key;
-    int arg_idx = 1;
-
-    /* Keep track of allocated strings for cleanup */
-    char **allocated = (char **)emalloc(keys_count * sizeof(char *));
-    int allocated_idx = 0;
-
-    ZEND_HASH_FOREACH_KEY_VAL(ht, num_idx, str_key, data)
-    {
-        if (arg_idx >= arg_count)
-            break;
-
-        /* Convert to string if needed */
-        if (Z_TYPE_P(data) == IS_STRING)
-        {
-            args[arg_idx] = (uintptr_t)Z_STRVAL_P(data);
-            args_len[arg_idx] = Z_STRLEN_P(data);
-        }
-        else
-        {
-            /* Convert non-string types to string */
-            zval copy;
-            size_t str_len;
-            char *str;
-
-            ZVAL_DUP(&copy, data);
-            convert_to_string(&copy);
-
-            str_len = Z_STRLEN(copy);
-            str = emalloc(str_len + 1);
-            memcpy(str, Z_STRVAL(copy), str_len);
-            str[str_len] = '\0';
-
-            args[arg_idx] = (uintptr_t)str;
-            args_len[arg_idx] = str_len;
-
-            /* Track allocated string for cleanup */
-            allocated[allocated_idx++] = str;
-
-            zval_dtor(&copy);
-        }
-
-        arg_idx++;
-    }
-    ZEND_HASH_FOREACH_END();
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        PfMerge,   /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free any allocated strings */
-    for (int i = 0; i < allocated_idx; i++)
-    {
-        efree(allocated[i]);
-    }
-    efree(allocated);
-
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Check the result */
-    int status = 0;
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
-            return 0;
-        }
-
-        if (result->response && result->response->response_type == Ok)
-        {
-            /* Success */
-            status = 1;
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    return execute_core_command(&args, NULL, process_core_bool_result);
 }
 
 /* Execute getTimeout command using the Valkey Glide client */

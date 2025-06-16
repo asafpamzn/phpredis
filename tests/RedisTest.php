@@ -5617,9 +5617,10 @@ class Redis_Test extends TestSuite {
 
                     // Add to our cardinality set, and confirm we got a valid response
                     $this->assertGT(0, $this->redis->pfadd($key, $mems));
-
+                    
                     // Grab estimated cardinality
                     $card = $this->redis->pfcount($key);
+                 
                     $this->assertIsInt($card);
 
                     // Count should be close

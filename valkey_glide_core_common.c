@@ -170,7 +170,14 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case Touch:
     case MGet:
     case Watch:
+    case PfCount:
         return prepare_multi_key_args(args, cmd_args, cmd_args_len);
+
+    /* HyperLogLog operations */
+    case PfAdd:
+    case PfMerge:
+        return prepare_key_value_args(args, cmd_args, cmd_args_len,
+                                      allocated_strings, allocated_count);
 
     /* Bit operations */
     case BitCount:
