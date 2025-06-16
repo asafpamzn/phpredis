@@ -29,6 +29,7 @@
 #include "redis_glide.h"
 #include "valkey_glide_z_common.h"
 #include "valkey_glide_list_common.h"
+#include "valkey_glide_commands_common.h"
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
@@ -73,294 +74,32 @@ extern zend_class_entry *redis_exception_ce;
 #endif
 
 /* {{{ proto string Redis::echo(string msg) */
-PHP_METHOD(Redis, echo)
-{
-    zval *object;
-    redis_object *redis;
-    char *msg = NULL;
-    size_t msg_len;
-    char *response = NULL;
-    size_t response_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
-                                     &object, redis_ce, &msg, &msg_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ECHO command using the Glide client */
-        int result = execute_echo_command(redis->glide_client, msg, msg_len, &response, &response_len);
-        /* Process the result */
-        if (result == 1 && response != NULL)
-        {
-            /* Return the echoed message */
-            RETVAL_STRINGL(response, response_len);
-            efree(response);
-            return;
-        }
-        else
-        {
-            /* Error */
-            RETURN_FALSE;
-        }
-    }
-}
+ECHO_METHOD_IMPL(Redis)
 /* }}} */
 
-PHP_METHOD(Redis, bitop)
-{
-    zval *object;
-    redis_object *redis;
-    char *op = NULL, *key = NULL;
-    size_t op_len, key_len;
-    zval *keys = NULL;
-    int keys_count = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss*",
-                                     &object, redis_ce, &op, &op_len,
-                                     &key, &key_len, &keys, &keys_count) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the BITOP command using the Glide client */
-        long result_value;
-        if (execute_bitop_command(redis->glide_client, op, op_len, key, key_len, keys, keys_count, &result_value))
-        {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-}
+BITOP_METHOD_IMPL(Redis)
 
 /* }}} */
 
 /* {{{ proto long Redis::getBit(string key, long offset) */
-PHP_METHOD(Redis, getBit)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zend_long offset;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osl",
-                                     &object, redis_ce, &key, &key_len,
-                                     &offset) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the GETBIT command using the Glide client */
-        long result_value;
-        if (execute_getbit_command(redis->glide_client, key, key_len, offset, &result_value))
-        {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-}
+GETBIT_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::setBit(string key, long offset, int value) */
-PHP_METHOD(Redis, setBit)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zend_long offset;
-    zend_bool value;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oslb",
-                                     &object, redis_ce, &key, &key_len,
-                                     &offset, &value) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the SETBIT command using the Glide client */
-        long result_value;
-        if (execute_setbit_command(redis->glide_client, key, key_len, offset, value ? 1 : 0, &result_value))
-        {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-}
+SETBIT_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::del(string key, ...) or Redis::del(array keys) */
-PHP_METHOD(Redis, del)
-{
-    zval *object;
-    redis_object *redis;
-    zval *args = NULL;
-    int argc = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O*",
-                                     &object, redis_ce, &args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-
-        /* Check if we have a single array argument */
-        if (argc == 1 && Z_TYPE(args[0]) == IS_ARRAY)
-        {
-            /* Use array elements as keys */
-            long result_value = 0;
-
-            if (execute_del_array(redis->glide_client, Z_ARRVAL(args[0]), &result_value))
-            {
-                /* Command succeeded, return the value */
-                RETURN_LONG(result_value);
-            }
-        }
-        else
-        {
-            /* Multiple arguments - use standard del command */
-            long result_value = 0;
-
-            if (execute_del_command(redis->glide_client, args, argc, &result_value))
-            {
-                /* Command succeeded, return the value */
-                RETURN_LONG(result_value);
-            }
-        }
-    }
-}
+DEL_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::bitcount(string key, [int start], [int end])
  */
-PHP_METHOD(Redis, bitcount)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zend_long start = 0, end = -1;
-    zend_bool bybit = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|llb",
-                                     &object, redis_ce, &key, &key_len,
-                                     &start, &end, &bybit) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the BITCOUNT command using the Glide client */
-        long result_value;
-        if (execute_bitcount_command(redis->glide_client, key, key_len, start, end, bybit, &result_value))
-        {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-}
+BITCOUNT_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto integer Redis::bitpos(string key, int bit, [int start, int end]) */
-PHP_METHOD(Redis, bitpos)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    zend_long bit, start = 0, end = -1;
-    zend_bool bybit = 0;
-    long result_value;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osl|llb",
-                                     &object, redis_ce, &key, &key_len, &bit,
-                                     &start, &end, &bybit) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the BITPOS command using the Glide client with new output parameter pattern */
-        if (execute_bitpos_command(redis->glide_client, key, key_len, bit, start, end, bybit, &result_value))
-        {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-}
+BITPOS_METHOD_IMPL(Redis)
 /* }}} */
 
 /* }}} */

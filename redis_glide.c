@@ -24,6 +24,18 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <ext/spl/spl_exceptions.h>
+#include <zend_exceptions.h>
+#include <ext/standard/info.h>
+#include <ext/hash/php_hash.h>
+
+extern zend_class_entry *redis_ce;
+extern zend_class_entry *redis_exception_ce;
+
+/* Import the string conversion functions from command_response.c */
+extern char *long_to_string(long value, size_t *len);
+extern char *double_to_string(double value, size_t *len);
+
 /* Create a connection request in protobuf format */
 static uint8_t *create_connection_request(const char *host, int port, const char *user, const char *pass, size_t *len, ClientConfig *config)
 {
@@ -226,11 +238,34 @@ static int process_ping_result(CommandResult *result, void *output)
 
 /* These functions are now defined in command_response.c */
 
-/* Execute a BITCOUNT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_bitcount_command(const void *glide_client, const char *key, size_t key_len, long start, long end, int bybit, long *output_value)
+/* Execute a BITCOUNT command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_bitcount_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long start = 0, end = -1;
+    zend_bool bybit = 0;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|llb",
+                                     &object, redis_ce, &key, &key_len,
+                                     &start, &end, &bybit) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = BitCount;
     args.key = key;
     args.key_len = key_len;
@@ -241,17 +276,46 @@ int execute_bitcount_command(const void *glide_client, const char *key, size_t k
     args.options.has_range = 1;
     args.options.bybit = bybit;
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    if (execute_core_command(&args, &result_value, process_core_int_result))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
 }
 
-/* Execute a BITOP command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_bitop_command(const void *glide_client, const char *op, size_t op_len, const char *dst, size_t dst_len, zval *keys, int keys_count, long *output_value)
+/* Execute a BITOP command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_bitop_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *op = NULL, *key = NULL;
+    size_t op_len, key_len;
+    zval *keys = NULL;
+    int keys_count = 0;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss*",
+                                     &object, redis_ce, &op, &op_len,
+                                     &key, &key_len, &keys, &keys_count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = BitOp;
-    args.key = dst; /* destination key */
-    args.key_len = dst_len;
+    args.key = key; /* destination key */
+    args.key_len = key_len;
 
     /* Add operation as first argument */
     args.args[0].type = CORE_ARG_TYPE_STRING;
@@ -267,14 +331,43 @@ int execute_bitop_command(const void *glide_client, const char *op, size_t op_le
     }
     args.arg_count = 1 + keys_count; /* operation + source keys */
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    if (execute_core_command(&args, &result_value, process_core_int_result))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
 }
 
-/* Execute a BITPOS command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_bitpos_command(const void *glide_client, const char *key, size_t key_len, long bit, long start, long end, int bybit, long *output_value)
+/* Execute a BITPOS command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_bitpos_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long bit, start = 0, end = -1;
+    zend_bool bybit = 0;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osl|llb",
+                                     &object, redis_ce, &key, &key_len, &bit,
+                                     &start, &end, &bybit) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = BitPos;
     args.key = key;
     args.key_len = key_len;
@@ -290,7 +383,13 @@ int execute_bitpos_command(const void *glide_client, const char *key, size_t key
     args.options.has_range = 1;
     args.options.bybit = bybit;
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    if (execute_core_command(&args, &result_value, process_core_int_result))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
 }
 
 /* Execute a SET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
@@ -393,11 +492,32 @@ void close_glide_client(const void *glide_client)
     close_client(glide_client);
 }
 
-/* Execute an ECHO command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_echo_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len)
+/* Execute an ECHO command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_echo_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *msg = NULL;
+    size_t msg_len;
+    char *response = NULL;
+    size_t response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &msg, &msg_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = Echo;
 
     /* Add message argument */
@@ -411,9 +531,19 @@ int execute_echo_command(const void *glide_client, const char *msg, size_t msg_l
     {
         char **result;
         size_t *result_len;
-    } output = {result, result_len};
+    } output = {&response, &response_len};
 
-    return execute_core_command(&args, &output, process_core_string_result);
+    if (execute_core_command(&args, &output, process_core_string_result))
+    {
+        if (response != NULL)
+        {
+            ZVAL_STRINGL(return_value, response, response_len);
+            efree(response);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute a PING command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
@@ -580,11 +710,33 @@ int execute_randomkey_command(const void *glide_client, char **result, size_t *r
     return execute_core_command(&args, &output, process_core_string_result);
 }
 
-/* Execute a GETBIT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_getbit_command(const void *glide_client, const char *key, size_t key_len, long offset, long *output_value)
+/* Execute a GETBIT command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_getbit_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long offset;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osl",
+                                     &object, redis_ce, &key, &key_len,
+                                     &offset) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = GetBit;
     args.key = key;
     args.key_len = key_len;
@@ -594,14 +746,43 @@ int execute_getbit_command(const void *glide_client, const char *key, size_t key
     args.args[0].data.long_arg.value = offset;
     args.arg_count = 1;
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    if (execute_core_command(&args, &result_value, process_core_int_result))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
 }
 
-/* Execute a SETBIT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_setbit_command(const void *glide_client, const char *key, size_t key_len, long offset, int value, long *output_value)
+/* Execute a SETBIT command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_setbit_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zend_long offset;
+    zend_bool value;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oslb",
+                                     &object, redis_ce, &key, &key_len,
+                                     &offset, &value) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = SetBit;
     args.key = key;
     args.key_len = key_len;
@@ -615,7 +796,13 @@ int execute_setbit_command(const void *glide_client, const char *key, size_t key
     args.args[1].data.long_arg.value = value ? 1 : 0;
     args.arg_count = 2;
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    if (execute_core_command(&args, &result_value, process_core_int_result))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
 }
 
 /* Helper function to execute del_command with arrays - MIGRATED TO CORE FRAMEWORK */
@@ -654,9 +841,42 @@ int execute_del_array(const void *glide_client, HashTable *keys_hash, long *outp
 }
 
 /* Execute a DEL command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_del_command(const void *glide_client, zval *keys, int keys_count, long *output_value)
+int execute_del_command(zval *object, int argc, zval *return_value)
 {
-    return execute_multi_key_command(glide_client, Del, keys, keys_count, output_value);
+    redis_object *redis;
+    long result_value = 0;
+    zval *keys = NULL;
+    int keys_count = 0;
+
+    if (zend_parse_method_parameters(argc, object, "O*",
+                                     &object, redis_ce, &keys, &keys_count) == FAILURE)
+    {
+        return 0;
+    }
+
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    if (keys_count == 1 && Z_TYPE(keys[0]) == IS_ARRAY)
+    {
+        if (execute_del_array(redis->glide_client, Z_ARRVAL(keys[0]), &result_value))
+        {
+            ZVAL_LONG(return_value, result_value);
+            return 1;
+        }
+    }
+    else
+    {
+        if (execute_multi_key_command(redis->glide_client, Del, keys, keys_count, &result_value))
+        {
+            ZVAL_LONG(return_value, result_value);
+            return 1;
+        }
+    }
+    return 0;
 }
 
 /* Helper function to execute unlink_command with arrays - MIGRATED TO CORE FRAMEWORK */

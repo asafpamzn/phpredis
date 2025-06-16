@@ -94,10 +94,10 @@ extern void free_command_result(CommandResult *command_result_ptr);
 /* Helper functions for Valkey Glide integration */
 extern const void *create_glide_client(ClientConfig *config);
 
-/* Bit operations */
-extern int execute_bitcount_command(const void *glide_client, const char *key, size_t key_len, long start, long end, int bybit, long *output_value);
-extern int execute_bitop_command(const void *glide_client, const char *op, size_t op_len, const char *dst, size_t dst_len, zval *keys, int keys_count, long *output_value);
-extern int execute_bitpos_command(const void *glide_client, const char *key, size_t key_len, long bit, long start, long end, int bybit, long *output_value);
+/* Bit operations - UNIFIED SIGNATURES */
+extern int execute_bitcount_command(zval *object, int argc, zval *return_value);
+extern int execute_bitop_command(zval *object, int argc, zval *return_value);
+extern int execute_bitpos_command(zval *object, int argc, zval *return_value);
 
 /* String operations */
 extern int execute_set_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, long expire, zval *opts, char **old_val, size_t *old_val_len);
@@ -115,7 +115,7 @@ extern int execute_rename_command(const void *glide_client, const char *src, siz
 extern int execute_renamenx_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len);
 
 /* Server operations */
-extern int execute_echo_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len);
+extern int execute_echo_command(zval *object, int argc, zval *return_value);
 extern int execute_ping_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len);
 extern int execute_reset_command(const void *glide_client);
 extern int execute_info_command(const void *glide_client, const char *section, size_t section_len, char **result, size_t *result_len);
@@ -130,9 +130,9 @@ int execute_decr_command(const void *glide_client, const char *key, size_t key_l
 int execute_decrby_command(const void *glide_client, const char *key, size_t key_len, long decrement, long *output_value);
 
 /* Additional operations */
-extern int execute_getbit_command(const void *glide_client, const char *key, size_t key_len, long offset, long *output_value);
-extern int execute_setbit_command(const void *glide_client, const char *key, size_t key_len, long offset, int value, long *output_value);
-extern int execute_del_command(const void *glide_client, zval *keys, int keys_count, long *output_value);
+extern int execute_getbit_command(zval *object, int argc, zval *return_value);
+extern int execute_setbit_command(zval *object, int argc, zval *return_value);
+int execute_del_command(zval *object, int argc, zval *return_value);
 int execute_del_array(const void *glide_client, HashTable *keys_hash, long *output_value);
 int execute_unlink_array(const void *glide_client, HashTable *keys_hash, long *output_value);
 extern int execute_strlen_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
