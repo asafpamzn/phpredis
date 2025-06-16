@@ -17,194 +17,64 @@
 #include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
+#include "valkey_glide_core_common.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
-/* Execute a FLUSHDB command using the Valkey Glide client */
+/* Execute a FLUSHDB command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_flushdb_command(const void *glide_client, int async)
 {
-    /* Check if client is valid */
-    if (!glide_client)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = FlushDB;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = async ? 1 : 0; /* Optional ASYNC argument */
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* Set up arguments */
     if (async)
     {
-        args[0] = (uintptr_t)"ASYNC";
-        args_len[0] = 5;
+        args.args[0].type = CORE_ARG_TYPE_STRING;
+        args.args[0].data.string_arg.value = "ASYNC";
+        args.args[0].data.string_arg.len = 5;
+        args.arg_count = 1;
     }
 
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        FlushDB,   /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Use the proper handler for OK response */
-    int status = handle_ok_response(result);
-
-    /* Convert response status to boolean */
-    return (status == 1) ? 1 : 0;
+    return execute_core_command(&args, NULL, process_core_bool_result);
 }
 
-/* Execute a FLUSHALL command using the Valkey Glide client */
+/* Execute a FLUSHALL command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_flushall_command(const void *glide_client, int async)
 {
-    /* Check if client is valid */
-    if (!glide_client)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = FlushAll;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = async ? 1 : 0; /* Optional ASYNC argument */
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* Set up arguments */
     if (async)
     {
-        args[0] = (uintptr_t)"ASYNC";
-        args_len[0] = 5;
+        args.args[0].type = CORE_ARG_TYPE_STRING;
+        args.args[0].data.string_arg.value = "ASYNC";
+        args.args[0].data.string_arg.len = 5;
+        args.arg_count = 1;
     }
 
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        FlushAll,  /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Use the proper handler for OK response */
-    int status = handle_ok_response(result);
-
-    /* Convert response status to boolean */
-    return (status == 1) ? 1 : 0;
+    return execute_core_command(&args, NULL, process_core_bool_result);
 }
 
-/* Execute a TIME command using the Valkey Glide client */
+/* Execute a TIME command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_time_command(const void *glide_client, zval *return_value)
 {
-    /* Check if client is valid */
-    if (!glide_client || !return_value)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Time;
 
-    /* No arguments for TIME command */
-    unsigned long arg_count = 0;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Time,      /* command type */
-        arg_count, /* number of arguments */
-        NULL,      /* no arguments */
-        NULL       /* no argument lengths */
-    );
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing TIME command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Process the result */
-    if (result->response && result->response->response_type == Array)
-    {
-        /* Initialize the return array */
-        array_init(return_value);
-
-        /* Redis TIME command returns array with [unix_timestamp, microseconds] */
-        if (result->response->array_value_len >= 2)
-        {
-            /* Process the timestamp */
-            if (result->response->array_value[0].response_type == String)
-            {
-                add_next_index_string(return_value, result->response->array_value[0].string_value);
-            }
-            /* Process the microseconds */
-            if (result->response->array_value[1].response_type == String)
-            {
-                add_next_index_string(return_value, result->response->array_value[1].string_value);
-            }
-        }
-
-        free_command_result(result);
-        return 1;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-    return 0;
+    return execute_core_command(&args, return_value, process_core_array_result);
 }
 
-/* Execute a ROLE command using the Valkey Glide client */
+/* Execute a ROLE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_role_command(const void *glide_client, zval *return_value)
 {
-    /* Check if client is valid */
-    if (!glide_client || !return_value)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Role;
 
-    /* No arguments for ROLE command */
-    unsigned long arg_count = 0;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Role,      /* command type */
-        arg_count, /* number of arguments */
-        NULL,      /* no arguments */
-        NULL       /* no argument lengths */
-    );
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing ROLE command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Process the result */
-    int ret_val = 0;
-    if (result->response)
-    {
-        /* Convert response to PHP array */
-        ret_val = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
-    }
-
-    /* Free the result */
-    free_command_result(result);
-    return ret_val;
+    return execute_core_command(&args, return_value, process_core_array_result);
 }

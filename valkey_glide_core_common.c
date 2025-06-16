@@ -98,6 +98,10 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     {
     /* Zero argument operations */
     case RandomKey:
+    case Discard:
+    case Exec:
+    case Time:
+    case Role:
         return prepare_zero_args(args, cmd_args, cmd_args_len);
 
     /* Single key operations */
@@ -111,6 +115,7 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case ExpireTime:
     case PExpireTime:
     case Persist:
+    case Dump:
         return prepare_key_only_args(args, cmd_args, cmd_args_len);
 
     /* Pattern-based operations */
@@ -193,6 +198,8 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     /* Message operations (no key, just arguments) */
     case Echo:
     case Wait:
+    case FlushDB:
+    case FlushAll:
         return prepare_message_args(args, cmd_args, cmd_args_len,
                                     allocated_strings, allocated_count);
 

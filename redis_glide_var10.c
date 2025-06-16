@@ -163,77 +163,24 @@ int execute_multi_command(const void *glide_client)
     return execute_core_command(&args, NULL, process_core_bool_result);
 }
 
-/* Execute a DISCARD command using the Valkey Glide client */
+/* Execute a DISCARD command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_discard_command(const void *glide_client)
 {
-    /* Check if client is valid */
-    if (!glide_client)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Discard;
 
-    /* No arguments for DISCARD */
-    unsigned long arg_count = 0;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Discard,   /* command type */
-        arg_count, /* number of arguments */
-        NULL,      /* no arguments */
-        NULL       /* no argument lengths */
-    );
-
-    /* Use the proper handler for OK response */
-    int status = handle_ok_response(result);
-
-    /* Convert response status to boolean */
-    return (status == 1) ? 1 : 0;
+    return execute_core_command(&args, NULL, process_core_bool_result);
 }
 
-/* Execute an EXEC command using the Valkey Glide client */
+/* Execute an EXEC command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_exec_command(const void *glide_client, zval *return_value)
 {
-    /* Check if client is valid */
-    if (!glide_client)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Exec;
 
-    /* No arguments for EXEC */
-    unsigned long arg_count = 0;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Exec,      /* command type */
-        arg_count, /* number of arguments */
-        NULL,      /* no arguments */
-        NULL       /* no argument lengths */
-    );
-
-    /* Handle the result directly */
-    int status = 0;
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
-            return 0;
-        }
-
-        if (result->response)
-        {
-            /* EXEC returns an array of results */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
-            free_command_result(result);
-            return status;
-        }
-        free_command_result(result);
-    }
-
-    return 0;
+    return execute_core_command(&args, return_value, process_core_array_result);
 }
 
 /* Execute an FCALL command using the Valkey Glide client */
@@ -424,36 +371,23 @@ int execute_fcall_ro_command(const void *glide_client, const char *name, size_t 
     return 0;
 }
 
-/* Execute a DUMP command using the Valkey Glide client */
+/* Execute a DUMP command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_dump_command(const void *glide_client, const char *key, size_t key_len,
                          char **output, size_t *output_len)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key || key_len <= 0)
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Dump;
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Use string result processor that handles null */
+    struct
     {
-        return -1;
-    }
-
-    /* Prepare command arguments */
-    unsigned long arg_count = 1; /* key */
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* Set up arguments */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Dump,      /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Handle string response with possible NULL result */
-    return handle_null_or_string_response(result, output, output_len);
+        char **result;
+        size_t *result_len;
+    } out = {output, output_len};
+    return execute_core_command(&args, &out, process_core_string_result);
 }
 
 /* Execute a RESTORE command using the Valkey Glide client */
