@@ -276,119 +276,18 @@ PHP_METHOD(Redis, set)
 
 /* {{{ proto boolean Redis::setex(string key, long expire, string value)
  */
-PHP_METHOD(Redis, setex)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *val = NULL;
-    size_t key_len, val_len;
-    zend_long expire;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osls",
-                                     &object, redis_ce, &key, &key_len,
-                                     &expire, &val, &val_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the SETEX command using the Glide client */
-        int result = execute_setex_command(redis->glide_client, key, key_len, expire, val, val_len);
-
-        /* Return TRUE if successful, FALSE otherwise */
-        if (result == 1)
-        {
-            RETURN_TRUE;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+SETEX_METHOD_IMPL(Redis)
+/* }}} */
 
 /* {{{ proto boolean Redis::psetex(string key, long expire, string value)
  */
-PHP_METHOD(Redis, psetex)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *val = NULL;
-    size_t key_len, val_len;
-    zend_long expire;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osls",
-                                     &object, redis_ce, &key, &key_len,
-                                     &expire, &val, &val_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the PSETEX command using the Glide client */
-        int result = execute_psetex_command(redis->glide_client, key, key_len, expire, val, val_len);
-
-        /* Return TRUE if successful, FALSE otherwise */
-        if (result == 1)
-        {
-            RETURN_TRUE;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+PSETEX_METHOD_IMPL(Redis)
+/* }}} */
 
 /* {{{ proto boolean Redis::setnx(string key, string value)
  */
-PHP_METHOD(Redis, setnx)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *val = NULL;
-    size_t key_len, val_len;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
-                                     &object, redis_ce, &key, &key_len,
-                                     &val, &val_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the SETNX command using the Glide client */
-        int result = execute_setnx_command(redis->glide_client, key, key_len, val, val_len);
-
-        /* Return TRUE if key was set (result == 1), FALSE otherwise */
-        if (result == 1)
-        {
-            RETURN_TRUE;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+SETNX_METHOD_IMPL(Redis)
+/* }}} */
 
 /* }}} */
 
@@ -505,42 +404,7 @@ PHP_METHOD(Redis, lcs)
 /* }}} */
 
 /* {{{ proto string Redis::setRange(string key, long start, string value) */
-PHP_METHOD(Redis, setRange)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *val = NULL;
-    size_t key_len, val_len;
-    zend_long offset;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osls",
-                                     &object, redis_ce, &key, &key_len,
-                                     &offset, &val, &val_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the SETRANGE command using the Glide client */
-        long result_value;
-        if (execute_setrange_command(redis->glide_client, key, key_len, offset, val, val_len, &result_value))
-        {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-}
+SETRANGE_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::strlen(string key) */

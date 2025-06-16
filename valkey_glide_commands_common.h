@@ -198,4 +198,49 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         RETURN_FALSE;                                                       \
     }
 
+/* Additional SET family macros */
+#define SETEX_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, setex)                                            \
+    {                                                                        \
+        if (execute_setex_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+#define PSETEX_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, psetex)                                            \
+    {                                                                         \
+        if (execute_psetex_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define SETNX_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, setnx)                                            \
+    {                                                                        \
+        if (execute_setnx_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+#define SETRANGE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, setRange)                                            \
+    {                                                                           \
+        if (execute_setrange_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        zval_dtor(return_value);                                                \
+        RETURN_FALSE;                                                           \
+    }
+
 #endif /* VALKEY_GLIDE_COMMANDS_COMMON_H */

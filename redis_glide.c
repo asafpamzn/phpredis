@@ -431,17 +431,67 @@ int execute_set_command(const void *glide_client, const char *key, size_t key_le
     return execute_core_command(&args, &result_data, process_set_result);
 }
 
-/* Execute a SETEX command using the Valkey Glide client */
-int execute_setex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len)
+/* Execute a SETEX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_setex_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+    zend_long expire;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osls",
+                                     &object, redis_ce, &key, &key_len,
+                                     &expire, &val, &val_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
     /* Call execute_set_command with expire in seconds (EX) and no special options */
-    /* No need to pass options since execute_set_command uses EX by default when expire > 0 */
-    return execute_set_command(glide_client, key, key_len, val, val_len, expire, NULL, NULL, NULL);
+    int result = execute_set_command(redis->glide_client, key, key_len, val, val_len, expire, NULL, NULL, NULL);
+
+    if (result == 1)
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+    else
+    {
+        ZVAL_FALSE(return_value);
+        return 0;
+    }
 }
 
-/* Execute a PSETEX command using the Valkey Glide client */
-int execute_psetex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len)
+/* Execute a PSETEX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_psetex_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+    zend_long expire;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osls",
+                                     &object, redis_ce, &key, &key_len,
+                                     &expire, &val, &val_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
     /* Create options array for PX option */
     zval options;
     array_init(&options);
@@ -450,17 +500,45 @@ int execute_psetex_command(const void *glide_client, const char *key, size_t key
     add_assoc_long_ex(&options, "PX", sizeof("PX") - 1, expire);
 
     /* Call execute_set_command with the PX option */
-    int result = execute_set_command(glide_client, key, key_len, val, val_len, 0, &options, NULL, NULL);
+    int result = execute_set_command(redis->glide_client, key, key_len, val, val_len, 0, &options, NULL, NULL);
 
     /* Clean up options array */
     zval_dtor(&options);
 
-    return result;
+    if (result == 1)
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+    else
+    {
+        ZVAL_FALSE(return_value);
+        return 0;
+    }
 }
 
-/* Execute a SETNX command using the Valkey Glide client */
-int execute_setnx_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len)
+/* Execute a SETNX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_setnx_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &val, &val_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
     /* Create options array for NX option */
     zval options;
     array_init(&options);
@@ -471,12 +549,21 @@ int execute_setnx_command(const void *glide_client, const char *key, size_t key_
     add_next_index_zval(&options, &nx_option);
 
     /* Call execute_set_command with the NX option and no expiration */
-    int result = execute_set_command(glide_client, key, key_len, val, val_len, 0, &options, NULL, NULL);
+    int result = execute_set_command(redis->glide_client, key, key_len, val, val_len, 0, &options, NULL, NULL);
 
     /* Clean up options array */
     zval_dtor(&options);
 
-    return result;
+    if (result == 1)
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+    else
+    {
+        ZVAL_FALSE(return_value);
+        return 0;
+    }
 }
 
 /* Function to close a Valkey Glide client */
@@ -1190,11 +1277,33 @@ int execute_strlen_command(zval *object, int argc, zval *return_value)
     return 0;
 }
 
-/* Execute a SETRANGE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_setrange_command(const void *glide_client, const char *key, size_t key_len, long offset, const char *value, size_t value_len, long *output_value)
+/* Execute a SETRANGE command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_setrange_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+    zend_long offset;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osls",
+                                     &object, redis_ce, &key, &key_len,
+                                     &offset, &val, &val_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = SetRange;
     args.key = key;
     args.key_len = key_len;
@@ -1205,11 +1314,17 @@ int execute_setrange_command(const void *glide_client, const char *key, size_t k
 
     /* Add value argument */
     args.args[1].type = CORE_ARG_TYPE_STRING;
-    args.args[1].data.string_arg.value = value;
-    args.args[1].data.string_arg.len = value_len;
+    args.args[1].data.string_arg.value = val;
+    args.args[1].data.string_arg.len = val_len;
     args.arg_count = 2;
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    if (execute_core_command(&args, &result_value, process_core_int_result))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
 }
 
 /* Process list elements from LMPOP/BLMPOP response */

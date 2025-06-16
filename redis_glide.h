@@ -101,9 +101,9 @@ extern int execute_bitpos_command(zval *object, int argc, zval *return_value);
 
 /* String operations */
 extern int execute_set_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, long expire, zval *opts, char **old_val, size_t *old_val_len);
-extern int execute_setex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len);
-extern int execute_psetex_command(const void *glide_client, const char *key, size_t key_len, long expire, const char *val, size_t val_len);
-extern int execute_setnx_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len);
+extern int execute_setex_command(zval *object, int argc, zval *return_value);
+extern int execute_psetex_command(zval *object, int argc, zval *return_value);
+extern int execute_setnx_command(zval *object, int argc, zval *return_value);
 extern int execute_get_command(zval *object, int argc, zval *return_value);
 extern int execute_getwithmeta_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);
 extern int execute_getdel_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);
@@ -136,7 +136,7 @@ int execute_del_command(zval *object, int argc, zval *return_value);
 int execute_del_array(const void *glide_client, HashTable *keys_hash, long *output_value);
 int execute_unlink_array(const void *glide_client, HashTable *keys_hash, long *output_value);
 extern int execute_strlen_command(zval *object, int argc, zval *return_value);
-extern int execute_setrange_command(const void *glide_client, const char *key, size_t key_len, long offset, const char *value, size_t value_len, long *output_value);
+extern int execute_setrange_command(zval *object, int argc, zval *return_value);
 extern int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_len, const char *key2, size_t key2_len, zval *options, zval *result);
 
 /* Time to live operations */
