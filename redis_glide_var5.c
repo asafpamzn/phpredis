@@ -23,6 +23,9 @@
 #include <string.h>
 #include <stdio.h>
 
+extern zend_class_entry *redis_ce;
+extern zend_class_entry *redis_exception_ce;
+
 /* Execute getReadTimeout command using the Valkey Glide client */
 int execute_get_read_timeout_command(const void *glide_client, double *output_value)
 {
@@ -41,6 +44,36 @@ int execute_get_read_timeout_command(const void *glide_client, double *output_va
        return success and the default value */
 
     return 1;
+}
+
+/* Unified getReadTimeout command implementation */
+int execute_getreadtimeout_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    double timeout;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the getReadTimeout command */
+    if (execute_get_read_timeout_command(redis->glide_client, &timeout))
+    {
+        ZVAL_DOUBLE(return_value, timeout);
+        return 1;
+    }
+
+    return 0;
 }
 
 /* Execute getPersistentID command using the Valkey Glide client */

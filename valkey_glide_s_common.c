@@ -2523,3 +2523,198 @@ int execute_serverversion_command(zval *object, int argc, zval *return_value)
 
     return 0;
 }
+
+/**
+ * Execute HSCAN command with unified signature
+ */
+int execute_hscan_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL, *pattern = NULL;
+    size_t key_len, pattern_len = 0;
+    zval *z_iter;
+    zend_long count = 0;
+
+    /* Parse arguments */
+    if (zend_parse_method_parameters(argc, object, "Osz|sl",
+                                     &object, redis_ce, &key, &key_len, &z_iter,
+                                     &pattern, &pattern_len, &count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Make sure we have a valid cursor */
+    if (Z_TYPE_P(z_iter) != IS_LONG && Z_TYPE_P(z_iter) != IS_STRING)
+    {
+        php_error_docref(NULL, E_WARNING, "Cursor must be numeric or string");
+        return 0;
+    }
+
+    /* Dereference if it's a reference */
+    ZVAL_DEREF(z_iter);
+
+    /* If the cursor is a string, convert it to a long */
+    long cursor;
+    if (Z_TYPE_P(z_iter) == IS_STRING)
+    {
+        cursor = atol(Z_STRVAL_P(z_iter));
+    }
+    else
+    {
+        cursor = Z_LVAL_P(z_iter);
+    }
+
+    /* Initialize return array */
+    array_init(return_value);
+
+    /* Execute HSCAN command with the legacy implementation */
+
+    /* Execute an HSCAN command using the Valkey Glide client */
+
+    /* Check if client and key are valid */
+    if (!redis->glide_client || !key || !return_value)
+    {
+        return 0;
+    }
+
+    /* Calculate the number of arguments */
+    unsigned long arg_count = 2; /* key + cursor */
+    if (pattern && pattern_len > 0)
+        arg_count += 2; /* MATCH + pattern */
+    if (count > 0)
+        arg_count += 2; /* COUNT + count */
+
+    /* Allocate argument arrays */
+    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!args || !args_len)
+    {
+        if (args)
+            efree(args);
+        if (args_len)
+            efree(args_len);
+        return 0;
+    }
+
+    /* First argument: key */
+    args[0] = (uintptr_t)key;
+    args_len[0] = key_len;
+
+    /* Second argument: cursor (convert to string) */
+    size_t cursor_len;
+    char *cursor_str = long_to_string(cursor, &cursor_len);
+    if (!cursor_str)
+    {
+        efree(args);
+        efree(args_len);
+        return 0;
+    }
+    args[1] = (uintptr_t)cursor_str;
+    args_len[1] = cursor_len;
+
+    /* Track current argument index */
+    int arg_idx = 2;
+
+    /* Add pattern if provided */
+    if (pattern && pattern_len > 0)
+    {
+        args[arg_idx] = (uintptr_t)"MATCH";
+        args_len[arg_idx] = 5; /* strlen("MATCH") */
+        arg_idx++;
+
+        args[arg_idx] = (uintptr_t)pattern;
+        args_len[arg_idx] = pattern_len;
+        arg_idx++;
+    }
+
+    /* Add count if provided */
+    if (count > 0)
+    {
+        args[arg_idx] = (uintptr_t)"COUNT";
+        args_len[arg_idx] = 5; /* strlen("COUNT") */
+        arg_idx++;
+
+        size_t count_len;
+        char *count_str = long_to_string(count, &count_len);
+        if (!count_str)
+        {
+            efree(cursor_str);
+            efree(args);
+            efree(args_len);
+            return 0;
+        }
+        args[arg_idx] = (uintptr_t)count_str;
+        args_len[arg_idx] = count_len;
+        arg_idx++;
+    }
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        redis->glide_client,
+        HScan,     /* command type */
+        arg_count, /* number of arguments */
+        args,      /* arguments */
+        args_len   /* argument lengths */
+    );
+
+    /* Free the cursor string */
+    efree(cursor_str);
+
+    /* Free the count string if used */
+    if (count > 0)
+        efree((void *)args[arg_idx - 1]);
+
+    /* Free the argument arrays */
+    efree(args);
+    efree(args_len);
+
+    /* Process the result */
+    int status = 0;
+
+    if (result)
+    {
+        if (result->command_error)
+        {
+            /* Command failed */
+            free_command_result(result);
+            return 0;
+        }
+
+        if (result->response && result->response->response_type == Array)
+        {
+            /* Convert the nested array result to PHP array */
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+        }
+        free_command_result(result);
+    }
+
+    if (status)
+    {
+        /* The hscan_command directly sets the return_value */
+        /* We need to update the iterator value */
+        zval *z_new_cursor = zend_hash_index_find(Z_ARRVAL_P(return_value), 0);
+        if (z_new_cursor)
+        {
+            /* Update the passed-in cursor */
+            if (Z_TYPE_P(z_new_cursor) == IS_STRING)
+            {
+                ZVAL_STRINGL(z_iter, Z_STRVAL_P(z_new_cursor), Z_STRLEN_P(z_new_cursor));
+            }
+            else if (Z_TYPE_P(z_new_cursor) == IS_LONG)
+            {
+                ZVAL_LONG(z_iter, Z_LVAL_P(z_new_cursor));
+            }
+        }
+        return 1;
+    }
+
+    return 0;
+}

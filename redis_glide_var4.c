@@ -23,12 +23,69 @@
 #include <string.h>
 #include <stdio.h>
 
-/* Execute a COPY command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_copy_command(const void *glide_client, const char *src, size_t src_len,
-                         const char *dst, size_t dst_len, int replace)
+extern zend_class_entry *redis_ce;
+extern zend_class_entry *redis_exception_ce;
+
+/* Execute a PFADD command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
+
+/* Execute getTimeout command using the Valkey Glide client */
+int execute_get_timeout_command(const void *glide_client, double *output_value)
 {
+    /* Check if client is valid */
+    if (!glide_client || !output_value)
+    {
+        return 0;
+    }
+
+    /* Since this is a client configuration getter rather than a Redis command,
+       we'll use a default value as this isn't directly supported by Glide */
+    *output_value = 0.0; /* Default timeout */
+
+    /* Here we'd ideally access the Glide client's configuration, but since
+       we don't have direct access to it through the FFI interface, we just
+       return success and the default value */
+
+    return 1;
+}
+
+/* Unified COPY command implementation */
+int execute_copy_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *src = NULL, *dst = NULL;
+    size_t src_len, dst_len;
+    zend_bool replace = 0;
+    zval *z_opts = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss|a",
+                                     &object, redis_ce, &src, &src_len,
+                                     &dst, &dst_len, &z_opts) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Check for the REPLACE option if options array was passed */
+    if (z_opts && Z_TYPE_P(z_opts) == IS_ARRAY)
+    {
+        HashTable *ht = Z_ARRVAL_P(z_opts);
+        zval *replace_val;
+        replace_val = zend_hash_str_find(ht, "replace", sizeof("replace") - 1);
+        if (replace_val && Z_TYPE_P(replace_val) == IS_TRUE)
+        {
+            replace = 1;
+        }
+    }
+
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = Copy;
     args.key = src; /* Source key */
     args.key_len = src_len;
@@ -51,200 +108,179 @@ int execute_copy_command(const void *glide_client, const char *src, size_t src_l
 
     args.arg_count = arg_count;
 
-    return execute_core_command(&args, NULL, process_core_bool_result);
+    /* Execute the COPY command using the Glide client */
+    if (execute_core_command(&args, NULL, process_core_bool_result))
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+    else
+    {
+        ZVAL_FALSE(return_value);
+        return 0;
+    }
 }
 
-/* Execute an HSCAN command using the Valkey Glide client */
-int execute_hscan_command(const void *glide_client, const char *key, size_t key_len,
-                          long cursor, char *pattern, size_t pattern_len,
-                          long count, zval *return_value)
+/* Unified PFADD command implementation */
+int execute_pfadd_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key || !return_value)
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *z_elements;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osa",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_elements) == FAILURE)
     {
         return 0;
     }
 
-    /* Calculate the number of arguments */
-    unsigned long arg_count = 2; /* key + cursor */
-    if (pattern && pattern_len > 0)
-        arg_count += 2; /* MATCH + pattern */
-    if (count > 0)
-        arg_count += 2; /* COUNT + count */
-
-    /* Allocate argument arrays */
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!args || !args_len)
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
     {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
         return 0;
     }
 
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
+    /* Execute the PFADD command using the Glide client */
+    int result_value = 0;
+    int elements_count = zend_hash_num_elements(Z_ARRVAL_P(z_elements));
 
-    /* Second argument: cursor (convert to string) */
-    size_t cursor_len;
-    char *cursor_str = long_to_string(cursor, &cursor_len);
-    if (!cursor_str)
-    {
-        efree(args);
-        efree(args_len);
-        return 0;
-    }
-    args[1] = (uintptr_t)cursor_str;
-    args_len[1] = cursor_len;
-
-    /* Track current argument index */
-    int arg_idx = 2;
-
-    /* Add pattern if provided */
-    if (pattern && pattern_len > 0)
-    {
-        args[arg_idx] = (uintptr_t)"MATCH";
-        args_len[arg_idx] = 5; /* strlen("MATCH") */
-        arg_idx++;
-
-        args[arg_idx] = (uintptr_t)pattern;
-        args_len[arg_idx] = pattern_len;
-        arg_idx++;
-    }
-
-    /* Add count if provided */
-    if (count > 0)
-    {
-        args[arg_idx] = (uintptr_t)"COUNT";
-        args_len[arg_idx] = 5; /* strlen("COUNT") */
-        arg_idx++;
-
-        size_t count_len;
-        char *count_str = long_to_string(count, &count_len);
-        if (!count_str)
-        {
-            efree(cursor_str);
-            efree(args);
-            efree(args_len);
-            return 0;
-        }
-        args[arg_idx] = (uintptr_t)count_str;
-        args_len[arg_idx] = count_len;
-        arg_idx++;
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        HScan,     /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the cursor string */
-    efree(cursor_str);
-
-    /* Free the count string if used */
-    if (count > 0)
-        efree((void *)args[arg_idx - 1]);
-
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Process the result */
-    int status = 0;
-
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
-            return 0;
-        }
-
-        if (result->response && result->response->response_type == Array)
-        {
-            /* Convert the nested array result to PHP array */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
-        }
-        free_command_result(result);
-    }
-
-    return status;
-}
-
-/* Execute a PFADD command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_pfadd_command(const void *glide_client, const char *key, size_t key_len,
-                          zval *elements, int elements_count, int *output_value)
-{
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = PfAdd;
     args.key = key;
     args.key_len = key_len;
 
     /* Add elements array argument */
     args.args[0].type = CORE_ARG_TYPE_ARRAY;
-    args.args[0].data.array_arg.array = elements;
+    args.args[0].data.array_arg.array = z_elements;
     args.args[0].data.array_arg.count = elements_count;
     args.arg_count = 1;
 
     long result;
     int success = execute_core_command(&args, &result, process_core_int_result);
     if (success)
-        *output_value = (int)result;
-    return success;
+        result_value = (int)result;
+
+    if (success)
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
 }
 
-/* Execute a PFCOUNT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_pfcount_command(const void *glide_client, zval *keys, int keys_count, long *output_value)
+/* Unified PFCOUNT command implementation */
+int execute_pfcount_command(zval *object, int argc, zval *return_value)
 {
-    /* Use the existing multi-key handler that properly handles both single strings and arrays */
-    return execute_multi_key_command(glide_client, PfCount, keys, keys_count, output_value);
+    redis_object *redis;
+    zval *z_args = NULL;
+    int arg_count = 0;
+    long result_value = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O+",
+                                     &object, redis_ce, &z_args, &arg_count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the PFCOUNT command using the Glide client */
+
+    if (execute_multi_key_command(redis->glide_client, PfCount, z_args, arg_count, &result_value))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
 }
 
-/* Execute a PFMERGE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_pfmerge_command(const void *glide_client, const char *dst, size_t dst_len,
-                            zval *keys, int keys_count)
+/* Unified PFMERGE command implementation */
+int execute_pfmerge_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *dst = NULL;
+    size_t dst_len;
+    zval *z_keys;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osa",
+                                     &object, redis_ce, &dst, &dst_len,
+                                     &z_keys) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the PFMERGE command using the Glide client */
+    int keys_count = zend_hash_num_elements(Z_ARRVAL_P(z_keys));
+
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = PfMerge;
     args.key = dst; /* Destination key */
     args.key_len = dst_len;
 
     /* Add source keys array */
     args.args[0].type = CORE_ARG_TYPE_ARRAY;
-    args.args[0].data.array_arg.array = keys;
+    args.args[0].data.array_arg.array = z_keys;
     args.args[0].data.array_arg.count = keys_count;
     args.arg_count = 1;
 
-    return execute_core_command(&args, NULL, process_core_bool_result);
+    if (execute_core_command(&args, NULL, process_core_bool_result))
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+
+    ZVAL_FALSE(return_value);
+    return 0;
 }
 
-/* Execute getTimeout command using the Valkey Glide client */
-int execute_get_timeout_command(const void *glide_client, double *output_value)
+/* Unified getTimeout command implementation */
+int execute_gettimeout_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client is valid */
-    if (!glide_client || !output_value)
+    redis_object *redis;
+    double timeout;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
     {
         return 0;
     }
 
-    /* Since this is a client configuration getter rather than a Redis command,
-       we'll use a default value as this isn't directly supported by Glide */
-    *output_value = 0.0; /* Default timeout */
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
 
-    /* Here we'd ideally access the Glide client's configuration, but since
-       we don't have direct access to it through the FFI interface, we just
-       return success and the default value */
+    /* Execute the getTimeout command */
+    if (execute_get_timeout_command(redis->glide_client, &timeout))
+    {
+        ZVAL_DOUBLE(return_value, timeout);
+        return 1;
+    }
 
-    return 1;
+    return 0;
 }

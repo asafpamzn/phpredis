@@ -188,6 +188,13 @@ extern int execute_servername_command(zval *object, int argc, zval *return_value
 extern int execute_serverversion_command(zval *object, int argc, zval *return_value);
 extern int execute_scan_command(zval *object, int argc, zval *return_value);
 extern int execute_sscan_command(zval *object, int argc, zval *return_value);
+extern int execute_copy_command(zval *object, int argc, zval *return_value);
+extern int execute_hscan_command(zval *object, int argc, zval *return_value);
+extern int execute_pfadd_command(zval *object, int argc, zval *return_value);
+extern int execute_pfcount_command(zval *object, int argc, zval *return_value);
+extern int execute_pfmerge_command(zval *object, int argc, zval *return_value);
+extern int execute_gettimeout_command(zval *object, int argc, zval *return_value);
+extern int execute_getreadtimeout_command(zval *object, int argc, zval *return_value);
 
 /* Don't include command_response.h here to avoid circular dependencies */
 

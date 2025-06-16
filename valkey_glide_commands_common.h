@@ -397,4 +397,81 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         RETURN_FALSE;                                                        \
     }
 
+#define COPY_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, copy)                                            \
+    {                                                                       \
+        if (execute_copy_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define HSCAN_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, hscan)                                            \
+    {                                                                        \
+        if (execute_hscan_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+#define PFADD_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, pfadd)                                            \
+    {                                                                        \
+        if (execute_pfadd_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+#define PFCOUNT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, pfcount)                                            \
+    {                                                                          \
+        if (execute_pfcount_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+#define PFMERGE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, pfmerge)                                            \
+    {                                                                          \
+        if (execute_pfmerge_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+#define GETTIMEOUT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, getTimeout)                                            \
+    {                                                                             \
+        if (execute_gettimeout_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        zval_dtor(return_value);                                                  \
+        RETURN_FALSE;                                                             \
+    }
+
+#define GETREADTIMEOUT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, getReadTimeout)                                            \
+    {                                                                                 \
+        if (execute_getreadtimeout_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                             \
+            return;                                                                   \
+        }                                                                             \
+        zval_dtor(return_value);                                                      \
+        RETURN_FALSE;                                                                 \
+    }
+
 #endif /* VALKEY_GLIDE_COMMANDS_COMMON_H */
