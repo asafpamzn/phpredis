@@ -30,13 +30,13 @@ int execute_wait_command(const void *glide_client, long numreplicas, long timeou
     args.glide_client = glide_client;
     args.cmd_type = Wait;
 
-    /* Add numreplicas and timeout arguments */
+    /* WAIT is a server-level command (not key-based) with 2 arguments: numreplicas, timeout */
     args.args[0].type = CORE_ARG_TYPE_LONG;
     args.args[0].data.long_arg.value = numreplicas;
     args.args[1].type = CORE_ARG_TYPE_LONG;
     args.args[1].data.long_arg.value = timeout;
     args.arg_count = 2;
-    *output_value = -1;
+
     return execute_core_command(&args, output_value, process_core_int_result);
 }
 
