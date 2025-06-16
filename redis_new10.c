@@ -17,114 +17,19 @@
 #include "php_redis.h"
 #include "redis_glide.h"
 #include "valkey_glide_list_common.h"
-
-/* Forward declarations for the non-list Glide execute functions */
-extern int execute_watch_command(const void *glide_client, zval *keys, int keys_count);
-extern int execute_unwatch_command(const void *glide_client);
-extern int execute_acl_command(const void *glide_client, zval *args, int args_count, zval *return_value);
+#include "valkey_glide_commands_common.h"
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
 /* {{{ proto boolean Redis::watch(string key1, string key2...) */
-PHP_METHOD(Redis, watch)
-{
-    zval *object;
-    redis_object *redis;
-    zval *z_args;
-    int argc;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O*",
-                                     &object, redis_ce, &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the WATCH command using the Glide client */
-        if (execute_watch_command(redis->glide_client, z_args, argc))
-        {
-
-            RETURN_TRUE;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+WATCH_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto boolean Redis::unwatch() */
-PHP_METHOD(Redis, unwatch)
-{
-    zval *object;
-    redis_object *redis;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-                                     &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the UNWATCH command using the Glide client */
-        if (execute_unwatch_command(redis->glide_client))
-        {
-
-            RETURN_TRUE;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+UNWATCH_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto mixed Redis::acl(string $op, ...) */
-PHP_METHOD(Redis, acl)
-{
-    zval *object;
-    redis_object *redis;
-    zval *z_args;
-    int argc;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O*",
-                                     &object, redis_ce, &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ACL command using the Glide client */
-        if (execute_acl_command(redis->glide_client, z_args, argc, return_value))
-        {
-            /* Return value already set in execute_acl_command */
-            return;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
+ACL_METHOD_IMPL(Redis)
 /* }}} */

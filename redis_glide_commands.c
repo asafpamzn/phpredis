@@ -23,6 +23,9 @@
 #include <string.h>
 #include <stdio.h>
 
+extern zend_class_entry *redis_ce;
+extern zend_class_entry *redis_exception_ce;
+
 /* Execute a setOption command using the Valkey Glide client */
 int execute_setOption_command(const void *glide_client, zend_long option, zval *value)
 {
@@ -71,4 +74,166 @@ int execute_msetnx_command(const void *glide_client, zval *arr, long *output_val
     int result = execute_core_command(&args, output_value, process_core_bool_result);
 
     return result;
+}
+
+/* Execute a FLUSHDB command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_flushdb_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    zend_bool async = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O|b",
+                                     &object, redis_ce, &async) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = FlushDB;
+
+    /* Add ASYNC option if requested */
+    if (async)
+    {
+        args.args[0].type = CORE_ARG_TYPE_STRING;
+        args.args[0].data.string_arg.value = "ASYNC";
+        args.args[0].data.string_arg.len = 5;
+        args.arg_count = 1;
+    }
+
+    if (execute_core_command(&args, NULL, process_core_bool_result))
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+    else
+    {
+        ZVAL_FALSE(return_value);
+        return 0;
+    }
+}
+
+/* Execute a FLUSHALL command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_flushall_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    zend_bool async = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O|b",
+                                     &object, redis_ce, &async) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = FlushAll;
+
+    /* Add ASYNC option if requested */
+    if (async)
+    {
+        args.args[0].type = CORE_ARG_TYPE_STRING;
+        args.args[0].data.string_arg.value = "ASYNC";
+        args.args[0].data.string_arg.len = 5;
+        args.arg_count = 1;
+    }
+
+    if (execute_core_command(&args, NULL, process_core_bool_result))
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+    else
+    {
+        ZVAL_FALSE(return_value);
+        return 0;
+    }
+}
+
+/* Execute a TIME command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_time_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = Time;
+
+    if (execute_core_command(&args, return_value, process_core_array_result))
+    {
+        return 1;
+    }
+    else
+    {
+        ZVAL_FALSE(return_value);
+        return 0;
+    }
+}
+
+/* Execute a ROLE command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_role_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = Role;
+
+    if (execute_core_command(&args, return_value, process_core_array_result))
+    {
+        return 1;
+    }
+    else
+    {
+        ZVAL_FALSE(return_value);
+        return 0;
+    }
 }

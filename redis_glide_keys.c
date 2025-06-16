@@ -23,6 +23,8 @@
 #include <string.h>
 #include <stdio.h>
 
+extern zend_class_entry *redis_ce;
+
 /* Execute a KEYS command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_keys_command(const void *glide_client, const char *pattern, size_t pattern_len, zval *return_value)
 {
@@ -39,45 +41,111 @@ int execute_keys_command(const void *glide_client, const char *pattern, size_t p
     return execute_core_command(&args, return_value, process_core_array_result);
 }
 
-/* Execute a WATCH command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_watch_command(const void *glide_client, zval *keys, int keys_count)
+/* Execute a WATCH command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_watch_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    zval *z_args;
+    int arg_count;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O*",
+                                     &object, redis_ce, &z_args, &arg_count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = Watch;
 
     /* Set up array argument for keys */
     args.args[0].type = CORE_ARG_TYPE_ARRAY;
-    args.args[0].data.array_arg.array = keys;
-    args.args[0].data.array_arg.count = keys_count;
+    args.args[0].data.array_arg.array = z_args;
+    args.args[0].data.array_arg.count = arg_count;
     args.arg_count = 1;
 
-    return execute_core_command(&args, NULL, process_core_bool_result);
+    if (execute_core_command(&args, NULL, process_core_bool_result))
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+    else
+    {
+        ZVAL_FALSE(return_value);
+        return 0;
+    }
 }
 
-/* Execute an UNWATCH command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_unwatch_command(const void *glide_client)
+/* Execute an UNWATCH command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_unwatch_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = UnWatch;
 
-    return execute_core_command(&args, NULL, process_core_bool_result);
+    if (execute_core_command(&args, NULL, process_core_bool_result))
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+    else
+    {
+        ZVAL_FALSE(return_value);
+        return 0;
+    }
 }
 
-/* Execute an ACL command using the Valkey Glide client */
-int execute_acl_command(const void *glide_client, zval *args, int args_count, zval *return_value)
+/* Execute an ACL command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_acl_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client and args are valid */
-    if (!glide_client || !args || args_count <= 0)
+    redis_object *redis;
+    zval *z_args;
+    int arg_count;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O*",
+                                     &object, redis_ce, &z_args, &arg_count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client || !z_args || arg_count <= 0)
     {
         return 0;
     }
 
     /* Prepare command arguments */
-    unsigned long arg_count = args_count;
-    uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    unsigned long cmd_arg_count = arg_count;
+    uintptr_t *cmd_args = (uintptr_t *)emalloc(cmd_arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(cmd_arg_count * sizeof(unsigned long));
 
     if (!cmd_args || !args_len)
     {
@@ -90,9 +158,9 @@ int execute_acl_command(const void *glide_client, zval *args, int args_count, zv
 
     /* Convert arguments to strings if needed */
     int i;
-    for (i = 0; i < args_count; i++)
+    for (i = 0; i < arg_count; i++)
     {
-        zval *arg = &args[i];
+        zval *arg = &z_args[i];
 
         /* If not string, convert to one */
         if (Z_TYPE_P(arg) != IS_STRING)
@@ -113,8 +181,8 @@ int execute_acl_command(const void *glide_client, zval *args, int args_count, zv
 
     /* Set the first argument as "ACL" */
     const char *acl_cmd = "ACL";
-    uintptr_t *final_args = (uintptr_t *)emalloc((arg_count + 1) * sizeof(uintptr_t));
-    unsigned long *final_args_len = (unsigned long *)emalloc((arg_count + 1) * sizeof(unsigned long));
+    uintptr_t *final_args = (uintptr_t *)emalloc((cmd_arg_count + 1) * sizeof(uintptr_t));
+    unsigned long *final_args_len = (unsigned long *)emalloc((cmd_arg_count + 1) * sizeof(unsigned long));
 
     if (!final_args || !final_args_len)
     {
@@ -133,7 +201,7 @@ int execute_acl_command(const void *glide_client, zval *args, int args_count, zv
     final_args_len[0] = strlen(acl_cmd);
 
     /* Copy the rest of the arguments */
-    for (i = 0; i < arg_count; i++)
+    for (i = 0; i < cmd_arg_count; i++)
     {
         final_args[i + 1] = cmd_args[i];
         final_args_len[i + 1] = args_len[i];
@@ -141,11 +209,11 @@ int execute_acl_command(const void *glide_client, zval *args, int args_count, zv
 
     /* Execute the command */
     CommandResult *result = execute_command(
-        glide_client,
-        CustomCommand, /* ACL commands use custom command type */
-        arg_count + 1, /* ACL command + args */
-        final_args,    /* arguments */
-        final_args_len /* argument lengths */
+        redis->glide_client,
+        CustomCommand,     /* ACL commands use custom command type */
+        cmd_arg_count + 1, /* ACL command + args */
+        final_args,        /* arguments */
+        final_args_len     /* argument lengths */
     );
 
     /* Free the argument arrays */
@@ -170,7 +238,7 @@ int execute_acl_command(const void *glide_client, zval *args, int args_count, zv
             /* ACL can return various types based on subcommand */
             status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
             free_command_result(result);
-            return status;
+            return status ? 1 : 0;
         }
         free_command_result(result);
     }

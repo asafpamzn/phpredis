@@ -276,4 +276,81 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         RETURN_FALSE;                                                      \
     }
 
+#define WATCH_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, watch)                                            \
+    {                                                                        \
+        if (execute_watch_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+#define UNWATCH_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, unwatch)                                            \
+    {                                                                          \
+        if (execute_unwatch_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+#define ACL_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, acl)                                            \
+    {                                                                      \
+        if (execute_acl_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                  \
+            return;                                                        \
+        }                                                                  \
+        zval_dtor(return_value);                                           \
+        RETURN_FALSE;                                                      \
+    }
+
+#define FLUSHDB_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, flushDB)                                            \
+    {                                                                          \
+        if (execute_flushdb_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+#define FLUSHALL_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, flushAll)                                            \
+    {                                                                           \
+        if (execute_flushall_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        zval_dtor(return_value);                                                \
+        RETURN_FALSE;                                                           \
+    }
+
+#define TIME_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, time)                                            \
+    {                                                                       \
+        if (execute_time_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define ROLE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, role)                                            \
+    {                                                                       \
+        if (execute_role_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
 #endif /* VALKEY_GLIDE_COMMANDS_COMMON_H */

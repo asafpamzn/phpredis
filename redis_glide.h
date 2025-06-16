@@ -176,6 +176,15 @@ int execute_object_command(const void *glide_client,
 /* Import the execute functions from redis_glide_keys.c */
 int execute_keys_command(const void *glide_client, const char *pattern, size_t pattern_len, zval *return_value);
 
+/* Unified command functions */
+extern int execute_watch_command(zval *object, int argc, zval *return_value);
+extern int execute_unwatch_command(zval *object, int argc, zval *return_value);
+extern int execute_acl_command(zval *object, int argc, zval *return_value);
+extern int execute_flushdb_command(zval *object, int argc, zval *return_value);
+extern int execute_flushall_command(zval *object, int argc, zval *return_value);
+extern int execute_time_command(zval *object, int argc, zval *return_value);
+extern int execute_role_command(zval *object, int argc, zval *return_value);
+
 /* Don't include command_response.h here to avoid circular dependencies */
 
 #endif /* REDIS_GLIDE_H */

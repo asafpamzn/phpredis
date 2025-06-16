@@ -15,171 +15,25 @@
 */
 
 #include "php_redis.h"
-
 #include "redis_glide.h"
 #include "valkey_glide_list_common.h"
-extern int execute_flushdb_command(const void *glide_client, int async);
-extern int execute_flushall_command(const void *glide_client, int async);
-extern int execute_time_command(const void *glide_client, zval *return_value);
-extern int execute_role_command(const void *glide_client, zval *return_value);
+#include "valkey_glide_commands_common.h"
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
 /* {{{ proto boolean Redis::flushDB([boolean async]) */
-PHP_METHOD(Redis, flushDB)
-{
-    zval *object;
-    redis_object *redis;
-    zend_bool async = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|b",
-                                     &object, redis_ce, &async) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        int status;
-
-        /* Execute the FLUSHDB command using the Glide client */
-        status = execute_flushdb_command(redis->glide_client, async);
-
-        if (status)
-        {
-            /* Success */
-            RETURN_TRUE;
-        }
-        else
-        {
-            /* Error */
-            RETURN_FALSE;
-        }
-    }
-
-    /* If we reach here, either we don't have a Glide client or something went wrong */
-    RETURN_FALSE;
-}
+FLUSHDB_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto boolean Redis::flushAll([boolean async]) */
-PHP_METHOD(Redis, flushAll)
-{
-    zval *object;
-    redis_object *redis;
-    zend_bool async = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|b",
-                                     &object, redis_ce, &async) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        int status;
-
-        /* Execute the FLUSHALL command using the Glide client */
-        status = execute_flushall_command(redis->glide_client, async);
-
-        if (status)
-        {
-            /* Success */
-            RETURN_TRUE;
-        }
-        else
-        {
-            /* Error */
-            RETURN_FALSE;
-        }
-    }
-
-    /* If we reach here, either we don't have a Glide client or something went wrong */
-    RETURN_FALSE;
-}
+FLUSHALL_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::time() */
-PHP_METHOD(Redis, time)
-{
-    zval *object;
-    redis_object *redis;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-                                     &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the TIME command using the Glide client */
-        if (execute_time_command(redis->glide_client, return_value))
-        {
-            /* Return value already set in execute_time_command */
-            return;
-        }
-        else
-        {
-            /* Error */
-            RETURN_FALSE;
-        }
-    }
-
-    /* If we reach here, either we don't have a Glide client or something went wrong */
-    RETURN_FALSE;
-}
+TIME_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::role() */
-PHP_METHOD(Redis, role)
-{
-    zval *object;
-    redis_object *redis;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-                                     &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the ROLE command using the Glide client */
-        if (execute_role_command(redis->glide_client, return_value))
-        {
-            /* Return value already set in execute_role_command */
-            return;
-        }
-        else
-        {
-            /* Error */
-            RETURN_FALSE;
-        }
-    }
-
-    /* If we reach here, either we don't have a Glide client or something went wrong */
-    RETURN_FALSE;
-}
+ROLE_METHOD_IMPL(Redis)
 /* }}} */
