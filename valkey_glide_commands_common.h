@@ -120,4 +120,82 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         RETURN_FALSE;                                                      \
     }
 
+/* Additional unified macros for new converted commands */
+#define GET_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, get)                                            \
+    {                                                                      \
+        if (execute_get_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                  \
+            return;                                                        \
+        }                                                                  \
+        zval_dtor(return_value);                                           \
+        RETURN_FALSE;                                                      \
+    }
+
+#define RANDOMKEY_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, randomKey)                                            \
+    {                                                                            \
+        if (execute_randomkey_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                        \
+            return;                                                              \
+        }                                                                        \
+        zval_dtor(return_value);                                                 \
+        RETURN_FALSE;                                                            \
+    }
+
+#define STRLEN_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, strlen)                                            \
+    {                                                                         \
+        if (execute_strlen_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define TTL_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, ttl)                                            \
+    {                                                                      \
+        if (execute_ttl_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                  \
+            return;                                                        \
+        }                                                                  \
+        zval_dtor(return_value);                                           \
+        RETURN_FALSE;                                                      \
+    }
+
+#define PTTL_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, pttl)                                            \
+    {                                                                       \
+        if (execute_pttl_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define PING_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, ping)                                            \
+    {                                                                       \
+        if (execute_ping_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define INFO_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, info)                                            \
+    {                                                                       \
+        if (execute_info_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
 #endif /* VALKEY_GLIDE_COMMANDS_COMMON_H */

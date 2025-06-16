@@ -102,8 +102,6 @@ BITCOUNT_METHOD_IMPL(Redis)
 BITPOS_METHOD_IMPL(Redis)
 /* }}} */
 
-/* }}} */
-
 /* {{{ proto boolean Redis::set(string key, mixed val, double|int|array timeout,
  *                              [array opt) */
 PHP_METHOD(Redis, set)
@@ -456,98 +454,13 @@ PHP_METHOD(Redis, getset)
 /* }}} */
 
 /* {{{ proto string Redis::get(string key) */
-PHP_METHOD(Redis, get)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    char *response = NULL;
-    size_t response_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the GET command using the Glide client */
-        int result = execute_get_command(redis->glide_client, key, key_len, &response, &response_len);
-
-        /* Process the result */
-        if (result == 1 && response != NULL)
-        {
-            /* Return the value */
-            RETVAL_STRINGL(response, response_len);
-            efree(response);
-            return;
-        }
-        else if (result == 0)
-        {
-            /* Key didn't exist */
-            RETURN_FALSE;
-        }
-        else
-        {
-            /* Error */
-            RETURN_FALSE;
-        }
-    }
-}
+GET_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto string Redis::randomKey()
  */
-PHP_METHOD(Redis, randomKey)
-{
-    zval *object;
-    redis_object *redis;
-    char *response = NULL;
-    size_t response_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-                                     &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the RANDOMKEY command using the Glide client */
-        int result = execute_randomkey_command(redis->glide_client, &response, &response_len);
-
-        /* Process the result */
-        if (result == 1 && response != NULL)
-        {
-            /* Return the random key */
-            RETVAL_STRINGL(response, response_len);
-            efree(response);
-            return;
-        }
-        else if (result == 0)
-        {
-            /* No keys in the database */
-            RETURN_NULL();
-        }
-        else
-        {
-            /* Error */
-            RETURN_FALSE;
-        }
-    }
-}
+RANDOMKEY_METHOD_IMPL(Redis)
+/* }}} */
 
 /* {{{ proto mixed Redis::lcs(string $key1, string $key2, ?array $options = NULL); */
 PHP_METHOD(Redis, lcs)
@@ -631,271 +544,24 @@ PHP_METHOD(Redis, setRange)
 /* }}} */
 
 /* {{{ proto long Redis::strlen(string key) */
-PHP_METHOD(Redis, strlen)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the STRLEN command using the Glide client */
-        long result_value;
-        if (execute_strlen_command(redis->glide_client, key, key_len, &result_value))
-        {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-}
-
-static void
-redis_parse_info_response(char *response, zval *z_ret)
-{
-    char *p1, *s1 = NULL;
-
-    ZVAL_FALSE(z_ret);
-    if ((p1 = php_strtok_r(response, _NL, &s1)) != NULL)
-    {
-        array_init(z_ret);
-        do
-        {
-            if (*p1 == '#')
-                continue;
-            char *p;
-            zend_uchar type;
-            zend_long lval;
-            double dval;
-            if ((p = strchr(p1, ':')) != NULL)
-            {
-                type = is_numeric_string(p + 1, strlen(p + 1), &lval, &dval, 0);
-                switch (type)
-                {
-                case IS_LONG:
-                    add_assoc_long_ex(z_ret, p1, p - p1, lval);
-                    break;
-                case IS_DOUBLE:
-                    add_assoc_double_ex(z_ret, p1, p - p1, dval);
-                    break;
-                default:
-                    add_assoc_string_ex(z_ret, p1, p - p1, p + 1);
-                }
-            }
-            else
-            {
-                add_next_index_string(z_ret, p1);
-            }
-        } while ((p1 = php_strtok_r(NULL, _NL, &s1)) != NULL);
-    }
-}
+STRLEN_METHOD_IMPL(Redis)
+/* }}} */
 
 /* {{{ proto array Redis::info([string section [, string section...]]) */
-PHP_METHOD(Redis, info)
-{
-    zval *object;
-    redis_object *redis;
-    char *response = NULL;
-    size_t response_len = 0;
-    int argc = 0;
-    zval *sections = NULL;
-
-    /* Parse parameters - accept variable number of string arguments */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O*",
-                                     &object, redis_ce, &sections, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        int result = 0;
-
-        /* Handle different cases based on number of arguments */
-        if (argc == 0)
-        {
-            /* No sections specified, call with NULL section */
-
-            result = execute_info_command(redis->glide_client, NULL, 0, &response, &response_len);
-        }
-        else
-        {
-            /* One or more sections specified */
-
-            result = execute_info_sections_command(redis->glide_client, sections, argc, &response, &response_len);
-        }
-
-        /* Process the result */
-        if (result == 1 && response != NULL)
-        {
-            zval z_ret;
-            ZVAL_UNDEF(&z_ret);
-
-            /* Parse the INFO response into a zval array */
-            redis_parse_info_response(response, &z_ret);
-
-            /* Free the response string */
-            efree(response);
-
-            /* Return the parsed array */
-            RETVAL_ZVAL(&z_ret, 0, 1);
-            return;
-        }
-        else
-        {
-            /* Error or empty response */
-            RETURN_FALSE;
-        }
-    }
-}
+INFO_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::ttl(string key) */
-PHP_METHOD(Redis, ttl)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the TTL command using the Glide client */
-        long result_value;
-        if (execute_ttl_command(redis->glide_client, key, key_len, &result_value))
-        {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-}
+TTL_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto long Redis::pttl(string key) */
-PHP_METHOD(Redis, pttl)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the PTTL command using the Glide client */
-        long result_value;
-        if (execute_pttl_command(redis->glide_client, key, key_len, &result_value))
-        {
-            /* Command succeeded, return the value */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            /* Command failed */
-            RETURN_FALSE;
-        }
-    }
-}
+PTTL_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto string Redis::ping([string message])
  */
-PHP_METHOD(Redis, ping)
-{
-    zval *object;
-    redis_object *redis;
-    char *msg = NULL, *response = NULL;
-    size_t msg_len = 0, response_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|s",
-                                     &object, redis_ce, &msg, &msg_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the PING command using the Glide client */
-        int result = execute_ping_command(redis->glide_client, msg, msg_len, &response, &response_len);
-
-        /* If the result is -1, there was an error */
-        if (result == -1)
-        {
-            RETURN_FALSE;
-        }
-
-        /* Return the response */
-        if (response)
-        {
-            if (strncmp(response, "PONG", 4) == 0)
-            {
-                efree(response);
-                RETURN_TRUE;
-            }
-
-            /* Return the response */
-            RETVAL_STRINGL(response, response_len);
-            efree(response);
-            return;
-        }
-        else
-        {
-            RETURN_TRUE;
-        }
-    }
-    RETURN_FALSE;
-}
+PING_METHOD_IMPL(Redis)
 /* }}} */
 
 /** {{{ proto bool Redis::reset()

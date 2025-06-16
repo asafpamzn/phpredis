@@ -546,11 +546,32 @@ int execute_echo_command(zval *object, int argc, zval *return_value)
     return 0;
 }
 
-/* Execute a PING command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_ping_command(const void *glide_client, const char *msg, size_t msg_len, char **result, size_t *result_len)
+/* Execute a PING command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_ping_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *msg = NULL;
+    size_t msg_len = 0;
+    char *response = NULL;
+    size_t response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O|s",
+                                     &object, redis_ce, &msg, &msg_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = Ping;
 
     /* Add optional message argument */
@@ -567,43 +588,192 @@ int execute_ping_command(const void *glide_client, const char *msg, size_t msg_l
     {
         char **result;
         size_t *result_len;
-    } output = {result, result_len};
+    } output = {&response, &response_len};
 
-    return execute_core_command(&args, &output, process_ping_result);
+    if (execute_core_command(&args, &output, process_ping_result))
+    {
+        if (response != NULL)
+        {
+            if (strncmp(response, "PONG", 4) == 0)
+            {
+                efree(response);
+                ZVAL_TRUE(return_value);
+                return 1;
+            }
+            ZVAL_STRINGL(return_value, response, response_len);
+            efree(response);
+            return 1;
+        }
+        else
+        {
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+static void
+redis_parse_info_response(char *response, zval *z_ret)
+{
+    char *p1, *s1 = NULL;
+
+    ZVAL_FALSE(z_ret);
+    if ((p1 = php_strtok_r(response, _NL, &s1)) != NULL)
+    {
+        array_init(z_ret);
+        do
+        {
+            if (*p1 == '#')
+                continue;
+            char *p;
+            zend_uchar type;
+            zend_long lval;
+            double dval;
+            if ((p = strchr(p1, ':')) != NULL)
+            {
+                type = is_numeric_string(p + 1, strlen(p + 1), &lval, &dval, 0);
+                switch (type)
+                {
+                case IS_LONG:
+                    add_assoc_long_ex(z_ret, p1, p - p1, lval);
+                    break;
+                case IS_DOUBLE:
+                    add_assoc_double_ex(z_ret, p1, p - p1, dval);
+                    break;
+                default:
+                    add_assoc_string_ex(z_ret, p1, p - p1, p + 1);
+                }
+            }
+            else
+            {
+                add_next_index_string(z_ret, p1);
+            }
+        } while ((p1 = php_strtok_r(NULL, _NL, &s1)) != NULL);
+    }
 }
 
-/* Execute an INFO command using the Valkey Glide client */
-int execute_info_command(const void *glide_client, const char *section, size_t section_len, char **result, size_t *result_len)
+/* Execute an INFO command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_info_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client is valid */
-    if (!glide_client)
+    redis_object *redis;
+    zval *args = NULL;
+    int args_count = 0;
+    char *response = NULL;
+    size_t response_len = 0;
+
+    /* Parse parameters - accept variable number of string arguments */
+    if (zend_parse_method_parameters(argc, object, "O*",
+                                     &object, redis_ce, &args, &args_count) == FAILURE)
     {
         return 0;
     }
 
-    /* Prepare command arguments */
-    unsigned long arg_count = section ? 1 : 0;
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* Add section argument if provided */
-    if (section)
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
     {
-        args[0] = (uintptr_t)section;
-        args_len[0] = section_len;
+        return 0;
     }
 
-    /* Execute the command */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        Info,      /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
+    int result = 0;
 
-    /* Use the generic handler to process the result */
-    return handle_string_response(cmd_result, result, result_len);
+    /* Handle different cases based on number of arguments */
+    if (args_count == 0)
+    {
+        /* No sections specified, call with NULL section */
+        /* Prepare command arguments */
+        CommandResult *cmd_result = execute_command(
+            redis->glide_client,
+            Info, /* command type */
+            0,    /* number of arguments */
+            NULL, /* arguments */
+            NULL  /* argument lengths */
+        );
+
+        /* Use the generic handler to process the result */
+        result = handle_string_response(cmd_result, &response, &response_len);
+    }
+    else
+    {
+        /* One or more sections specified */
+        /* Prepare command arguments - each section is one argument */
+        unsigned long arg_count = args_count;
+        uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+        unsigned long *cmd_args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+        if (!cmd_args || !cmd_args_len)
+        {
+            if (cmd_args)
+                efree(cmd_args);
+            if (cmd_args_len)
+                efree(cmd_args_len);
+            return 0;
+        }
+
+        /* Process each section argument */
+        for (int i = 0; i < args_count; i++)
+        {
+            zval *section = &args[i];
+
+            /* Check if the section is a string */
+            if (Z_TYPE_P(section) != IS_STRING)
+            {
+                /* Convert to string if needed */
+                zval temp;
+                ZVAL_COPY(&temp, section);
+                convert_to_string(&temp);
+
+                cmd_args[i] = (uintptr_t)Z_STRVAL(temp);
+                cmd_args_len[i] = Z_STRLEN(temp);
+
+                /* Free the temporary zval */
+                zval_dtor(&temp);
+            }
+            else
+            {
+                /* It's already a string */
+                cmd_args[i] = (uintptr_t)Z_STRVAL_P(section);
+                cmd_args_len[i] = Z_STRLEN_P(section);
+            }
+        }
+
+        /* Execute the command */
+        CommandResult *cmd_result = execute_command(
+            redis->glide_client,
+            Info,        /* command type */
+            arg_count,   /* number of arguments */
+            cmd_args,    /* arguments */
+            cmd_args_len /* argument lengths */
+        );
+
+        /* Free the argument arrays */
+        efree(cmd_args);
+        efree(cmd_args_len);
+
+        /* Use the generic handler to process the result */
+        result = handle_string_response(cmd_result, &response, &response_len);
+    }
+
+    /* Process the result */
+    if (result == 1 && response != NULL)
+    {
+        zval z_ret;
+        ZVAL_UNDEF(&z_ret);
+
+        /* Parse the INFO response into a zval array */
+        redis_parse_info_response(response, &z_ret);
+
+        /* Free the response string */
+        efree(response);
+
+        /* Return the parsed array */
+        ZVAL_COPY_VALUE(return_value, &z_ret);
+        return 1;
+    }
+
+    /* Error or empty response */
+    return 0;
 }
 
 /* Execute an INFO command with multiple sections using the Valkey Glide client */
@@ -674,11 +844,32 @@ int execute_info_sections_command(const void *glide_client, zval *sections, int 
     return handle_string_response(cmd_result, result, result_len);
 }
 
-/* Execute a GET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_get_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len)
+/* Execute a GET command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_get_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    char *response = NULL;
+    size_t response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = Get;
     args.key = key;
     args.key_len = key_len;
@@ -688,16 +879,50 @@ int execute_get_command(const void *glide_client, const char *key, size_t key_le
     {
         char **result;
         size_t *result_len;
-    } output = {result, result_len};
+    } output = {&response, &response_len};
 
-    return execute_core_command(&args, &output, process_core_string_result);
+    if (execute_core_command(&args, &output, process_core_string_result))
+    {
+        if (response != NULL)
+        {
+            ZVAL_STRINGL(return_value, response, response_len);
+            efree(response);
+            return 1;
+        }
+        else
+        {
+            ZVAL_FALSE(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
-/* Execute a RANDOMKEY command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_randomkey_command(const void *glide_client, char **result, size_t *result_len)
+/* Execute a RANDOMKEY command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_randomkey_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *response = NULL;
+    size_t response_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = RandomKey;
 
     /* Use string result processor */
@@ -705,9 +930,24 @@ int execute_randomkey_command(const void *glide_client, char **result, size_t *r
     {
         char **result;
         size_t *result_len;
-    } output = {result, result_len};
+    } output = {&response, &response_len};
 
-    return execute_core_command(&args, &output, process_core_string_result);
+    if (execute_core_command(&args, &output, process_core_string_result))
+    {
+        if (response != NULL)
+        {
+            ZVAL_STRINGL(return_value, response, response_len);
+            efree(response);
+            return 1;
+        }
+        else
+        {
+            ZVAL_NULL(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute a GETBIT command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
@@ -912,16 +1152,42 @@ int execute_unlink_array(const void *glide_client, HashTable *keys_hash, long *o
     return execute_core_command(&args, output_value, process_core_int_result);
 }
 
-/* Execute a STRLEN command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_strlen_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
+/* Execute a STRLEN command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_strlen_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = Strlen;
     args.key = key;
     args.key_len = key_len;
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    if (execute_core_command(&args, &result_value, process_core_int_result))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
 }
 
 /* Execute a SETRANGE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
@@ -988,16 +1254,42 @@ static void process_sorted_set_elements(struct CommandResponse *elements_resp, z
     }
 }
 
-/* Execute a TTL command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_ttl_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
+/* Execute a TTL command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_ttl_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = TTL;
     args.key = key;
     args.key_len = key_len;
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    if (execute_core_command(&args, &result_value, process_core_int_result))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
 }
 
 /* Execute a single-key DEL command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
@@ -1013,14 +1305,40 @@ int execute_del_single_key(const void *glide_client, const char *key, size_t key
     return execute_core_command(&args, output_value, process_core_int_result);
 }
 
-/* Execute a PTTL command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_pttl_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
+/* Execute a PTTL command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_pttl_command(zval *object, int argc, zval *return_value)
 {
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    long result_value;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute using core framework */
     core_command_args_t args = {0};
-    args.glide_client = glide_client;
+    args.glide_client = redis->glide_client;
     args.cmd_type = PTTL;
     args.key = key;
     args.key_len = key_len;
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    if (execute_core_command(&args, &result_value, process_core_int_result))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+
+    return 0;
 }
