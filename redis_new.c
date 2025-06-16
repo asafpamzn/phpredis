@@ -293,63 +293,7 @@ SETNX_METHOD_IMPL(Redis)
 
 /* {{{ proto string Redis::getSet(string key, string value)
  */
-PHP_METHOD(Redis, getset)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *val = NULL;
-    size_t key_len, val_len;
-    char *response = NULL;
-    size_t response_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
-                                     &object, redis_ce, &key, &key_len,
-                                     &val, &val_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Create a zval array for the GET option */
-        zval z_opts;
-        array_init(&z_opts);
-        add_next_index_string(&z_opts, "GET");
-
-        /* Execute the SET command with GET option using the Glide client */
-        int result = execute_set_command(redis->glide_client, key, key_len, val, val_len,
-                                         0,       /* No expiry */
-                                         &z_opts, /* Use GET option */
-                                         &response, &response_len);
-
-        /* Free the zval array */
-        zval_dtor(&z_opts);
-
-        /* Process the result */
-        if ((result == 1 || result == 2) && response != NULL)
-        {
-            /* Return the old value */
-            RETVAL_STRINGL(response, response_len);
-            efree(response);
-            return;
-        }
-        else if (result == 0 || (result == 2 && response == NULL))
-        {
-            /* Key didn't exist */
-            RETURN_FALSE;
-        }
-        else
-        {
-            /* Error */
-            RETURN_FALSE;
-        }
-    }
-}
+GETSET_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto string Redis::get(string key) */
@@ -362,45 +306,7 @@ RANDOMKEY_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto mixed Redis::lcs(string $key1, string $key2, ?array $options = NULL); */
-PHP_METHOD(Redis, lcs)
-{
-    zval *object;
-    redis_object *redis;
-    char *key1 = NULL, *key2 = NULL;
-    size_t key1_len, key2_len;
-    zval *options = NULL;
-    zval result;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss|a",
-                                     &object, redis_ce, &key1, &key1_len,
-                                     &key2, &key2_len, &options) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Initialize result zval */
-        ZVAL_NULL(&result);
-
-        /* Execute the LCS command using the Glide client */
-        int ret = execute_lcs_command(redis->glide_client, key1, key1_len, key2, key2_len, options, &result);
-
-        /* If the result is -1, there was an error */
-        if (ret == 0)
-        {
-            RETURN_FALSE;
-        }
-
-        /* Return the result */
-        RETURN_ZVAL(&result, 0, 1);
-    }
-}
+LCS_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto string Redis::setRange(string key, long start, string value) */

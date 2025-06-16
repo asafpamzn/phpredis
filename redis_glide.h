@@ -137,7 +137,8 @@ int execute_del_array(const void *glide_client, HashTable *keys_hash, long *outp
 int execute_unlink_array(const void *glide_client, HashTable *keys_hash, long *output_value);
 extern int execute_strlen_command(zval *object, int argc, zval *return_value);
 extern int execute_setrange_command(zval *object, int argc, zval *return_value);
-extern int execute_lcs_command(const void *glide_client, const char *key1, size_t key1_len, const char *key2, size_t key2_len, zval *options, zval *result);
+extern int execute_getset_command(zval *object, int argc, zval *return_value);
+int execute_lcs_command(zval *object, int argc, zval *return_value);
 
 /* Time to live operations */
 extern int execute_ttl_command(zval *object, int argc, zval *return_value);
