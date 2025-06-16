@@ -48,11 +48,12 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
     arg_count = prepare_core_args(args, &cmd_args, &cmd_args_len,
                                   &allocated_strings, &allocated_count);
 
+    printf("final arg count: %d\n", arg_count);
     if (arg_count < 0)
     {
         return 0;
     }
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     /* Execute the command */
     CommandResult *result = execute_command(
         args->glide_client,
@@ -60,7 +61,7 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
         arg_count,
         cmd_args,
         cmd_args_len);
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     debug_print_command_result(result);
 
     /* Process result */
@@ -170,8 +171,22 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case Touch:
     case MGet:
     case Watch:
-    case PfCount:
         return prepare_multi_key_args(args, cmd_args, cmd_args_len);
+
+    /* PFCOUNT: Support both single-key and multi-key operations */
+    case PfCount:
+        /* Check if single key or multi-key operation */
+        if (args->key && args->key_len > 0 && args->arg_count == 0)
+        {
+            /* Single key: PFCOUNT key */
+            return prepare_key_only_args(args, cmd_args, cmd_args_len);
+        }
+        else if (args->arg_count > 0 && args->args[0].type == CORE_ARG_TYPE_ARRAY)
+        {
+            /* Multi-key: PFCOUNT key1 key2 key3 */
+            return prepare_multi_key_args(args, cmd_args, cmd_args_len);
+        }
+        return 0;
 
     /* HyperLogLog operations */
     case PfAdd:
