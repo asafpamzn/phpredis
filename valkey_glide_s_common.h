@@ -189,13 +189,6 @@ int execute_sunion_command(zval *object, int argc, zval *return_value);
 int execute_sunionstore_command(zval *object, int argc, zval *return_value);
 int execute_sdiff_command(zval *object, int argc, zval *return_value);
 int execute_sdiffstore_command(zval *object, int argc, zval *return_value);
-int execute_servername_command(const void *glide_client, char **output, size_t *output_len);
-int execute_serverversion_command(const void *glide_client, char **output, size_t *output_len);
-int execute_scan_command(const void *glide_client, long *it, const char *pattern, size_t pattern_len,
-                         long count, zval *return_value);
-int execute_sscan_command(const void *glide_client, const char *key, size_t key_len,
-                          long *it, const char *pattern, size_t pattern_len,
-                          long count, zval *return_value);
 
 /* ====================================================================
  * CONVENIENCE MACROS

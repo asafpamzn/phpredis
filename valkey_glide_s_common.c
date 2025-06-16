@@ -2153,10 +2153,10 @@ int execute_sdiffstore_command(zval *object, int argc, zval *return_value)
 }
 
 /**
- * Execute SCAN command using the generic framework
+ * Execute SCAN command using the generic framework - ORIGINAL SIGNATURE
  */
-int execute_scan_command(const void *glide_client, long *it, const char *pattern, size_t pattern_len,
-                         long count, zval *return_value)
+int execute_scan_command_internal(const void *glide_client, long *it, const char *pattern, size_t pattern_len,
+                                  long count, zval *return_value)
 {
     s_command_args_t args;
     INIT_S_COMMAND_ARGS(args);
@@ -2172,11 +2172,71 @@ int execute_scan_command(const void *glide_client, long *it, const char *pattern
 }
 
 /**
- * Execute SSCAN command using the generic framework
+ * Execute SCAN command with unified signature
  */
-int execute_sscan_command(const void *glide_client, const char *key, size_t key_len,
-                          long *it, const char *pattern, size_t pattern_len,
-                          long count, zval *return_value)
+int execute_scan_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    zval *z_iter;
+    char *pattern = NULL;
+    size_t pattern_len = 0;
+    int has_pattern = 0;
+    zend_long count = 0;
+    int has_count = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oz|sl",
+                                     &object, redis_ce, &z_iter, &pattern, &pattern_len,
+                                     &count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Check if optional parameters are provided */
+    has_pattern = (pattern != NULL && pattern_len > 0);
+    has_count = (argc > 2);
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Dereference if it's a reference */
+    ZVAL_DEREF(z_iter);
+
+    /* Convert iterator */
+    convert_to_long(z_iter);
+    long iter = Z_LVAL_P(z_iter);
+
+    /* Use empty pattern if not specified */
+    const char *scan_pattern = has_pattern ? pattern : "";
+    size_t scan_pattern_len = has_pattern ? pattern_len : 0;
+
+    /* Use default count if not specified */
+    long scan_count = has_count ? count : 10;
+
+    /* Execute the SCAN command using the internal function */
+    if (execute_scan_command_internal(redis->glide_client, &iter, scan_pattern,
+                                      scan_pattern_len, scan_count, return_value))
+    {
+        /* Update iterator value */
+        ZVAL_LONG(z_iter, iter);
+
+        /* Return value already set in execute_scan_command_internal */
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Execute SSCAN command using the generic framework - ORIGINAL SIGNATURE
+ */
+int execute_sscan_command_internal(const void *glide_client, const char *key, size_t key_len,
+                                   long *it, const char *pattern, size_t pattern_len,
+                                   long count, zval *return_value)
 {
     s_command_args_t args;
     INIT_S_COMMAND_ARGS(args);
@@ -2194,33 +2254,272 @@ int execute_sscan_command(const void *glide_client, const char *key, size_t key_
 }
 
 /**
- * Execute server name command using the generic framework
+ * Execute SSCAN command with unified signature
  */
-int execute_servername_command(const void *glide_client, char **output, size_t *output_len)
+int execute_sscan_command(zval *object, int argc, zval *return_value)
 {
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    zval *z_iter;
+    char *pattern = NULL;
+    size_t pattern_len = 0;
+    int has_pattern = 0;
+    zend_long count = 0;
+    int has_count = 0;
 
-    args.glide_client = glide_client;
-    args.output_string = output;
-    args.output_string_len = output_len;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osz|sl",
+                                     &object, redis_ce, &key, &key_len, &z_iter,
+                                     &pattern, &pattern_len, &count) == FAILURE)
+    {
+        return 0;
+    }
 
-    /* This is a special case that needs custom implementation due to INFO parsing */
-    return 0; /* Fallback to original implementation */
+    /* Check if optional parameters are provided */
+    has_pattern = (pattern != NULL && pattern_len > 0);
+    has_count = (argc > 3);
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Dereference if it's a reference */
+    ZVAL_DEREF(z_iter);
+
+    /* Convert iterator */
+    convert_to_long(z_iter);
+    long iter = Z_LVAL_P(z_iter);
+
+    /* Use empty pattern if not specified */
+    const char *scan_pattern = has_pattern ? pattern : "";
+    size_t scan_pattern_len = has_pattern ? pattern_len : 0;
+
+    /* Use default count if not specified */
+    long scan_count = has_count ? count : 10;
+
+    /* Execute the SSCAN command using the internal function */
+    if (execute_sscan_command_internal(redis->glide_client, key, key_len, &iter,
+                                       scan_pattern, scan_pattern_len,
+                                       scan_count, return_value))
+    {
+        /* Update iterator value */
+        ZVAL_LONG(z_iter, iter);
+
+        /* Return value already set in execute_sscan_command_internal */
+        return 1;
+    }
+
+    return 0;
 }
 
 /**
- * Execute server version command using the generic framework
+ * Execute server name command - INTERNAL implementation
  */
-int execute_serverversion_command(const void *glide_client, char **output, size_t *output_len)
+int execute_servername_command_internal(const void *glide_client, char **output, size_t *output_len)
 {
-    s_command_args_t args;
-    INIT_S_COMMAND_ARGS(args);
+    CommandResult *result;
+    char *section = "server";
+    unsigned long section_len = 6;
+    uintptr_t args[1];
+    unsigned long args_len[1];
 
-    args.glide_client = glide_client;
-    args.output_string = output;
-    args.output_string_len = output_len;
+    args[0] = (uintptr_t)section;
+    args_len[0] = section_len;
 
-    /* This is a special case that needs custom implementation due to INFO parsing */
-    return 0; /* Fallback to original implementation */
+    /* Execute INFO SERVER command */
+    result = execute_command(
+        glide_client,
+        Info,    /* command type */
+        1,       /* number of arguments */
+        args,    /* arguments */
+        args_len /* argument lengths */
+    );
+
+    if (result && !result->command_error && result->response)
+    {
+        /* Find the server name in the response */
+        if (result->response->response_type == String)
+        {
+            char *info_str = result->response->string_value;
+            char *name_line = strstr(info_str, "redis_version:");
+
+            if (name_line)
+            {
+                /* Skip "redis_version:" and any whitespace */
+                char *start = name_line + 13;
+                while (*start == ' ' || *start == '\t')
+                    start++;
+
+                /* Find end of line or string */
+                char *end = start;
+                while (*end && *end != '\r' && *end != '\n')
+                    end++;
+
+                size_t len = end - start;
+                *output = emalloc(len + 1);
+                if (*output)
+                {
+                    memcpy(*output, start, len);
+                    (*output)[len] = '\0';
+                    *output_len = len;
+                    free_command_result(result);
+                    return 1;
+                }
+            }
+        }
+        free_command_result(result);
+    }
+    return 0;
+}
+
+/**
+ * Execute server name command with unified signature
+ */
+int execute_servername_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *result = NULL;
+    size_t result_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the INFO command and get server name */
+    if (execute_servername_command_internal(redis->glide_client, &result, &result_len))
+    {
+        /* Check if we got a server name */
+        if (result != NULL && result_len > 0)
+        {
+            /* Return the server name */
+            ZVAL_STRINGL(return_value, result, result_len);
+            /* Free allocated memory */
+            efree(result);
+            return 1;
+        }
+        else if (result != NULL)
+        {
+            efree(result);
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * Execute server version command - INTERNAL implementation
+ */
+int execute_serverversion_command_internal(const void *glide_client, char **output, size_t *output_len)
+{
+    CommandResult *result;
+    char *section = "server";
+    unsigned long section_len = 6;
+    uintptr_t args[1];
+    unsigned long args_len[1];
+
+    args[0] = (uintptr_t)section;
+    args_len[0] = section_len;
+
+    /* Execute INFO SERVER command */
+    result = execute_command(
+        glide_client,
+        Info,    /* command type */
+        1,       /* number of arguments */
+        args,    /* arguments */
+        args_len /* argument lengths */
+    );
+
+    if (result && !result->command_error && result->response)
+    {
+        /* Find the server version in the response */
+        if (result->response->response_type == String)
+        {
+            char *info_str = result->response->string_value;
+            char *version_line = strstr(info_str, "redis_version:");
+
+            if (version_line)
+            {
+                /* Skip "redis_version:" and any whitespace */
+                char *start = version_line + 14;
+                while (*start == ' ' || *start == '\t')
+                    start++;
+
+                /* Find end of line or string */
+                char *end = start;
+                while (*end && *end != '\r' && *end != '\n')
+                    end++;
+
+                size_t len = end - start;
+                *output = emalloc(len + 1);
+                if (*output)
+                {
+                    memcpy(*output, start, len);
+                    (*output)[len] = '\0';
+                    *output_len = len;
+                    free_command_result(result);
+                    return 1;
+                }
+            }
+        }
+        free_command_result(result);
+    }
+    return 0;
+}
+
+/**
+ * Execute server version command with unified signature
+ */
+int execute_serverversion_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *result = NULL;
+    size_t result_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the INFO command and get server version */
+    if (execute_serverversion_command_internal(redis->glide_client, &result, &result_len))
+    {
+        /* Check if we got a server version */
+        if (result != NULL && result_len > 0)
+        {
+            /* Return the server version */
+            ZVAL_STRINGL(return_value, result, result_len);
+            /* Free allocated memory */
+            efree(result);
+            return 1;
+        }
+        else if (result != NULL)
+        {
+            efree(result);
+        }
+    }
+
+    return 0;
 }

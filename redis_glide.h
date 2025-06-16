@@ -184,6 +184,10 @@ extern int execute_flushdb_command(zval *object, int argc, zval *return_value);
 extern int execute_flushall_command(zval *object, int argc, zval *return_value);
 extern int execute_time_command(zval *object, int argc, zval *return_value);
 extern int execute_role_command(zval *object, int argc, zval *return_value);
+extern int execute_servername_command(zval *object, int argc, zval *return_value);
+extern int execute_serverversion_command(zval *object, int argc, zval *return_value);
+extern int execute_scan_command(zval *object, int argc, zval *return_value);
+extern int execute_sscan_command(zval *object, int argc, zval *return_value);
 
 /* Don't include command_response.h here to avoid circular dependencies */
 
