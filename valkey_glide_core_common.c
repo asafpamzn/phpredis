@@ -48,12 +48,11 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
     arg_count = prepare_core_args(args, &cmd_args, &cmd_args_len,
                                   &allocated_strings, &allocated_count);
 
-    printf("final arg count: %d\n", arg_count);
     if (arg_count < 0)
     {
         return 0;
     }
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
     /* Execute the command */
     CommandResult *result = execute_command(
         args->glide_client,
@@ -61,7 +60,7 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
         arg_count,
         cmd_args,
         cmd_args_len);
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
     debug_print_command_result(result);
 
     /* Process result */
@@ -322,6 +321,10 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
         case CORE_ARG_TYPE_MULTI_STRING:
             total_args += args->args[i].data.multi_string_arg.count;
             break;
+        case CORE_ARG_TYPE_ARRAY:
+            /* Count elements in the array */
+            total_args += args->args[i].data.array_arg.count;
+            break;
         default:
             break;
         }
@@ -428,6 +431,49 @@ int prepare_key_value_args(core_command_args_t *args, uintptr_t **cmd_args,
                 arg_idx++;
             }
             break;
+
+        case CORE_ARG_TYPE_ARRAY:
+        {
+            /* Expand array elements into individual arguments */
+            zval *array = args->args[i].data.array_arg.array;
+            if (Z_TYPE_P(array) == IS_ARRAY)
+            {
+                HashTable *ht = Z_ARRVAL_P(array);
+                zval *element;
+
+                ZEND_HASH_FOREACH_VAL(ht, element)
+                {
+                    if (Z_TYPE_P(element) == IS_STRING)
+                    {
+                        (*cmd_args)[arg_idx] = (uintptr_t)Z_STRVAL_P(element);
+                        (*cmd_args_len)[arg_idx] = Z_STRLEN_P(element);
+                        arg_idx++;
+                    }
+                    else
+                    {
+                        /* Convert non-string to string */
+                        zend_string *str = zval_get_string(element);
+                        if (str)
+                        {
+                            size_t len = ZSTR_LEN(str);
+                            char *str_copy = emalloc(len + 1);
+                            if (str_copy)
+                            {
+                                memcpy(str_copy, ZSTR_VAL(str), len);
+                                str_copy[len] = '\0';
+                                (*cmd_args)[arg_idx] = (uintptr_t)str_copy;
+                                (*cmd_args_len)[arg_idx] = len;
+                                add_tracked_string(*allocated_strings, allocated_count, str_copy);
+                                arg_idx++;
+                            }
+                            zend_string_release(str);
+                        }
+                    }
+                }
+                ZEND_HASH_FOREACH_END();
+            }
+            break;
+        }
 
         default:
             break;
