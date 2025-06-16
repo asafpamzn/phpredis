@@ -239,125 +239,35 @@ int execute_getex_command(const void *glide_client, const char *key, size_t key_
     return execute_core_command(&args, &output, process_core_string_result);
 }
 
-/* Execute an INCR command using the Valkey Glide client */
+/* Execute an INCR command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 long execute_incr_command(const void *glide_client, const char *key, size_t key_len)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Incr;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1;
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Incr,      /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing INCR command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Get the result value */
-    long ret_val = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        ret_val = result->response->int_value;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    long result;
+    return execute_core_command(&args, &result, process_core_int_result) ? result : 0;
 }
 
-/* Execute an INCRBY command using the Valkey Glide client */
+/* Execute an INCRBY command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 long execute_incrby_command(const void *glide_client, const char *key, size_t key_len, long increment)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = IncrBy;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 2;
-    uintptr_t args[2];
-    unsigned long args_len[2];
+    /* Add increment argument */
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = increment;
+    args.arg_count = 1;
 
-    /* First argument: key */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-
-    /* Second argument: increment */
-    size_t incr_len;
-    char *incr_str = long_to_string(increment, &incr_len);
-    if (!incr_str)
-    {
-        return 0;
-    }
-    args[1] = (uintptr_t)incr_str;
-    args_len[1] = incr_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        IncrBy,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the increment string */
-    efree(incr_str);
-
-    /* Check if the command was successful */
-    if (!result)
-    {
-        return 0;
-    }
-
-    /* Check if there was an error */
-    if (result->command_error)
-    {
-        printf("Error executing INCRBY command: %s\n", result->command_error->command_error_message);
-        free_command_result(result);
-        return 0;
-    }
-
-    /* Get the result value */
-    long ret_val = 0;
-    if (result->response && result->response->response_type == Int)
-    {
-        ret_val = result->response->int_value;
-    }
-
-    /* Free the result */
-    free_command_result(result);
-
-    return ret_val;
+    long result;
+    return execute_core_command(&args, &result, process_core_int_result) ? result : 0;
 }
 
 /* Execute an INCRBYFLOAT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
