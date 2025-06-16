@@ -284,3 +284,155 @@ int execute_gettimeout_command(zval *object, int argc, zval *return_value)
 
     return 0;
 }
+
+/* Execute a SELECT command using the Valkey Glide client */
+int execute_select_command_internal(const void *glide_client, long dbindex)
+{
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Select;
+
+    /* Add database index argument */
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = dbindex;
+    args.arg_count = 1;
+
+    return execute_core_command(&args, NULL, process_core_bool_result);
+}
+
+/* Execute a SELECT command - UNIFIED IMPLEMENTATION */
+int execute_select_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    long dbindex;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Ol",
+                                     &object, redis_ce, &dbindex) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the SELECT command using the Glide client */
+    if (execute_select_command_internal(redis->glide_client, dbindex))
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+
+    return 0;
+}
+
+/* Execute a SWAPDB command using the Valkey Glide client */
+int execute_swapdb_command_internal(const void *glide_client, long db1, long db2)
+{
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = SwapDb;
+
+    /* Add db1 argument */
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = db1;
+
+    /* Add db2 argument */
+    args.args[1].type = CORE_ARG_TYPE_LONG;
+    args.args[1].data.long_arg.value = db2;
+    args.arg_count = 2;
+
+    return execute_core_command(&args, NULL, process_core_bool_result);
+}
+
+/* Execute a SWAPDB command - UNIFIED IMPLEMENTATION */
+int execute_swapdb_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    long db1, db2;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oll",
+                                     &object, redis_ce, &db1, &db2) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the SWAPDB command using the Glide client */
+    if (execute_swapdb_command_internal(redis->glide_client, db1, db2))
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+
+    return 0;
+}
+
+/* Execute a MOVE command using the Valkey Glide client */
+int execute_move_command_internal(const void *glide_client, const char *key, size_t key_len, long db, int *output_value)
+{
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Move;
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Add db argument */
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = db;
+    args.arg_count = 1;
+
+    return execute_core_command(&args, output_value, process_core_bool_result);
+}
+
+/* Execute a MOVE command - UNIFIED IMPLEMENTATION */
+int execute_move_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
+    long dbindex;
+    int result_value = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osl",
+                                     &object, redis_ce, &key, &key_len,
+                                     &dbindex) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the MOVE command using the Glide client */
+    if (execute_move_command_internal(redis->glide_client, key, key_len, dbindex, &result_value))
+    {
+        if (result_value == 1)
+        {
+            ZVAL_TRUE(return_value);
+        }
+        else
+        {
+            ZVAL_FALSE(return_value);
+        }
+        return 1;
+    }
+
+    return 0;
+}

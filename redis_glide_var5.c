@@ -94,7 +94,7 @@ int execute_get_persistent_id_command(const void *glide_client, char **result, s
 }
 
 /* Execute a CLIENT command using the Valkey Glide client */
-int execute_client_command(const void *glide_client, zval *args, int args_count, zval *return_value)
+int execute_client_command_internal(const void *glide_client, zval *args, int args_count, zval *return_value)
 {
     /* Check if client and args are valid */
     if (!glide_client || !args || args_count <= 0 || !return_value)
@@ -276,7 +276,7 @@ int execute_client_command(const void *glide_client, zval *args, int args_count,
 }
 
 /* Execute a RAWCOMMAND command using the Valkey Glide client */
-int execute_rawcommand_command(const void *glide_client, zval *args, int args_count, zval *return_value)
+int execute_rawcommand_command_internal(const void *glide_client, zval *args, int args_count, zval *return_value)
 {
     /* Check if client and args are valid */
     if (!glide_client || !args || args_count <= 0 || !return_value)
@@ -379,11 +379,103 @@ int execute_rawcommand_command(const void *glide_client, zval *args, int args_co
 }
 
 /* Execute a DBSIZE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_dbsize_command(const void *glide_client, long *output_value)
+int execute_dbsize_command_internal(const void *glide_client, long *output_value)
 {
     core_command_args_t args = {0};
     args.glide_client = glide_client;
     args.cmd_type = DBSize;
 
     return execute_core_command(&args, output_value, process_core_int_result);
+}
+
+/* Execute client command - UNIFIED IMPLEMENTATION */
+int execute_client_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    zval *z_args = NULL;
+    int arg_count = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O+",
+                                     &object, redis_ce, &z_args, &arg_count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the client command using the Glide client */
+    if (execute_client_command_internal(redis->glide_client, z_args, arg_count, return_value))
+    {
+        /* Return value already set in execute_client_command */
+        return 1;
+    }
+
+    return 0;
+}
+
+/* Execute rawcommand command - UNIFIED IMPLEMENTATION */
+int execute_rawcommand_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    zval *z_args = NULL;
+    int arg_count = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O+",
+                                     &object, redis_ce, &z_args, &arg_count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the raw command using the Glide client */
+    if (execute_rawcommand_command_internal(redis->glide_client, z_args, arg_count, return_value))
+    {
+        /* Return value already set in execute_rawcommand_command */
+        return 1;
+    }
+
+    return 0;
+}
+
+/* Execute dbSize command - UNIFIED IMPLEMENTATION */
+int execute_dbsize_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    long dbsize;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the DBSIZE command using the Glide client */
+    if (execute_dbsize_command_internal(redis->glide_client, &dbsize))
+    {
+        ZVAL_LONG(return_value, dbsize);
+        return 1;
+    }
+
+    return 0;
 }

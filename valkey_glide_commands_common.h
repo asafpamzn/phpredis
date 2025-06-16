@@ -474,4 +474,70 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         RETURN_FALSE;                                                                 \
     }
 
+#define CLIENT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, client)                                            \
+    {                                                                         \
+        if (execute_client_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define RAWCOMMAND_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, rawcommand)                                            \
+    {                                                                             \
+        if (execute_rawcommand_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        zval_dtor(return_value);                                                  \
+        RETURN_FALSE;                                                             \
+    }
+
+#define DBSIZE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, dbSize)                                            \
+    {                                                                         \
+        if (execute_dbsize_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define SELECT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, select)                                            \
+    {                                                                         \
+        if (execute_select_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define SWAPDB_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, swapdb)                                            \
+    {                                                                         \
+        if (execute_swapdb_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define MOVE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, move)                                            \
+    {                                                                       \
+        if (execute_move_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
 #endif /* VALKEY_GLIDE_COMMANDS_COMMON_H */

@@ -195,6 +195,12 @@ extern int execute_pfcount_command(zval *object, int argc, zval *return_value);
 extern int execute_pfmerge_command(zval *object, int argc, zval *return_value);
 extern int execute_gettimeout_command(zval *object, int argc, zval *return_value);
 extern int execute_getreadtimeout_command(zval *object, int argc, zval *return_value);
+extern int execute_client_command(zval *object, int argc, zval *return_value);
+extern int execute_rawcommand_command(zval *object, int argc, zval *return_value);
+extern int execute_dbsize_command(zval *object, int argc, zval *return_value);
+extern int execute_select_command(zval *object, int argc, zval *return_value);
+extern int execute_swapdb_command(zval *object, int argc, zval *return_value);
+extern int execute_move_command(zval *object, int argc, zval *return_value);
 
 /* Don't include command_response.h here to avoid circular dependencies */
 

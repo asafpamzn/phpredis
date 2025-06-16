@@ -692,3 +692,27 @@ PHP_METHOD(Redis, reset)
     // TODO
 }
 /* }}} */
+
+/* {{{ proto boolean Redis::select(int dbindex) */
+SELECT_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto boolean Redis::swapdb(int db1, int db2) */
+SWAPDB_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto boolean Redis::move(string key, int dbindex) */
+MOVE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto mixed Redis::client(string cmd, ...) */
+CLIENT_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto mixed Redis::rawcommand(string cmd, ...) */
+RAWCOMMAND_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::dbSize() */
+DBSIZE_METHOD_IMPL(Redis)
+/* }}} */
