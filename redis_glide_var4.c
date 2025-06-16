@@ -23,88 +23,35 @@
 #include <string.h>
 #include <stdio.h>
 
-/* Execute a COPY command using the Valkey Glide client */
+/* Execute a COPY command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_copy_command(const void *glide_client, const char *src, size_t src_len,
                          const char *dst, size_t dst_len, int replace)
 {
-    /* Check if client and keys are valid */
-    if (!glide_client || !src || !dst)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Copy;
+    args.key = src; /* Source key */
+    args.key_len = src_len;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = replace ? 3 : 2;
-    uintptr_t *args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    /* Destination key */
+    args.args[0].type = CORE_ARG_TYPE_STRING;
+    args.args[0].data.string_arg.value = dst;
+    args.args[0].data.string_arg.len = dst_len;
 
-    if (!args || !args_len)
-    {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
+    int arg_count = 1;
 
-    /* First argument: source key */
-    args[0] = (uintptr_t)src;
-    args_len[0] = src_len;
-
-    /* Second argument: destination key */
-    args[1] = (uintptr_t)dst;
-    args_len[1] = dst_len;
-
-    /* Third argument (optional): REPLACE */
+    /* Optional REPLACE flag */
     if (replace)
     {
-        args[2] = (uintptr_t)"REPLACE";
-        args_len[2] = 7; /* strlen("REPLACE") */
+        args.args[1].type = CORE_ARG_TYPE_STRING;
+        args.args[1].data.string_arg.value = "REPLACE";
+        args.args[1].data.string_arg.len = 7;
+        arg_count = 2;
     }
 
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Copy,      /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
+    args.arg_count = arg_count;
 
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Process the result */
-    int status = 0;
-    long output_value = 0;
-
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
-            return 0;
-        }
-
-        if (result->response)
-        {
-            if (result->response->response_type == Int)
-            {
-                output_value = result->response->int_value;
-                status = (output_value == 1);
-            }
-            else if (result->response->response_type == Ok)
-            {
-                /* Some Redis versions return OK instead of 1 */
-                status = 1;
-            }
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    return execute_core_command(&args, NULL, process_core_bool_result);
 }
 
 /* Execute an HSCAN command using the Valkey Glide client */

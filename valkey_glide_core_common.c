@@ -102,6 +102,7 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case Exec:
     case Time:
     case Role:
+    case DBSize:
         return prepare_zero_args(args, cmd_args, cmd_args_len);
 
     /* Single key operations */
@@ -144,6 +145,8 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case Rename:
     case RenameNX:
     case IncrByFloat:
+    case Move:
+    case Copy:
         return prepare_key_value_args(args, cmd_args, cmd_args_len,
                                       allocated_strings, allocated_count);
 
@@ -221,6 +224,8 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
     case Wait:
     case FlushDB:
     case FlushAll:
+    case Select:
+    case SwapDb:
         return prepare_message_args(args, cmd_args, cmd_args_len,
                                     allocated_strings, allocated_count);
 

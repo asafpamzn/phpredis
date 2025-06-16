@@ -17,6 +17,7 @@
 #include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
+#include "valkey_glide_core_common.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>
@@ -99,202 +100,52 @@ int execute_auth_command(const void *glide_client, const char *password, size_t 
     return status;
 }
 
-/* Execute a SELECT command using the Valkey Glide client */
+/* Execute a SELECT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_select_command(const void *glide_client, long database)
 {
-    /* Check if client is valid */
-    if (!glide_client)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Select;
 
-    /* Convert database index to string */
-    size_t db_len;
-    char *db_str = long_to_string(database, &db_len);
-    if (!db_str)
-    {
-        return 0;
-    }
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = database;
+    args.arg_count = 1;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 1;
-    uintptr_t args[1];
-    unsigned long args_len[1];
-
-    /* Set database index */
-    args[0] = (uintptr_t)db_str;
-    args_len[0] = db_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Select,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the database string */
-    efree(db_str);
-
-    /* Check if the command was successful */
-    int status = 0;
-
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
-            return 0;
-        }
-
-        if (result->response && result->response->response_type == Ok)
-        {
-            /* Success */
-            status = 1;
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    return execute_core_command(&args, NULL, process_core_bool_result);
 }
 
-/* Execute a SWAPDB command using the Valkey Glide client */
+/* Execute a SWAPDB command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_swapdb_command(const void *glide_client, long db1, long db2)
 {
-    /* Check if client is valid */
-    if (!glide_client)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = SwapDb;
 
-    /* Convert database indices to strings */
-    size_t db1_len, db2_len;
-    char *db1_str = long_to_string(db1, &db1_len);
-    char *db2_str = NULL;
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = db1;
+    args.args[1].type = CORE_ARG_TYPE_LONG;
+    args.args[1].data.long_arg.value = db2;
+    args.arg_count = 2;
 
-    if (!db1_str)
-    {
-        return 0;
-    }
-
-    db2_str = long_to_string(db2, &db2_len);
-    if (!db2_str)
-    {
-        efree(db1_str);
-        return 0;
-    }
-
-    /* Prepare command arguments */
-    unsigned long arg_count = 2;
-    uintptr_t args[2];
-    unsigned long args_len[2];
-
-    /* Set database indices */
-    args[0] = (uintptr_t)db1_str;
-    args_len[0] = db1_len;
-    args[1] = (uintptr_t)db2_str;
-    args_len[1] = db2_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        SwapDb,    /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the database strings */
-    efree(db1_str);
-    efree(db2_str);
-
-    /* Check if the command was successful */
-    int status = 0;
-
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
-            return 0;
-        }
-
-        if (result->response && result->response->response_type == Ok)
-        {
-            /* Success */
-            status = 1;
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    return execute_core_command(&args, NULL, process_core_bool_result);
 }
 
-/* Execute a MOVE command using the Valkey Glide client */
+/* Execute a MOVE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_move_command(const void *glide_client, const char *key, size_t key_len, long db, int *output_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key || !output_value)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = Move;
+    args.key = key;
+    args.key_len = key_len;
 
-    /* Convert database index to string */
-    size_t db_len;
-    char *db_str = long_to_string(db, &db_len);
-    if (!db_str)
-    {
-        return 0;
-    }
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = db;
+    args.arg_count = 1;
 
-    /* Prepare command arguments */
-    unsigned long arg_count = 2;
-    uintptr_t args[2];
-    unsigned long args_len[2];
-
-    /* Set arguments: key, database index */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-    args[1] = (uintptr_t)db_str;
-    args_len[1] = db_len;
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Move,      /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the database string */
-    efree(db_str);
-
-    /* Check if the command was successful */
-    int status = 0;
-    long value = 0;
-
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
-            return 0;
-        }
-
-        if (result->response && result->response->response_type == Int)
-        {
-            /* Success, set output value */
-            value = result->response->int_value;
-            *output_value = (int)value;
-            status = 1;
-        }
-        free_command_result(result);
-    }
-
-    return status;
+    long result;
+    int success = execute_core_command(&args, &result, process_core_int_result);
+    if (success)
+        *output_value = (int)result;
+    return success;
 }

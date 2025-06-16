@@ -17,6 +17,7 @@
 #include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
+#include "valkey_glide_core_common.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>
 #include <string.h>
@@ -566,24 +567,12 @@ int execute_command_method(const void *glide_client, zval *args, int args_count,
     return status;
 }
 
-/* Execute a DBSIZE command using the Valkey Glide client */
+/* Execute a DBSIZE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_dbsize_command(const void *glide_client, long *output_value)
 {
-    /* Check if client is valid */
-    if (!glide_client || !output_value)
-    {
-        return 0;
-    }
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = DBSize;
 
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        DBSize, /* command type */
-        0,      /* number of arguments */
-        NULL,   /* arguments */
-        NULL    /* argument lengths */
-    );
-
-    /* Use the generic handler to process the result */
-    return handle_int_response(result, output_value);
+    return execute_core_command(&args, output_value, process_core_int_result);
 }
