@@ -271,6 +271,36 @@ PHP_METHOD(Redis, georadiusbymember)
 }
 /* }}} */
 
+/* {{{ proto string Redis::getPersistentID() */
+PHP_METHOD(Redis, getPersistentID)
+{
+
+    RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto mixed Redis::getAuth() */
+PHP_METHOD(Redis, getAuth)
+{
+    RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto mixed Redis::command(...) */
+PHP_METHOD(Redis, command)
+{
+
+    RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto boolean Redis::auth(string password [, string username]) */
+PHP_METHOD(Redis, auth)
+{
+    RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ proto array Redis::georadiusbymember_ro(string key, string member, float radius, string unit [, array options]) */
 PHP_METHOD(Redis, georadiusbymember_ro)
 {

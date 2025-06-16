@@ -31,90 +31,6 @@ extern int execute_auth_command(const void *glide_client, const char *password, 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
-/* {{{ proto string Redis::getPersistentID() */
-PHP_METHOD(Redis, getPersistentID)
-{
-    zval *object;
-    redis_object *redis;
-    char *result = NULL;
-    size_t result_len;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-                                     &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the getPersistentID command using the Glide client */
-        if (execute_get_persistent_id_command(redis->glide_client, &result, &result_len))
-        {
-            if (result != NULL)
-            {
-                RETVAL_STRINGL(result, result_len);
-                efree(result);
-            }
-            else
-            {
-                RETURN_NULL();
-            }
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
-/* }}} */
-
-/* {{{ proto mixed Redis::getAuth() */
-PHP_METHOD(Redis, getAuth)
-{
-    zval *object;
-    redis_object *redis;
-    char *result = NULL;
-    size_t result_len;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-                                     &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the getAuth command using the Glide client */
-        if (execute_get_auth_command(redis->glide_client, &result, &result_len))
-        {
-            if (result != NULL)
-            {
-                RETVAL_STRINGL(result, result_len);
-                efree(result);
-            }
-            else
-            {
-                RETURN_NULL();
-            }
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
-/* }}} */
-
 /* {{{ proto mixed Redis::client(string cmd, ...) */
 PHP_METHOD(Redis, client)
 {
@@ -185,41 +101,6 @@ PHP_METHOD(Redis, rawcommand)
 }
 /* }}} */
 
-/* {{{ proto mixed Redis::command(...) */
-PHP_METHOD(Redis, command)
-{
-    zval *object;
-    redis_object *redis;
-    zval *z_args = NULL;
-    int argc = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O*",
-                                     &object, redis_ce, &z_args, &argc) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the COMMAND command using the Glide client */
-        if (execute_command_method(redis->glide_client, z_args, argc, return_value))
-        {
-            /* Return value already set in execute_command_method */
-            return;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
-/* }}} */
-
 /* {{{ proto long Redis::dbSize() */
 PHP_METHOD(Redis, dbSize)
 {
@@ -245,43 +126,6 @@ PHP_METHOD(Redis, dbSize)
         if (execute_dbsize_command(redis->glide_client, &dbsize))
         {
             RETURN_LONG(dbsize);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
-/* }}} */
-
-/* {{{ proto boolean Redis::auth(string password [, string username]) */
-PHP_METHOD(Redis, auth)
-{
-    zval *object;
-    redis_object *redis;
-    char *password = NULL;
-    size_t password_len;
-    char *username = NULL;
-    size_t username_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|s",
-                                     &object, redis_ce, &password, &password_len,
-                                     &username, &username_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the AUTH command using the Glide client */
-        if (execute_auth_command(redis->glide_client, password, password_len, username, username_len))
-        {
-            RETURN_TRUE;
         }
         else
         {
