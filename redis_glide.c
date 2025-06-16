@@ -392,8 +392,156 @@ int execute_bitpos_command(zval *object, int argc, zval *return_value)
     return 0;
 }
 
-/* Execute a SET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_set_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, long expire, zval *opts, char **old_val, size_t *old_val_len)
+/* Execute a SET command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_set_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    zval *z_value, *z_expire = NULL, *z_opts = NULL;
+    char *key = NULL, *val = NULL;
+    size_t key_len, val_len;
+    double expire = 0;
+    zend_long expire_int = 0;
+    zval *z_set_opts = NULL; /* Will hold our options either from z_expire or z_opts */
+    int free_val = 0;        /* Flag to track if we need to free val */
+    char *old_val = NULL;    /* For storing GET response */
+    size_t old_val_len = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osz|za",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_value, &z_expire, &z_opts) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Check if expire parameter was provided */
+    if (z_expire != NULL)
+    {
+        switch (Z_TYPE_P(z_expire))
+        {
+        case IS_DOUBLE:
+            /* Double - use as timeout */
+            expire = Z_DVAL_P(z_expire);
+            expire_int = (zend_long)expire;
+            break;
+        case IS_LONG:
+            /* Long - use as timeout */
+            expire = (double)Z_LVAL_P(z_expire);
+            expire_int = Z_LVAL_P(z_expire);
+            break;
+        case IS_ARRAY:
+            /* Array - use as options */
+            z_set_opts = z_expire;
+            break;
+        case IS_NULL:
+            /* NULL - ignore */
+            break;
+        default:
+            /* Not a supported type - return false */
+            return 0;
+        }
+    }
+
+    /* If options were passed in z_opts, use those instead */
+    if (z_opts != NULL && Z_TYPE_P(z_opts) == IS_ARRAY)
+    {
+        z_set_opts = z_opts;
+    }
+
+    /* Convert value based on its type */
+    switch (Z_TYPE_P(z_value))
+    {
+    case IS_STRING:
+        /* It's already a string, use directly */
+        val = Z_STRVAL_P(z_value);
+        val_len = Z_STRLEN_P(z_value);
+        break;
+    case IS_LONG:
+        /* Convert integer to string */
+        val = long_to_string(Z_LVAL_P(z_value), &val_len);
+        free_val = 1; // We'll need to free this
+        break;
+    case IS_DOUBLE:
+        /* Convert float to string */
+        val = double_to_string(Z_DVAL_P(z_value), &val_len);
+        free_val = 1; // We'll need to free this
+        break;
+    case IS_TRUE:
+        /* Convert boolean TRUE to "1" */
+        val = estrdup("1");
+        val_len = 1;
+        free_val = 1;
+        break;
+    case IS_FALSE:
+        /* Convert boolean FALSE to "0" */
+        val = estrdup("0");
+        val_len = 1;
+        free_val = 1;
+        break;
+    case IS_NULL:
+        /* Convert NULL to empty string */
+        val = estrdup("");
+        val_len = 0;
+        free_val = 1;
+        break;
+    default:
+        /* Unsupported type */
+        return 0;
+    }
+
+    /* Check if conversion succeeded */
+    if (!val)
+    {
+        return 0;
+    }
+
+    /* Execute the SET command using the internal helper function */
+    int result = execute_set_command_internal(redis->glide_client, key, key_len, val, val_len,
+                                              expire_int, z_set_opts, &old_val, &old_val_len);
+
+    /* Free the allocated string if needed */
+    if (free_val)
+    {
+        efree(val);
+    }
+
+    /* Process the result */
+    switch (result)
+    {
+    case 1: /* Success */
+        ZVAL_TRUE(return_value);
+        return 1;
+    case 0: /* Not set (NX/XX/IFEQ condition not met) */
+        ZVAL_FALSE(return_value);
+        return 1;
+    case 2: /* GET option returned a value */
+        /* If GET option was used and old value was returned */
+        if (old_val != NULL)
+        {
+            /* Return the old value */
+            ZVAL_STRINGL(return_value, old_val, old_val_len);
+            efree(old_val); /* Free the allocated old value */
+            return 1;
+        }
+        /* Fallback to returning TRUE when GET is used but handling fails */
+        ZVAL_TRUE(return_value);
+        return 1;
+    default: /* Error */
+        ZVAL_FALSE(return_value);
+        return 0;
+    }
+    return 0; /* Should not reach here, but just in case */
+}
+
+/* Execute a SET command using the Valkey Glide client - INTERNAL HELPER FUNCTION */
+int execute_set_command_internal(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, long expire, zval *opts, char **old_val, size_t *old_val_len)
 {
     core_command_args_t args = {0};
     args.glide_client = glide_client;
@@ -454,8 +602,8 @@ int execute_setex_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Call execute_set_command with expire in seconds (EX) and no special options */
-    int result = execute_set_command(redis->glide_client, key, key_len, val, val_len, expire, NULL, NULL, NULL);
+    /* Call execute_set_command_internal with expire in seconds (EX) and no special options */
+    int result = execute_set_command_internal(redis->glide_client, key, key_len, val, val_len, expire, NULL, NULL, NULL);
 
     if (result == 1)
     {
@@ -499,8 +647,8 @@ int execute_psetex_command(zval *object, int argc, zval *return_value)
     /* Add PX option with expire value */
     add_assoc_long_ex(&options, "PX", sizeof("PX") - 1, expire);
 
-    /* Call execute_set_command with the PX option */
-    int result = execute_set_command(redis->glide_client, key, key_len, val, val_len, 0, &options, NULL, NULL);
+    /* Call execute_set_command_internal with the PX option */
+    int result = execute_set_command_internal(redis->glide_client, key, key_len, val, val_len, 0, &options, NULL, NULL);
 
     /* Clean up options array */
     zval_dtor(&options);
@@ -548,8 +696,8 @@ int execute_setnx_command(zval *object, int argc, zval *return_value)
     ZVAL_STRING(&nx_option, "NX");
     add_next_index_zval(&options, &nx_option);
 
-    /* Call execute_set_command with the NX option and no expiration */
-    int result = execute_set_command(redis->glide_client, key, key_len, val, val_len, 0, &options, NULL, NULL);
+    /* Call execute_set_command_internal with the NX option and no expiration */
+    int result = execute_set_command_internal(redis->glide_client, key, key_len, val, val_len, 0, &options, NULL, NULL);
 
     /* Clean up options array */
     zval_dtor(&options);
@@ -1488,10 +1636,10 @@ int execute_getset_command(zval *object, int argc, zval *return_value)
     add_next_index_string(&z_opts, "GET");
 
     /* Execute the SET command with GET option using the Glide client */
-    int result = execute_set_command(redis->glide_client, key, key_len, val, val_len,
-                                     0,       /* No expiry */
-                                     &z_opts, /* Use GET option */
-                                     &response, &response_len);
+    int result = execute_set_command_internal(redis->glide_client, key, key_len, val, val_len,
+                                              0,       /* No expiry */
+                                              &z_opts, /* Use GET option */
+                                              &response, &response_len);
 
     /* Free the zval array */
     zval_dtor(&z_opts);

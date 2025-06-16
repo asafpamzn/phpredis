@@ -100,7 +100,8 @@ extern int execute_bitop_command(zval *object, int argc, zval *return_value);
 extern int execute_bitpos_command(zval *object, int argc, zval *return_value);
 
 /* String operations */
-extern int execute_set_command(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, long expire, zval *opts, char **old_val, size_t *old_val_len);
+extern int execute_set_command_internal(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, long expire, zval *opts, char **old_val, size_t *old_val_len);
+extern int execute_set_command(zval *object, int argc, zval *return_value);
 extern int execute_setex_command(zval *object, int argc, zval *return_value);
 extern int execute_psetex_command(zval *object, int argc, zval *return_value);
 extern int execute_setnx_command(zval *object, int argc, zval *return_value);

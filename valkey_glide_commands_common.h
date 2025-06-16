@@ -254,6 +254,17 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         RETURN_FALSE;                                                         \
     }
 
+#define SET_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, set)                                            \
+    {                                                                      \
+        if (execute_set_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                  \
+            return;                                                        \
+        }                                                                  \
+        zval_dtor(return_value);                                           \
+        RETURN_FALSE;                                                      \
+    }
+
 #define LCS_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, lcs)                                            \
     {                                                                      \

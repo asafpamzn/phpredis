@@ -226,33 +226,6 @@ create_redis_object(zend_class_entry *ce)
 static zend_always_inline RedisSock *
 redis_sock_get_instance(zval *id, int no_throw)
 {
-#if 0
-    redis_object *redis;
-
-    if (Z_TYPE_P(id) == IS_OBJECT)
-    {
-        redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, id);
-        if (redis->sock)
-        {
-            /* Initialize the Valkey Glide client if it doesn't exist */
-            if (redis->sock->status >= REDIS_SOCK_STATUS_CONNECTED && !redis->glide_client)
-            {
-                /* Create a Valkey Glide client using the socket information */
-                //  redis->glide_client = create_glide_client(
-                //    ZSTR_VAL(redis->sock->host),
-                //   redis->sock->port,
-                //  redis->sock->user ? ZSTR_VAL(redis->sock->user) : NULL,
-                // redis->sock->pass ? ZSTR_VAL(redis->sock->pass) : NULL);
-            }
-            return redis->sock;
-        }
-    }
-    // Throw an exception unless we've been requested not to
-    if (!no_throw)
-    {
-        REDIS_THROW_EXCEPTION("Redis server went away", 0);
-    }
-#endif
 
     return NULL;
 }
