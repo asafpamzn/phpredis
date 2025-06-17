@@ -720,3 +720,19 @@ DBSIZE_METHOD_IMPL(Redis)
 /* {{{ proto int Redis::wait(int numreplicas, int timeout) */
 WAIT_METHOD_IMPL(Redis)
 /* }}} */
+
+/* {{{ proto mixed Redis::config(string operation, mixed key [, mixed value]) */
+CONFIG_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto mixed Redis::function(string cmd, ...) */
+FUNCTION_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto Redis Redis::multi() */
+MULTI_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto bool Redis::discard() */
+DISCARD_METHOD_IMPL(Redis)
+/* }}} */

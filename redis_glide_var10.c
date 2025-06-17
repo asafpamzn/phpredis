@@ -69,136 +69,199 @@ int execute_wait_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a FUNCTION command using the Valkey Glide client */
-int execute_function_command(const void *glide_client, zval *args, int args_count, zval *return_value)
+int execute_function_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client and args are valid */
-    if (!glide_client || !args || args_count <= 0)
+    redis_object *redis;
+    zval *z_args;
+    int args_count;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O*",
+                                     &object, redis_ce, &z_args, &args_count) == FAILURE)
     {
         return 0;
     }
 
-    /* Prepare command arguments */
-    unsigned long arg_count = args_count;
-    uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    if (!cmd_args || !args_len)
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
     {
-        if (cmd_args)
-            efree(cmd_args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Convert arguments to strings if needed */
-    int i;
-    for (i = 0; i < args_count; i++)
-    {
-        zval *arg = &args[i];
-
-        /* If not string, convert to one */
-        if (Z_TYPE_P(arg) != IS_STRING)
+        /* Check if args are valid */
+        if (!z_args || args_count <= 0)
         {
-            zval temp;
-            ZVAL_COPY(&temp, arg);
-            convert_to_string(&temp);
-            cmd_args[i] = (uintptr_t)Z_STRVAL(temp);
-            args_len[i] = Z_STRLEN(temp);
-            zval_dtor(&temp);
-        }
-        else
-        {
-            cmd_args[i] = (uintptr_t)Z_STRVAL_P(arg);
-            args_len[i] = Z_STRLEN_P(arg);
-        }
-    }
-
-    /* Set the first argument as "FUNCTION" */
-    const char *function_cmd = "FUNCTION";
-    uintptr_t *final_args = (uintptr_t *)emalloc((arg_count + 1) * sizeof(uintptr_t));
-    unsigned long *final_args_len = (unsigned long *)emalloc((arg_count + 1) * sizeof(unsigned long));
-
-    if (!final_args || !final_args_len)
-    {
-        if (cmd_args)
-            efree(cmd_args);
-        if (args_len)
-            efree(args_len);
-        if (final_args)
-            efree(final_args);
-        if (final_args_len)
-            efree(final_args_len);
-        return 0;
-    }
-
-    final_args[0] = (uintptr_t)function_cmd;
-    final_args_len[0] = strlen(function_cmd);
-
-    /* Copy the rest of the arguments */
-    for (i = 0; i < arg_count; i++)
-    {
-        final_args[i + 1] = cmd_args[i];
-        final_args_len[i + 1] = args_len[i];
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        CustomCommand, /* FUNCTION commands use custom command type */
-        arg_count + 1, /* FUNCTION command + args */
-        final_args,    /* arguments */
-        final_args_len /* argument lengths */
-    );
-
-    /* Free the argument arrays */
-    efree(cmd_args);
-    efree(args_len);
-    efree(final_args);
-    efree(final_args_len);
-
-    /* Handle the result directly */
-    int status = 0;
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
             return 0;
         }
 
-        if (result->response)
+        /* Prepare command arguments */
+        unsigned long arg_count = args_count;
+        uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+        unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+        if (!cmd_args || !args_len)
         {
-            /* FUNCTION can return various types based on subcommand */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
-            free_command_result(result);
-            return status;
+            if (cmd_args)
+                efree(cmd_args);
+            if (args_len)
+                efree(args_len);
+            return 0;
         }
-        free_command_result(result);
+
+        /* Convert arguments to strings if needed */
+        int i;
+        for (i = 0; i < args_count; i++)
+        {
+            zval *arg = &z_args[i];
+
+            /* If not string, convert to one */
+            if (Z_TYPE_P(arg) != IS_STRING)
+            {
+                zval temp;
+                ZVAL_COPY(&temp, arg);
+                convert_to_string(&temp);
+                cmd_args[i] = (uintptr_t)Z_STRVAL(temp);
+                args_len[i] = Z_STRLEN(temp);
+                zval_dtor(&temp);
+            }
+            else
+            {
+                cmd_args[i] = (uintptr_t)Z_STRVAL_P(arg);
+                args_len[i] = Z_STRLEN_P(arg);
+            }
+        }
+
+        /* Set the first argument as "FUNCTION" */
+        const char *function_cmd = "FUNCTION";
+        uintptr_t *final_args = (uintptr_t *)emalloc((arg_count + 1) * sizeof(uintptr_t));
+        unsigned long *final_args_len = (unsigned long *)emalloc((arg_count + 1) * sizeof(unsigned long));
+
+        if (!final_args || !final_args_len)
+        {
+            if (cmd_args)
+                efree(cmd_args);
+            if (args_len)
+                efree(args_len);
+            if (final_args)
+                efree(final_args);
+            if (final_args_len)
+                efree(final_args_len);
+            return 0;
+        }
+
+        final_args[0] = (uintptr_t)function_cmd;
+        final_args_len[0] = strlen(function_cmd);
+
+        /* Copy the rest of the arguments */
+        for (i = 0; i < arg_count; i++)
+        {
+            final_args[i + 1] = cmd_args[i];
+            final_args_len[i + 1] = args_len[i];
+        }
+
+        /* Execute the command */
+        CommandResult *result = execute_command(
+            redis->glide_client,
+            CustomCommand, /* FUNCTION commands use custom command type */
+            arg_count + 1, /* FUNCTION command + args */
+            final_args,    /* arguments */
+            final_args_len /* argument lengths */
+        );
+
+        /* Free the argument arrays */
+        efree(cmd_args);
+        efree(args_len);
+        efree(final_args);
+        efree(final_args_len);
+
+        /* Handle the result directly */
+        int status = 0;
+        if (result)
+        {
+            if (result->command_error)
+            {
+                /* Command failed */
+                free_command_result(result);
+                return 0;
+            }
+
+            if (result->response)
+            {
+                /* FUNCTION can return various types based on subcommand */
+                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+                free_command_result(result);
+                return status;
+            }
+            free_command_result(result);
+        }
     }
 
     return 0;
 }
 
 /* Execute a MULTI command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_multi_command(const void *glide_client)
+int execute_multi_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = Multi;
+    redis_object *redis;
 
-    return execute_core_command(&args, NULL, process_core_bool_result);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = Multi;
+
+        if (execute_core_command(&args, NULL, process_core_bool_result))
+        {
+            /* Return $this */
+            ZVAL_COPY(return_value, object);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute a DISCARD command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_discard_command(const void *glide_client)
+int execute_discard_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = Discard;
+    redis_object *redis;
 
-    return execute_core_command(&args, NULL, process_core_bool_result);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = Discard;
+
+        if (execute_core_command(&args, NULL, process_core_bool_result))
+        {
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute an EXEC command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
