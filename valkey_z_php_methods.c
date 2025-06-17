@@ -847,3 +847,91 @@ EXPIREMEMBER_METHOD_IMPL(Redis)
 /* {{{ proto bool Redis::expirememberat(string key, string member, long timestamp) */
 EXPIREMEMBERAT_METHOD_IMPL(Redis)
 /* }}} */
+
+/* {{{ proto boolean Redis::watch(string key1, string key2...) */
+WATCH_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto boolean Redis::unwatch() */
+UNWATCH_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto mixed Redis::acl(string $op, ...) */
+ACL_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto double Redis::incrByFloat(string key, double value) */
+INCRBYFLOAT_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto long Redis::incrBy(string key, long value) */
+INCRBY_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto long Redis::incr(string key, [long value]) */
+INCR_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto string Redis::getEx(string key, array opts) */
+GETEX_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto string Redis::getDel(string key) */
+GETDEL_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto string Redis::getWithMeta(string key) */
+GETWITHMETA_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto boolean Redis::renameNx(string key_src, string key_dst) */
+RENAMENX_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto boolean Redis::rename(string key_src, string key_dst) */
+RENAME_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::unlink(string key | array keys) */
+UNLINK_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto long Redis::touch(string key | array keys) */
+TOUCH_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto long Redis::exists(string key | array keys) */
+EXISTS_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto long Redis::decrBy(string key, long value) */
+DECRBY_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto long Redis::decr(string key, [long value]) */
+DECR_METHOD_IMPL(Redis)
+/* }}} */
+/* {{{ proto array Redis::mget(array keys) */
+MGET_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto boolean Redis::flushDB([boolean async]) */
+FLUSHDB_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto boolean Redis::flushAll([boolean async]) */
+FLUSHALL_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::time() */
+TIME_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::role() */
+ROLE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string Redis::serverName() */
+SERVERNAME_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string Redis::serverVersion() */
+SERVERVERSION_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::scan(long &iterator [, string pattern, long count]) */
+SCAN_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::sscan(string key, long &iterator [, string pattern, long count]) */
+SSCAN_METHOD_IMPL(Redis)
+/* }}} */

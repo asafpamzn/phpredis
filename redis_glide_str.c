@@ -925,9 +925,6 @@ int execute_sortdesc_command(zval *object, int argc, zval *return_value)
 int execute_sortdescalpha_command(zval *object, int argc, zval *return_value)
 {
 
-    return 0;
-}
-#if 0
     redis_object *redis;
     char *key = NULL;
     size_t key_len = 0;
@@ -990,5 +987,18 @@ int execute_sortdescalpha_command(zval *object, int argc, zval *return_value)
         if (cmd_result->response->response_type == Array)
         {
             array_init(return_value);
-            ret_val = command_response_to_zval(cmd_result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE
-#endif
+            ret_val = command_response_to_zval(cmd_result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+        }
+        else if (cmd_result->response->response_type == Null)
+        {
+            /* Empty array */
+            array_init(return_value);
+            ret_val = 1;
+        }
+
+        free_command_result(cmd_result);
+        return ret_val;
+    }
+
+    return 0;
+}

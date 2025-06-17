@@ -21,19 +21,3 @@
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
-
-/* {{{ proto boolean Redis::flushDB([boolean async]) */
-FLUSHDB_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto boolean Redis::flushAll([boolean async]) */
-FLUSHALL_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto array Redis::time() */
-TIME_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto array Redis::role() */
-ROLE_METHOD_IMPL(Redis)
-/* }}} */

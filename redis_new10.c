@@ -21,15 +21,3 @@
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
-
-/* {{{ proto boolean Redis::watch(string key1, string key2...) */
-WATCH_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto boolean Redis::unwatch() */
-UNWATCH_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto mixed Redis::acl(string $op, ...) */
-ACL_METHOD_IMPL(Redis)
-/* }}} */

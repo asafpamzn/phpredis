@@ -123,10 +123,6 @@ int execute_rename_command(zval *object, int argc, zval *return_value)
     }
 }
 
-/* {{{ proto boolean Redis::rename(string key_src, string key_dst) */
-RENAME_METHOD_IMPL(Redis)
-/* }}} */
-
 /* Execute a RENAMENX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_renamenx_command(zval *object, int argc, zval *return_value)
 {
@@ -177,10 +173,6 @@ int execute_renamenx_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 }
-
-/* {{{ proto boolean Redis::renameNx(string key_src, string key_dst) */
-RENAMENX_METHOD_IMPL(Redis)
-/* }}} */
 
 /* Execute a GETWITHMETA command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_getwithmeta_command(zval *object, int argc, zval *return_value)
@@ -242,10 +234,6 @@ int execute_getwithmeta_command(zval *object, int argc, zval *return_value)
     }
 }
 
-/* {{{ proto string Redis::getWithMeta(string key) */
-GETWITHMETA_METHOD_IMPL(Redis)
-/* }}} */
-
 /* Execute a GETDEL command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_getdel_command(zval *object, int argc, zval *return_value)
 {
@@ -305,10 +293,6 @@ int execute_getdel_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 }
-
-/* {{{ proto string Redis::getDel(string key) */
-GETDEL_METHOD_IMPL(Redis)
-/* }}} */
 
 /* Execute a GETEX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_getex_command(zval *object, int argc, zval *return_value)
@@ -377,10 +361,6 @@ int execute_getex_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 }
-
-/* {{{ proto string Redis::getEx(string key, array opts) */
-GETEX_METHOD_IMPL(Redis)
-/* }}} */
 
 /* Execute an INCR command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_incr_command(zval *object, int argc, zval *return_value)
@@ -464,10 +444,6 @@ int execute_incr_command(zval *object, int argc, zval *return_value)
     return 1;
 }
 
-/* {{{ proto long Redis::incr(string key, [long value]) */
-INCR_METHOD_IMPL(Redis)
-/* }}} */
-
 /* Execute an INCRBY command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_incrby_command(zval *object, int argc, zval *return_value)
 {
@@ -516,10 +492,6 @@ int execute_incrby_command(zval *object, int argc, zval *return_value)
     return 1;
 }
 
-/* {{{ proto long Redis::incrBy(string key, long value) */
-INCRBY_METHOD_IMPL(Redis)
-/* }}} */
-
 /* Execute an INCRBYFLOAT command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_incrbyfloat_command(zval *object, int argc, zval *return_value)
 {
@@ -565,10 +537,6 @@ int execute_incrbyfloat_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 }
-
-/* {{{ proto double Redis::incrByFloat(string key, double value) */
-INCRBYFLOAT_METHOD_IMPL(Redis)
-/* }}} */
 
 /* Execute a DECR command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_decr_command(zval *object, int argc, zval *return_value)
@@ -648,10 +616,6 @@ int execute_decr_command(zval *object, int argc, zval *return_value)
     return 0;
 }
 
-/* {{{ proto long Redis::decr(string key, [long value]) */
-DECR_METHOD_IMPL(Redis)
-/* }}} */
-
 /* Execute a DECRBY command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_decrby_command(zval *object, int argc, zval *return_value)
 {
@@ -699,10 +663,6 @@ int execute_decrby_command(zval *object, int argc, zval *return_value)
     }
 }
 
-/* {{{ proto long Redis::decrBy(string key, long value) */
-DECRBY_METHOD_IMPL(Redis)
-/* }}} */
-
 /* Execute an MGET command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_mget_command(zval *object, int argc, zval *return_value)
 {
@@ -748,10 +708,6 @@ int execute_mget_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 }
-
-/* {{{ proto array Redis::mget(array keys) */
-MGET_METHOD_IMPL(Redis)
-/* }}} */
 
 /* Execute an EXISTS command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_exists_command(zval *object, int argc, zval *return_value)
@@ -821,10 +777,6 @@ int execute_exists_command(zval *object, int argc, zval *return_value)
         }
     }
 }
-
-/* {{{ proto long Redis::exists(string key | array keys) */
-EXISTS_METHOD_IMPL(Redis)
-/* }}} */
 
 /* Execute a TOUCH command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_touch_command(zval *object, int argc, zval *return_value)
@@ -896,10 +848,6 @@ int execute_touch_command(zval *object, int argc, zval *return_value)
     }
 }
 
-/* {{{ proto long Redis::touch(string key | array keys) */
-TOUCH_METHOD_IMPL(Redis)
-/* }}} */
-
 /* Execute an UNLINK command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_unlink_command(zval *object, int argc, zval *return_value)
 {
@@ -942,7 +890,3 @@ int execute_unlink_command(zval *object, int argc, zval *return_value)
 
     return 0;
 }
-
-/* {{{ proto long Redis::unlink(string key | array keys) */
-UNLINK_METHOD_IMPL(Redis)
-/* }}} */

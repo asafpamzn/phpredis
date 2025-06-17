@@ -20,19 +20,3 @@
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
-
-/* {{{ proto string Redis::serverName() */
-SERVERNAME_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto string Redis::serverVersion() */
-SERVERVERSION_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto array Redis::scan(long &iterator [, string pattern, long count]) */
-SCAN_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto array Redis::sscan(string key, long &iterator [, string pattern, long count]) */
-SSCAN_METHOD_IMPL(Redis)
-/* }}} */

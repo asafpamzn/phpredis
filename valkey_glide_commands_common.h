@@ -65,6 +65,21 @@ extern int execute_sortdesc_command(zval *object, int argc, zval *return_value);
 extern int execute_sortdescalpha_command(zval *object, int argc, zval *return_value);
 extern int execute_expiremember_command(zval *object, int argc, zval *return_value);
 extern int execute_expirememberat_command(zval *object, int argc, zval *return_value);
+int execute_mget_command(zval *object, int argc, zval *return_value);
+int execute_rename_command(zval *object, int argc, zval *return_value);
+int execute_renamenx_command(zval *object, int argc, zval *return_value);
+int execute_getwithmeta_command(zval *object, int argc, zval *return_value);
+int execute_getdel_command(zval *object, int argc, zval *return_value);
+int execute_getex_command(zval *object, int argc, zval *return_value);
+int execute_incr_command(zval *object, int argc, zval *return_value);
+int execute_incrby_command(zval *object, int argc, zval *return_value);
+int execute_incrbyfloat_command(zval *object, int argc, zval *return_value);
+int execute_decr_command(zval *object, int argc, zval *return_value);
+int execute_decrby_command(zval *object, int argc, zval *return_value);
+int execute_mget_command(zval *object, int argc, zval *return_value);
+int execute_exists_command(zval *object, int argc, zval *return_value);
+int execute_touch_command(zval *object, int argc, zval *return_value);
+int execute_unlink_command(zval *object, int argc, zval *return_value);
 
 /* DEL command uses different signature - handled separately */
 
