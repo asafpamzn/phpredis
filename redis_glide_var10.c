@@ -800,3 +800,758 @@ int execute_restore_command(zval *object, int argc, zval *return_value)
 
     return 0;
 }
+
+/* Execute a CONFIG command using the Valkey Glide client */
+int execute_config_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *operation = NULL;
+    size_t operation_len;
+    zval *key = NULL, *value = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|z!z!",
+                                     &object, redis_ce, &operation, &operation_len,
+                                     &key, &value) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Check if operation is valid */
+        if (!operation)
+        {
+            return 0;
+        }
+
+        /* Determine the CONFIG operation type */
+        enum RequestType command_type;
+
+        if (strncasecmp(operation, "GET", operation_len) == 0)
+        {
+            command_type = ConfigGet;
+        }
+        else if (strncasecmp(operation, "SET", operation_len) == 0)
+        {
+            command_type = ConfigSet;
+        }
+        else if (strncasecmp(operation, "RESETSTAT", operation_len) == 0)
+        {
+            command_type = ConfigResetStat;
+        }
+        else if (strncasecmp(operation, "REWRITE", operation_len) == 0)
+        {
+            command_type = ConfigRewrite;
+        }
+        else
+        {
+            php_error_docref(NULL, E_WARNING, "Unknown CONFIG operation '%s'", operation);
+            return 0;
+        }
+
+        /* Prepare command arguments */
+        unsigned long arg_count = 0;
+        uintptr_t *args = NULL;
+        unsigned long *args_len = NULL;
+        char **temp_strings = NULL;
+        int temp_string_count = 0;
+
+        /* For CONFIG GET */
+        if (command_type == ConfigGet)
+        {
+            if (!key)
+            {
+                php_error_docref(NULL, E_WARNING, "CONFIG GET requires a parameter");
+                return 0;
+            }
+
+            /* Handle string or array parameter */
+            if (Z_TYPE_P(key) == IS_STRING)
+            {
+                arg_count = 1;
+                args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+                args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+                args[0] = (uintptr_t)Z_STRVAL_P(key);
+                args_len[0] = Z_STRLEN_P(key);
+            }
+            else if (Z_TYPE_P(key) == IS_ARRAY)
+            {
+                HashTable *ht = Z_ARRVAL_P(key);
+                arg_count = zend_hash_num_elements(ht);
+
+                if (arg_count == 0)
+                {
+                    php_error_docref(NULL, E_WARNING, "CONFIG GET array cannot be empty");
+                    return 0;
+                }
+
+                args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+                args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+                temp_strings = (char **)ecalloc(arg_count, sizeof(char *));
+
+                zval *z_param;
+                int i = 0;
+                ZEND_HASH_FOREACH_VAL(ht, z_param)
+                {
+                    zval temp;
+                    ZVAL_COPY(&temp, z_param);
+                    convert_to_string(&temp);
+
+                    temp_strings[temp_string_count] = estrdup(Z_STRVAL(temp));
+                    args[i] = (uintptr_t)temp_strings[temp_string_count];
+                    args_len[i] = Z_STRLEN(temp);
+                    temp_string_count++;
+                    i++;
+
+                    zval_dtor(&temp);
+                }
+                ZEND_HASH_FOREACH_END();
+            }
+            else
+            {
+                php_error_docref(NULL, E_WARNING, "CONFIG GET parameter must be a string or array");
+                return 0;
+            }
+        }
+        /* For CONFIG SET */
+        else if (command_type == ConfigSet)
+        {
+            if (!key || (Z_TYPE_P(key) != IS_ARRAY && !value))
+            {
+                php_error_docref(NULL, E_WARNING, "CONFIG SET requires key and value parameters");
+                return 0;
+            }
+
+            /* Handle two strings or an array */
+            if (Z_TYPE_P(key) == IS_STRING && Z_TYPE_P(value) != IS_NULL)
+            {
+                /* CONFIG SET key value */
+                arg_count = 2;
+                args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+                args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+                temp_strings = (char **)ecalloc(2, sizeof(char *));
+
+                /* Key */
+                args[0] = (uintptr_t)Z_STRVAL_P(key);
+                args_len[0] = Z_STRLEN_P(key);
+
+                /* Value */
+                zval temp;
+                ZVAL_COPY(&temp, value);
+                convert_to_string(&temp);
+
+                temp_strings[0] = estrdup(Z_STRVAL(temp));
+                args[1] = (uintptr_t)temp_strings[0];
+                args_len[1] = Z_STRLEN(temp);
+                temp_string_count = 1;
+
+                zval_dtor(&temp);
+            }
+            else if (Z_TYPE_P(key) == IS_ARRAY && value == NULL)
+            {
+                /* CONFIG SET from array */
+                HashTable *ht = Z_ARRVAL_P(key);
+                arg_count = zend_hash_num_elements(ht) * 2;
+
+                if (arg_count == 0)
+                {
+                    php_error_docref(NULL, E_WARNING, "CONFIG SET array cannot be empty");
+                    return 0;
+                }
+
+                args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+                args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+                temp_strings = (char **)ecalloc(zend_hash_num_elements(ht), sizeof(char *));
+
+                zend_string *zkey;
+                zval *zvalue;
+                int i = 0;
+                ZEND_HASH_FOREACH_STR_KEY_VAL(ht, zkey, zvalue)
+                {
+                    if (!zkey)
+                    {
+                        php_error_docref(NULL, E_WARNING, "CONFIG SET array must be associative");
+                        goto cleanup;
+                    }
+
+                    /* Add key */
+                    args[i] = (uintptr_t)ZSTR_VAL(zkey);
+                    args_len[i] = ZSTR_LEN(zkey);
+                    i++;
+
+                    /* Add value */
+                    zval temp;
+                    ZVAL_COPY(&temp, zvalue);
+                    convert_to_string(&temp);
+
+                    temp_strings[temp_string_count] = estrdup(Z_STRVAL(temp));
+                    args[i] = (uintptr_t)temp_strings[temp_string_count];
+                    args_len[i] = Z_STRLEN(temp);
+                    temp_string_count++;
+                    i++;
+
+                    zval_dtor(&temp);
+                }
+                ZEND_HASH_FOREACH_END();
+            }
+            else
+            {
+                php_error_docref(NULL, E_WARNING, "CONFIG SET requires two strings or an array");
+                return 0;
+            }
+        }
+        /* CONFIG RESETSTAT and CONFIG REWRITE have no additional arguments */
+        else if (command_type == ConfigResetStat || command_type == ConfigRewrite)
+        {
+            arg_count = 0; /* No arguments needed */
+            args = NULL;
+            args_len = NULL;
+        }
+        else
+        {
+            php_error_docref(NULL, E_WARNING, "Unknown CONFIG operation '%s'", operation);
+            return 0;
+        }
+
+        /* Execute the command */
+        CommandResult *result = execute_command(
+            redis->glide_client,
+            command_type,
+            arg_count,
+            args,
+            args_len);
+
+        /* Free temporary strings */
+        if (temp_strings)
+        {
+            for (int i = 0; i < temp_string_count; i++)
+            {
+                if (temp_strings[i])
+                    efree(temp_strings[i]);
+            }
+            efree(temp_strings);
+        }
+
+        /* Free the argument arrays */
+        if (args)
+            efree(args);
+        if (args_len)
+            efree(args_len);
+
+        /* Handle the result */
+        int status = 0;
+        if (result)
+        {
+            if (result->command_error)
+            {
+                /* Command failed */
+                free_command_result(result);
+                return 0;
+            }
+
+            if (result->response)
+            {
+                if (command_type == ConfigGet)
+                {
+                    /* CONFIG GET returns a Map - convert to associative array */
+                    status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_ASSOSIATIVE_ARRAY, false);
+                }
+                else
+                {
+                    /* CONFIG SET/RESETSTAT/REWRITE return OK */
+                    if (result->response->response_type == Ok)
+                    {
+                        ZVAL_TRUE(return_value);
+                        status = 1;
+                    }
+                    else
+                    {
+                        ZVAL_FALSE(return_value);
+                        status = 0;
+                    }
+                }
+            }
+            free_command_result(result);
+        }
+
+        return status;
+
+    cleanup:
+        /* Cleanup on error */
+        if (temp_strings)
+        {
+            for (int i = 0; i < temp_string_count; i++)
+            {
+                if (temp_strings[i])
+                    efree(temp_strings[i]);
+            }
+            efree(temp_strings);
+        }
+        if (args)
+            efree(args);
+        if (args_len)
+            efree(args_len);
+    }
+
+    return 0;
+}
+
+/* Execute getReadTimeout command using the Valkey Glide client */
+int execute_get_read_timeout_command(const void *glide_client, double *output_value)
+{
+    /* Check if client is valid */
+    if (!glide_client || !output_value)
+    {
+        return 0;
+    }
+
+    /* Since this is a client configuration getter rather than a Redis command,
+       we'll use a default value as this isn't directly supported by Glide */
+    *output_value = 0.0; /* Default read timeout */
+
+    /* Here we'd ideally access the Glide client's configuration, but since
+       we don't have direct access to it through the FFI interface, we just
+       return success and the default value */
+
+    return 1;
+}
+
+/* Unified getReadTimeout command implementation */
+int execute_getreadtimeout_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    double timeout;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the getReadTimeout command */
+    if (execute_get_read_timeout_command(redis->glide_client, &timeout))
+    {
+        ZVAL_DOUBLE(return_value, timeout);
+        return 1;
+    }
+
+    return 0;
+}
+
+/* Execute getPersistentID command using the Valkey Glide client */
+int execute_get_persistent_id_command(const void *glide_client, char **result, size_t *result_len)
+{
+    /* Check if client is valid */
+    if (!glide_client || !result || !result_len)
+    {
+        return 0;
+    }
+
+    /* Since this is a client connection property rather than a Redis command,
+       we return a NULL value since we don't have access to this information */
+    *result = NULL;
+    *result_len = 0;
+
+    return 1;
+}
+
+/* Execute a CLIENT command using the Valkey Glide client */
+int execute_client_command_internal(const void *glide_client, zval *args, int args_count, zval *return_value)
+{
+    /* Check if client and args are valid */
+    if (!glide_client || !args || args_count <= 0 || !return_value)
+    {
+        return 0;
+    }
+
+    /* Create argument arrays */
+    unsigned long arg_count = args_count;
+    uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!cmd_args || !args_len)
+    {
+        if (cmd_args)
+            efree(cmd_args);
+        if (args_len)
+            efree(args_len);
+        return 0;
+    }
+
+    /* Keep track of allocated strings for cleanup */
+    char **allocated = (char **)emalloc(args_count * sizeof(char *));
+    int allocated_idx = 0;
+
+    /* Convert arguments to strings if needed */
+    int i;
+    for (i = 0; i < args_count; i++)
+    {
+        zval *arg = &args[i];
+
+        /* If string, use directly */
+        if (Z_TYPE_P(arg) == IS_STRING)
+        {
+            cmd_args[i] = (uintptr_t)Z_STRVAL_P(arg);
+            args_len[i] = Z_STRLEN_P(arg);
+        }
+        else
+        {
+            /* Convert non-string types to string */
+            zval copy;
+            size_t str_len;
+            char *str;
+
+            ZVAL_DUP(&copy, arg);
+            convert_to_string(&copy);
+
+            str_len = Z_STRLEN(copy);
+            str = emalloc(str_len + 1);
+            memcpy(str, Z_STRVAL(copy), str_len);
+            str[str_len] = '\0';
+
+            cmd_args[i] = (uintptr_t)str;
+            args_len[i] = str_len;
+
+            /* Track allocated string for cleanup */
+            allocated[allocated_idx++] = str;
+
+            zval_dtor(&copy);
+        }
+    }
+
+    /* Determine the appropriate client command type based on the first argument */
+    enum RequestType command_type = ClientInfo; /* Default to ClientInfo */
+
+    if (args_count > 0 && Z_TYPE(args[0]) == IS_STRING)
+    {
+        const char *subcmd = Z_STRVAL(args[0]);
+        if (strcasecmp(subcmd, "KILL") == 0)
+        {
+            if (args_count > 1)
+                command_type = ClientKill;
+            else
+                command_type = ClientKillSimple;
+        }
+        else if (strcasecmp(subcmd, "LIST") == 0)
+            command_type = ClientList;
+        else if (strcasecmp(subcmd, "GETNAME") == 0)
+            command_type = ClientGetName;
+        else if (strcasecmp(subcmd, "ID") == 0)
+            command_type = ClientId;
+        else if (strcasecmp(subcmd, "SETNAME") == 0)
+            command_type = ClientSetName;
+        else if (strcasecmp(subcmd, "PAUSE") == 0)
+            command_type = ClientPause;
+        else if (strcasecmp(subcmd, "UNPAUSE") == 0)
+            command_type = ClientUnpause;
+        else if (strcasecmp(subcmd, "REPLY") == 0)
+            command_type = ClientReply;
+        else
+            command_type = CustomCommand; /* Use custom command for other subcommands */
+    }
+
+    /* Set additional client prefix for custom commands */
+    uintptr_t *final_args = cmd_args;
+    unsigned long *final_args_len = args_len;
+    unsigned long final_arg_count = arg_count;
+
+    /* If using CustomCommand type, prepend "CLIENT" to the argument list */
+    if (command_type == CustomCommand)
+    {
+        final_arg_count = arg_count + 1;
+        final_args = (uintptr_t *)emalloc(final_arg_count * sizeof(uintptr_t));
+        final_args_len = (unsigned long *)emalloc(final_arg_count * sizeof(unsigned long));
+
+        if (!final_args || !final_args_len)
+        {
+            if (final_args)
+                efree(final_args);
+            if (final_args_len)
+                efree(final_args_len);
+
+            /* Free allocated strings */
+            for (i = 0; i < allocated_idx; i++)
+                efree(allocated[i]);
+            efree(allocated);
+            efree(cmd_args);
+            efree(args_len);
+            return 0;
+        }
+
+        /* Add "CLIENT" as first argument */
+        final_args[0] = (uintptr_t)"CLIENT";
+        final_args_len[0] = 6; /* strlen("CLIENT") */
+
+        /* Copy the rest of the arguments */
+        for (i = 0; i < arg_count; i++)
+        {
+            final_args[i + 1] = cmd_args[i];
+            final_args_len[i + 1] = args_len[i];
+        }
+    }
+
+    /* Execute the command */
+    CommandResult *result = execute_command(
+        glide_client,
+        command_type,    /* command type */
+        final_arg_count, /* number of arguments */
+        final_args,      /* arguments */
+        final_args_len   /* argument lengths */
+    );
+
+    /* Free allocated memory */
+    for (i = 0; i < allocated_idx; i++)
+        efree(allocated[i]);
+    efree(allocated);
+
+    /* If we created a new args array for CustomCommand, free it */
+    if (command_type == CustomCommand)
+    {
+        efree(final_args);
+        efree(final_args_len);
+    }
+
+    efree(cmd_args);
+    efree(args_len);
+
+    /* Process the result */
+    int status = 0;
+
+    if (result)
+    {
+        if (result->command_error)
+        {
+            /* Command failed */
+            free_command_result(result);
+            return 0;
+        }
+
+        if (result->response)
+        {
+            /* Convert the response to PHP value */
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+        }
+        free_command_result(result);
+    }
+
+    return status;
+}
+
+/* Execute a RAWCOMMAND command using the Valkey Glide client */
+int execute_rawcommand_command_internal(const void *glide_client, zval *args, int args_count, zval *return_value)
+{
+    /* Check if client and args are valid */
+    if (!glide_client || !args || args_count <= 0 || !return_value)
+    {
+        return 0;
+    }
+
+    /* Create argument arrays */
+    unsigned long arg_count = args_count;
+    uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+    if (!cmd_args || !args_len)
+    {
+        if (cmd_args)
+            efree(cmd_args);
+        if (args_len)
+            efree(args_len);
+        return 0;
+    }
+
+    /* Keep track of allocated strings for cleanup */
+    char **allocated = (char **)emalloc(args_count * sizeof(char *));
+    int allocated_idx = 0;
+
+    /* Convert arguments to strings if needed */
+    int i;
+    for (i = 0; i < args_count; i++)
+    {
+        zval *arg = &args[i];
+
+        /* If string, use directly */
+        if (Z_TYPE_P(arg) == IS_STRING)
+        {
+            cmd_args[i] = (uintptr_t)Z_STRVAL_P(arg);
+            args_len[i] = Z_STRLEN_P(arg);
+        }
+        else
+        {
+            /* Convert non-string types to string */
+            zval copy;
+            size_t str_len;
+            char *str;
+
+            ZVAL_DUP(&copy, arg);
+            convert_to_string(&copy);
+
+            str_len = Z_STRLEN(copy);
+            str = emalloc(str_len + 1);
+            memcpy(str, Z_STRVAL(copy), str_len);
+            str[str_len] = '\0';
+
+            cmd_args[i] = (uintptr_t)str;
+            args_len[i] = str_len;
+
+            /* Track allocated string for cleanup */
+            allocated[allocated_idx++] = str;
+
+            zval_dtor(&copy);
+        }
+    }
+
+    /* Execute the command using CustomCommand type */
+    CommandResult *result = execute_command(
+        glide_client,
+        CustomCommand, /* command type for raw commands */
+        arg_count,     /* number of arguments */
+        cmd_args,      /* arguments */
+        args_len       /* argument lengths */
+    );
+
+    /* Free allocated memory */
+    for (i = 0; i < allocated_idx; i++)
+        efree(allocated[i]);
+    efree(allocated);
+    efree(cmd_args);
+    efree(args_len);
+
+    /* Process the result */
+    int status = 0;
+
+    if (result)
+    {
+        if (result->command_error)
+        {
+            /* Command failed */
+            free_command_result(result);
+            return 0;
+        }
+
+        if (result->response)
+        {
+            /* Convert the response to PHP value */
+            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+        }
+        free_command_result(result);
+    }
+
+    return status;
+}
+
+/* Execute a DBSIZE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
+int execute_dbsize_command_internal(const void *glide_client, long *output_value)
+{
+    core_command_args_t args = {0};
+    args.glide_client = glide_client;
+    args.cmd_type = DBSize;
+
+    return execute_core_command(&args, output_value, process_core_int_result);
+}
+
+/* Execute client command - UNIFIED IMPLEMENTATION */
+int execute_client_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    zval *z_args = NULL;
+    int arg_count = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O+",
+                                     &object, redis_ce, &z_args, &arg_count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the client command using the Glide client */
+    if (execute_client_command_internal(redis->glide_client, z_args, arg_count, return_value))
+    {
+        /* Return value already set in execute_client_command */
+        return 1;
+    }
+
+    return 0;
+}
+
+/* Execute rawcommand command - UNIFIED IMPLEMENTATION */
+int execute_rawcommand_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    zval *z_args = NULL;
+    int arg_count = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O+",
+                                     &object, redis_ce, &z_args, &arg_count) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the raw command using the Glide client */
+    if (execute_rawcommand_command_internal(redis->glide_client, z_args, arg_count, return_value))
+    {
+        /* Return value already set in execute_rawcommand_command */
+        return 1;
+    }
+
+    return 0;
+}
+
+/* Execute dbSize command - UNIFIED IMPLEMENTATION */
+int execute_dbsize_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    long dbsize;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the DBSIZE command using the Glide client */
+    if (execute_dbsize_command_internal(redis->glide_client, &dbsize))
+    {
+        ZVAL_LONG(return_value, dbsize);
+        return 1;
+    }
+
+    return 0;
+}
