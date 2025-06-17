@@ -20,31 +20,3 @@
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
-
-/* {{{ proto long Redis::copy(string $source, string $destination, array $options = null) */
-COPY_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto array Redis::hscan(string key, long &iterator, [string pattern, [long count]]) */
-HSCAN_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto long Redis::pfadd(string key, array elements) */
-PFADD_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto long Redis::pfcount(string key[, string key2, string key3...]) */
-PFCOUNT_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto bool Redis::pfmerge(string dst, array keys) */
-PFMERGE_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto double Redis::getTimeout() */
-GETTIMEOUT_METHOD_IMPL(Redis)
-/* }}} */
-
-/* {{{ proto double Redis::getReadTimeout() */
-GETREADTIMEOUT_METHOD_IMPL(Redis)
-/* }}} */
