@@ -51,6 +51,9 @@ extern int execute_pexpireat_command(zval *object, int argc, zval *return_value)
 extern int execute_persist_command(zval *object, int argc, zval *return_value);
 extern int execute_expiretime_command(zval *object, int argc, zval *return_value);
 extern int execute_pexpiretime_command(zval *object, int argc, zval *return_value);
+extern int execute_keys_command(zval *object, int argc, zval *return_value);
+extern int execute_mset_command(zval *object, int argc, zval *return_value);
+extern int execute_msetnx_command(zval *object, int argc, zval *return_value);
 
 /* DEL command uses different signature - handled separately */
 
@@ -897,6 +900,39 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         }                                                                          \
         zval_dtor(return_value);                                                   \
         RETURN_FALSE;                                                              \
+    }
+
+#define KEYS_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, keys)                                            \
+    {                                                                       \
+        if (execute_keys_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define MSET_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, mset)                                            \
+    {                                                                       \
+        if (execute_mset_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define MSETNX_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, msetnx)                                            \
+    {                                                                         \
+        if (execute_msetnx_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
     }
 
 #endif /* VALKEY_GLIDE_COMMANDS_COMMON_H */

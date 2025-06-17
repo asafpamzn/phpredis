@@ -791,3 +791,15 @@ EXPIRETIME_METHOD_IMPL(Redis)
 /* {{{ proto long Redis::pexpiretime(string key) */
 PEXPIRETIME_METHOD_IMPL(Redis)
 /* }}} */
+
+/* {{{ proto array Redis::keys(string pattern) */
+KEYS_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto bool Redis::mset(array key_values) */
+MSET_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto bool Redis::msetnx(array key_values) */
+MSETNX_METHOD_IMPL(Redis)
+/* }}} */

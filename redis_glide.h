@@ -137,8 +137,7 @@ extern int execute_pttl_command(zval *object, int argc, zval *return_value);
 /* Hash operations */
 
 /* New commands added in redis_glide_commands.c */
-int execute_mset_command(const void *glide_client, zval *arr);
-int execute_msetnx_command(const void *glide_client, zval *arr, long *output_value);
+
 int execute_brpoplpush_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len, zend_long timeout, char **result, size_t *result_len);
 
 /* Object operations */
@@ -146,9 +145,6 @@ int execute_object_command(const void *glide_client,
                            const char *subcommand, size_t subcommand_len,
                            const char *key, size_t key_len,
                            zval *return_value);
-
-/* Import the execute functions from redis_glide_keys.c */
-int execute_keys_command(const void *glide_client, const char *pattern, size_t pattern_len, zval *return_value);
 
 /* Unified command functions */
 extern int execute_watch_command(zval *object, int argc, zval *return_value);

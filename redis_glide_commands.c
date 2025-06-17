@@ -27,39 +27,81 @@ extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
 /* Execute an MSET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_mset_command(const void *glide_client, zval *arr)
+int execute_mset_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = MSet;
+    redis_object *redis;
+    zval *z_arr;
 
-    /* Set up array argument for key-value pairs */
-    args.args[0].type = CORE_ARG_TYPE_ARRAY;
-    args.args[0].data.array_arg.array = arr;
-    args.args[0].data.array_arg.count = zend_hash_num_elements(Z_ARRVAL_P(arr));
-    args.arg_count = 1;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oa",
+                                     &object, redis_ce, &z_arr) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_core_command(&args, NULL, process_core_bool_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = MSet;
+
+        /* Set up array argument for key-value pairs */
+        args.args[0].type = CORE_ARG_TYPE_ARRAY;
+        args.args[0].data.array_arg.array = z_arr;
+        args.args[0].data.array_arg.count = zend_hash_num_elements(Z_ARRVAL_P(z_arr));
+        args.arg_count = 1;
+
+        if (execute_core_command(&args, NULL, process_core_bool_result))
+        {
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute an MSETNX command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_msetnx_command(const void *glide_client, zval *arr, long *output_value)
+int execute_msetnx_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = MSetNX;
+    redis_object *redis;
+    zval *z_arr;
 
-    /* Set up array argument for key-value pairs */
-    args.args[0].type = CORE_ARG_TYPE_ARRAY;
-    args.args[0].data.array_arg.array = arr;
-    args.args[0].data.array_arg.count = zend_hash_num_elements(Z_ARRVAL_P(arr));
-    args.arg_count = 1;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oa",
+                                     &object, redis_ce, &z_arr) == FAILURE)
+    {
+        return 0;
+    }
 
-    /* Convert output to long for compatibility */
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    int result = execute_core_command(&args, output_value, process_core_bool_result);
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = MSetNX;
 
-    return result;
+        /* Set up array argument for key-value pairs */
+        args.args[0].type = CORE_ARG_TYPE_ARRAY;
+        args.args[0].data.array_arg.array = z_arr;
+        args.args[0].data.array_arg.count = zend_hash_num_elements(Z_ARRVAL_P(z_arr));
+        args.arg_count = 1;
+
+        if (execute_core_command(&args, NULL, process_core_bool_result))
+        {
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute a FLUSHDB command using the Valkey Glide client - UNIFIED IMPLEMENTATION */

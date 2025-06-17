@@ -26,19 +26,42 @@
 extern zend_class_entry *redis_ce;
 
 /* Execute a KEYS command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_keys_command(const void *glide_client, const char *pattern, size_t pattern_len, zval *return_value)
+int execute_keys_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = Keys;
+    redis_object *redis;
+    char *pattern = NULL;
+    size_t pattern_len;
 
-    /* Add pattern argument */
-    args.args[0].type = CORE_ARG_TYPE_STRING;
-    args.args[0].data.string_arg.value = pattern;
-    args.args[0].data.string_arg.len = pattern_len;
-    args.arg_count = 1;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &pattern, &pattern_len) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_core_command(&args, return_value, process_core_array_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = Keys;
+
+        /* Add pattern argument */
+        args.args[0].type = CORE_ARG_TYPE_STRING;
+        args.args[0].data.string_arg.value = pattern;
+        args.args[0].data.string_arg.len = pattern_len;
+        args.arg_count = 1;
+
+        if (execute_core_command(&args, return_value, process_core_array_result))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute a WATCH command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
