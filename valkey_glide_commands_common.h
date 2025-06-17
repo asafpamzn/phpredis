@@ -39,6 +39,11 @@ extern int execute_config_command(zval *object, int argc, zval *return_value);
 extern int execute_function_command(zval *object, int argc, zval *return_value);
 extern int execute_multi_command(zval *object, int argc, zval *return_value);
 extern int execute_discard_command(zval *object, int argc, zval *return_value);
+extern int execute_exec_command(zval *object, int argc, zval *return_value);
+extern int execute_fcall_command(zval *object, int argc, zval *return_value);
+extern int execute_fcall_ro_command(zval *object, int argc, zval *return_value);
+extern int execute_dump_command(zval *object, int argc, zval *return_value);
+extern int execute_restore_command(zval *object, int argc, zval *return_value);
 
 /* DEL command uses different signature - handled separately */
 
@@ -748,6 +753,61 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
     PHP_METHOD(class_name, discard)                                            \
     {                                                                          \
         if (execute_discard_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+#define EXEC_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, exec)                                            \
+    {                                                                       \
+        if (execute_exec_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define FCALL_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, fcall)                                            \
+    {                                                                        \
+        if (execute_fcall_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+#define FCALL_RO_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, fcall_ro)                                            \
+    {                                                                           \
+        if (execute_fcall_ro_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        zval_dtor(return_value);                                                \
+        RETURN_FALSE;                                                           \
+    }
+
+#define DUMP_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, dump)                                            \
+    {                                                                       \
+        if (execute_dump_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define RESTORE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, restore)                                            \
+    {                                                                          \
+        if (execute_restore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
         {                                                                      \
             return;                                                            \
         }                                                                      \

@@ -265,395 +265,538 @@ int execute_discard_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an EXEC command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_exec_command(const void *glide_client, zval *return_value)
+int execute_exec_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = Exec;
+    redis_object *redis;
 
-    return execute_core_command(&args, return_value, process_core_array_result);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "O",
+                                     &object, redis_ce) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = Exec;
+
+        if (execute_core_command(&args, return_value, process_core_array_result))
+        {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute an FCALL command using the Valkey Glide client */
-int execute_fcall_command(const void *glide_client, const char *name, size_t name_len,
-                          int numkeys, zval *args, int args_count, zval *return_value)
+int execute_fcall_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client and name are valid */
-    if (!glide_client || !name || name_len <= 0)
+    redis_object *redis;
+    char *name = NULL;
+    size_t name_len;
+    long numkeys = 0;
+    zval *z_args = NULL;
+    int args_count = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osl*",
+                                     &object, redis_ce, &name, &name_len,
+                                     &numkeys, &z_args, &args_count) == FAILURE)
     {
         return 0;
     }
 
-    /* Prepare numkeys as string */
-    char numkeys_str[32];
-    snprintf(numkeys_str, sizeof(numkeys_str), "%d", numkeys);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Calculate total arguments: function_name + numkeys + all additional args */
-    unsigned long arg_count = 2 + args_count; /* name + numkeys + additional args */
-    uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!cmd_args || !args_len)
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
     {
-        if (cmd_args)
-            efree(cmd_args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Set function name and numkeys */
-    cmd_args[0] = (uintptr_t)name;
-    args_len[0] = name_len;
-    cmd_args[1] = (uintptr_t)numkeys_str;
-    args_len[1] = strlen(numkeys_str);
-
-    /* Convert additional arguments to strings if needed */
-    int i;
-    for (i = 0; i < args_count; i++)
-    {
-        zval *arg = &args[i];
-
-        /* If not string, convert to one */
-        if (Z_TYPE_P(arg) != IS_STRING)
+        /* Check if name is valid */
+        if (!name || name_len <= 0)
         {
-            zval temp;
-            ZVAL_COPY(&temp, arg);
-            convert_to_string(&temp);
-            cmd_args[i + 2] = (uintptr_t)Z_STRVAL(temp);
-            args_len[i + 2] = Z_STRLEN(temp);
-            zval_dtor(&temp);
-        }
-        else
-        {
-            cmd_args[i + 2] = (uintptr_t)Z_STRVAL_P(arg);
-            args_len[i + 2] = Z_STRLEN_P(arg);
-        }
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        FCall,     /* command type */
-        arg_count, /* number of arguments */
-        cmd_args,  /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument arrays */
-    efree(cmd_args);
-    efree(args_len);
-
-    /* Handle the result directly */
-    int status = 0;
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
             return 0;
         }
 
-        if (result->response)
+        /* Prepare numkeys as string */
+        char numkeys_str[32];
+        snprintf(numkeys_str, sizeof(numkeys_str), "%ld", numkeys);
+
+        /* Calculate total arguments: function_name + numkeys + all additional args */
+        unsigned long arg_count = 2 + args_count; /* name + numkeys + additional args */
+        uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+        unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+        if (!cmd_args || !args_len)
         {
-            /* FCALL can return various types */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
-            free_command_result(result);
-            return status;
+            if (cmd_args)
+                efree(cmd_args);
+            if (args_len)
+                efree(args_len);
+            return 0;
         }
-        free_command_result(result);
+
+        /* Set function name and numkeys */
+        cmd_args[0] = (uintptr_t)name;
+        args_len[0] = name_len;
+        cmd_args[1] = (uintptr_t)numkeys_str;
+        args_len[1] = strlen(numkeys_str);
+
+        /* Convert additional arguments to strings if needed */
+        int i;
+        for (i = 0; i < args_count; i++)
+        {
+            zval *arg = &z_args[i];
+
+            /* If not string, convert to one */
+            if (Z_TYPE_P(arg) != IS_STRING)
+            {
+                zval temp;
+                ZVAL_COPY(&temp, arg);
+                convert_to_string(&temp);
+                cmd_args[i + 2] = (uintptr_t)Z_STRVAL(temp);
+                args_len[i + 2] = Z_STRLEN(temp);
+                zval_dtor(&temp);
+            }
+            else
+            {
+                cmd_args[i + 2] = (uintptr_t)Z_STRVAL_P(arg);
+                args_len[i + 2] = Z_STRLEN_P(arg);
+            }
+        }
+
+        /* Execute the command */
+        CommandResult *result = execute_command(
+            redis->glide_client,
+            FCall,     /* command type */
+            arg_count, /* number of arguments */
+            cmd_args,  /* arguments */
+            args_len   /* argument lengths */
+        );
+
+        /* Free the argument arrays */
+        efree(cmd_args);
+        efree(args_len);
+
+        /* Handle the result directly */
+        int status = 0;
+        if (result)
+        {
+            if (result->command_error)
+            {
+                /* Command failed */
+                free_command_result(result);
+                return 0;
+            }
+
+            if (result->response)
+            {
+                /* FCALL can return various types */
+                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+                free_command_result(result);
+                return status;
+            }
+            free_command_result(result);
+        }
     }
 
     return 0;
 }
 
 /* Execute an FCALL_RO command using the Valkey Glide client */
-int execute_fcall_ro_command(const void *glide_client, const char *name, size_t name_len,
-                             int numkeys, zval *args, int args_count, zval *return_value)
+int execute_fcall_ro_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client and name are valid */
-    if (!glide_client || !name || name_len <= 0)
+    redis_object *redis;
+    char *name = NULL;
+    size_t name_len;
+    long numkeys = 0;
+    zval *z_args = NULL;
+    int args_count = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osl*",
+                                     &object, redis_ce, &name, &name_len,
+                                     &numkeys, &z_args, &args_count) == FAILURE)
     {
         return 0;
     }
 
-    /* Prepare numkeys as string */
-    char numkeys_str[32];
-    snprintf(numkeys_str, sizeof(numkeys_str), "%d", numkeys);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Calculate total arguments: function_name + numkeys + all additional args */
-    unsigned long arg_count = 2 + args_count; /* name + numkeys + additional args */
-    uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-    if (!cmd_args || !args_len)
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
     {
-        if (cmd_args)
-            efree(cmd_args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Set function name and numkeys */
-    cmd_args[0] = (uintptr_t)name;
-    args_len[0] = name_len;
-    cmd_args[1] = (uintptr_t)numkeys_str;
-    args_len[1] = strlen(numkeys_str);
-
-    /* Convert additional arguments to strings if needed */
-    int i;
-    for (i = 0; i < args_count; i++)
-    {
-        zval *arg = &args[i];
-
-        /* If not string, convert to one */
-        if (Z_TYPE_P(arg) != IS_STRING)
+        /* Check if name is valid */
+        if (!name || name_len <= 0)
         {
-            zval temp;
-            ZVAL_COPY(&temp, arg);
-            convert_to_string(&temp);
-            cmd_args[i + 2] = (uintptr_t)Z_STRVAL(temp);
-            args_len[i + 2] = Z_STRLEN(temp);
-            zval_dtor(&temp);
-        }
-        else
-        {
-            cmd_args[i + 2] = (uintptr_t)Z_STRVAL_P(arg);
-            args_len[i + 2] = Z_STRLEN_P(arg);
-        }
-    }
-
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        FCallReadOnly, /* command type */
-        arg_count,     /* number of arguments */
-        cmd_args,      /* arguments */
-        args_len       /* argument lengths */
-    );
-
-    /* Free the argument arrays */
-    efree(cmd_args);
-    efree(args_len);
-
-    /* Handle the result directly */
-    int status = 0;
-    if (result)
-    {
-        if (result->command_error)
-        {
-            /* Command failed */
-            free_command_result(result);
             return 0;
         }
 
-        if (result->response)
+        /* Prepare numkeys as string */
+        char numkeys_str[32];
+        snprintf(numkeys_str, sizeof(numkeys_str), "%ld", numkeys);
+
+        /* Calculate total arguments: function_name + numkeys + all additional args */
+        unsigned long arg_count = 2 + args_count; /* name + numkeys + additional args */
+        uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+        unsigned long *args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+        if (!cmd_args || !args_len)
         {
-            /* FCALL_RO can return various types */
-            status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
-            free_command_result(result);
-            return status;
+            if (cmd_args)
+                efree(cmd_args);
+            if (args_len)
+                efree(args_len);
+            return 0;
         }
-        free_command_result(result);
+
+        /* Set function name and numkeys */
+        cmd_args[0] = (uintptr_t)name;
+        args_len[0] = name_len;
+        cmd_args[1] = (uintptr_t)numkeys_str;
+        args_len[1] = strlen(numkeys_str);
+
+        /* Convert additional arguments to strings if needed */
+        int i;
+        for (i = 0; i < args_count; i++)
+        {
+            zval *arg = &z_args[i];
+
+            /* If not string, convert to one */
+            if (Z_TYPE_P(arg) != IS_STRING)
+            {
+                zval temp;
+                ZVAL_COPY(&temp, arg);
+                convert_to_string(&temp);
+                cmd_args[i + 2] = (uintptr_t)Z_STRVAL(temp);
+                args_len[i + 2] = Z_STRLEN(temp);
+                zval_dtor(&temp);
+            }
+            else
+            {
+                cmd_args[i + 2] = (uintptr_t)Z_STRVAL_P(arg);
+                args_len[i + 2] = Z_STRLEN_P(arg);
+            }
+        }
+
+        /* Execute the command */
+        CommandResult *result = execute_command(
+            redis->glide_client,
+            FCallReadOnly, /* command type */
+            arg_count,     /* number of arguments */
+            cmd_args,      /* arguments */
+            args_len       /* argument lengths */
+        );
+
+        /* Free the argument arrays */
+        efree(cmd_args);
+        efree(args_len);
+
+        /* Handle the result directly */
+        int status = 0;
+        if (result)
+        {
+            if (result->command_error)
+            {
+                /* Command failed */
+                free_command_result(result);
+                return 0;
+            }
+
+            if (result->response)
+            {
+                /* FCALL_RO can return various types */
+                status = command_response_to_zval(result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+                free_command_result(result);
+                return status;
+            }
+            free_command_result(result);
+        }
     }
 
     return 0;
 }
 
-/* Execute a DUMP command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_dump_command(const void *glide_client, const char *key, size_t key_len,
-                         char **output, size_t *output_len)
+/* Execute a DUMP command using the Valkey Glide client */
+int execute_dump_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = Dump;
-    args.key = key;
-    args.key_len = key_len;
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
 
-    /* Use string result processor that handles null */
-    struct
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
     {
-        char **result;
-        size_t *result_len;
-    } out = {output, output_len};
-    return execute_core_command(&args, &out, process_core_string_result);
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = Dump;
+        args.key = key;
+        args.key_len = key_len;
+
+        char *output = NULL;
+        size_t output_len = 0;
+        struct
+        {
+            char **result;
+            size_t *result_len;
+        } out = {&output, &output_len};
+
+        if (execute_core_command(&args, &out, process_core_string_result))
+        {
+            if (output)
+            {
+                /* Return serialized value */
+                ZVAL_STRINGL(return_value, output, output_len);
+                efree(output);
+                return 1;
+            }
+            else
+            {
+                /* Key doesn't exist */
+                ZVAL_FALSE(return_value);
+                return 1;
+            }
+        }
+    }
+
+    return 0;
 }
 
 /* Execute a RESTORE command using the Valkey Glide client */
-int execute_restore_command(const void *glide_client, const char *key, size_t key_len,
-                            long ttl, const char *serialized, size_t serialized_len,
-                            zval *options)
+int execute_restore_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client, key and serialized value are valid */
-    if (!glide_client || !key || key_len <= 0 || !serialized || serialized_len <= 0)
+    redis_object *redis;
+    char *key = NULL, *serialized = NULL;
+    size_t key_len, serialized_len;
+    long ttl;
+    zval *options = NULL;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osls|a",
+                                     &object, redis_ce, &key, &key_len, &ttl,
+                                     &serialized, &serialized_len, &options) == FAILURE)
     {
         return 0;
     }
 
-    /* Convert TTL to string */
-    char ttl_str[32];
-    snprintf(ttl_str, sizeof(ttl_str), "%ld", ttl);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Start with basic arguments: key + ttl + serialized */
-    unsigned long base_arg_count = 3;
-    unsigned long max_args = 10; /* Maximum possible arguments */
-    uintptr_t *args = (uintptr_t *)emalloc(max_args * sizeof(uintptr_t));
-    unsigned long *args_len = (unsigned long *)emalloc(max_args * sizeof(unsigned long));
-
-    if (!args || !args_len)
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
     {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
-
-    /* Set up base arguments */
-    args[0] = (uintptr_t)key;
-    args_len[0] = key_len;
-    args[1] = (uintptr_t)ttl_str;
-    args_len[1] = strlen(ttl_str);
-    args[2] = (uintptr_t)serialized;
-    args_len[2] = serialized_len;
-
-    unsigned long arg_count = base_arg_count;
-
-    /* Process options if provided */
-    if (options && Z_TYPE_P(options) == IS_ARRAY)
-    {
-        HashTable *ht = Z_ARRVAL_P(options);
-        zval *val;
-        zend_string *key_str;
-        zend_ulong num_key;
-
-        /* Variables for option values */
-        zend_bool has_replace = 0;
-        zend_bool has_absttl = 0;
-        long idletime = -1;
-        long freq = -1;
-
-        /* Parse the array */
-        ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, key_str, val)
+        /* Check if key and serialized value are valid */
+        if (!key || key_len <= 0 || !serialized || serialized_len <= 0)
         {
-            /* Handle indexed array elements (like ['REPLACE', 'ABSTTL']) */
-            if (!key_str && Z_TYPE_P(val) == IS_STRING)
+            return 0;
+        }
+
+        /* Convert TTL to string */
+        char ttl_str[32];
+        snprintf(ttl_str, sizeof(ttl_str), "%ld", ttl);
+
+        /* Start with basic arguments: key + ttl + serialized */
+        unsigned long base_arg_count = 3;
+        unsigned long max_args = 10; /* Maximum possible arguments */
+        uintptr_t *args = (uintptr_t *)emalloc(max_args * sizeof(uintptr_t));
+        unsigned long *args_len = (unsigned long *)emalloc(max_args * sizeof(unsigned long));
+
+        if (!args || !args_len)
+        {
+            if (args)
+                efree(args);
+            if (args_len)
+                efree(args_len);
+            return 0;
+        }
+
+        /* Set up base arguments */
+        args[0] = (uintptr_t)key;
+        args_len[0] = key_len;
+        args[1] = (uintptr_t)ttl_str;
+        args_len[1] = strlen(ttl_str);
+        args[2] = (uintptr_t)serialized;
+        args_len[2] = serialized_len;
+
+        unsigned long arg_count = base_arg_count;
+
+        /* Process options if provided */
+        if (options && Z_TYPE_P(options) == IS_ARRAY)
+        {
+            HashTable *ht = Z_ARRVAL_P(options);
+            zval *val;
+            zend_string *key_str;
+            zend_ulong num_key;
+
+            /* Variables for option values */
+            zend_bool has_replace = 0;
+            zend_bool has_absttl = 0;
+            long idletime = -1;
+            long freq = -1;
+
+            /* Parse the array */
+            ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, key_str, val)
             {
-                const char *flag = Z_STRVAL_P(val);
-                if (strcmp(flag, "REPLACE") == 0)
+                /* Handle indexed array elements (like ['REPLACE', 'ABSTTL']) */
+                if (!key_str && Z_TYPE_P(val) == IS_STRING)
                 {
-                    has_replace = 1;
+                    const char *flag = Z_STRVAL_P(val);
+                    if (strcmp(flag, "REPLACE") == 0)
+                    {
+                        has_replace = 1;
+                    }
+                    else if (strcmp(flag, "ABSTTL") == 0)
+                    {
+                        has_absttl = 1;
+                    }
                 }
-                else if (strcmp(flag, "ABSTTL") == 0)
+                /* Handle associative array elements (like ['IDLETIME' => 200]) */
+                else if (key_str)
                 {
-                    has_absttl = 1;
+                    const char *opt_name = ZSTR_VAL(key_str);
+                    if (strcmp(opt_name, "REPLACE") == 0)
+                    {
+                        has_replace = 1;
+                    }
+                    else if (strcmp(opt_name, "ABSTTL") == 0)
+                    {
+                        has_absttl = 1;
+                    }
+                    else if (strcmp(opt_name, "IDLETIME") == 0 && Z_TYPE_P(val) == IS_LONG)
+                    {
+                        idletime = Z_LVAL_P(val);
+                    }
+                    else if (strcmp(opt_name, "FREQ") == 0 && Z_TYPE_P(val) == IS_LONG)
+                    {
+                        freq = Z_LVAL_P(val);
+                    }
                 }
             }
-            /* Handle associative array elements (like ['IDLETIME' => 200]) */
-            else if (key_str)
+            ZEND_HASH_FOREACH_END();
+
+            /* Add REPLACE if needed */
+            if (has_replace && arg_count < max_args)
             {
-                const char *opt_name = ZSTR_VAL(key_str);
-                if (strcmp(opt_name, "REPLACE") == 0)
-                {
-                    has_replace = 1;
-                }
-                else if (strcmp(opt_name, "ABSTTL") == 0)
-                {
-                    has_absttl = 1;
-                }
-                else if (strcmp(opt_name, "IDLETIME") == 0 && Z_TYPE_P(val) == IS_LONG)
-                {
-                    idletime = Z_LVAL_P(val);
-                }
-                else if (strcmp(opt_name, "FREQ") == 0 && Z_TYPE_P(val) == IS_LONG)
-                {
-                    freq = Z_LVAL_P(val);
-                }
+                const char *replace_str = "REPLACE";
+                args[arg_count] = (uintptr_t)replace_str;
+                args_len[arg_count] = strlen(replace_str);
+                arg_count++;
+            }
+
+            /* Add ABSTTL if needed */
+            if (has_absttl && arg_count < max_args)
+            {
+                const char *absttl_str = "ABSTTL";
+                args[arg_count] = (uintptr_t)absttl_str;
+                args_len[arg_count] = strlen(absttl_str);
+                arg_count++;
+            }
+
+            /* Add IDLETIME if provided */
+            if (idletime >= 0 && arg_count + 1 < max_args)
+            {
+                const char *idletime_str = "IDLETIME";
+                args[arg_count] = (uintptr_t)idletime_str;
+                args_len[arg_count] = strlen(idletime_str);
+                arg_count++;
+
+                /* Convert idletime to string */
+                char *idletime_val = (char *)emalloc(32);
+                snprintf(idletime_val, 32, "%ld", idletime);
+                args[arg_count] = (uintptr_t)idletime_val;
+                args_len[arg_count] = strlen(idletime_val);
+                arg_count++;
+            }
+
+            /* Add FREQ if provided */
+            if (freq >= 0 && arg_count + 1 < max_args)
+            {
+                const char *freq_str = "FREQ";
+                args[arg_count] = (uintptr_t)freq_str;
+                args_len[arg_count] = strlen(freq_str);
+                arg_count++;
+
+                /* Convert freq to string */
+                char *freq_val = (char *)emalloc(32);
+                snprintf(freq_val, 32, "%ld", freq);
+                args[arg_count] = (uintptr_t)freq_val;
+                args_len[arg_count] = strlen(freq_val);
+                arg_count++;
             }
         }
-        ZEND_HASH_FOREACH_END();
 
-        /* Add REPLACE if needed */
-        if (has_replace && arg_count < max_args)
+        /* Execute the command */
+        CommandResult *result = execute_command(
+            redis->glide_client,
+            Restore,   /* command type */
+            arg_count, /* number of arguments */
+            args,      /* arguments */
+            args_len   /* argument lengths */
+        );
+
+        /* Free any dynamically allocated option values */
+        int i;
+        for (i = base_arg_count; i < arg_count; i++)
         {
-            const char *replace_str = "REPLACE";
-            args[arg_count] = (uintptr_t)replace_str;
-            args_len[arg_count] = strlen(replace_str);
-            arg_count++;
+            /* Check if this is a dynamically allocated string (IDLETIME/FREQ values) */
+            char *str = (char *)args[i];
+            if (str && str[0] >= '0' && str[0] <= '9')
+            {
+                efree(str);
+            }
         }
 
-        /* Add ABSTTL if needed */
-        if (has_absttl && arg_count < max_args)
+        /* Free the argument arrays */
+        efree(args);
+        efree(args_len);
+
+        /* Process the result */
+        int status = 0;
+        if (result)
         {
-            const char *absttl_str = "ABSTTL";
-            args[arg_count] = (uintptr_t)absttl_str;
-            args_len[arg_count] = strlen(absttl_str);
-            arg_count++;
+            if (result->command_error)
+            {
+                /* Command failed */
+                free_command_result(result);
+                return 0;
+            }
+
+            if (result->response)
+            {
+                if (result->response->response_type == Ok)
+                {
+                    ZVAL_TRUE(return_value);
+                    status = 1;
+                }
+                else
+                {
+                    ZVAL_FALSE(return_value);
+                    status = 0;
+                }
+            }
+            free_command_result(result);
         }
 
-        /* Add IDLETIME if provided */
-        if (idletime >= 0 && arg_count + 1 < max_args)
-        {
-            const char *idletime_str = "IDLETIME";
-            args[arg_count] = (uintptr_t)idletime_str;
-            args_len[arg_count] = strlen(idletime_str);
-            arg_count++;
-
-            /* Convert idletime to string */
-            char *idletime_val = (char *)emalloc(32);
-            snprintf(idletime_val, 32, "%ld", idletime);
-            args[arg_count] = (uintptr_t)idletime_val;
-            args_len[arg_count] = strlen(idletime_val);
-            arg_count++;
-        }
-
-        /* Add FREQ if provided */
-        if (freq >= 0 && arg_count + 1 < max_args)
-        {
-            const char *freq_str = "FREQ";
-            args[arg_count] = (uintptr_t)freq_str;
-            args_len[arg_count] = strlen(freq_str);
-            arg_count++;
-
-            /* Convert freq to string */
-            char *freq_val = (char *)emalloc(32);
-            snprintf(freq_val, 32, "%ld", freq);
-            args[arg_count] = (uintptr_t)freq_val;
-            args_len[arg_count] = strlen(freq_val);
-            arg_count++;
-        }
+        return status;
     }
 
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        Restore,   /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free any dynamically allocated option values */
-    int i;
-    for (i = base_arg_count; i < arg_count; i++)
-    {
-        /* Check if this is a dynamically allocated string (IDLETIME/FREQ values) */
-        char *str = (char *)args[i];
-        if (str && str[0] >= '0' && str[0] <= '9')
-        {
-            efree(str);
-        }
-    }
-
-    /* Free the argument arrays */
-    efree(args);
-    efree(args_len);
-
-    /* Process the result */
-    int status = handle_ok_response(result);
-
-    /* Convert response status to boolean */
-    return (status == 1) ? 1 : 0;
+    return 0;
 }

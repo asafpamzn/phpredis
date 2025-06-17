@@ -736,3 +736,23 @@ MULTI_METHOD_IMPL(Redis)
 /* {{{ proto bool Redis::discard() */
 DISCARD_METHOD_IMPL(Redis)
 /* }}} */
+
+/* {{{ proto array Redis::exec() */
+EXEC_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto mixed Redis::fcall(string name, int numkeys, mixed ...args) */
+FCALL_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto mixed Redis::fcall_ro(string name, int numkeys, mixed ...args) */
+FCALL_RO_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string Redis::dump(string key) */
+DUMP_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto bool Redis::restore(string key, int ttl, string serialized_value [, array options]) */
+RESTORE_METHOD_IMPL(Redis)
+/* }}} */
