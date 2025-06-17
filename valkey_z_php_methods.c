@@ -803,3 +803,47 @@ MSET_METHOD_IMPL(Redis)
 /* {{{ proto bool Redis::msetnx(array key_values) */
 MSETNX_METHOD_IMPL(Redis)
 /* }}} */
+
+/* {{{ proto long Redis::type(string key) */
+TYPE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::append(string key, string value) */
+APPEND_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto string Redis::getRange(string key, long start, long end) */
+GETRANGE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::sort(string key [, array options]) */
+SORT_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::sort_ro(string key [, array options]) */
+SORT_RO_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::sortAsc(string key [, array options]) */
+SORTASC_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::sortAscAlpha(string key [, array options]) */
+SORTASCALPHA_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::sortDesc(string key [, array options]) */
+SORTDESC_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto array Redis::sortDescAlpha(string key [, array options]) */
+SORTDESCALPHA_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto bool Redis::expiremember(string key, string member, long seconds) */
+EXPIREMEMBER_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto bool Redis::expirememberat(string key, string member, long timestamp) */
+EXPIREMEMBERAT_METHOD_IMPL(Redis)
+/* }}} */

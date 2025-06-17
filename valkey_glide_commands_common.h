@@ -54,6 +54,17 @@ extern int execute_pexpiretime_command(zval *object, int argc, zval *return_valu
 extern int execute_keys_command(zval *object, int argc, zval *return_value);
 extern int execute_mset_command(zval *object, int argc, zval *return_value);
 extern int execute_msetnx_command(zval *object, int argc, zval *return_value);
+extern int execute_type_command(zval *object, int argc, zval *return_value);
+extern int execute_append_command(zval *object, int argc, zval *return_value);
+extern int execute_getrange_command(zval *object, int argc, zval *return_value);
+extern int execute_sort_command(zval *object, int argc, zval *return_value);
+extern int execute_sort_ro_command(zval *object, int argc, zval *return_value);
+extern int execute_sortasc_command(zval *object, int argc, zval *return_value);
+extern int execute_sortascalpha_command(zval *object, int argc, zval *return_value);
+extern int execute_sortdesc_command(zval *object, int argc, zval *return_value);
+extern int execute_sortdescalpha_command(zval *object, int argc, zval *return_value);
+extern int execute_expiremember_command(zval *object, int argc, zval *return_value);
+extern int execute_expirememberat_command(zval *object, int argc, zval *return_value);
 
 /* DEL command uses different signature - handled separately */
 
@@ -933,6 +944,127 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         }                                                                     \
         zval_dtor(return_value);                                              \
         RETURN_FALSE;                                                         \
+    }
+
+#define TYPE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, type)                                            \
+    {                                                                       \
+        if (execute_type_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define APPEND_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, append)                                            \
+    {                                                                         \
+        if (execute_append_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define GETRANGE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, getRange)                                            \
+    {                                                                           \
+        if (execute_getrange_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        zval_dtor(return_value);                                                \
+        RETURN_FALSE;                                                           \
+    }
+
+#define SORT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sort)                                            \
+    {                                                                       \
+        if (execute_sort_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define SORT_RO_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sort_ro)                                            \
+    {                                                                          \
+        if (execute_sort_ro_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+#define SORTASC_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sortAsc)                                            \
+    {                                                                          \
+        if (execute_sortasc_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+#define SORTASCALPHA_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sortAscAlpha)                                            \
+    {                                                                               \
+        if (execute_sortascalpha_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                           \
+            return;                                                                 \
+        }                                                                           \
+        zval_dtor(return_value);                                                    \
+        RETURN_FALSE;                                                               \
+    }
+
+#define SORTDESC_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sortDesc)                                            \
+    {                                                                           \
+        if (execute_sortdesc_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        zval_dtor(return_value);                                                \
+        RETURN_FALSE;                                                           \
+    }
+
+#define SORTDESCALPHA_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, sortDescAlpha)                                            \
+    {                                                                                \
+        if (execute_sortdescalpha_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                            \
+            return;                                                                  \
+        }                                                                            \
+        zval_dtor(return_value);                                                     \
+        RETURN_FALSE;                                                                \
+    }
+
+#define EXPIREMEMBER_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, expiremember)                                            \
+    {                                                                               \
+        if (execute_expiremember_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                           \
+            return;                                                                 \
+        }                                                                           \
+        zval_dtor(return_value);                                                    \
+        RETURN_FALSE;                                                               \
+    }
+
+#define EXPIREMEMBERAT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, expirememberat)                                            \
+    {                                                                                 \
+        if (execute_expirememberat_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                             \
+            return;                                                                   \
+        }                                                                             \
+        zval_dtor(return_value);                                                      \
+        RETURN_FALSE;                                                                 \
     }
 
 #endif /* VALKEY_GLIDE_COMMANDS_COMMON_H */

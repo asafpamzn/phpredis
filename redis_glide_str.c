@@ -23,60 +23,153 @@
 #include <string.h>
 #include <stdio.h>
 
-/* Execute a TYPE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_type_command(const void *glide_client, const char *key, size_t key_len, long *result)
-{
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = Type;
-    args.key = key;
-    args.key_len = key_len;
+extern zend_class_entry *redis_ce;
 
-    return execute_core_command(&args, result, process_core_type_result);
+/* Import the string conversion functions from command_response.c */
+extern char *long_to_string(long value, size_t *len);
+extern char *double_to_string(double value, size_t *len);
+
+/* Execute a TYPE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
+int execute_type_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len = 0;
+    long type_value = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = Type;
+        args.key = key;
+        args.key_len = key_len;
+
+        if (execute_core_command(&args, &type_value, process_core_type_result))
+        {
+            ZVAL_LONG(return_value, type_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute an APPEND command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_append_command(const void *glide_client, const char *key, size_t key_len, const char *value, size_t value_len, long *output_value)
+int execute_append_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = Append;
-    args.key = key;
-    args.key_len = key_len;
+    redis_object *redis;
+    char *key = NULL, *value = NULL;
+    size_t key_len = 0, value_len = 0;
+    long result_value = 0;
 
-    /* Add value argument */
-    args.args[0].type = CORE_ARG_TYPE_STRING;
-    args.args[0].data.string_arg.value = value;
-    args.args[0].data.string_arg.len = value_len;
-    args.arg_count = 1;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss",
+                                     &object, redis_ce, &key, &key_len,
+                                     &value, &value_len) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = Append;
+        args.key = key;
+        args.key_len = key_len;
+
+        /* Add value argument */
+        args.args[0].type = CORE_ARG_TYPE_STRING;
+        args.args[0].data.string_arg.value = value;
+        args.args[0].data.string_arg.len = value_len;
+        args.arg_count = 1;
+
+        if (execute_core_command(&args, &result_value, process_core_int_result))
+        {
+            ZVAL_LONG(return_value, result_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute a GETRANGE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_getrange_command(const void *glide_client, const char *key, size_t key_len, long start, long end, char **result, size_t *result_len)
+int execute_getrange_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = GetRange;
-    args.key = key;
-    args.key_len = key_len;
+    redis_object *redis;
+    char *key = NULL, *result = NULL;
+    size_t key_len = 0, result_len = 0;
+    long start = 0, end = 0;
 
-    /* Add start and end arguments */
-    args.args[0].type = CORE_ARG_TYPE_LONG;
-    args.args[0].data.long_arg.value = start;
-    args.args[1].type = CORE_ARG_TYPE_LONG;
-    args.args[1].data.long_arg.value = end;
-    args.arg_count = 2;
-
-    /* Use string result processor */
-    struct
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osll",
+                                     &object, redis_ce, &key, &key_len,
+                                     &start, &end) == FAILURE)
     {
-        char **result;
-        size_t *result_len;
-    } output = {result, result_len};
+        return 0;
+    }
 
-    return execute_core_command(&args, &output, process_core_string_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = GetRange;
+        args.key = key;
+        args.key_len = key_len;
+
+        /* Add start and end arguments */
+        args.args[0].type = CORE_ARG_TYPE_LONG;
+        args.args[0].data.long_arg.value = start;
+        args.args[1].type = CORE_ARG_TYPE_LONG;
+        args.args[1].data.long_arg.value = end;
+        args.arg_count = 2;
+
+        /* Use string result processor */
+        struct
+        {
+            char **result;
+            size_t *result_len;
+        } output = {&result, &result_len};
+
+        int ret = execute_core_command(&args, &output, process_core_string_result);
+
+        if (ret > 0)
+        {
+            /* Command succeeded with data */
+            RETVAL_STRINGL(result, result_len);
+            efree(result);
+            return 1;
+        }
+        else if (ret == 0)
+        {
+            /* Key didn't exist, return empty string */
+            ZVAL_EMPTY_STRING(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Helper function to build SORT command arguments */
@@ -269,194 +362,633 @@ static void free_sort_args(uintptr_t *args, unsigned long *args_len, unsigned lo
 }
 
 /* Execute a SORT command using the Valkey Glide client */
-int execute_sort_command(const void *glide_client, const char *key, size_t key_len,
-                         zval *sort_pattern, zend_bool alpha, zend_bool desc, zval *return_value)
+int execute_sort_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len = 0;
+    zval *z_opts = NULL;
+    zend_bool alpha = 0, desc = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|a",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_opts) == FAILURE)
     {
         return 0;
     }
 
-    /* Build command arguments */
-    uintptr_t *args = NULL;
-    unsigned long *args_len = NULL;
-    unsigned long arg_count = 0;
-    build_sort_args(key, key_len, sort_pattern, alpha, desc, &args, &args_len, &arg_count);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    if (!args || !args_len || arg_count == 0)
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
     {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
-        return 0;
-    }
+        /* Build command arguments */
+        uintptr_t *args = NULL;
+        unsigned long *args_len = NULL;
+        unsigned long arg_count = 0;
+        build_sort_args(key, key_len, z_opts, alpha, desc, &args, &args_len, &arg_count);
 
-    /* Execute the command */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        Sort,      /* command type */
-        arg_count, /* number of arguments */
-        args,      /* arguments */
-        args_len   /* argument lengths */
-    );
-
-    /* Free the argument arrays */
-    free_sort_args(args, args_len, arg_count);
-
-    /* Check if we have a valid result */
-    if (!cmd_result || !cmd_result->response)
-    {
-        if (cmd_result)
-            free_command_result(cmd_result);
-        return 0;
-    }
-
-    /* Process the result */
-    int ret_val = 0;
-
-    /* Check for STORE option */
-    if (sort_pattern && Z_TYPE_P(sort_pattern) == IS_ARRAY)
-    {
-        zval *z_store = zend_hash_str_find(Z_ARRVAL_P(sort_pattern), "store", sizeof("store") - 1);
-        if (z_store && Z_TYPE_P(z_store) == IS_STRING)
+        if (!args || !args_len || arg_count == 0)
         {
-            /* With STORE option, we get the number of stored elements */
-            long result_value = 0;
-            if (handle_int_response(cmd_result, &result_value))
-            {
-                ZVAL_LONG(return_value, result_value);
-                return 1;
-            }
+            if (args)
+                efree(args);
+            if (args_len)
+                efree(args_len);
             return 0;
         }
+
+        /* Execute the command */
+        CommandResult *cmd_result = execute_command(
+            redis->glide_client,
+            Sort,      /* command type */
+            arg_count, /* number of arguments */
+            args,      /* arguments */
+            args_len   /* argument lengths */
+        );
+
+        /* Free the argument arrays */
+        free_sort_args(args, args_len, arg_count);
+
+        /* Check if we have a valid result */
+        if (!cmd_result || !cmd_result->response)
+        {
+            if (cmd_result)
+                free_command_result(cmd_result);
+            return 0;
+        }
+
+        /* Process the result */
+        int ret_val = 0;
+
+        /* Check for STORE option */
+        if (z_opts && Z_TYPE_P(z_opts) == IS_ARRAY)
+        {
+            zval *z_store = zend_hash_str_find(Z_ARRVAL_P(z_opts), "store", sizeof("store") - 1);
+            if (z_store && Z_TYPE_P(z_store) == IS_STRING)
+            {
+                /* With STORE option, we get the number of stored elements */
+                long result_value = 0;
+                if (handle_int_response(cmd_result, &result_value))
+                {
+                    ZVAL_LONG(return_value, result_value);
+                    free_command_result(cmd_result);
+                    return 1;
+                }
+                free_command_result(cmd_result);
+                return 0;
+            }
+        }
+
+        /* Without STORE option, we get an array of sorted values */
+        if (cmd_result->response->response_type == Array)
+        {
+            array_init(return_value);
+            ret_val = command_response_to_zval(cmd_result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+        }
+        else if (cmd_result->response->response_type == Null)
+        {
+            /* Empty array */
+            array_init(return_value);
+            ret_val = 1;
+        }
+
+        free_command_result(cmd_result);
+        return ret_val;
     }
 
-    /* Without STORE option, we get an array of sorted values */
-    if (cmd_result->response->response_type == Array)
+    return 0;
+}
+
+/* Execute an EXPIREMEMBER command using the Valkey Glide client */
+int execute_expiremember_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL, *member = NULL;
+    size_t key_len = 0, member_len = 0;
+    long seconds = 0, result_value = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Ossl",
+                                     &object, redis_ce, &key, &key_len,
+                                     &member, &member_len, &seconds) == FAILURE)
     {
-        array_init(return_value);
-        ret_val = command_response_to_zval(cmd_result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
-    }
-    else if (cmd_result->response->response_type == Null)
-    {
-        /* Empty array */
-        array_init(return_value);
-        ret_val = 1;
+        return 0;
     }
 
-    free_command_result(cmd_result);
-    return ret_val;
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Build command arguments */
+        const char *args[] = {"EXPIREMEMBER", key, member, NULL};
+        unsigned long args_len[] = {12, key_len, member_len, 0};
+        unsigned long arg_count = 3;
+
+        /* Convert seconds to string */
+        char seconds_str[32];
+        size_t seconds_len;
+        snprintf(seconds_str, sizeof(seconds_str), "%ld", seconds);
+        seconds_len = strlen(seconds_str);
+
+        args[3] = seconds_str;
+        args_len[3] = seconds_len;
+        arg_count = 4;
+
+        /* Execute the command */
+        CommandResult *cmd_result = execute_command(
+            redis->glide_client,
+            CustomCommand,     /* command type */
+            arg_count,         /* number of arguments */
+            (uintptr_t *)args, /* arguments */
+            args_len           /* argument lengths */
+        );
+
+        /* Check if we have a valid result */
+        if (!cmd_result || !cmd_result->response)
+        {
+            if (cmd_result)
+                free_command_result(cmd_result);
+            return 0;
+        }
+
+        /* Process the result - EXPIREMEMBER returns 1 or 0 */
+        if (handle_int_response(cmd_result, &result_value))
+        {
+            ZVAL_BOOL(return_value, result_value);
+            free_command_result(cmd_result);
+            return 1;
+        }
+
+        free_command_result(cmd_result);
+    }
+
+    return 0;
+}
+
+/* Execute an EXPIREMEMBERAT command using the Valkey Glide client */
+int execute_expirememberat_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL, *member = NULL;
+    size_t key_len = 0, member_len = 0;
+    long timestamp = 0, result_value = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Ossl",
+                                     &object, redis_ce, &key, &key_len,
+                                     &member, &member_len, &timestamp) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Build command arguments */
+        const char *args[] = {"EXPIREMEMBERAT", key, member, NULL};
+        unsigned long args_len[] = {14, key_len, member_len, 0};
+        unsigned long arg_count = 3;
+
+        /* Convert timestamp to string */
+        char timestamp_str[32];
+        size_t timestamp_len;
+        snprintf(timestamp_str, sizeof(timestamp_str), "%ld", timestamp);
+        timestamp_len = strlen(timestamp_str);
+
+        args[3] = timestamp_str;
+        args_len[3] = timestamp_len;
+        arg_count = 4;
+
+        /* Execute the command */
+        CommandResult *cmd_result = execute_command(
+            redis->glide_client,
+            CustomCommand,     /* command type */
+            arg_count,         /* number of arguments */
+            (uintptr_t *)args, /* arguments */
+            args_len           /* argument lengths */
+        );
+
+        /* Check if we have a valid result */
+        if (!cmd_result || !cmd_result->response)
+        {
+            if (cmd_result)
+                free_command_result(cmd_result);
+            return 0;
+        }
+
+        /* Process the result - EXPIREMEMBERAT returns 1 or 0 */
+        if (handle_int_response(cmd_result, &result_value))
+        {
+            ZVAL_BOOL(return_value, result_value);
+            free_command_result(cmd_result);
+            return 1;
+        }
+
+        free_command_result(cmd_result);
+    }
+
+    return 0;
 }
 
 /* Execute a SORT_RO command using the Valkey Glide client */
-int execute_sort_ro_command(const void *glide_client, const char *key, size_t key_len,
-                            zval *sort_pattern, zend_bool alpha, zend_bool desc, zval *return_value)
+int execute_sort_ro_command(zval *object, int argc, zval *return_value)
 {
-    /* Check if client and key are valid */
-    if (!glide_client || !key)
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len = 0;
+    zval *z_opts = NULL;
+    zend_bool alpha = 0, desc = 0;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|a",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_opts) == FAILURE)
     {
         return 0;
     }
 
-    /* Build command arguments */
-    uintptr_t *args = NULL;
-    unsigned long *args_len = NULL;
-    unsigned long arg_count = 0;
-    build_sort_args(key, key_len, sort_pattern, alpha, desc, &args, &args_len, &arg_count);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    if (!args || !args_len || arg_count == 0)
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
     {
-        if (args)
-            efree(args);
-        if (args_len)
-            efree(args_len);
+        /* Build command arguments */
+        uintptr_t *args = NULL;
+        unsigned long *args_len = NULL;
+        unsigned long arg_count = 0;
+        build_sort_args(key, key_len, z_opts, alpha, desc, &args, &args_len, &arg_count);
+
+        if (!args || !args_len || arg_count == 0)
+        {
+            if (args)
+                efree(args);
+            if (args_len)
+                efree(args_len);
+            return 0;
+        }
+
+        /* Execute the command */
+        CommandResult *cmd_result = execute_command(
+            redis->glide_client,
+            SortReadOnly, /* command type */
+            arg_count,    /* number of arguments */
+            args,         /* arguments */
+            args_len      /* argument lengths */
+        );
+
+        /* Free the argument arrays */
+        free_sort_args(args, args_len, arg_count);
+
+        /* Check if we have a valid result */
+        if (!cmd_result || !cmd_result->response)
+        {
+            if (cmd_result)
+                free_command_result(cmd_result);
+            return 0;
+        }
+
+        /* Process the result */
+        int ret_val = 0;
+
+        /* SORT_RO doesn't support STORE option, so we always get an array of values */
+        if (cmd_result->response->response_type == Array)
+        {
+            array_init(return_value);
+            ret_val = command_response_to_zval(cmd_result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+        }
+        else if (cmd_result->response->response_type == Null)
+        {
+            /* Empty array */
+            array_init(return_value);
+            ret_val = 1;
+        }
+
+        free_command_result(cmd_result);
+        return ret_val;
+    }
+
+    return 0;
+}
+
+/* Execute a SORT command in ascending order */
+int execute_sortasc_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len = 0;
+    zval *z_opts = NULL;
+    zend_bool alpha = 0, desc = 0; /* Ascending order */
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|a",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_opts) == FAILURE)
+    {
         return 0;
     }
 
-    /* Execute the command */
-    CommandResult *cmd_result = execute_command(
-        glide_client,
-        SortReadOnly, /* command type */
-        arg_count,    /* number of arguments */
-        args,         /* arguments */
-        args_len      /* argument lengths */
-    );
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Free the argument arrays */
-    free_sort_args(args, args_len, arg_count);
-
-    /* Check if we have a valid result */
-    if (!cmd_result || !cmd_result->response)
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
     {
-        if (cmd_result)
-            free_command_result(cmd_result);
+        /* Build command arguments */
+        uintptr_t *args = NULL;
+        unsigned long *args_len = NULL;
+        unsigned long arg_count = 0;
+        build_sort_args(key, key_len, z_opts, alpha, desc, &args, &args_len, &arg_count);
+
+        if (!args || !args_len || arg_count == 0)
+        {
+            if (args)
+                efree(args);
+            if (args_len)
+                efree(args_len);
+            return 0;
+        }
+
+        /* Execute the command */
+        CommandResult *cmd_result = execute_command(
+            redis->glide_client,
+            Sort,      /* command type */
+            arg_count, /* number of arguments */
+            args,      /* arguments */
+            args_len   /* argument lengths */
+        );
+
+        /* Free the argument arrays */
+        free_sort_args(args, args_len, arg_count);
+
+        /* Check if we have a valid result */
+        if (!cmd_result || !cmd_result->response)
+        {
+            if (cmd_result)
+                free_command_result(cmd_result);
+            return 0;
+        }
+
+        /* Process the result */
+        int ret_val = 0;
+
+        /* Without STORE option, we get an array of sorted values */
+        if (cmd_result->response->response_type == Array)
+        {
+            array_init(return_value);
+            ret_val = command_response_to_zval(cmd_result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+        }
+        else if (cmd_result->response->response_type == Null)
+        {
+            /* Empty array */
+            array_init(return_value);
+            ret_val = 1;
+        }
+
+        free_command_result(cmd_result);
+        return ret_val;
+    }
+
+    return 0;
+}
+
+/* Execute a SORT command in ascending order with alpha flag */
+int execute_sortascalpha_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len = 0;
+    zval *z_opts = NULL;
+    zend_bool alpha = 1, desc = 0; /* Ascending order with alpha */
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|a",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_opts) == FAILURE)
+    {
         return 0;
     }
 
-    /* Process the result */
-    int ret_val = 0;
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* SORT_RO doesn't support STORE option, so we always get an array of values */
-    if (cmd_result->response->response_type == Array)
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
     {
-        array_init(return_value);
-        ret_val = command_response_to_zval(cmd_result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+        /* Build command arguments */
+        uintptr_t *args = NULL;
+        unsigned long *args_len = NULL;
+        unsigned long arg_count = 0;
+        build_sort_args(key, key_len, z_opts, alpha, desc, &args, &args_len, &arg_count);
+
+        if (!args || !args_len || arg_count == 0)
+        {
+            if (args)
+                efree(args);
+            if (args_len)
+                efree(args_len);
+            return 0;
+        }
+
+        /* Execute the command */
+        CommandResult *cmd_result = execute_command(
+            redis->glide_client,
+            Sort,      /* command type */
+            arg_count, /* number of arguments */
+            args,      /* arguments */
+            args_len   /* argument lengths */
+        );
+
+        /* Free the argument arrays */
+        free_sort_args(args, args_len, arg_count);
+
+        /* Check if we have a valid result */
+        if (!cmd_result || !cmd_result->response)
+        {
+            if (cmd_result)
+                free_command_result(cmd_result);
+            return 0;
+        }
+
+        /* Process the result */
+        int ret_val = 0;
+
+        /* Without STORE option, we get an array of sorted values */
+        if (cmd_result->response->response_type == Array)
+        {
+            array_init(return_value);
+            ret_val = command_response_to_zval(cmd_result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+        }
+        else if (cmd_result->response->response_type == Null)
+        {
+            /* Empty array */
+            array_init(return_value);
+            ret_val = 1;
+        }
+
+        free_command_result(cmd_result);
+        return ret_val;
     }
-    else if (cmd_result->response->response_type == Null)
+
+    return 0;
+}
+
+/* Execute a SORT command in descending order */
+int execute_sortdesc_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len = 0;
+    zval *z_opts = NULL;
+    zend_bool alpha = 0, desc = 1; /* Descending order */
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|a",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_opts) == FAILURE)
     {
-        /* Empty array */
-        array_init(return_value);
-        ret_val = 1;
+        return 0;
     }
 
-    free_command_result(cmd_result);
-    return ret_val;
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Build command arguments */
+        uintptr_t *args = NULL;
+        unsigned long *args_len = NULL;
+        unsigned long arg_count = 0;
+        build_sort_args(key, key_len, z_opts, alpha, desc, &args, &args_len, &arg_count);
+
+        if (!args || !args_len || arg_count == 0)
+        {
+            if (args)
+                efree(args);
+            if (args_len)
+                efree(args_len);
+            return 0;
+        }
+
+        /* Execute the command */
+        CommandResult *cmd_result = execute_command(
+            redis->glide_client,
+            Sort,      /* command type */
+            arg_count, /* number of arguments */
+            args,      /* arguments */
+            args_len   /* argument lengths */
+        );
+
+        /* Free the argument arrays */
+        free_sort_args(args, args_len, arg_count);
+
+        /* Check if we have a valid result */
+        if (!cmd_result || !cmd_result->response)
+        {
+            if (cmd_result)
+                free_command_result(cmd_result);
+            return 0;
+        }
+
+        /* Process the result */
+        int ret_val = 0;
+
+        /* Without STORE option, we get an array of sorted values */
+        if (cmd_result->response->response_type == Array)
+        {
+            array_init(return_value);
+            ret_val = command_response_to_zval(cmd_result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE, false);
+        }
+        else if (cmd_result->response->response_type == Null)
+        {
+            /* Empty array */
+            array_init(return_value);
+            ret_val = 1;
+        }
+
+        free_command_result(cmd_result);
+        return ret_val;
+    }
+
+    return 0;
 }
 
-/* Execute an EXPIREMEMBER command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_expiremember_command(const void *glide_client, const char *key, size_t key_len,
-                                 const char *member, size_t member_len, long seconds, long *output_value)
+/* Execute a SORT command in descending order with alpha flag */
+int execute_sortdescalpha_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = CustomCommand; /* Custom command type */
-    args.key = key;
-    args.key_len = key_len;
 
-    /* Add member argument */
-    args.args[0].type = CORE_ARG_TYPE_STRING;
-    args.args[0].data.string_arg.value = member;
-    args.args[0].data.string_arg.len = member_len;
-
-    /* Add seconds argument */
-    args.args[1].type = CORE_ARG_TYPE_LONG;
-    args.args[1].data.long_arg.value = seconds;
-    args.arg_count = 2;
-
-    return execute_core_command(&args, output_value, process_core_int_result);
+    return 0;
 }
+#if 0
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len = 0;
+    zval *z_opts = NULL;
+    zend_bool alpha = 1, desc = 1; /* Descending order with alpha */
 
-/* Execute an EXPIREMEMBERAT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_expirememberat_command(const void *glide_client, const char *key, size_t key_len,
-                                   const char *member, size_t member_len, long timestamp, long *output_value)
-{
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = CustomCommand; /* Custom command type */
-    args.key = key;
-    args.key_len = key_len;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os|a",
+                                     &object, redis_ce, &key, &key_len,
+                                     &z_opts) == FAILURE)
+    {
+        return 0;
+    }
 
-    /* Add member argument */
-    args.args[0].type = CORE_ARG_TYPE_STRING;
-    args.args[0].data.string_arg.value = member;
-    args.args[0].data.string_arg.len = member_len;
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
-    /* Add timestamp argument */
-    args.args[1].type = CORE_ARG_TYPE_LONG;
-    args.args[1].data.long_arg.value = timestamp;
-    args.arg_count = 2;
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Build command arguments */
+        uintptr_t *args = NULL;
+        unsigned long *args_len = NULL;
+        unsigned long arg_count = 0;
+        build_sort_args(key, key_len, z_opts, alpha, desc, &args, &args_len, &arg_count);
 
-    return execute_core_command(&args, output_value, process_core_int_result);
-}
+        if (!args || !args_len || arg_count == 0)
+        {
+            if (args)
+                efree(args);
+            if (args_len)
+                efree(args_len);
+            return 0;
+        }
+
+        /* Execute the command */
+        CommandResult *cmd_result = execute_command(
+            redis->glide_client,
+            Sort,      /* command type */
+            arg_count, /* number of arguments */
+            args,      /* arguments */
+            args_len   /* argument lengths */
+        );
+
+        /* Free the argument arrays */
+        free_sort_args(args, args_len, arg_count);
+
+        /* Check if we have a valid result */
+        if (!cmd_result || !cmd_result->response)
+        {
+            if (cmd_result)
+                free_command_result(cmd_result);
+            return 0;
+        }
+
+        /* Process the result */
+        int ret_val = 0;
+
+        /* Without STORE option, we get an array of sorted values */
+        if (cmd_result->response->response_type == Array)
+        {
+            array_init(return_value);
+            ret_val = command_response_to_zval(cmd_result->response, return_value, COMMAND_RESPONSE_NOT_ASSOSIATIVE
+#endif
