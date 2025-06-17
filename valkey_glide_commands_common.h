@@ -540,4 +540,15 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         RETURN_FALSE;                                                       \
     }
 
+#define DECRBY_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, decrBy)                                            \
+    {                                                                         \
+        if (execute_decrby_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
 #endif /* VALKEY_GLIDE_COMMANDS_COMMON_H */

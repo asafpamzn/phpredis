@@ -29,6 +29,7 @@
 #include "redis_glide.h"
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include "valkey_glide_core_common.h"
+#include "valkey_glide_commands_common.h"
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
 #include <ext/standard/info.h>
@@ -762,14 +763,7 @@ int execute_decrby_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto long Redis::decrBy(string key, long value) */
-PHP_METHOD(Redis, decrBy)
-{
-    if (execute_decrby_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+DECRBY_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute an MGET command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
