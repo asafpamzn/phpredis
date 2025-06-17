@@ -19,7 +19,7 @@
 #include "redis_glide.h"
 
 /* Forward declarations for the Glide execute functions */
-extern int execute_wait_command(const void *glide_client, long numreplicas, long timeout, long *output_value);
+extern int execute_wait_command(zval *object, int argc, zval *return_value);
 extern int execute_function_command(const void *glide_client, zval *args, int args_count, zval *return_value);
 extern int execute_multi_command(const void *glide_client);
 extern int execute_discard_command(const void *glide_client);
@@ -38,44 +38,6 @@ extern int execute_config_command(const void *glide_client, const char *operatio
 
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
-
-/* {{{ proto int Redis::wait(int numreplicas, int timeout) */
-PHP_METHOD(Redis, wait)
-{
-    zval *object;
-    redis_object *redis;
-    long numreplicas, timeout;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oll",
-                                     &object, redis_ce, &numreplicas, &timeout) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the WAIT command using the Glide client */
-        long result_value;
-        if (execute_wait_command(redis->glide_client, numreplicas, timeout, &result_value))
-        {
-            /* Return the number of replicas that acknowledged the write */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-
-    /* If we don't have a Glide client, fall back to standard implementation */
-    RETURN_FALSE;
-}
-/* }}} */
 
 /* {{{ proto mixed Redis::config(string operation, mixed key [, mixed value]) */
 PHP_METHOD(Redis, config)

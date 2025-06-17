@@ -34,6 +34,7 @@ extern int execute_setbit_command(zval *object, int argc, zval *return_value);
 extern int execute_bitcount_command(zval *object, int argc, zval *return_value);
 extern int execute_bitpos_command(zval *object, int argc, zval *return_value);
 int execute_touch_command(zval *object, int argc, zval *return_value);
+extern int execute_wait_command(zval *object, int argc, zval *return_value);
 
 /* DEL command uses different signature - handled separately */
 
@@ -693,6 +694,17 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         }                                                                     \
         zval_dtor(return_value);                                              \
         RETURN_FALSE;                                                         \
+    }
+
+#define WAIT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, wait)                                            \
+    {                                                                       \
+        if (execute_wait_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
     }
 
 #endif /* VALKEY_GLIDE_COMMANDS_COMMON_H */

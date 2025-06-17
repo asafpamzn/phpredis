@@ -23,21 +23,49 @@
 #include <string.h>
 #include <stdio.h>
 
+extern zend_class_entry *redis_ce;
+extern zend_class_entry *redis_exception_ce;
+
 /* Execute a WAIT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_wait_command(const void *glide_client, long numreplicas, long timeout, long *output_value)
+int execute_wait_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = Wait;
+    redis_object *redis;
+    long numreplicas, timeout;
 
-    /* WAIT is a server-level command (not key-based) with 2 arguments: numreplicas, timeout */
-    args.args[0].type = CORE_ARG_TYPE_LONG;
-    args.args[0].data.long_arg.value = numreplicas;
-    args.args[1].type = CORE_ARG_TYPE_LONG;
-    args.args[1].data.long_arg.value = timeout;
-    args.arg_count = 2;
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oll",
+                                     &object, redis_ce, &numreplicas, &timeout) == FAILURE)
+    {
+        return 0;
+    }
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = Wait;
+
+        /* WAIT is a server-level command (not key-based) with 2 arguments: numreplicas, timeout */
+        args.args[0].type = CORE_ARG_TYPE_LONG;
+        args.args[0].data.long_arg.value = numreplicas;
+        args.args[1].type = CORE_ARG_TYPE_LONG;
+        args.args[1].data.long_arg.value = timeout;
+        args.arg_count = 2;
+
+        long result_value;
+        if (execute_core_command(&args, &result_value, process_core_int_result))
+        {
+            /* Return the number of replicas that acknowledged the write */
+            ZVAL_LONG(return_value, result_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute a FUNCTION command using the Valkey Glide client */

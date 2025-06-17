@@ -716,3 +716,7 @@ RAWCOMMAND_METHOD_IMPL(Redis)
 /* {{{ proto long Redis::dbSize() */
 DBSIZE_METHOD_IMPL(Redis)
 /* }}} */
+
+/* {{{ proto int Redis::wait(int numreplicas, int timeout) */
+WAIT_METHOD_IMPL(Redis)
+/* }}} */
