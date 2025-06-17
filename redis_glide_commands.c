@@ -26,20 +26,6 @@
 extern zend_class_entry *redis_ce;
 extern zend_class_entry *redis_exception_ce;
 
-/* Execute a setOption command using the Valkey Glide client */
-int execute_setOption_command(const void *glide_client, zend_long option, zval *value)
-{
-    /* Check if client is valid */
-    if (!glide_client)
-    {
-        return 0;
-    }
-
-    /* Currently, Glide client doesn't directly support setting client options,
-     * so we store them in the local Redis object. We'll return success for now. */
-    return 1;
-}
-
 /* Execute an MSET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_mset_command(const void *glide_client, zval *arr)
 {

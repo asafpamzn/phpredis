@@ -117,43 +117,6 @@ PHP_METHOD(Redis, keys)
 }
 /* }}} */
 
-/* {{{ proto boolean Redis::setOption(long option, mixed value) */
-PHP_METHOD(Redis, setOption)
-{
-    zval *object;
-    redis_object *redis;
-    zend_long option;
-    zval *value;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Olz",
-                                     &object, redis_ce, &option, &value) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the setOption command using the Glide client */
-        int result = execute_setOption_command(redis->glide_client, option, value);
-
-        /* Return TRUE if successful, FALSE otherwise */
-        if (result == 1)
-        {
-            RETURN_TRUE;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
-    }
-}
-/* }}} */
-
 /* {{{ proto boolean Redis::mset(array key_values) */
 PHP_METHOD(Redis, mset)
 {

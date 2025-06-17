@@ -137,7 +137,6 @@ extern int execute_pttl_command(zval *object, int argc, zval *return_value);
 /* Hash operations */
 
 /* New commands added in redis_glide_commands.c */
-int execute_setOption_command(const void *glide_client, zend_long option, zval *value);
 int execute_mset_command(const void *glide_client, zval *arr);
 int execute_msetnx_command(const void *glide_client, zval *arr, long *output_value);
 int execute_brpoplpush_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len, zend_long timeout, char **result, size_t *result_len);

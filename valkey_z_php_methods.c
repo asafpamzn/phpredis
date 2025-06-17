@@ -693,6 +693,13 @@ PHP_METHOD(Redis, reset)
 }
 /* }}} */
 
+/* {{{ proto boolean Redis::setOption(long option, mixed value) */
+PHP_METHOD(Redis, setOption)
+{
+    RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ proto boolean Redis::select(int dbindex) */
 SELECT_METHOD_IMPL(Redis)
 /* }}} */
