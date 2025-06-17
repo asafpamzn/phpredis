@@ -379,14 +379,7 @@ int execute_getex_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto string Redis::getEx(string key, array opts) */
-PHP_METHOD(Redis, getEx)
-{
-    if (execute_getex_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+GETEX_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute an INCR command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
@@ -472,14 +465,7 @@ int execute_incr_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto long Redis::incr(string key, [long value]) */
-PHP_METHOD(Redis, incr)
-{
-    if (execute_incr_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+INCR_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute an INCRBY command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
@@ -531,14 +517,7 @@ int execute_incrby_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto long Redis::incrBy(string key, long value) */
-PHP_METHOD(Redis, incrBy)
-{
-    if (execute_incrby_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+INCRBY_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute an INCRBYFLOAT command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
@@ -588,14 +567,7 @@ int execute_incrbyfloat_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto double Redis::incrByFloat(string key, double value) */
-PHP_METHOD(Redis, incrByFloat)
-{
-    if (execute_incrbyfloat_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+INCRBYFLOAT_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute a DECR command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
@@ -677,14 +649,7 @@ int execute_decr_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto long Redis::decr(string key, [long value]) */
-PHP_METHOD(Redis, decr)
-{
-    if (execute_decr_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+DECR_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute a DECRBY command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
@@ -785,14 +750,7 @@ int execute_mget_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto array Redis::mget(array keys) */
-PHP_METHOD(Redis, mget)
-{
-    if (execute_mget_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+MGET_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute an EXISTS command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
@@ -865,14 +823,7 @@ int execute_exists_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto long Redis::exists(string key | array keys) */
-PHP_METHOD(Redis, exists)
-{
-    if (execute_exists_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+EXISTS_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute a TOUCH command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
@@ -946,14 +897,7 @@ int execute_touch_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto long Redis::touch(string key | array keys) */
-PHP_METHOD(Redis, touch)
-{
-    if (execute_touch_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+TOUCH_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute an UNLINK command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
@@ -1000,12 +944,5 @@ int execute_unlink_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto long Redis::unlink(string key | array keys) */
-PHP_METHOD(Redis, unlink)
-{
-    if (execute_unlink_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+UNLINK_METHOD_IMPL(Redis)
 /* }}} */

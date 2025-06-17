@@ -33,6 +33,7 @@ extern int execute_getbit_command(zval *object, int argc, zval *return_value);
 extern int execute_setbit_command(zval *object, int argc, zval *return_value);
 extern int execute_bitcount_command(zval *object, int argc, zval *return_value);
 extern int execute_bitpos_command(zval *object, int argc, zval *return_value);
+int execute_touch_command(zval *object, int argc, zval *return_value);
 
 /* DEL command uses different signature - handled separately */
 
