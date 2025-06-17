@@ -124,14 +124,7 @@ int execute_rename_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto boolean Redis::rename(string key_src, string key_dst) */
-PHP_METHOD(Redis, rename)
-{
-    if (execute_rename_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+RENAME_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute a RENAMENX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
@@ -186,14 +179,7 @@ int execute_renamenx_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto boolean Redis::renameNx(string key_src, string key_dst) */
-PHP_METHOD(Redis, renameNx)
-{
-    if (execute_renamenx_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+RENAMENX_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute a GETWITHMETA command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
@@ -257,14 +243,7 @@ int execute_getwithmeta_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto string Redis::getWithMeta(string key) */
-PHP_METHOD(Redis, getWithMeta)
-{
-    if (execute_getwithmeta_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+GETWITHMETA_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute a GETDEL command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
@@ -328,14 +307,7 @@ int execute_getdel_command(zval *object, int argc, zval *return_value)
 }
 
 /* {{{ proto string Redis::getDel(string key) */
-PHP_METHOD(Redis, getDel)
-{
-    if (execute_getdel_command(getThis(), ZEND_NUM_ARGS(), return_value))
-    {
-        return;
-    }
-    RETURN_FALSE;
-}
+GETDEL_METHOD_IMPL(Redis)
 /* }}} */
 
 /* Execute a GETEX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */

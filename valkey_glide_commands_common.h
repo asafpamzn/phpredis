@@ -551,4 +551,147 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         RETURN_FALSE;                                                         \
     }
 
+#define RENAME_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, rename)                                            \
+    {                                                                         \
+        if (execute_rename_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define RENAMENX_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, renameNx)                                            \
+    {                                                                           \
+        if (execute_renamenx_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        zval_dtor(return_value);                                                \
+        RETURN_FALSE;                                                           \
+    }
+
+#define GETWITHMETA_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, getWithMeta)                                            \
+    {                                                                              \
+        if (execute_getwithmeta_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                          \
+            return;                                                                \
+        }                                                                          \
+        zval_dtor(return_value);                                                   \
+        RETURN_FALSE;                                                              \
+    }
+
+#define GETDEL_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, getDel)                                            \
+    {                                                                         \
+        if (execute_getdel_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define GETEX_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, getEx)                                            \
+    {                                                                        \
+        if (execute_getex_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+#define INCR_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, incr)                                            \
+    {                                                                       \
+        if (execute_incr_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define INCRBY_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, incrBy)                                            \
+    {                                                                         \
+        if (execute_incrby_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define INCRBYFLOAT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, incrByFloat)                                            \
+    {                                                                              \
+        if (execute_incrbyfloat_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                          \
+            return;                                                                \
+        }                                                                          \
+        zval_dtor(return_value);                                                   \
+        RETURN_FALSE;                                                              \
+    }
+
+#define DECR_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, decr)                                            \
+    {                                                                       \
+        if (execute_decr_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define MGET_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, mget)                                            \
+    {                                                                       \
+        if (execute_mget_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                   \
+            return;                                                         \
+        }                                                                   \
+        zval_dtor(return_value);                                            \
+        RETURN_FALSE;                                                       \
+    }
+
+#define EXISTS_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, exists)                                            \
+    {                                                                         \
+        if (execute_exists_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define TOUCH_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, touch)                                            \
+    {                                                                        \
+        if (execute_touch_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                    \
+            return;                                                          \
+        }                                                                    \
+        zval_dtor(return_value);                                             \
+        RETURN_FALSE;                                                        \
+    }
+
+#define UNLINK_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, unlink)                                            \
+    {                                                                         \
+        if (execute_unlink_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
 #endif /* VALKEY_GLIDE_COMMANDS_COMMON_H */
