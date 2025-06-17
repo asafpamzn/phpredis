@@ -44,6 +44,10 @@ extern int execute_fcall_command(zval *object, int argc, zval *return_value);
 extern int execute_fcall_ro_command(zval *object, int argc, zval *return_value);
 extern int execute_dump_command(zval *object, int argc, zval *return_value);
 extern int execute_restore_command(zval *object, int argc, zval *return_value);
+extern int execute_expire_command(zval *object, int argc, zval *return_value);
+extern int execute_expireat_command(zval *object, int argc, zval *return_value);
+extern int execute_pexpire_command(zval *object, int argc, zval *return_value);
+extern int execute_pexpireat_command(zval *object, int argc, zval *return_value);
 
 /* DEL command uses different signature - handled separately */
 
@@ -813,6 +817,50 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         }                                                                      \
         zval_dtor(return_value);                                               \
         RETURN_FALSE;                                                          \
+    }
+
+#define EXPIRE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, expire)                                            \
+    {                                                                         \
+        if (execute_expire_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                     \
+            return;                                                           \
+        }                                                                     \
+        zval_dtor(return_value);                                              \
+        RETURN_FALSE;                                                         \
+    }
+
+#define EXPIREAT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, expireAt)                                            \
+    {                                                                           \
+        if (execute_expireat_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                       \
+            return;                                                             \
+        }                                                                       \
+        zval_dtor(return_value);                                                \
+        RETURN_FALSE;                                                           \
+    }
+
+#define PEXPIRE_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, pexpire)                                            \
+    {                                                                          \
+        if (execute_pexpire_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+#define PEXPIREAT_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, pexpireAt)                                            \
+    {                                                                            \
+        if (execute_pexpireat_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                        \
+            return;                                                              \
+        }                                                                        \
+        zval_dtor(return_value);                                                 \
+        RETURN_FALSE;                                                            \
     }
 
 #endif /* VALKEY_GLIDE_COMMANDS_COMMON_H */

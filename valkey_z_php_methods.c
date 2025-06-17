@@ -756,3 +756,19 @@ DUMP_METHOD_IMPL(Redis)
 /* {{{ proto bool Redis::restore(string key, int ttl, string serialized_value [, array options]) */
 RESTORE_METHOD_IMPL(Redis)
 /* }}} */
+
+/* {{{ proto bool Redis::expire(string key, long seconds [, string mode]) */
+EXPIRE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto bool Redis::expireAt(string key, long timestamp [, string mode]) */
+EXPIREAT_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto bool Redis::pexpire(string key, long milliseconds [, string mode]) */
+PEXPIRE_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto bool Redis::pexpireAt(string key, long milliseconds_timestamp [, string mode]) */
+PEXPIREAT_METHOD_IMPL(Redis)
+/* }}} */

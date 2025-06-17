@@ -17,117 +17,267 @@
 #include "php_redis.h"
 #include "valkey_glide_core_common.h"
 
+extern zend_class_entry *redis_ce;
+
 /* ====================================================================
  * MIGRATED EXPIRE COMMANDS USING CORE FRAMEWORK
  * All functions dramatically reduced from ~70 lines each to 1-5 lines
  * ==================================================================== */
 
 /* Execute an EXPIRE command using the Valkey Glide client */
-int execute_expire_command(const void *glide_client, const char *key, size_t key_len,
-                           long seconds, const char *mode, size_t mode_len)
+int execute_expire_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = Expire;
-    args.key = key;
-    args.key_len = key_len;
+    redis_object *redis;
+    char *key = NULL, *mode = NULL;
+    size_t key_len, mode_len = 0;
+    zend_long seconds;
 
-    /* Add time argument */
-    args.args[0].type = CORE_ARG_TYPE_LONG;
-    args.args[0].data.long_arg.value = seconds;
-    args.arg_count = 1;
-
-    /* Add mode argument if provided (future enhancement) */
-    if (mode && mode_len > 0)
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osl|s",
+                                     &object, redis_ce, &key, &key_len,
+                                     &seconds, &mode, &mode_len) == FAILURE)
     {
-        args.args[1].type = CORE_ARG_TYPE_STRING;
-        args.args[1].data.string_arg.value = mode;
-        args.args[1].data.string_arg.len = mode_len;
-        args.arg_count = 2;
+        return 0;
     }
 
-    return execute_core_command(&args, NULL, process_core_bool_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* If mode is specified but not one of the valid options, return FALSE */
+        if (mode_len > 0)
+        {
+            if (strncasecmp(mode, "NX", mode_len) != 0 &&
+                strncasecmp(mode, "XX", mode_len) != 0 &&
+                strncasecmp(mode, "GT", mode_len) != 0 &&
+                strncasecmp(mode, "LT", mode_len) != 0)
+            {
+                return 0;
+            }
+        }
+
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = Expire;
+        args.key = key;
+        args.key_len = key_len;
+
+        /* Add time argument */
+        args.args[0].type = CORE_ARG_TYPE_LONG;
+        args.args[0].data.long_arg.value = seconds;
+        args.arg_count = 1;
+
+        /* Add mode argument if provided */
+        if (mode && mode_len > 0)
+        {
+            args.args[1].type = CORE_ARG_TYPE_STRING;
+            args.args[1].data.string_arg.value = mode;
+            args.args[1].data.string_arg.len = mode_len;
+            args.arg_count = 2;
+        }
+
+        if (execute_core_command(&args, NULL, process_core_bool_result))
+        {
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute an EXPIREAT command using the Valkey Glide client */
-int execute_expireat_command(const void *glide_client, const char *key, size_t key_len,
-                             long timestamp, const char *mode, size_t mode_len)
+int execute_expireat_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = ExpireAt;
-    args.key = key;
-    args.key_len = key_len;
+    redis_object *redis;
+    char *key = NULL, *mode = NULL;
+    size_t key_len, mode_len = 0;
+    zend_long timestamp;
 
-    /* Add timestamp argument */
-    args.args[0].type = CORE_ARG_TYPE_LONG;
-    args.args[0].data.long_arg.value = timestamp;
-    args.arg_count = 1;
-
-    /* Add mode argument if provided (future enhancement) */
-    if (mode && mode_len > 0)
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osl|s",
+                                     &object, redis_ce, &key, &key_len,
+                                     &timestamp, &mode, &mode_len) == FAILURE)
     {
-        args.args[1].type = CORE_ARG_TYPE_STRING;
-        args.args[1].data.string_arg.value = mode;
-        args.args[1].data.string_arg.len = mode_len;
-        args.arg_count = 2;
+        return 0;
     }
 
-    return execute_core_command(&args, NULL, process_core_bool_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* If mode is specified but not one of the valid options, return FALSE */
+        if (mode_len > 0)
+        {
+            if (strncasecmp(mode, "NX", mode_len) != 0 &&
+                strncasecmp(mode, "XX", mode_len) != 0 &&
+                strncasecmp(mode, "GT", mode_len) != 0 &&
+                strncasecmp(mode, "LT", mode_len) != 0)
+            {
+                return 0;
+            }
+        }
+
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = ExpireAt;
+        args.key = key;
+        args.key_len = key_len;
+
+        /* Add timestamp argument */
+        args.args[0].type = CORE_ARG_TYPE_LONG;
+        args.args[0].data.long_arg.value = timestamp;
+        args.arg_count = 1;
+
+        /* Add mode argument if provided */
+        if (mode && mode_len > 0)
+        {
+            args.args[1].type = CORE_ARG_TYPE_STRING;
+            args.args[1].data.string_arg.value = mode;
+            args.args[1].data.string_arg.len = mode_len;
+            args.arg_count = 2;
+        }
+
+        if (execute_core_command(&args, NULL, process_core_bool_result))
+        {
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute a PEXPIRE command using the Valkey Glide client */
-int execute_pexpire_command(const void *glide_client, const char *key, size_t key_len,
-                            long milliseconds, const char *mode, size_t mode_len)
+int execute_pexpire_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = PExpire;
-    args.key = key;
-    args.key_len = key_len;
+    redis_object *redis;
+    char *key = NULL, *mode = NULL;
+    size_t key_len, mode_len = 0;
+    zend_long milliseconds;
 
-    /* Add milliseconds argument */
-    args.args[0].type = CORE_ARG_TYPE_LONG;
-    args.args[0].data.long_arg.value = milliseconds;
-    args.arg_count = 1;
-
-    /* Add mode argument if provided (future enhancement) */
-    if (mode && mode_len > 0)
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osl|s",
+                                     &object, redis_ce, &key, &key_len,
+                                     &milliseconds, &mode, &mode_len) == FAILURE)
     {
-        args.args[1].type = CORE_ARG_TYPE_STRING;
-        args.args[1].data.string_arg.value = mode;
-        args.args[1].data.string_arg.len = mode_len;
-        args.arg_count = 2;
+        return 0;
     }
 
-    return execute_core_command(&args, NULL, process_core_bool_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* If mode is specified but not one of the valid options, return FALSE */
+        if (mode_len > 0)
+        {
+            if (strncasecmp(mode, "NX", mode_len) != 0 &&
+                strncasecmp(mode, "XX", mode_len) != 0 &&
+                strncasecmp(mode, "GT", mode_len) != 0 &&
+                strncasecmp(mode, "LT", mode_len) != 0)
+            {
+                return 0;
+            }
+        }
+
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = PExpire;
+        args.key = key;
+        args.key_len = key_len;
+
+        /* Add milliseconds argument */
+        args.args[0].type = CORE_ARG_TYPE_LONG;
+        args.args[0].data.long_arg.value = milliseconds;
+        args.arg_count = 1;
+
+        /* Add mode argument if provided */
+        if (mode && mode_len > 0)
+        {
+            args.args[1].type = CORE_ARG_TYPE_STRING;
+            args.args[1].data.string_arg.value = mode;
+            args.args[1].data.string_arg.len = mode_len;
+            args.arg_count = 2;
+        }
+
+        if (execute_core_command(&args, NULL, process_core_bool_result))
+        {
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute a PEXPIREAT command using the Valkey Glide client */
-int execute_pexpireat_command(const void *glide_client, const char *key, size_t key_len,
-                              long timestamp_ms, const char *mode, size_t mode_len)
+int execute_pexpireat_command(zval *object, int argc, zval *return_value)
 {
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = PExpireAt;
-    args.key = key;
-    args.key_len = key_len;
+    redis_object *redis;
+    char *key = NULL, *mode = NULL;
+    size_t key_len, mode_len = 0;
+    zend_long timestamp_ms;
 
-    /* Add timestamp in milliseconds argument */
-    args.args[0].type = CORE_ARG_TYPE_LONG;
-    args.args[0].data.long_arg.value = timestamp_ms;
-    args.arg_count = 1;
-
-    /* Add mode argument if provided (future enhancement) */
-    if (mode && mode_len > 0)
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Osl|s",
+                                     &object, redis_ce, &key, &key_len,
+                                     &timestamp_ms, &mode, &mode_len) == FAILURE)
     {
-        args.args[1].type = CORE_ARG_TYPE_STRING;
-        args.args[1].data.string_arg.value = mode;
-        args.args[1].data.string_arg.len = mode_len;
-        args.arg_count = 2;
+        return 0;
     }
 
-    return execute_core_command(&args, NULL, process_core_bool_result);
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* If mode is specified but not one of the valid options, return FALSE */
+        if (mode_len > 0)
+        {
+            if (strncasecmp(mode, "NX", mode_len) != 0 &&
+                strncasecmp(mode, "XX", mode_len) != 0 &&
+                strncasecmp(mode, "GT", mode_len) != 0 &&
+                strncasecmp(mode, "LT", mode_len) != 0)
+            {
+                return 0;
+            }
+        }
+
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = PExpireAt;
+        args.key = key;
+        args.key_len = key_len;
+
+        /* Add timestamp in milliseconds argument */
+        args.args[0].type = CORE_ARG_TYPE_LONG;
+        args.args[0].data.long_arg.value = timestamp_ms;
+        args.arg_count = 1;
+
+        /* Add mode argument if provided */
+        if (mode && mode_len > 0)
+        {
+            args.args[1].type = CORE_ARG_TYPE_STRING;
+            args.args[1].data.string_arg.value = mode;
+            args.args[1].data.string_arg.len = mode_len;
+            args.arg_count = 2;
+        }
+
+        if (execute_core_command(&args, NULL, process_core_bool_result))
+        {
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute a PERSIST command using the Valkey Glide client */
