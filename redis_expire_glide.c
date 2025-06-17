@@ -281,43 +281,117 @@ int execute_pexpireat_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a PERSIST command using the Valkey Glide client */
-int execute_persist_command(const void *glide_client, const char *key, size_t key_len)
+int execute_persist_command(zval *object, int argc, zval *return_value)
 {
-    /* PERSIST doesn't take any additional arguments besides the key */
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = Persist;
-    args.key = key;
-    args.key_len = key_len;
-    args.arg_count = 0; /* No additional arguments for PERSIST */
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
 
-    return execute_core_command(&args, NULL, process_core_bool_result);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* PERSIST doesn't take any additional arguments besides the key */
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = Persist;
+        args.key = key;
+        args.key_len = key_len;
+        args.arg_count = 0; /* No additional arguments for PERSIST */
+
+        if (execute_core_command(&args, NULL, process_core_bool_result))
+        {
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute an EXPIRETIME command using the Valkey Glide client */
-int execute_expiretime_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
+int execute_expiretime_command(zval *object, int argc, zval *return_value)
 {
-    /* EXPIRETIME returns an integer (timestamp) and takes no additional arguments */
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = ExpireTime;
-    args.key = key;
-    args.key_len = key_len;
-    args.arg_count = 0; /* No additional arguments for EXPIRETIME */
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* EXPIRETIME returns an integer (timestamp) and takes no additional arguments */
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = ExpireTime;
+        args.key = key;
+        args.key_len = key_len;
+        args.arg_count = 0; /* No additional arguments for EXPIRETIME */
+
+        long output_value;
+        if (execute_core_command(&args, &output_value, process_core_int_result))
+        {
+            ZVAL_LONG(return_value, output_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 /* Execute a PEXPIRETIME command using the Valkey Glide client */
-int execute_pexpiretime_command(const void *glide_client, const char *key, size_t key_len, long *output_value)
+int execute_pexpiretime_command(zval *object, int argc, zval *return_value)
 {
-    /* PEXPIRETIME returns an integer (timestamp in milliseconds) and takes no additional arguments */
-    core_command_args_t args = {0};
-    args.glide_client = glide_client;
-    args.cmd_type = PExpireTime;
-    args.key = key;
-    args.key_len = key_len;
-    args.arg_count = 0; /* No additional arguments for PEXPIRETIME */
+    redis_object *redis;
+    char *key = NULL;
+    size_t key_len;
 
-    return execute_core_command(&args, output_value, process_core_int_result);
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* PEXPIRETIME returns an integer (timestamp in milliseconds) and takes no additional arguments */
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = PExpireTime;
+        args.key = key;
+        args.key_len = key_len;
+        args.arg_count = 0; /* No additional arguments for PEXPIRETIME */
+
+        long output_value;
+        if (execute_core_command(&args, &output_value, process_core_int_result))
+        {
+            ZVAL_LONG(return_value, output_value);
+            return 1;
+        }
+    }
+
+    return 0;
 }

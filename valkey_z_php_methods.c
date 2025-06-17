@@ -772,3 +772,15 @@ PEXPIRE_METHOD_IMPL(Redis)
 /* {{{ proto bool Redis::pexpireAt(string key, long milliseconds_timestamp [, string mode]) */
 PEXPIREAT_METHOD_IMPL(Redis)
 /* }}} */
+
+/* {{{ proto bool Redis::persist(string key) */
+PERSIST_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::expiretime(string key) */
+EXPIRETIME_METHOD_IMPL(Redis)
+/* }}} */
+
+/* {{{ proto long Redis::pexpiretime(string key) */
+PEXPIRETIME_METHOD_IMPL(Redis)
+/* }}} */

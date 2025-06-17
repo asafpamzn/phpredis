@@ -132,10 +132,6 @@ int execute_lcs_command(zval *object, int argc, zval *return_value);
 extern int execute_ttl_command(zval *object, int argc, zval *return_value);
 extern int execute_pttl_command(zval *object, int argc, zval *return_value);
 
-extern int execute_persist_command(const void *glide_client, const char *key, size_t key_len);
-extern int execute_expiretime_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
-extern int execute_pexpiretime_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
-
 /* Sorted set operations */
 
 /* Hash operations */

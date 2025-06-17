@@ -48,6 +48,9 @@ extern int execute_expire_command(zval *object, int argc, zval *return_value);
 extern int execute_expireat_command(zval *object, int argc, zval *return_value);
 extern int execute_pexpire_command(zval *object, int argc, zval *return_value);
 extern int execute_pexpireat_command(zval *object, int argc, zval *return_value);
+extern int execute_persist_command(zval *object, int argc, zval *return_value);
+extern int execute_expiretime_command(zval *object, int argc, zval *return_value);
+extern int execute_pexpiretime_command(zval *object, int argc, zval *return_value);
 
 /* DEL command uses different signature - handled separately */
 
@@ -861,6 +864,39 @@ extern int execute_del_array(const void *glide_client, HashTable *keys_hash, lon
         }                                                                        \
         zval_dtor(return_value);                                                 \
         RETURN_FALSE;                                                            \
+    }
+
+#define PERSIST_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, persist)                                            \
+    {                                                                          \
+        if (execute_persist_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        zval_dtor(return_value);                                               \
+        RETURN_FALSE;                                                          \
+    }
+
+#define EXPIRETIME_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, expiretime)                                            \
+    {                                                                             \
+        if (execute_expiretime_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                         \
+            return;                                                               \
+        }                                                                         \
+        zval_dtor(return_value);                                                  \
+        RETURN_FALSE;                                                             \
+    }
+
+#define PEXPIRETIME_METHOD_IMPL(class_name)                                        \
+    PHP_METHOD(class_name, pexpiretime)                                            \
+    {                                                                              \
+        if (execute_pexpiretime_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        {                                                                          \
+            return;                                                                \
+        }                                                                          \
+        zval_dtor(return_value);                                                   \
+        RETURN_FALSE;                                                              \
     }
 
 #endif /* VALKEY_GLIDE_COMMANDS_COMMON_H */
