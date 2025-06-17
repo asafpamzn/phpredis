@@ -24,8 +24,6 @@
 
 #include "php_redis.h"
 
-#include "redis_cluster.h"
-
 #include "redis_glide.h"
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include "valkey_glide_core_common.h"

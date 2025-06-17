@@ -24,8 +24,6 @@
 
 #include "php_redis.h"
 
-#include "redis_cluster.h"
-
 #include "redis_glide.h"
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
@@ -178,10 +176,6 @@ PHP_METHOD(Redis, close)
 /* Passthru for destroying cluster cache */
 static void cluster_cache_dtor(zend_resource *rsrc)
 {
-    if (rsrc->ptr)
-    {
-        cluster_cache_free(rsrc->ptr);
-    }
 }
 
 void free_redis_object(zend_object *object)

@@ -28,8 +28,6 @@
 
 #include "php_redis.h"
 
-#include "redis_cluster.h"
-
 #include "redis_glide.h"
 #include "valkey_glide_z_common.h"
 
