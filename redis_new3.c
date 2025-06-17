@@ -28,6 +28,7 @@
 
 #include "redis_glide.h"
 #include "command_response.h" /* Include command_response.h for string conversion functions */
+#include "valkey_glide_core_common.h"
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
 #include <ext/standard/info.h>
@@ -70,86 +71,204 @@ extern zend_class_entry *redis_exception_ce;
 #include "redis_arginfo.h"
 #endif
 
-/* {{{ proto boolean Redis::rename(string key_src, string key_dst) */
-PHP_METHOD(Redis, rename)
+/* Execute a RENAME command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_rename_command(zval *object, int argc, zval *return_value)
 {
-    zval *object;
     redis_object *redis;
     char *src = NULL, *dst = NULL;
     size_t src_len, dst_len;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
+    if (zend_parse_method_parameters(argc, object, "Oss",
                                      &object, redis_ce, &src, &src_len,
                                      &dst, &dst_len) == FAILURE)
     {
-        RETURN_FALSE;
+        return 0;
     }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (!redis || !redis->glide_client)
     {
-        /* Execute the RENAME command using the Glide client */
-        int result = execute_rename_command(redis->glide_client, src, src_len, dst, dst_len);
+        return 0;
+    }
 
-        /* Return TRUE if successful, FALSE otherwise */
-        if (result == 1)
-        {
-            RETURN_TRUE;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
+    /* Execute the RENAME command using the Glide client */
+
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = Rename;
+    args.key = src;
+    args.key_len = src_len;
+
+    /* Add destination key as argument */
+    args.args[0].type = CORE_ARG_TYPE_STRING;
+    args.args[0].data.string_arg.value = dst;
+    args.args[0].data.string_arg.len = dst_len;
+    args.arg_count = 1;
+
+    int result = execute_core_command(&args, NULL, process_core_bool_result);
+
+    /* Return TRUE if successful, FALSE otherwise */
+    if (result == 1)
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+    else
+    {
+        ZVAL_FALSE(return_value);
+        return 0;
     }
 }
+
+/* {{{ proto boolean Redis::rename(string key_src, string key_dst) */
+PHP_METHOD(Redis, rename)
+{
+    if (execute_rename_command(getThis(), ZEND_NUM_ARGS(), return_value))
+    {
+        return;
+    }
+    RETURN_FALSE;
+}
 /* }}} */
+
+/* Execute a RENAMENX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_renamenx_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *src = NULL, *dst = NULL;
+    size_t src_len, dst_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss",
+                                     &object, redis_ce, &src, &src_len,
+                                     &dst, &dst_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the RENAMENX command using the Glide client */
+
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = RenameNX;
+    args.key = src;
+    args.key_len = src_len;
+
+    /* Add destination key as argument */
+    args.args[0].type = CORE_ARG_TYPE_STRING;
+    args.args[0].data.string_arg.value = dst;
+    args.args[0].data.string_arg.len = dst_len;
+    args.arg_count = 1;
+
+    int result = execute_core_command(&args, NULL, process_core_bool_result);
+
+    /* Return TRUE if successful, FALSE otherwise */
+    if (result == 1)
+    {
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+    else
+    {
+        ZVAL_FALSE(return_value);
+        return 0;
+    }
+}
 
 /* {{{ proto boolean Redis::renameNx(string key_src, string key_dst) */
 PHP_METHOD(Redis, renameNx)
 {
-    zval *object;
+    if (execute_renamenx_command(getThis(), ZEND_NUM_ARGS(), return_value))
+    {
+        return;
+    }
+    RETURN_FALSE;
+}
+/* }}} */
+
+/* Execute a GETWITHMETA command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_getwithmeta_command(zval *object, int argc, zval *return_value)
+{
     redis_object *redis;
-    char *src = NULL, *dst = NULL;
-    size_t src_len, dst_len;
+    char *key = NULL;
+    size_t key_len;
+    char *response = NULL;
+    size_t response_len = 0;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
-                                     &object, redis_ce, &src, &src_len,
-                                     &dst, &dst_len) == FAILURE)
+    if (zend_parse_method_parameters(argc, object, "Os",
+                                     &object, redis_ce, &key, &key_len) == FAILURE)
     {
-        RETURN_FALSE;
+        return 0;
     }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (!redis || !redis->glide_client)
     {
-        /* Execute the RENAMENX command using the Glide client */
-        int result = execute_renamenx_command(redis->glide_client, src, src_len, dst, dst_len);
+        return 0;
+    }
 
-        /* Return TRUE if successful, FALSE otherwise */
-        if (result == 1)
-        {
-            RETURN_TRUE;
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
+    /* Execute the GETWITHMETA command using the Glide client */
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = Get; /* Using GET for now, replace with GETWITHMETA when available */
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Use string result processor */
+    struct
+    {
+        char **result;
+        size_t *result_len;
+    } output = {&response, &response_len};
+
+    int result = execute_core_command(&args, &output, process_core_string_result);
+
+    /* Process the result */
+    if (result == 1 && response != NULL)
+    {
+        /* Return the value */
+        ZVAL_STRINGL(return_value, response, response_len);
+        efree(response);
+        return 1;
+    }
+    else if (result == 0)
+    {
+        /* Key didn't exist */
+        ZVAL_NULL(return_value);
+        return 1;
+    }
+    else
+    {
+        /* Error */
+        return 0;
     }
 }
-/* }}} */
 
 /* {{{ proto string Redis::getWithMeta(string key) */
 PHP_METHOD(Redis, getWithMeta)
 {
-    zval *object;
+    if (execute_getwithmeta_command(getThis(), ZEND_NUM_ARGS(), return_value))
+    {
+        return;
+    }
+    RETURN_FALSE;
+}
+/* }}} */
+
+/* Execute a GETDEL command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_getdel_command(zval *object, int argc, zval *return_value)
+{
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
@@ -157,95 +276,70 @@ PHP_METHOD(Redis, getWithMeta)
     size_t response_len = 0;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
+    if (zend_parse_method_parameters(argc, object, "Os",
                                      &object, redis_ce, &key, &key_len) == FAILURE)
     {
-        RETURN_FALSE;
+        return 0;
     }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (!redis || !redis->glide_client)
     {
-        /* Execute the GETWITHMETA command using the Glide client */
-        int result = execute_getwithmeta_command(redis->glide_client, key, key_len, &response, &response_len);
+        return 0;
+    }
 
-        /* Process the result */
-        if (result == 1 && response != NULL)
-        {
-            /* Return the value */
-            RETVAL_STRINGL(response, response_len);
-            efree(response);
-            return;
-        }
-        else if (result == 0)
-        {
-            /* Key didn't exist */
-            RETURN_NULL();
-        }
-        else
-        {
-            /* Error */
-            RETURN_FALSE;
-        }
+    /* Execute the GETDEL command using the Glide client */
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = GetDel;
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Use string result processor */
+    struct
+    {
+        char **result;
+        size_t *result_len;
+    } output = {&response, &response_len};
+
+    int result = execute_core_command(&args, &output, process_core_string_result);
+
+    /* Process the result */
+    if (result == 1 && response != NULL)
+    {
+        /* Return the value */
+        ZVAL_STRINGL(return_value, response, response_len);
+        efree(response);
+        return 1;
+    }
+    else if (result == 0)
+    {
+        /* Key didn't exist */
+        ZVAL_NULL(return_value);
+        return 1;
+    }
+    else
+    {
+        /* Error */
+        return 0;
     }
 }
-/* }}} */
 
 /* {{{ proto string Redis::getDel(string key) */
 PHP_METHOD(Redis, getDel)
 {
-    zval *object;
-    redis_object *redis;
-    char *key = NULL;
-    size_t key_len;
-    char *response = NULL;
-    size_t response_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+    if (execute_getdel_command(getThis(), ZEND_NUM_ARGS(), return_value))
     {
-        RETURN_FALSE;
+        return;
     }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the GETDEL command using the Glide client */
-        int result = execute_getdel_command(redis->glide_client, key, key_len, &response, &response_len);
-
-        /* Process the result */
-        if (result == 1 && response != NULL)
-        {
-            /* Return the value */
-            RETVAL_STRINGL(response, response_len);
-            efree(response);
-            return;
-        }
-        else if (result == 0)
-        {
-            /* Key didn't exist */
-            RETURN_NULL();
-        }
-        else
-        {
-            /* Error */
-            RETURN_FALSE;
-        }
-    }
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto string Redis::getEx(string key, array opts) */
-PHP_METHOD(Redis, getEx)
+/* Execute a GETEX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_getex_command(zval *object, int argc, zval *return_value)
 {
-    zval *object;
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
@@ -254,102 +348,170 @@ PHP_METHOD(Redis, getEx)
     size_t response_len = 0;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|a",
+    if (zend_parse_method_parameters(argc, object, "Os|a",
                                      &object, redis_ce, &key, &key_len, &opts) == FAILURE)
     {
-        RETURN_FALSE;
+        return 0;
     }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (!redis || !redis->glide_client)
     {
-        /* Execute the GETEX command using the Glide client */
-        int result = execute_getex_command(redis->glide_client, key, key_len, opts, &response, &response_len);
+        return 0;
+    }
 
-        /* Process the result */
-        if (result == 1 && response != NULL)
-        {
-            /* Return the value */
-            RETVAL_STRINGL(response, response_len);
-            efree(response);
-            return;
-        }
-        else if (result == 0)
-        {
-            /* Key didn't exist */
-            RETURN_NULL();
-        }
-        else
-        {
-            /* Error */
-            RETURN_FALSE;
-        }
+    /* Execute the GETEX command using the Glide client */
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = GetEx;
+    args.key = key;
+    args.key_len = key_len;
+    args.raw_options = opts;
+
+    /* Parse options using existing core framework option parsing */
+    if (opts)
+    {
+        parse_core_options(opts, &args.options);
+    }
+
+    /* Use string result processor */
+    struct
+    {
+        char **result;
+        size_t *result_len;
+    } output = {&response, &response_len};
+
+    int result = execute_core_command(&args, &output, process_core_string_result);
+
+    /* Process the result */
+    if (result == 1 && response != NULL)
+    {
+        /* Return the value */
+        ZVAL_STRINGL(return_value, response, response_len);
+        efree(response);
+        return 1;
+    }
+    else if (result == 0)
+    {
+        /* Key didn't exist */
+        ZVAL_NULL(return_value);
+        return 1;
+    }
+    else
+    {
+        /* Error */
+        return 0;
     }
 }
 
+/* {{{ proto string Redis::getEx(string key, array opts) */
+PHP_METHOD(Redis, getEx)
+{
+    if (execute_getex_command(getThis(), ZEND_NUM_ARGS(), return_value))
+    {
+        return;
+    }
+    RETURN_FALSE;
+}
 /* }}} */
 
-/* {{{ proto long Redis::incr(string key, [long value]) */
-PHP_METHOD(Redis, incr)
+/* Execute an INCR command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_incr_command(zval *object, int argc, zval *return_value)
 {
-    zval *object;
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
     zend_long value = 1;
     long result_value;
-    int argc = ZEND_NUM_ARGS();
 
     /* Parse parameters */
     if (argc == 1)
     {
         /* Only key parameter provided */
-        if (zend_parse_method_parameters(argc, getThis(), "Os",
+        if (zend_parse_method_parameters(argc, object, "Os",
                                          &object, redis_ce, &key, &key_len) == FAILURE)
         {
-            RETURN_FALSE;
+            return 0;
         }
     }
     else
     {
         /* Both key and value parameters provided */
-        if (zend_parse_method_parameters(argc, getThis(), "Osl",
+        if (zend_parse_method_parameters(argc, object, "Osl",
                                          &object, redis_ce, &key, &key_len, &value) == FAILURE)
         {
-            RETURN_FALSE;
+            return 0;
         }
     }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (!redis || !redis->glide_client)
     {
-        if (argc == 1)
-        {
-            /* Standard INCR command if only key is provided */
-            result_value = execute_incr_command(redis->glide_client, key, key_len);
-        }
-        else
-        {
-            /* Use INCRBY if both key and value are provided */
-            result_value = execute_incrby_command(redis->glide_client, key, key_len, value);
-        }
-
-        /* Return the result */
-        RETURN_LONG(result_value);
+        return 0;
     }
+
+    /* Execute command based on argument count */
+    if (argc == 1)
+    {
+        /* Execute an INCR command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = Incr;
+        args.key = key;
+        args.key_len = key_len;
+
+        long result;
+        result_value = 0;
+        /* Standard INCR command if only key is provided */
+        if (execute_core_command(&args, &result, process_core_int_result))
+        {
+            result_value = result;
+        }
+    }
+    else
+    {
+        /* Use INCRBY if both key and value are provided */
+
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = IncrBy;
+        args.key = key;
+        args.key_len = key_len;
+
+        /* Add increment argument */
+        args.args[0].type = CORE_ARG_TYPE_LONG;
+        args.args[0].data.long_arg.value = value;
+        args.arg_count = 1;
+
+        long result;
+        result_value = 0;
+
+        if (execute_core_command(&args, &result, process_core_int_result))
+        {
+            result_value = result;
+        }
+    }
+
+    ZVAL_LONG(return_value, result_value);
+    return 1;
+}
+
+/* {{{ proto long Redis::incr(string key, [long value]) */
+PHP_METHOD(Redis, incr)
+{
+    if (execute_incr_command(getThis(), ZEND_NUM_ARGS(), return_value))
+    {
+        return;
+    }
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto long Redis::incrBy(string key, long value) */
-PHP_METHOD(Redis, incrBy)
+/* Execute an INCRBY command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_incrby_command(zval *object, int argc, zval *return_value)
 {
-    zval *object;
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
@@ -357,128 +519,204 @@ PHP_METHOD(Redis, incrBy)
     long result_value;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osl",
+    if (zend_parse_method_parameters(argc, object, "Osl",
                                      &object, redis_ce, &key, &key_len, &value) == FAILURE)
     {
-        RETURN_FALSE;
+        return 0;
     }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (!redis || !redis->glide_client)
     {
-        /* Execute the INCRBY command using the Glide client */
-        result_value = execute_incrby_command(redis->glide_client, key, key_len, value);
-
-        /* Return the result */
-        RETURN_LONG(result_value);
+        return 0;
     }
+    /* Execute an INCRBY command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
+
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = IncrBy;
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Add increment argument */
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = value;
+    args.arg_count = 1;
+
+    long result;
+    result_value = 0;
+
+    /* Execute the INCRBY command using the Glide client */
+    if (execute_core_command(&args, &result, process_core_int_result))
+    {
+        result_value = result;
+    }
+
+    ZVAL_LONG(return_value, result_value);
+    return 1;
+}
+
+/* {{{ proto long Redis::incrBy(string key, long value) */
+PHP_METHOD(Redis, incrBy)
+{
+    if (execute_incrby_command(getThis(), ZEND_NUM_ARGS(), return_value))
+    {
+        return;
+    }
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto double Redis::incrByFloat(string key, double value) */
-PHP_METHOD(Redis, incrByFloat)
+/* Execute an INCRBYFLOAT command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_incrbyfloat_command(zval *object, int argc, zval *return_value)
 {
-    zval *object;
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
     double value, result;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osd",
+    if (zend_parse_method_parameters(argc, object, "Osd",
                                      &object, redis_ce, &key, &key_len, &value) == FAILURE)
     {
-        RETURN_FALSE;
+        return 0;
     }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (!redis || !redis->glide_client)
     {
-        /* Execute the INCRBYFLOAT command using the Glide client */
-        if (execute_incrbyfloat_command(redis->glide_client, key, key_len, value, &result))
-        {
-            /* Return the result */
-            RETURN_DOUBLE(result);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
+        return 0;
     }
+
+    /* Execute the INCRBYFLOAT command using the Glide client */
+
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = IncrByFloat;
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Add increment argument */
+    args.args[0].type = CORE_ARG_TYPE_DOUBLE;
+    args.args[0].data.double_arg.value = value;
+    args.arg_count = 1;
+
+    if (execute_core_command(&args, &result, process_core_double_result))
+    {
+        ZVAL_DOUBLE(return_value, result);
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+/* {{{ proto double Redis::incrByFloat(string key, double value) */
+PHP_METHOD(Redis, incrByFloat)
+{
+    if (execute_incrbyfloat_command(getThis(), ZEND_NUM_ARGS(), return_value))
+    {
+        return;
+    }
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto long Redis::decr(string key, [long value]) */
-PHP_METHOD(Redis, decr)
+/* Execute a DECR command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_decr_command(zval *object, int argc, zval *return_value)
 {
-    zval *object;
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
     zend_long value = 1;
     long result_value;
-    int argc = ZEND_NUM_ARGS();
 
     /* Parse parameters */
     if (argc == 1)
     {
         /* Only key parameter provided - standard DECR */
-        if (zend_parse_method_parameters(argc, getThis(), "Os",
+        if (zend_parse_method_parameters(argc, object, "Os",
                                          &object, redis_ce, &key, &key_len) == FAILURE)
         {
-            RETURN_FALSE;
+            return 0;
         }
     }
     else
     {
         /* Both key and value parameters provided - like DECRBY */
-        if (zend_parse_method_parameters(argc, getThis(), "Osl",
+        if (zend_parse_method_parameters(argc, object, "Osl",
                                          &object, redis_ce, &key, &key_len, &value) == FAILURE)
         {
-            RETURN_FALSE;
+            return 0;
         }
     }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (!redis || !redis->glide_client)
     {
-        if (argc == 1)
-        {
-            /* Standard DECR command if only key is provided */
-            if (execute_decr_command(redis->glide_client, key, key_len, &result_value))
-            {
-                /* Return the result */
-                RETURN_LONG(result_value);
-            }
-        }
-        else
-        {
-            /* Use DECRBY if both key and value are provided */
-            if (execute_decrby_command(redis->glide_client, key, key_len, value, &result_value))
-            {
-                /* Return the result */
-                RETURN_LONG(result_value);
-            }
-        }
-
-        RETURN_FALSE;
+        return 0;
     }
+
+    /* Execute command based on argument count */
+    if (argc == 1)
+    {
+        /* Standard DECR command if only key is provided */
+        /* Execute a DECR command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
+
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = Decr;
+        args.key = key;
+        args.key_len = key_len;
+
+        if (execute_core_command(&args, &result_value, process_core_int_result))
+        {
+            ZVAL_LONG(return_value, result_value);
+            return 1;
+        }
+    }
+    else
+    {
+        /* Use DECRBY if both key and value are provided */
+        /* Execute a DECRBY command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
+        core_command_args_t args = {0};
+        args.glide_client = redis->glide_client;
+        args.cmd_type = DecrBy;
+        args.key = key;
+        args.key_len = key_len;
+
+        /* Add decrement argument */
+        args.args[0].type = CORE_ARG_TYPE_LONG;
+        args.args[0].data.long_arg.value = value;
+        args.arg_count = 1;
+        if (execute_core_command(&args, &result_value, process_core_int_result))
+        {
+            ZVAL_LONG(return_value, result_value);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/* {{{ proto long Redis::decr(string key, [long value]) */
+PHP_METHOD(Redis, decr)
+{
+    if (execute_decr_command(getThis(), ZEND_NUM_ARGS(), return_value))
+    {
+        return;
+    }
+    RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto long Redis::decrBy(string key, long value) */
-PHP_METHOD(Redis, decrBy)
+/* Execute a DECRBY command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_decrby_command(zval *object, int argc, zval *return_value)
 {
-    zval *object;
     redis_object *redis;
     char *key = NULL;
     size_t key_len;
@@ -486,256 +724,322 @@ PHP_METHOD(Redis, decrBy)
     long result_value;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osl",
+    if (zend_parse_method_parameters(argc, object, "Osl",
                                      &object, redis_ce, &key, &key_len, &value) == FAILURE)
     {
-        RETURN_FALSE;
+        return 0;
     }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (!redis || !redis->glide_client)
     {
-        /* Execute the DECRBY command using the Glide client */
-        if (execute_decrby_command(redis->glide_client, key, key_len, value, &result_value))
-        {
-            /* Return the result */
-            RETURN_LONG(result_value);
-        }
-        else
-        {
-            RETURN_FALSE;
-        }
+        return 0;
+    }
+
+    /* Execute the DECRBY command using the Glide client */
+
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = DecrBy;
+    args.key = key;
+    args.key_len = key_len;
+
+    /* Add decrement argument */
+    args.args[0].type = CORE_ARG_TYPE_LONG;
+    args.args[0].data.long_arg.value = value;
+    args.arg_count = 1;
+
+    if (execute_core_command(&args, &result_value, process_core_int_result))
+    {
+        ZVAL_LONG(return_value, result_value);
+        return 1;
+    }
+    else
+    {
+        return 0;
     }
 }
+
+/* {{{ proto long Redis::decrBy(string key, long value) */
+PHP_METHOD(Redis, decrBy)
+{
+    if (execute_decrby_command(getThis(), ZEND_NUM_ARGS(), return_value))
+    {
+        return;
+    }
+    RETURN_FALSE;
+}
 /* }}} */
+
+/* Execute an MGET command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_mget_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    zval *z_array;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oa/",
+                                     &object, redis_ce, &z_array) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    if (!redis || !redis->glide_client)
+    {
+        return 0;
+    }
+
+    /* Execute the MGET command using the Glide client */
+    array_init(return_value);
+
+    core_command_args_t args = {0};
+    args.glide_client = redis->glide_client;
+    args.cmd_type = MGet;
+
+    /* Set up array argument for keys */
+    args.args[0].type = CORE_ARG_TYPE_ARRAY;
+    args.args[0].data.array_arg.array = z_array;
+    args.args[0].data.array_arg.count = zend_hash_num_elements(Z_ARRVAL_P(z_array));
+    args.arg_count = 1;
+
+    if (execute_core_command(&args, return_value, process_core_array_result))
+    {
+        /* Command succeeded, return_value is already set */
+        return 1;
+    }
+    else
+    {
+        /* Command failed */
+        zval_dtor(return_value);
+        return 0;
+    }
+}
 
 /* {{{ proto array Redis::mget(array keys) */
 PHP_METHOD(Redis, mget)
 {
-    zval *object;
+    if (execute_mget_command(getThis(), ZEND_NUM_ARGS(), return_value))
+    {
+        return;
+    }
+    RETURN_FALSE;
+}
+/* }}} */
+
+/* Execute an EXISTS command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_exists_command(zval *object, int argc, zval *return_value)
+{
     redis_object *redis;
-    zval *z_args, *z_array;
-    int argc;
+    zval *z_args;
+    long result_value;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oa/",
-                                     &object, redis_ce, &z_array) == FAILURE)
+    if (zend_parse_method_parameters(argc, object, "O+",
+                                     &object, redis_ce, &z_args, &argc) == FAILURE)
     {
-        RETURN_FALSE;
+        return 0;
     }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (!redis || !redis->glide_client)
     {
-        /* Execute the MGET command using the Glide client */
-        array_init(return_value);
-        if (execute_mget_command(redis->glide_client, z_array, return_value))
+        return 0;
+    }
+
+    /* Check if we received an array as a single argument */
+    if (argc == 1 && Z_TYPE_P(z_args) == IS_ARRAY)
+    {
+
+        /* Single array argument - pass directly to EXISTS command */
+        if (execute_multi_key_command(redis->glide_client, Exists, z_args, argc, &result_value))
         {
-            /* Command succeeded, return_value is already set */
-            return;
+            ZVAL_LONG(return_value, result_value);
+            return 1;
         }
         else
         {
-            /* Command failed */
-            zval_dtor(return_value);
-            RETURN_FALSE;
+            return 0;
+        }
+    }
+    else
+    {
+        /* Single string key or multiple arguments - create temporary array */
+        zval temp_array;
+        array_init(&temp_array);
+
+        /* Add all arguments to the temporary array */
+        for (int i = 0; i < argc; i++)
+        {
+            /* Create safe copy and convert to string if needed */
+            zval copy;
+            ZVAL_COPY(&copy, &z_args[i]);
+            convert_to_string(&copy);
+            add_next_index_zval(&temp_array, &copy);
+        }
+
+        /* Execute the EXISTS command with the temporary array */
+        int actual_key_count = zend_hash_num_elements(Z_ARRVAL(temp_array));
+
+        if (execute_multi_key_command(redis->glide_client, Exists, &temp_array, actual_key_count, &result_value))
+        {
+            zval_dtor(&temp_array);
+            ZVAL_LONG(return_value, result_value);
+            return 1;
+        }
+        else
+        {
+            zval_dtor(&temp_array);
+            return 0;
         }
     }
 }
-/* }}} */
 
 /* {{{ proto long Redis::exists(string key | array keys) */
 PHP_METHOD(Redis, exists)
 {
-    zval *object;
+    if (execute_exists_command(getThis(), ZEND_NUM_ARGS(), return_value))
+    {
+        return;
+    }
+    RETURN_FALSE;
+}
+/* }}} */
+
+/* Execute a TOUCH command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_touch_command(zval *object, int argc, zval *return_value)
+{
     redis_object *redis;
     zval *z_args;
-    int argc;
     long result_value;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O+",
+    if (zend_parse_method_parameters(argc, object, "O+",
                                      &object, redis_ce, &z_args, &argc) == FAILURE)
     {
-        RETURN_FALSE;
+        return 0;
     }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (!redis || !redis->glide_client)
     {
-        /* Check if we received an array as a single argument */
-        if (argc == 1 && Z_TYPE_P(z_args) == IS_ARRAY)
+        return 0;
+    }
+
+    /* Check if we received an array as a single argument */
+    if (argc == 1 && Z_TYPE_P(z_args) == IS_ARRAY)
+    {
+        /* Single array argument - pass directly to TOUCH command */
+        /* Execute a TOUCH command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
+
+        if (execute_multi_key_command(redis->glide_client, Touch, z_args, argc, &result_value))
         {
-            /* Single array argument - pass directly to EXISTS command */
-            if (execute_exists_command(redis->glide_client, z_args, argc, &result_value))
-            {
-                RETURN_LONG(result_value);
-            }
-            else
-            {
-                RETURN_FALSE;
-            }
+            ZVAL_LONG(return_value, result_value);
+            return 1;
         }
         else
         {
-            /* Single string key or multiple arguments - create temporary array */
-            zval temp_array;
-            array_init(&temp_array);
-
-            /* Add all arguments to the temporary array */
-            for (int i = 0; i < argc; i++)
-            {
-                /* Create safe copy and convert to string if needed */
-                zval copy;
-                ZVAL_COPY(&copy, &z_args[i]);
-                convert_to_string(&copy);
-                add_next_index_zval(&temp_array, &copy);
-            }
-
-            /* Execute the EXISTS command with the temporary array */
-            int actual_key_count = zend_hash_num_elements(Z_ARRVAL(temp_array));
-            if (execute_exists_command(redis->glide_client, &temp_array, actual_key_count, &result_value))
-            {
-                zval_dtor(&temp_array);
-                RETURN_LONG(result_value);
-            }
-            else
-            {
-                zval_dtor(&temp_array);
-                RETURN_FALSE;
-            }
+            return 0;
         }
     }
+    else
+    {
+        /* Single string key or multiple arguments - create temporary array */
+        zval temp_array;
+        array_init(&temp_array);
 
-    RETURN_FALSE;
+        /* Add all arguments to the temporary array */
+        for (int i = 0; i < argc; i++)
+        {
+            /* Create safe copy and convert to string if needed */
+            zval copy;
+            ZVAL_COPY(&copy, &z_args[i]);
+            convert_to_string(&copy);
+            add_next_index_zval(&temp_array, &copy);
+        }
+
+        /* Execute the TOUCH command with the temporary array */
+        int actual_key_count = zend_hash_num_elements(Z_ARRVAL(temp_array));
+
+        if (execute_multi_key_command(redis->glide_client, Touch, &temp_array, actual_key_count, &result_value))
+        {
+            zval_dtor(&temp_array);
+            ZVAL_LONG(return_value, result_value);
+            return 1;
+        }
+        else
+        {
+            zval_dtor(&temp_array);
+            return 0;
+        }
+    }
 }
-/* }}} */
 
 /* {{{ proto long Redis::touch(string key | array keys) */
 PHP_METHOD(Redis, touch)
 {
-    zval *object;
-    redis_object *redis;
-    zval *z_args;
-    int argc;
-    long result_value;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O+",
-                                     &object, redis_ce, &z_args, &argc) == FAILURE)
+    if (execute_touch_command(getThis(), ZEND_NUM_ARGS(), return_value))
     {
-        RETURN_FALSE;
+        return;
     }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Check if we received an array as a single argument */
-        if (argc == 1 && Z_TYPE_P(z_args) == IS_ARRAY)
-        {
-            /* Single array argument - pass directly to TOUCH command */
-            if (execute_touch_command(redis->glide_client, z_args, argc, &result_value))
-            {
-                RETURN_LONG(result_value);
-            }
-            else
-            {
-                RETURN_FALSE;
-            }
-        }
-        else
-        {
-            /* Single string key or multiple arguments - create temporary array */
-            zval temp_array;
-            array_init(&temp_array);
-
-            /* Add all arguments to the temporary array */
-            for (int i = 0; i < argc; i++)
-            {
-                /* Create safe copy and convert to string if needed */
-                zval copy;
-                ZVAL_COPY(&copy, &z_args[i]);
-                convert_to_string(&copy);
-                add_next_index_zval(&temp_array, &copy);
-            }
-
-            /* Execute the TOUCH command with the temporary array */
-            int actual_key_count = zend_hash_num_elements(Z_ARRVAL(temp_array));
-            if (execute_touch_command(redis->glide_client, &temp_array, actual_key_count, &result_value))
-            {
-                zval_dtor(&temp_array);
-                RETURN_LONG(result_value);
-            }
-            else
-            {
-                zval_dtor(&temp_array);
-                RETURN_FALSE;
-            }
-        }
-    }
-
     RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto long Redis::unlink(string key | array keys) */
-PHP_METHOD(Redis, unlink)
+/* Execute an UNLINK command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
+int execute_unlink_command(zval *object, int argc, zval *return_value)
 {
-    zval *object;
     redis_object *redis;
     zval *z_args;
-    int argc;
     long result_value;
 
     /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O+",
+    if (zend_parse_method_parameters(argc, object, "O+",
                                      &object, redis_ce, &z_args, &argc) == FAILURE)
     {
-        RETURN_FALSE;
+        return 0;
     }
 
     /* Get Redis object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (!redis || !redis->glide_client)
     {
-        /* Check if we have a single array argument */
-        if (argc == 1 && Z_TYPE(z_args[0]) == IS_ARRAY)
-        {
-            /* Use array elements as keys */
-            long result_value = 0;
-            if (execute_unlink_array(redis->glide_client, Z_ARRVAL(z_args[0]), &result_value))
-            {
-                /* Command succeeded, return the value */
-                RETURN_LONG(result_value);
-            }
-        }
-        else
-        {
-            /* Multiple arguments - use standard unlink command */
-            long result_value = 0;
-            if (execute_unlink_command(redis->glide_client, z_args, argc, &result_value))
-            {
-                /* Command succeeded, return the value */
-                RETURN_LONG(result_value);
-            }
-        }
-
-        /* If we reach here, the command failed */
-        RETURN_FALSE;
+        return 0;
     }
+
+    /* Check if we have a single array argument */
+    if (argc == 1 && Z_TYPE(z_args[0]) == IS_ARRAY)
+    {
+        /* Use array elements as keys */
+        if (execute_unlink_array(redis->glide_client, Z_ARRVAL(z_args[0]), &result_value))
+        {
+            ZVAL_LONG(return_value, result_value);
+            return 1;
+        }
+    }
+    else
+    {
+        if (execute_multi_key_command(redis->glide_client, Unlink, z_args, argc, &result_value))
+        {
+            ZVAL_LONG(return_value, result_value);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/* {{{ proto long Redis::unlink(string key | array keys) */
+PHP_METHOD(Redis, unlink)
+{
+    if (execute_unlink_command(getThis(), ZEND_NUM_ARGS(), return_value))
+    {
+        return;
+    }
+    RETURN_FALSE;
 }
 /* }}} */

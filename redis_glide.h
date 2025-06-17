@@ -106,14 +106,9 @@ extern int execute_setex_command(zval *object, int argc, zval *return_value);
 extern int execute_psetex_command(zval *object, int argc, zval *return_value);
 extern int execute_setnx_command(zval *object, int argc, zval *return_value);
 extern int execute_get_command(zval *object, int argc, zval *return_value);
-extern int execute_getwithmeta_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);
-extern int execute_getdel_command(const void *glide_client, const char *key, size_t key_len, char **result, size_t *result_len);
-extern int execute_getex_command(const void *glide_client, const char *key, size_t key_len, zval *opts, char **result, size_t *result_len);
 
 /* Key operations */
 extern int execute_randomkey_command(zval *object, int argc, zval *return_value);
-extern int execute_rename_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len);
-extern int execute_renamenx_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len);
 
 /* Server operations */
 extern int execute_echo_command(zval *object, int argc, zval *return_value);
@@ -121,14 +116,6 @@ extern int execute_ping_command(zval *object, int argc, zval *return_value);
 extern int execute_reset_command(const void *glide_client);
 extern int execute_info_command(zval *object, int argc, zval *return_value);
 extern int execute_info_sections_command(const void *glide_client, zval *sections, int sections_count, char **result, size_t *result_len);
-
-/* Increment operations */
-long execute_incr_command(const void *glide_client, const char *key, size_t key_len);
-extern long execute_incrby_command(const void *glide_client, const char *key, size_t key_len, long value);
-extern int execute_incrbyfloat_command(const void *glide_client, const char *key, size_t key_len, double value, double *result);
-
-int execute_decr_command(const void *glide_client, const char *key, size_t key_len, long *output_value);
-int execute_decrby_command(const void *glide_client, const char *key, size_t key_len, long decrement, long *output_value);
 
 /* Additional operations */
 extern int execute_getbit_command(zval *object, int argc, zval *return_value);
@@ -155,11 +142,6 @@ extern int execute_pexpiretime_command(const void *glide_client, const char *key
 /* Sorted set operations */
 
 /* Hash operations */
-
-int execute_mget_command(const void *glide_client, zval *keys, zval *return_value);
-int execute_exists_command(const void *glide_client, zval *keys, int keys_count, long *output_value);
-int execute_touch_command(const void *glide_client, zval *keys, int keys_count, long *output_value);
-int execute_unlink_command(const void *glide_client, zval *keys, int keys_count, long *output_value);
 
 /* New commands added in redis_glide_commands.c */
 int execute_setOption_command(const void *glide_client, zend_long option, zval *value);
