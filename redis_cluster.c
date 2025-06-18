@@ -46,22 +46,22 @@ zend_class_entry *redis_cluster_exception_ce;
 
 PHP_MINIT_FUNCTION(redis_cluster)
 {
-    redis_cluster_ce = register_class_RedisCluster();
+    redis_cluster_ce = register_class_ValkeyGlideCluster();
 
-    redis_cluster_exception_ce = register_class_RedisClusterException(spl_ce_RuntimeException);
+    redis_cluster_exception_ce = register_class_ValkeyGlideClusterException(spl_ce_RuntimeException);
 
     return SUCCESS;
 }
 
-/* Handlers for RedisCluster */
-zend_object_handlers RedisCluster_handlers;
+/* Handlers for ValkeyGlideCluster */
+zend_object_handlers ValkeyGlideCluster_handlers;
 
 /*
  * PHP Methods
  */
 
-/* Create a RedisCluster Object */
-PHP_METHOD(RedisCluster, __construct)
+/* Create a ValkeyGlideCluster Object */
+PHP_METHOD(ValkeyGlideCluster, __construct)
 {
     zval *object, *z_seeds = NULL, *z_auth = NULL, *context = NULL;
     zend_string *user = NULL, *pass = NULL;
@@ -96,39 +96,39 @@ PHP_METHOD(RedisCluster, __construct)
 }
 
 /*
- * RedisCluster method implementation
+ * ValkeyGlideCluster method implementation
  */
 
-/* {{{ proto bool RedisCluster::close() */
-PHP_METHOD(RedisCluster, close)
+/* {{{ proto bool ValkeyGlideCluster::close() */
+PHP_METHOD(ValkeyGlideCluster, close)
 {
     cluster_disconnect(GET_CONTEXT(), 1);
     RETURN_TRUE;
 }
 
-/* {{{ proto string RedisCluster::get(string key) */
-PHP_METHOD(RedisCluster, get)
+/* {{{ proto string ValkeyGlideCluster::get(string key) */
+PHP_METHOD(ValkeyGlideCluster, get)
 {
     redis_get_implementation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::getdel(string key) */
-PHP_METHOD(RedisCluster, getdel)
+/* {{{ proto string ValkeyGlideCluster::getdel(string key) */
+PHP_METHOD(ValkeyGlideCluster, getdel)
 {
     redis_get_implementation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto array|false RedisCluster::getWithMeta(string key) */
-PHP_METHOD(RedisCluster, getWithMeta)
+/* {{{ proto array|false ValkeyGlideCluster::getWithMeta(string key) */
+PHP_METHOD(ValkeyGlideCluster, getWithMeta)
 {
     redis_get_implementation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::set(string key, string value) */
-PHP_METHOD(RedisCluster, set)
+/* {{{ proto bool ValkeyGlideCluster::set(string key, string value) */
+PHP_METHOD(ValkeyGlideCluster, set)
 {
     redis_get_implementation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -554,20 +554,20 @@ static void cluster_generic_delete(INTERNAL_FUNCTION_PARAMETERS,
     }
 }
 
-/* {{{ proto array RedisCluster::del(string key1, string key2, ... keyN) */
-PHP_METHOD(RedisCluster, del)
+/* {{{ proto array ValkeyGlideCluster::del(string key1, string key2, ... keyN) */
+PHP_METHOD(ValkeyGlideCluster, del)
 {
     cluster_generic_delete(INTERNAL_FUNCTION_PARAM_PASSTHRU, "DEL", sizeof("DEL") - 1);
 }
 
-/* {{{ proto array RedisCluster::unlink(string key1, string key2, ... keyN) */
-PHP_METHOD(RedisCluster, unlink)
+/* {{{ proto array ValkeyGlideCluster::unlink(string key1, string key2, ... keyN) */
+PHP_METHOD(ValkeyGlideCluster, unlink)
 {
     cluster_generic_delete(INTERNAL_FUNCTION_PARAM_PASSTHRU, "UNLINK", sizeof("UNLINK") - 1);
 }
 
-/* {{{ proto array RedisCluster::mget(array keys) */
-PHP_METHOD(RedisCluster, mget)
+/* {{{ proto array ValkeyGlideCluster::mget(array keys) */
+PHP_METHOD(ValkeyGlideCluster, mget)
 {
     zval *z_ret = emalloc(sizeof(*z_ret));
 
@@ -583,8 +583,8 @@ PHP_METHOD(RedisCluster, mget)
     }
 }
 
-/* {{{ proto bool RedisCluster::mset(array keyvalues) */
-PHP_METHOD(RedisCluster, mset)
+/* {{{ proto bool ValkeyGlideCluster::mset(array keyvalues) */
+PHP_METHOD(ValkeyGlideCluster, mset)
 {
     zval *z_ret = emalloc(sizeof(*z_ret));
 
@@ -599,8 +599,8 @@ PHP_METHOD(RedisCluster, mset)
     }
 }
 
-/* {{{ proto array RedisCluster::msetnx(array keyvalues) */
-PHP_METHOD(RedisCluster, msetnx)
+/* {{{ proto array ValkeyGlideCluster::msetnx(array keyvalues) */
+PHP_METHOD(ValkeyGlideCluster, msetnx)
 {
     zval *z_ret = emalloc(sizeof(*z_ret));
 
@@ -617,55 +617,55 @@ PHP_METHOD(RedisCluster, msetnx)
 }
 /* }}} */
 
-PHP_METHOD(RedisCluster, getex)
+PHP_METHOD(ValkeyGlideCluster, getex)
 {
     CLUSTER_PROCESS_CMD(getex, cluster_bulk_resp, 0);
 }
 
-/* {{{ proto bool RedisCluster::setex(string key, string value, int expiry) */
-PHP_METHOD(RedisCluster, setex)
+/* {{{ proto bool ValkeyGlideCluster::setex(string key, string value, int expiry) */
+PHP_METHOD(ValkeyGlideCluster, setex)
 {
     CLUSTER_PROCESS_KW_CMD("SETEX", redis_key_long_val_cmd, cluster_bool_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::psetex(string key, string value, int expiry) */
-PHP_METHOD(RedisCluster, psetex)
+/* {{{ proto bool ValkeyGlideCluster::psetex(string key, string value, int expiry) */
+PHP_METHOD(ValkeyGlideCluster, psetex)
 {
     CLUSTER_PROCESS_KW_CMD("PSETEX", redis_key_long_val_cmd, cluster_bool_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::setnx(string key, string value) */
-PHP_METHOD(RedisCluster, setnx)
+/* {{{ proto bool ValkeyGlideCluster::setnx(string key, string value) */
+PHP_METHOD(ValkeyGlideCluster, setnx)
 {
     CLUSTER_PROCESS_KW_CMD("SETNX", redis_kv_cmd, cluster_1_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::getSet(string key, string value) */
-PHP_METHOD(RedisCluster, getset)
+/* {{{ proto string ValkeyGlideCluster::getSet(string key, string value) */
+PHP_METHOD(ValkeyGlideCluster, getset)
 {
     CLUSTER_PROCESS_KW_CMD("GETSET", redis_kv_cmd, cluster_bulk_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto int RedisCluster::exists(string $key, string ...$more_keys) */
-PHP_METHOD(RedisCluster, exists)
+/* {{{ proto int ValkeyGlideCluster::exists(string $key, string ...$more_keys) */
+PHP_METHOD(ValkeyGlideCluster, exists)
 {
     CLUSTER_PROCESS_KW_CMD("EXISTS", redis_varkey_cmd, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto int RedisCluster::exists(string $key, string ...$more_keys) */
-PHP_METHOD(RedisCluster, touch)
+/* {{{ proto int ValkeyGlideCluster::exists(string $key, string ...$more_keys) */
+PHP_METHOD(ValkeyGlideCluster, touch)
 {
     CLUSTER_PROCESS_KW_CMD("TOUCH", redis_varkey_cmd, cluster_long_resp, 0);
 }
 
 /* }}} */
-/* {{{ proto array Redis::keys(string pattern) */
-PHP_METHOD(RedisCluster, keys)
+/* {{{ proto array ValkeyGlide::keys(string pattern) */
+PHP_METHOD(ValkeyGlideCluster, keys)
 {
     redisCluster *c = GET_CONTEXT();
     redisClusterNode *node;
@@ -733,41 +733,41 @@ PHP_METHOD(RedisCluster, keys)
 }
 /* }}} */
 
-/* {{{ proto int RedisCluster::type(string key) */
-PHP_METHOD(RedisCluster, type)
+/* {{{ proto int ValkeyGlideCluster::type(string key) */
+PHP_METHOD(ValkeyGlideCluster, type)
 {
     CLUSTER_PROCESS_KW_CMD("TYPE", redis_key_cmd, cluster_type_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::pop(string key, [int count = 0]) */
-PHP_METHOD(RedisCluster, lpop)
+/* {{{ proto string ValkeyGlideCluster::pop(string key, [int count = 0]) */
+PHP_METHOD(ValkeyGlideCluster, lpop)
 {
     CLUSTER_PROCESS_KW_CMD("LPOP", redis_pop_cmd, cluster_pop_resp, 0);
 }
 /* }}} */
 
-PHP_METHOD(RedisCluster, lpos)
+PHP_METHOD(ValkeyGlideCluster, lpos)
 {
     CLUSTER_PROCESS_CMD(lpos, cluster_lpos_resp, 1);
 }
 
-/* {{{ proto string RedisCluster::rpop(string key, [int count = 0]) */
-PHP_METHOD(RedisCluster, rpop)
+/* {{{ proto string ValkeyGlideCluster::rpop(string key, [int count = 0]) */
+PHP_METHOD(ValkeyGlideCluster, rpop)
 {
     CLUSTER_PROCESS_KW_CMD("RPOP", redis_pop_cmd, cluster_pop_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::lset(string key, long index, string val) */
-PHP_METHOD(RedisCluster, lset)
+/* {{{ proto bool ValkeyGlideCluster::lset(string key, long index, string val) */
+PHP_METHOD(ValkeyGlideCluster, lset)
 {
     CLUSTER_PROCESS_KW_CMD("LSET", redis_key_long_val_cmd, cluster_bool_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::spop(string key) */
-PHP_METHOD(RedisCluster, spop)
+/* {{{ proto string ValkeyGlideCluster::spop(string key) */
+PHP_METHOD(ValkeyGlideCluster, spop)
 {
     if (ZEND_NUM_ARGS() == 1)
     {
@@ -784,183 +784,183 @@ PHP_METHOD(RedisCluster, spop)
 }
 /* }}} */
 
-/* {{{ proto string|array RedisCluster::srandmember(string key, [long count]) */
-PHP_METHOD(RedisCluster, srandmember)
+/* {{{ proto string|array ValkeyGlideCluster::srandmember(string key, [long count]) */
+PHP_METHOD(ValkeyGlideCluster, srandmember)
 {
     CLUSTER_PROCESS_CMD(srandmember, cluster_srandmember_resp, 1);
 }
 
-/* {{{ proto string RedisCluster::strlen(string key) */
-PHP_METHOD(RedisCluster, strlen)
+/* {{{ proto string ValkeyGlideCluster::strlen(string key) */
+PHP_METHOD(ValkeyGlideCluster, strlen)
 {
     CLUSTER_PROCESS_KW_CMD("STRLEN", redis_key_cmd, cluster_long_resp, 1);
 }
 
-/* {{{ proto long RedisCluster::lpush(string key, string val1, ... valN) */
-PHP_METHOD(RedisCluster, lpush)
+/* {{{ proto long ValkeyGlideCluster::lpush(string key, string val1, ... valN) */
+PHP_METHOD(ValkeyGlideCluster, lpush)
 {
     CLUSTER_PROCESS_KW_CMD("LPUSH", redis_key_varval_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::rpush(string key, string val1, ... valN) */
-PHP_METHOD(RedisCluster, rpush)
+/* {{{ proto long ValkeyGlideCluster::rpush(string key, string val1, ... valN) */
+PHP_METHOD(ValkeyGlideCluster, rpush)
 {
     CLUSTER_PROCESS_KW_CMD("RPUSH", redis_key_varval_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::blpop(string key1, ... keyN, long timeout) */
-PHP_METHOD(RedisCluster, blpop)
+/* {{{ proto array ValkeyGlideCluster::blpop(string key1, ... keyN, long timeout) */
+PHP_METHOD(ValkeyGlideCluster, blpop)
 {
     CLUSTER_PROCESS_KW_CMD("BLPOP", redis_blocking_pop_cmd, cluster_mbulk_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::brpop(string key1, ... keyN, long timeout */
-PHP_METHOD(RedisCluster, brpop)
+/* {{{ proto array ValkeyGlideCluster::brpop(string key1, ... keyN, long timeout */
+PHP_METHOD(ValkeyGlideCluster, brpop)
 {
     CLUSTER_PROCESS_KW_CMD("BRPOP", redis_blocking_pop_cmd, cluster_mbulk_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::rpushx(string key, mixed value) */
-PHP_METHOD(RedisCluster, rpushx)
+/* {{{ proto long ValkeyGlideCluster::rpushx(string key, mixed value) */
+PHP_METHOD(ValkeyGlideCluster, rpushx)
 {
     CLUSTER_PROCESS_KW_CMD("RPUSHX", redis_kv_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::lpushx(string key, mixed value) */
-PHP_METHOD(RedisCluster, lpushx)
+/* {{{ proto long ValkeyGlideCluster::lpushx(string key, mixed value) */
+PHP_METHOD(ValkeyGlideCluster, lpushx)
 {
     CLUSTER_PROCESS_KW_CMD("LPUSHX", redis_kv_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::linsert(string k,string pos,mix pvt,mix val) */
-PHP_METHOD(RedisCluster, linsert)
+/* {{{ proto long ValkeyGlideCluster::linsert(string k,string pos,mix pvt,mix val) */
+PHP_METHOD(ValkeyGlideCluster, linsert)
 {
     CLUSTER_PROCESS_CMD(linsert, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::lindex(string key, long index) */
-PHP_METHOD(RedisCluster, lindex)
+/* {{{ proto string ValkeyGlideCluster::lindex(string key, long index) */
+PHP_METHOD(ValkeyGlideCluster, lindex)
 {
     CLUSTER_PROCESS_KW_CMD("LINDEX", redis_key_long_cmd, cluster_bulk_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::lrem(string key, long count, string val) */
-PHP_METHOD(RedisCluster, lrem)
+/* {{{ proto long ValkeyGlideCluster::lrem(string key, long count, string val) */
+PHP_METHOD(ValkeyGlideCluster, lrem)
 {
     CLUSTER_PROCESS_CMD(lrem, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::rpoplpush(string key, string key) */
-PHP_METHOD(RedisCluster, rpoplpush)
+/* {{{ proto string ValkeyGlideCluster::rpoplpush(string key, string key) */
+PHP_METHOD(ValkeyGlideCluster, rpoplpush)
 {
     CLUSTER_PROCESS_KW_CMD("RPOPLPUSH", redis_key_key_cmd, cluster_bulk_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::brpoplpush(string key, string key, long tm) */
-PHP_METHOD(RedisCluster, brpoplpush)
+/* {{{ proto string ValkeyGlideCluster::brpoplpush(string key, string key, long tm) */
+PHP_METHOD(ValkeyGlideCluster, brpoplpush)
 {
     CLUSTER_PROCESS_CMD(brpoplpush, cluster_bulk_resp, 0);
 }
 /* }}} */
 
-PHP_METHOD(RedisCluster, lmove)
+PHP_METHOD(ValkeyGlideCluster, lmove)
 {
     CLUSTER_PROCESS_KW_CMD("LMOVE", redis_lmove_cmd, cluster_bulk_resp, 0);
 }
 
-PHP_METHOD(RedisCluster, blmove)
+PHP_METHOD(ValkeyGlideCluster, blmove)
 {
     CLUSTER_PROCESS_KW_CMD("BLMOVE", redis_lmove_cmd, cluster_bulk_resp, 0);
 }
 
-/* {{{ proto long RedisCluster::llen(string key)  */
-PHP_METHOD(RedisCluster, llen)
+/* {{{ proto long ValkeyGlideCluster::llen(string key)  */
+PHP_METHOD(ValkeyGlideCluster, llen)
 {
     CLUSTER_PROCESS_KW_CMD("LLEN", redis_key_cmd, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::scard(string key) */
-PHP_METHOD(RedisCluster, scard)
+/* {{{ proto long ValkeyGlideCluster::scard(string key) */
+PHP_METHOD(ValkeyGlideCluster, scard)
 {
     CLUSTER_PROCESS_KW_CMD("SCARD", redis_key_cmd, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::smembers(string key) */
-PHP_METHOD(RedisCluster, smembers)
+/* {{{ proto array ValkeyGlideCluster::smembers(string key) */
+PHP_METHOD(ValkeyGlideCluster, smembers)
 {
     CLUSTER_PROCESS_KW_CMD("SMEMBERS", redis_key_cmd, cluster_mbulk_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::sismember(string key) */
-PHP_METHOD(RedisCluster, sismember)
+/* {{{ proto long ValkeyGlideCluster::sismember(string key) */
+PHP_METHOD(ValkeyGlideCluster, sismember)
 {
     CLUSTER_PROCESS_KW_CMD("SISMEMBER", redis_kv_cmd, cluster_1_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::smismember(string key, string member0, ...memberN) */
-PHP_METHOD(RedisCluster, smismember)
+/* {{{ proto array ValkeyGlideCluster::smismember(string key, string member0, ...memberN) */
+PHP_METHOD(ValkeyGlideCluster, smismember)
 {
     CLUSTER_PROCESS_KW_CMD("SMISMEMBER", redis_key_varval_cmd, cluster_variant_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::sadd(string key, string val1 [, ...]) */
-PHP_METHOD(RedisCluster, sadd)
+/* {{{ proto long ValkeyGlideCluster::sadd(string key, string val1 [, ...]) */
+PHP_METHOD(ValkeyGlideCluster, sadd)
 {
     CLUSTER_PROCESS_KW_CMD("SADD", redis_key_varval_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::saddarray(string key, array values) */
-PHP_METHOD(RedisCluster, saddarray)
+/* {{{ proto long ValkeyGlideCluster::saddarray(string key, array values) */
+PHP_METHOD(ValkeyGlideCluster, saddarray)
 {
     CLUSTER_PROCESS_KW_CMD("SADD", redis_key_val_arr_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::srem(string key, string val1 [, ...]) */
-PHP_METHOD(RedisCluster, srem)
+/* {{{ proto long ValkeyGlideCluster::srem(string key, string val1 [, ...]) */
+PHP_METHOD(ValkeyGlideCluster, srem)
 {
     CLUSTER_PROCESS_KW_CMD("SREM", redis_key_varval_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::sunion(string key1, ... keyN) */
-PHP_METHOD(RedisCluster, sunion)
+/* {{{ proto array ValkeyGlideCluster::sunion(string key1, ... keyN) */
+PHP_METHOD(ValkeyGlideCluster, sunion)
 {
     CLUSTER_PROCESS_KW_CMD("SUNION", redis_varkey_cmd, cluster_mbulk_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::sunionstore(string dst, string k1, ... kN) */
-PHP_METHOD(RedisCluster, sunionstore)
+/* {{{ proto long ValkeyGlideCluster::sunionstore(string dst, string k1, ... kN) */
+PHP_METHOD(ValkeyGlideCluster, sunionstore)
 {
     CLUSTER_PROCESS_KW_CMD("SUNIONSTORE", redis_varkey_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ ptoto array RedisCluster::sinter(string k1, ... kN) */
-PHP_METHOD(RedisCluster, sinter)
+/* {{{ ptoto array ValkeyGlideCluster::sinter(string k1, ... kN) */
+PHP_METHOD(ValkeyGlideCluster, sinter)
 {
     CLUSTER_PROCESS_KW_CMD("SINTER", redis_varkey_cmd, cluster_mbulk_resp, 0);
 }
 
-/* {{{ proto RedisCluster::sintercard(array $keys, int $count = -1) */
-PHP_METHOD(RedisCluster, sintercard)
+/* {{{ proto ValkeyGlideCluster::sintercard(array $keys, int $count = -1) */
+PHP_METHOD(ValkeyGlideCluster, sintercard)
 {
     CLUSTER_PROCESS_KW_CMD("SINTERCARD", redis_intercard_cmd, cluster_long_resp, 0);
 }
@@ -968,485 +968,485 @@ PHP_METHOD(RedisCluster, sintercard)
 
 /* }}} */
 
-/* {{{ ptoto long RedisCluster::sinterstore(string dst, string k1, ... kN) */
-PHP_METHOD(RedisCluster, sinterstore)
+/* {{{ ptoto long ValkeyGlideCluster::sinterstore(string dst, string k1, ... kN) */
+PHP_METHOD(ValkeyGlideCluster, sinterstore)
 {
     CLUSTER_PROCESS_KW_CMD("SINTERSTORE", redis_varkey_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::sdiff(string k1, ... kN) */
-PHP_METHOD(RedisCluster, sdiff)
+/* {{{ proto array ValkeyGlideCluster::sdiff(string k1, ... kN) */
+PHP_METHOD(ValkeyGlideCluster, sdiff)
 {
     CLUSTER_PROCESS_KW_CMD("SDIFF", redis_varkey_cmd, cluster_mbulk_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::sdiffstore(string dst, string k1, ... kN) */
-PHP_METHOD(RedisCluster, sdiffstore)
+/* {{{ proto long ValkeyGlideCluster::sdiffstore(string dst, string k1, ... kN) */
+PHP_METHOD(ValkeyGlideCluster, sdiffstore)
 {
     CLUSTER_PROCESS_KW_CMD("SDIFFSTORE", redis_varkey_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::smove(string src, string dst, string mem) */
-PHP_METHOD(RedisCluster, smove)
+/* {{{ proto bool ValkeyGlideCluster::smove(string src, string dst, string mem) */
+PHP_METHOD(ValkeyGlideCluster, smove)
 {
     CLUSTER_PROCESS_CMD(smove, cluster_1_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::persist(string key) */
-PHP_METHOD(RedisCluster, persist)
+/* {{{ proto bool ValkeyGlideCluster::persist(string key) */
+PHP_METHOD(ValkeyGlideCluster, persist)
 {
     CLUSTER_PROCESS_KW_CMD("PERSIST", redis_key_cmd, cluster_1_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::ttl(string key) */
-PHP_METHOD(RedisCluster, ttl)
+/* {{{ proto long ValkeyGlideCluster::ttl(string key) */
+PHP_METHOD(ValkeyGlideCluster, ttl)
 {
     CLUSTER_PROCESS_KW_CMD("TTL", redis_key_cmd, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::pttl(string key) */
-PHP_METHOD(RedisCluster, pttl)
+/* {{{ proto long ValkeyGlideCluster::pttl(string key) */
+PHP_METHOD(ValkeyGlideCluster, pttl)
 {
     CLUSTER_PROCESS_KW_CMD("PTTL", redis_key_cmd, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::zcard(string key) */
-PHP_METHOD(RedisCluster, zcard)
+/* {{{ proto long ValkeyGlideCluster::zcard(string key) */
+PHP_METHOD(ValkeyGlideCluster, zcard)
 {
     CLUSTER_PROCESS_KW_CMD("ZCARD", redis_key_cmd, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto double RedisCluster::zscore(string key) */
-PHP_METHOD(RedisCluster, zscore)
+/* {{{ proto double ValkeyGlideCluster::zscore(string key) */
+PHP_METHOD(ValkeyGlideCluster, zscore)
 {
     CLUSTER_PROCESS_KW_CMD("ZSCORE", redis_kv_cmd, cluster_dbl_resp, 1);
 }
 /* }}} */
 
-PHP_METHOD(RedisCluster, zmscore)
+PHP_METHOD(ValkeyGlideCluster, zmscore)
 {
     CLUSTER_PROCESS_KW_CMD("ZMSCORE", redis_key_varval_cmd, cluster_mbulk_dbl_resp, 1);
 }
 
-/* {{{ proto long RedisCluster::zadd(string key,double score,string mem, ...) */
-PHP_METHOD(RedisCluster, zadd)
+/* {{{ proto long ValkeyGlideCluster::zadd(string key,double score,string mem, ...) */
+PHP_METHOD(ValkeyGlideCluster, zadd)
 {
     CLUSTER_PROCESS_CMD(zadd, cluster_zadd_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto double RedisCluster::zincrby(string key, double by, string mem) */
-PHP_METHOD(RedisCluster, zincrby)
+/* {{{ proto double ValkeyGlideCluster::zincrby(string key, double by, string mem) */
+PHP_METHOD(ValkeyGlideCluster, zincrby)
 {
     CLUSTER_PROCESS_CMD(zincrby, cluster_dbl_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::zremrangebyscore(string k, string s, string e) */
-PHP_METHOD(RedisCluster, zremrangebyscore)
+/* {{{ proto ValkeyGlideCluster::zremrangebyscore(string k, string s, string e) */
+PHP_METHOD(ValkeyGlideCluster, zremrangebyscore)
 {
     CLUSTER_PROCESS_KW_CMD("ZREMRANGEBYSCORE", redis_key_str_str_cmd,
                            cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::zcount(string key, string s, string e) */
-PHP_METHOD(RedisCluster, zcount)
+/* {{{ proto ValkeyGlideCluster::zcount(string key, string s, string e) */
+PHP_METHOD(ValkeyGlideCluster, zcount)
 {
     CLUSTER_PROCESS_KW_CMD("ZCOUNT", redis_key_str_str_cmd, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::zrank(string key, mixed member) */
-PHP_METHOD(RedisCluster, zrank)
+/* {{{ proto long ValkeyGlideCluster::zrank(string key, mixed member) */
+PHP_METHOD(ValkeyGlideCluster, zrank)
 {
     CLUSTER_PROCESS_KW_CMD("ZRANK", redis_kv_cmd, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::zrevrank(string key, mixed member) */
-PHP_METHOD(RedisCluster, zrevrank)
+/* {{{ proto long ValkeyGlideCluster::zrevrank(string key, mixed member) */
+PHP_METHOD(ValkeyGlideCluster, zrevrank)
 {
     CLUSTER_PROCESS_KW_CMD("ZREVRANK", redis_kv_cmd, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::hlen(string key) */
-PHP_METHOD(RedisCluster, hlen)
+/* {{{ proto long ValkeyGlideCluster::hlen(string key) */
+PHP_METHOD(ValkeyGlideCluster, hlen)
 {
     CLUSTER_PROCESS_KW_CMD("HLEN", redis_key_cmd, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::hkeys(string key) */
-PHP_METHOD(RedisCluster, hkeys)
+/* {{{ proto array ValkeyGlideCluster::hkeys(string key) */
+PHP_METHOD(ValkeyGlideCluster, hkeys)
 {
     CLUSTER_PROCESS_KW_CMD("HKEYS", redis_key_cmd, cluster_mbulk_raw_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::hvals(string key) */
-PHP_METHOD(RedisCluster, hvals)
+/* {{{ proto array ValkeyGlideCluster::hvals(string key) */
+PHP_METHOD(ValkeyGlideCluster, hvals)
 {
     CLUSTER_PROCESS_KW_CMD("HVALS", redis_key_cmd, cluster_mbulk_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::hget(string key, string mem) */
-PHP_METHOD(RedisCluster, hget)
+/* {{{ proto string ValkeyGlideCluster::hget(string key, string mem) */
+PHP_METHOD(ValkeyGlideCluster, hget)
 {
     CLUSTER_PROCESS_KW_CMD("HGET", redis_key_str_cmd, cluster_bulk_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::hset(string key, string mem, string val) */
-PHP_METHOD(RedisCluster, hset)
+/* {{{ proto bool ValkeyGlideCluster::hset(string key, string mem, string val) */
+PHP_METHOD(ValkeyGlideCluster, hset)
 {
     CLUSTER_PROCESS_CMD(hset, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::hsetnx(string key, string mem, string val) */
-PHP_METHOD(RedisCluster, hsetnx)
+/* {{{ proto bool ValkeyGlideCluster::hsetnx(string key, string mem, string val) */
+PHP_METHOD(ValkeyGlideCluster, hsetnx)
 {
     CLUSTER_PROCESS_CMD(hsetnx, cluster_1_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::hgetall(string key) */
-PHP_METHOD(RedisCluster, hgetall)
+/* {{{ proto array ValkeyGlideCluster::hgetall(string key) */
+PHP_METHOD(ValkeyGlideCluster, hgetall)
 {
     CLUSTER_PROCESS_KW_CMD("HGETALL", redis_key_cmd,
                            cluster_mbulk_zipstr_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::hexists(string key, string member) */
-PHP_METHOD(RedisCluster, hexists)
+/* {{{ proto bool ValkeyGlideCluster::hexists(string key, string member) */
+PHP_METHOD(ValkeyGlideCluster, hexists)
 {
     CLUSTER_PROCESS_KW_CMD("HEXISTS", redis_key_str_cmd, cluster_1_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::hincr(string key, string mem, long val) */
-PHP_METHOD(RedisCluster, hincrby)
+/* {{{ proto long ValkeyGlideCluster::hincr(string key, string mem, long val) */
+PHP_METHOD(ValkeyGlideCluster, hincrby)
 {
     CLUSTER_PROCESS_CMD(hincrby, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto double RedisCluster::hincrbyfloat(string k, string m, double v) */
-PHP_METHOD(RedisCluster, hincrbyfloat)
+/* {{{ proto double ValkeyGlideCluster::hincrbyfloat(string k, string m, double v) */
+PHP_METHOD(ValkeyGlideCluster, hincrbyfloat)
 {
     CLUSTER_PROCESS_CMD(hincrbyfloat, cluster_dbl_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::hmset(string key, array key_vals) */
-PHP_METHOD(RedisCluster, hmset)
+/* {{{ proto bool ValkeyGlideCluster::hmset(string key, array key_vals) */
+PHP_METHOD(ValkeyGlideCluster, hmset)
 {
     CLUSTER_PROCESS_CMD(hmset, cluster_bool_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::hrandfield(string key, [array $options]) */
-PHP_METHOD(RedisCluster, hrandfield)
+/* {{{ proto bool ValkeyGlideCluster::hrandfield(string key, [array $options]) */
+PHP_METHOD(ValkeyGlideCluster, hrandfield)
 {
     CLUSTER_PROCESS_CMD(hrandfield, cluster_hrandfield_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::hdel(string key, string mem1, ... memN) */
-PHP_METHOD(RedisCluster, hdel)
+/* {{{ proto long ValkeyGlideCluster::hdel(string key, string mem1, ... memN) */
+PHP_METHOD(ValkeyGlideCluster, hdel)
 {
     CLUSTER_PROCESS_CMD(hdel, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::hmget(string key, array members) */
-PHP_METHOD(RedisCluster, hmget)
+/* {{{ proto array ValkeyGlideCluster::hmget(string key, array members) */
+PHP_METHOD(ValkeyGlideCluster, hmget)
 {
     CLUSTER_PROCESS_CMD(hmget, cluster_mbulk_assoc_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::hstrlen(string key, string field) */
-PHP_METHOD(RedisCluster, hstrlen)
+/* {{{ proto array ValkeyGlideCluster::hstrlen(string key, string field) */
+PHP_METHOD(ValkeyGlideCluster, hstrlen)
 {
     CLUSTER_PROCESS_CMD(hstrlen, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::dump(string key) */
-PHP_METHOD(RedisCluster, dump)
+/* {{{ proto string ValkeyGlideCluster::dump(string key) */
+PHP_METHOD(ValkeyGlideCluster, dump)
 {
     CLUSTER_PROCESS_KW_CMD("DUMP", redis_key_cmd, cluster_bulk_raw_resp, 1);
 }
 
-/* {{{ proto long RedisCluster::incr(string key) */
-PHP_METHOD(RedisCluster, incr)
+/* {{{ proto long ValkeyGlideCluster::incr(string key) */
+PHP_METHOD(ValkeyGlideCluster, incr)
 {
     CLUSTER_PROCESS_CMD(incr, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::incrby(string key, long byval) */
-PHP_METHOD(RedisCluster, incrby)
+/* {{{ proto long ValkeyGlideCluster::incrby(string key, long byval) */
+PHP_METHOD(ValkeyGlideCluster, incrby)
 {
     CLUSTER_PROCESS_KW_CMD("INCRBY", redis_key_long_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::decr(string key) */
-PHP_METHOD(RedisCluster, decr)
+/* {{{ proto long ValkeyGlideCluster::decr(string key) */
+PHP_METHOD(ValkeyGlideCluster, decr)
 {
     CLUSTER_PROCESS_CMD(decr, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::decrby(string key, long byval) */
-PHP_METHOD(RedisCluster, decrby)
+/* {{{ proto long ValkeyGlideCluster::decrby(string key, long byval) */
+PHP_METHOD(ValkeyGlideCluster, decrby)
 {
     CLUSTER_PROCESS_KW_CMD("DECRBY", redis_key_long_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto double RedisCluster::incrbyfloat(string key, double val) */
-PHP_METHOD(RedisCluster, incrbyfloat)
+/* {{{ proto double ValkeyGlideCluster::incrbyfloat(string key, double val) */
+PHP_METHOD(ValkeyGlideCluster, incrbyfloat)
 {
     CLUSTER_PROCESS_KW_CMD("INCRBYFLOAT", redis_key_dbl_cmd,
                            cluster_dbl_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto double RedisCluster::decrbyfloat(string key, double val) */
-PHP_METHOD(RedisCluster, decrbyfloat)
+/* {{{ proto double ValkeyGlideCluster::decrbyfloat(string key, double val) */
+PHP_METHOD(ValkeyGlideCluster, decrbyfloat)
 {
     CLUSTER_PROCESS_KW_CMD("DECRBYFLOAT", redis_key_dbl_cmd,
                            cluster_dbl_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::expire(string key, long sec) */
-PHP_METHOD(RedisCluster, expire)
+/* {{{ proto bool ValkeyGlideCluster::expire(string key, long sec) */
+PHP_METHOD(ValkeyGlideCluster, expire)
 {
     CLUSTER_PROCESS_KW_CMD("EXPIRE", redis_expire_cmd, cluster_1_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::expireat(string key, long ts) */
-PHP_METHOD(RedisCluster, expireat)
+/* {{{ proto bool ValkeyGlideCluster::expireat(string key, long ts) */
+PHP_METHOD(ValkeyGlideCluster, expireat)
 {
     CLUSTER_PROCESS_KW_CMD("EXPIREAT", redis_expire_cmd, cluster_1_resp, 0);
 }
 
-/* {{{ proto bool RedisCluster::pexpire(string key, long ms) */
-PHP_METHOD(RedisCluster, pexpire)
+/* {{{ proto bool ValkeyGlideCluster::pexpire(string key, long ms) */
+PHP_METHOD(ValkeyGlideCluster, pexpire)
 {
     CLUSTER_PROCESS_KW_CMD("PEXPIRE", redis_expire_cmd, cluster_1_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::pexpireat(string key, long ts) */
-PHP_METHOD(RedisCluster, pexpireat)
+/* {{{ proto bool ValkeyGlideCluster::pexpireat(string key, long ts) */
+PHP_METHOD(ValkeyGlideCluster, pexpireat)
 {
     CLUSTER_PROCESS_KW_CMD("PEXPIREAT", redis_expire_cmd, cluster_1_resp, 0);
 }
 /* }}} */
 
-/* {{{ Redis::expiretime(string $key): int */
-PHP_METHOD(RedisCluster, expiretime)
+/* {{{ ValkeyGlide::expiretime(string $key): int */
+PHP_METHOD(ValkeyGlideCluster, expiretime)
 {
     CLUSTER_PROCESS_KW_CMD("EXPIRETIME", redis_key_cmd, cluster_long_resp, 1);
 }
 
-/* {{{ Redis::pexpiretime(string $key): int */
-PHP_METHOD(RedisCluster, pexpiretime)
+/* {{{ ValkeyGlide::pexpiretime(string $key): int */
+PHP_METHOD(ValkeyGlideCluster, pexpiretime)
 {
     CLUSTER_PROCESS_KW_CMD("PEXPIRETIME", redis_key_cmd, cluster_long_resp, 1);
 }
 
-/* {{{ proto long RedisCluster::append(string key, string val) */
-PHP_METHOD(RedisCluster, append)
+/* {{{ proto long ValkeyGlideCluster::append(string key, string val) */
+PHP_METHOD(ValkeyGlideCluster, append)
 {
     CLUSTER_PROCESS_KW_CMD("APPEND", redis_kv_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::getbit(string key, long val) */
-PHP_METHOD(RedisCluster, getbit)
+/* {{{ proto long ValkeyGlideCluster::getbit(string key, long val) */
+PHP_METHOD(ValkeyGlideCluster, getbit)
 {
     CLUSTER_PROCESS_KW_CMD("GETBIT", redis_key_long_cmd, cluster_long_resp, 1);
 }
 /* }}} */
 
-PHP_METHOD(RedisCluster, expiremember)
+PHP_METHOD(ValkeyGlideCluster, expiremember)
 {
     CLUSTER_PROCESS_CMD(expiremember, cluster_long_resp, 0);
 }
 
-PHP_METHOD(RedisCluster, expirememberat)
+PHP_METHOD(ValkeyGlideCluster, expirememberat)
 {
     CLUSTER_PROCESS_CMD(expiremember, cluster_long_resp, 0);
 }
 
-/* {{{ proto long RedisCluster::setbit(string key, long offset, bool onoff) */
-PHP_METHOD(RedisCluster, setbit)
+/* {{{ proto long ValkeyGlideCluster::setbit(string key, long offset, bool onoff) */
+PHP_METHOD(ValkeyGlideCluster, setbit)
 {
     CLUSTER_PROCESS_CMD(setbit, cluster_long_resp, 0);
 }
 
-/* {{{ proto long RedisCluster::bitop(string op,string key,[string key2,...]) */
-PHP_METHOD(RedisCluster, bitop)
+/* {{{ proto long ValkeyGlideCluster::bitop(string op,string key,[string key2,...]) */
+PHP_METHOD(ValkeyGlideCluster, bitop)
 {
     CLUSTER_PROCESS_CMD(bitop, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::bitcount(string key, [int start, int end]) */
-PHP_METHOD(RedisCluster, bitcount)
+/* {{{ proto long ValkeyGlideCluster::bitcount(string key, [int start, int end]) */
+PHP_METHOD(ValkeyGlideCluster, bitcount)
 {
     CLUSTER_PROCESS_CMD(bitcount, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::bitpos(string key, int bit, [int s, int end]) */
-PHP_METHOD(RedisCluster, bitpos)
+/* {{{ proto long ValkeyGlideCluster::bitpos(string key, int bit, [int s, int end]) */
+PHP_METHOD(ValkeyGlideCluster, bitpos)
 {
     CLUSTER_PROCESS_CMD(bitpos, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto string Redis::lget(string key, long index) */
-PHP_METHOD(RedisCluster, lget)
+/* {{{ proto string ValkeyGlide::lget(string key, long index) */
+PHP_METHOD(ValkeyGlideCluster, lget)
 {
     CLUSTER_PROCESS_KW_CMD("LINDEX", redis_key_long_cmd, cluster_bulk_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::getrange(string key, long start, long end) */ PHP_METHOD(RedisCluster, getrange)
+/* {{{ proto string ValkeyGlideCluster::getrange(string key, long start, long end) */ PHP_METHOD(ValkeyGlideCluster, getrange)
 {
     CLUSTER_PROCESS_KW_CMD("GETRANGE", redis_key_long_long_cmd,
                            cluster_bulk_resp, 1);
 }
 /* }}} */
 
-/* {{{ prot RedisCluster::lcs(string $key1, string $key2, ?array $options = NULL): mixed; */
-PHP_METHOD(RedisCluster, lcs)
+/* {{{ prot ValkeyGlideCluster::lcs(string $key1, string $key2, ?array $options = NULL): mixed; */
+PHP_METHOD(ValkeyGlideCluster, lcs)
 {
     CLUSTER_PROCESS_CMD(lcs, cluster_variant_resp, 1);
 }
 
-/* {{{ proto Redis|array|false Redis::lmpop(array $keys, string $from, int $count = 1) */
-PHP_METHOD(RedisCluster, lmpop)
+/* {{{ proto ValkeyGlide|array|false ValkeyGlide::lmpop(array $keys, string $from, int $count = 1) */
+PHP_METHOD(ValkeyGlideCluster, lmpop)
 {
     CLUSTER_PROCESS_KW_CMD("LMPOP", redis_mpop_cmd, cluster_mpop_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto Redis|array|false Redis::blmpop(double $timeout, array $keys, string $from, int $count = 1) */
-PHP_METHOD(RedisCluster, blmpop)
+/* {{{ proto ValkeyGlide|array|false ValkeyGlide::blmpop(double $timeout, array $keys, string $from, int $count = 1) */
+PHP_METHOD(ValkeyGlideCluster, blmpop)
 {
     CLUSTER_PROCESS_KW_CMD("BLMPOP", redis_mpop_cmd, cluster_mpop_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto Redis|array|false Redis::zmpop(array $keys, string $from, int $count = 1) */
-PHP_METHOD(RedisCluster, zmpop)
+/* {{{ proto ValkeyGlide|array|false ValkeyGlide::zmpop(array $keys, string $from, int $count = 1) */
+PHP_METHOD(ValkeyGlideCluster, zmpop)
 {
     CLUSTER_PROCESS_KW_CMD("ZMPOP", redis_mpop_cmd, cluster_mpop_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto Redis|array|false Redis::bzmpop(double $timeout, array $keys, string $from, int $count = 1) */
-PHP_METHOD(RedisCluster, bzmpop)
+/* {{{ proto ValkeyGlide|array|false ValkeyGlide::bzmpop(double $timeout, array $keys, string $from, int $count = 1) */
+PHP_METHOD(ValkeyGlideCluster, bzmpop)
 {
     CLUSTER_PROCESS_KW_CMD("BZMPOP", redis_mpop_cmd, cluster_mpop_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::ltrim(string key, long start, long end) */
-PHP_METHOD(RedisCluster, ltrim)
+/* {{{ proto string ValkeyGlideCluster::ltrim(string key, long start, long end) */
+PHP_METHOD(ValkeyGlideCluster, ltrim)
 {
     CLUSTER_PROCESS_KW_CMD("LTRIM", redis_key_long_long_cmd, cluster_bool_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::lrange(string key, long start, long end) */
-PHP_METHOD(RedisCluster, lrange)
+/* {{{ proto array ValkeyGlideCluster::lrange(string key, long start, long end) */
+PHP_METHOD(ValkeyGlideCluster, lrange)
 {
     CLUSTER_PROCESS_KW_CMD("LRANGE", redis_key_long_long_cmd,
                            cluster_mbulk_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::zremrangebyrank(string k, long s, long e) */
-PHP_METHOD(RedisCluster, zremrangebyrank)
+/* {{{ proto long ValkeyGlideCluster::zremrangebyrank(string k, long s, long e) */
+PHP_METHOD(ValkeyGlideCluster, zremrangebyrank)
 {
     CLUSTER_PROCESS_KW_CMD("ZREMRANGEBYRANK", redis_key_long_long_cmd,
                            cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::publish(string key, string msg) */
-PHP_METHOD(RedisCluster, publish)
+/* {{{ proto long ValkeyGlideCluster::publish(string key, string msg) */
+PHP_METHOD(ValkeyGlideCluster, publish)
 {
     CLUSTER_PROCESS_KW_CMD("PUBLISH", redis_key_str_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::rename(string key1, string key2) */
-PHP_METHOD(RedisCluster, rename)
+/* {{{ proto bool ValkeyGlideCluster::rename(string key1, string key2) */
+PHP_METHOD(ValkeyGlideCluster, rename)
 {
     CLUSTER_PROCESS_KW_CMD("RENAME", redis_key_key_cmd, cluster_bool_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::renamenx(string key1, string key2) */
-PHP_METHOD(RedisCluster, renamenx)
+/* {{{ proto bool ValkeyGlideCluster::renamenx(string key1, string key2) */
+PHP_METHOD(ValkeyGlideCluster, renamenx)
 {
     CLUSTER_PROCESS_KW_CMD("RENAMENX", redis_key_key_cmd, cluster_1_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::pfcount(string key) */
-PHP_METHOD(RedisCluster, pfcount)
+/* {{{ proto long ValkeyGlideCluster::pfcount(string key) */
+PHP_METHOD(ValkeyGlideCluster, pfcount)
 {
     CLUSTER_PROCESS_CMD(pfcount, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::pfadd(string key, array vals) */
-PHP_METHOD(RedisCluster, pfadd)
+/* {{{ proto bool ValkeyGlideCluster::pfadd(string key, array vals) */
+PHP_METHOD(ValkeyGlideCluster, pfadd)
 {
     CLUSTER_PROCESS_CMD(pfadd, cluster_1_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::pfmerge(string key, array keys) */
-PHP_METHOD(RedisCluster, pfmerge)
+/* {{{ proto bool ValkeyGlideCluster::pfmerge(string key, array keys) */
+PHP_METHOD(ValkeyGlideCluster, pfmerge)
 {
     CLUSTER_PROCESS_CMD(pfmerge, cluster_bool_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto boolean RedisCluster::restore(string key, long ttl, string val) */
-PHP_METHOD(RedisCluster, restore)
+/* {{{ proto boolean ValkeyGlideCluster::restore(string key, long ttl, string val) */
+PHP_METHOD(ValkeyGlideCluster, restore)
 {
     CLUSTER_PROCESS_CMD(restore, cluster_bool_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::setrange(string key, long offset, string val) */
-PHP_METHOD(RedisCluster, setrange)
+/* {{{ proto long ValkeyGlideCluster::setrange(string key, long offset, string val) */
+PHP_METHOD(ValkeyGlideCluster, setrange)
 {
     CLUSTER_PROCESS_KW_CMD("SETRANGE", redis_key_long_str_cmd,
                            cluster_long_resp, 0);
@@ -1454,137 +1454,137 @@ PHP_METHOD(RedisCluster, setrange)
 /* }}} */
 
 /* {{{ proto
- *     array RedisCluster::zrange(string k, long s, long e, bool score = 0) */
-PHP_METHOD(RedisCluster, zrange)
+ *     array ValkeyGlideCluster::zrange(string k, long s, long e, bool score = 0) */
+PHP_METHOD(ValkeyGlideCluster, zrange)
 {
     CLUSTER_PROCESS_KW_CMD("ZRANGE", redis_zrange_cmd, cluster_zrange_resp, 1);
 }
 /* }}} */
 
 /* {{{ proto
- *     array RedisCluster::zrange(string $dstkey, string $srckey, long s, long e, array|bool $options = false) */
-PHP_METHOD(RedisCluster, zrangestore)
+ *     array ValkeyGlideCluster::zrange(string $dstkey, string $srckey, long s, long e, array|bool $options = false) */
+PHP_METHOD(ValkeyGlideCluster, zrangestore)
 {
     CLUSTER_PROCESS_KW_CMD("ZRANGESTORE", redis_zrange_cmd, cluster_long_resp, 0);
 }
 
 /* }}} */
 /* {{{ proto
- *     array RedisCluster::zrevrange(string k,long s,long e,bool scores = 0) */
-PHP_METHOD(RedisCluster, zrevrange)
+ *     array ValkeyGlideCluster::zrevrange(string k,long s,long e,bool scores = 0) */
+PHP_METHOD(ValkeyGlideCluster, zrevrange)
 {
     CLUSTER_PROCESS_KW_CMD("ZREVRANGE", redis_zrange_cmd, cluster_zrange_resp, 1);
 }
 /* }}} */
 
 /* {{{ proto array
- *     RedisCluster::zrangebyscore(string k, long s, long e, array opts) */
-PHP_METHOD(RedisCluster, zrangebyscore)
+ *     ValkeyGlideCluster::zrangebyscore(string k, long s, long e, array opts) */
+PHP_METHOD(ValkeyGlideCluster, zrangebyscore)
 {
     CLUSTER_PROCESS_KW_CMD("ZRANGEBYSCORE", redis_zrange_cmd, cluster_zrange_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::zunionstore(string dst, array keys, [array weights,
+/* {{{ proto ValkeyGlideCluster::zunionstore(string dst, array keys, [array weights,
  *                                     string agg]) */
-PHP_METHOD(RedisCluster, zunionstore)
+PHP_METHOD(ValkeyGlideCluster, zunionstore)
 {
     CLUSTER_PROCESS_KW_CMD("ZUNIONSTORE", redis_zinterunionstore_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-PHP_METHOD(RedisCluster, zdiff)
+PHP_METHOD(ValkeyGlideCluster, zdiff)
 {
     CLUSTER_PROCESS_CMD(zdiff, cluster_zdiff_resp, 1);
 }
 
-PHP_METHOD(RedisCluster, zdiffstore)
+PHP_METHOD(ValkeyGlideCluster, zdiffstore)
 {
     CLUSTER_PROCESS_CMD(zdiffstore, cluster_long_resp, 0);
 }
 
-PHP_METHOD(RedisCluster, zinter)
+PHP_METHOD(ValkeyGlideCluster, zinter)
 {
     CLUSTER_PROCESS_KW_CMD("ZUNION", redis_zinterunion_cmd, cluster_zdiff_resp, 1);
 }
 
-PHP_METHOD(RedisCluster, zunion)
+PHP_METHOD(ValkeyGlideCluster, zunion)
 {
     CLUSTER_PROCESS_KW_CMD("ZINTER", redis_zinterunion_cmd, cluster_zdiff_resp, 1);
 }
 
-/* {{{ proto array RedisCluster::zrandmember(string key, array options) */
-PHP_METHOD(RedisCluster, zrandmember)
+/* {{{ proto array ValkeyGlideCluster::zrandmember(string key, array options) */
+PHP_METHOD(ValkeyGlideCluster, zrandmember)
 {
     CLUSTER_PROCESS_CMD(zrandmember, cluster_zrandmember_resp, 1);
 }
 
 /* }}} */
-/* {{{ proto RedisCluster::zinterstore(string dst, array keys, [array weights,
+/* {{{ proto ValkeyGlideCluster::zinterstore(string dst, array keys, [array weights,
  *                                     string agg]) */
-PHP_METHOD(RedisCluster, zinterstore)
+PHP_METHOD(ValkeyGlideCluster, zinterstore)
 {
     CLUSTER_PROCESS_KW_CMD("ZINTERSTORE", redis_zinterunionstore_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::zintercard(array $keys, int $count = -1) */
-PHP_METHOD(RedisCluster, zintercard)
+/* {{{ proto ValkeyGlideCluster::zintercard(array $keys, int $count = -1) */
+PHP_METHOD(ValkeyGlideCluster, zintercard)
 {
     CLUSTER_PROCESS_KW_CMD("ZINTERCARD", redis_intercard_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::zrem(string key, string val1, ... valN) */
-PHP_METHOD(RedisCluster, zrem)
+/* {{{ proto ValkeyGlideCluster::zrem(string key, string val1, ... valN) */
+PHP_METHOD(ValkeyGlideCluster, zrem)
 {
     CLUSTER_PROCESS_KW_CMD("ZREM", redis_key_varval_cmd, cluster_long_resp, 0);
 }
 /* }}} */
 
 /* {{{ proto array
- *     RedisCluster::zrevrangebyscore(string k, long s, long e, array opts) */
-PHP_METHOD(RedisCluster, zrevrangebyscore)
+ *     ValkeyGlideCluster::zrevrangebyscore(string k, long s, long e, array opts) */
+PHP_METHOD(ValkeyGlideCluster, zrevrangebyscore)
 {
     CLUSTER_PROCESS_KW_CMD("ZREVRANGEBYSCORE", redis_zrange_cmd, cluster_zrange_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::zrangebylex(string key, string min, string max,
+/* {{{ proto array ValkeyGlideCluster::zrangebylex(string key, string min, string max,
  *                                           [offset, count]) */
-PHP_METHOD(RedisCluster, zrangebylex)
+PHP_METHOD(ValkeyGlideCluster, zrangebylex)
 {
     CLUSTER_PROCESS_KW_CMD("ZRANGEBYLEX", redis_zrangebylex_cmd,
                            cluster_mbulk_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::zrevrangebylex(string key, string min,
+/* {{{ proto array ValkeyGlideCluster::zrevrangebylex(string key, string min,
  *                                              string min, [long off, long limit) */
-PHP_METHOD(RedisCluster, zrevrangebylex)
+PHP_METHOD(ValkeyGlideCluster, zrevrangebylex)
 {
     CLUSTER_PROCESS_KW_CMD("ZREVRANGEBYLEX", redis_zrangebylex_cmd,
                            cluster_mbulk_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::zlexcount(string key, string min, string max) */
-PHP_METHOD(RedisCluster, zlexcount)
+/* {{{ proto long ValkeyGlideCluster::zlexcount(string key, string min, string max) */
+PHP_METHOD(ValkeyGlideCluster, zlexcount)
 {
     CLUSTER_PROCESS_KW_CMD("ZLEXCOUNT", redis_gen_zlex_cmd, cluster_long_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::zremrangebylex(string key, string min, string max) */
-PHP_METHOD(RedisCluster, zremrangebylex)
+/* {{{ proto long ValkeyGlideCluster::zremrangebylex(string key, string min, string max) */
+PHP_METHOD(ValkeyGlideCluster, zremrangebylex)
 {
     CLUSTER_PROCESS_KW_CMD("ZREMRANGEBYLEX", redis_gen_zlex_cmd,
                            cluster_long_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::zpopmax(string key) */
-PHP_METHOD(RedisCluster, zpopmax)
+/* {{{ proto array ValkeyGlideCluster::zpopmax(string key) */
+PHP_METHOD(ValkeyGlideCluster, zpopmax)
 {
     if (ZEND_NUM_ARGS() == 1)
     {
@@ -1601,8 +1601,8 @@ PHP_METHOD(RedisCluster, zpopmax)
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::zpopmin(string key) */
-PHP_METHOD(RedisCluster, zpopmin)
+/* {{{ proto array ValkeyGlideCluster::zpopmin(string key) */
+PHP_METHOD(ValkeyGlideCluster, zpopmin)
 {
     if (ZEND_NUM_ARGS() == 1)
     {
@@ -1619,45 +1619,45 @@ PHP_METHOD(RedisCluster, zpopmin)
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::bzPopMin(Array keys [, timeout]) }}} */
-PHP_METHOD(RedisCluster, bzpopmax)
+/* {{{ proto array ValkeyGlideCluster::bzPopMin(Array keys [, timeout]) }}} */
+PHP_METHOD(ValkeyGlideCluster, bzpopmax)
 {
     CLUSTER_PROCESS_KW_CMD("BZPOPMAX", redis_blocking_pop_cmd, cluster_mbulk_resp, 0);
 }
 
-/* {{{ proto array RedisCluster::bzPopMax(Array keys [, timeout]) }}} */
-PHP_METHOD(RedisCluster, bzpopmin)
+/* {{{ proto array ValkeyGlideCluster::bzPopMax(Array keys [, timeout]) }}} */
+PHP_METHOD(ValkeyGlideCluster, bzpopmin)
 {
     CLUSTER_PROCESS_KW_CMD("BZPOPMIN", redis_blocking_pop_cmd, cluster_mbulk_resp, 0);
 }
 
-/* {{{ proto RedisCluster::sort(string key, array options) */
-PHP_METHOD(RedisCluster, sort)
+/* {{{ proto ValkeyGlideCluster::sort(string key, array options) */
+PHP_METHOD(ValkeyGlideCluster, sort)
 {
     CLUSTER_PROCESS_KW_CMD("SORT", redis_sort_cmd, cluster_variant_resp, 0);
 }
 
-/* {{{ proto RedisCluster::sort_ro(string key, array options) */
-PHP_METHOD(RedisCluster, sort_ro)
+/* {{{ proto ValkeyGlideCluster::sort_ro(string key, array options) */
+PHP_METHOD(ValkeyGlideCluster, sort_ro)
 {
     CLUSTER_PROCESS_KW_CMD("SORT_RO", redis_sort_cmd, cluster_variant_resp, 1);
 }
 
-/* {{{ proto RedisCluster::object(string subcmd, string key) */
-PHP_METHOD(RedisCluster, object)
+/* {{{ proto ValkeyGlideCluster::object(string subcmd, string key) */
+PHP_METHOD(ValkeyGlideCluster, object)
 {
     CLUSTER_PROCESS_CMD(object, cluster_object_resp, 1);
 }
 
-/* {{{ proto null RedisCluster::subscribe(array chans, callable cb) */
-PHP_METHOD(RedisCluster, subscribe)
+/* {{{ proto null ValkeyGlideCluster::subscribe(array chans, callable cb) */
+PHP_METHOD(ValkeyGlideCluster, subscribe)
 {
     CLUSTER_PROCESS_KW_CMD("SUBSCRIBE", redis_subscribe_cmd, cluster_sub_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto null RedisCluster::psubscribe(array pats, callable cb) */
-PHP_METHOD(RedisCluster, psubscribe)
+/* {{{ proto null ValkeyGlideCluster::psubscribe(array pats, callable cb) */
+PHP_METHOD(ValkeyGlideCluster, psubscribe)
 {
     CLUSTER_PROCESS_KW_CMD("PSUBSCRIBE", redis_subscribe_cmd, cluster_sub_resp, 0);
 }
@@ -1700,63 +1700,63 @@ static void generic_unsub_cmd(INTERNAL_FUNCTION_PARAMETERS, redisCluster *c,
     efree(cmd);
 }
 
-/* {{{ proto array RedisCluster::unsubscribe(array chans) */
-PHP_METHOD(RedisCluster, unsubscribe)
+/* {{{ proto array ValkeyGlideCluster::unsubscribe(array chans) */
+PHP_METHOD(ValkeyGlideCluster, unsubscribe)
 {
     generic_unsub_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, GET_CONTEXT(),
                       "UNSUBSCRIBE");
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::punsubscribe(array pats) */
-PHP_METHOD(RedisCluster, punsubscribe)
+/* {{{ proto array ValkeyGlideCluster::punsubscribe(array pats) */
+PHP_METHOD(ValkeyGlideCluster, punsubscribe)
 {
     generic_unsub_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, GET_CONTEXT(),
                       "PUNSUBSCRIBE");
 }
 /* }}} */
 
-/* {{{ proto mixed RedisCluster::eval(string script, [array args, int numkeys) */
-PHP_METHOD(RedisCluster, eval)
+/* {{{ proto mixed ValkeyGlideCluster::eval(string script, [array args, int numkeys) */
+PHP_METHOD(ValkeyGlideCluster, eval)
 {
     CLUSTER_PROCESS_KW_CMD("EVAL", redis_eval_cmd, cluster_variant_raw_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto mixed RedisCluster::eval_ro(string script, [array args, int numkeys) */
-PHP_METHOD(RedisCluster, eval_ro)
+/* {{{ proto mixed ValkeyGlideCluster::eval_ro(string script, [array args, int numkeys) */
+PHP_METHOD(ValkeyGlideCluster, eval_ro)
 {
     CLUSTER_PROCESS_KW_CMD("EVAL_RO", redis_eval_cmd, cluster_variant_raw_resp, 1);
 }
 /* }}} */
 
-/* {{{ proto mixed RedisCluster::evalsha(string sha, [array args, int numkeys]) */
-PHP_METHOD(RedisCluster, evalsha)
+/* {{{ proto mixed ValkeyGlideCluster::evalsha(string sha, [array args, int numkeys]) */
+PHP_METHOD(ValkeyGlideCluster, evalsha)
 {
     CLUSTER_PROCESS_KW_CMD("EVALSHA", redis_eval_cmd, cluster_variant_raw_resp, 0);
 }
 /* }}} */
 
-/* {{{ proto mixed RedisCluster::evalsha_ro(string sha, [array args, int numkeys]) */
-PHP_METHOD(RedisCluster, evalsha_ro)
+/* {{{ proto mixed ValkeyGlideCluster::evalsha_ro(string sha, [array args, int numkeys]) */
+PHP_METHOD(ValkeyGlideCluster, evalsha_ro)
 {
     CLUSTER_PROCESS_KW_CMD("EVALSHA_RO", redis_eval_cmd, cluster_variant_raw_resp, 1);
 }
 
 /* }}} */
-/* Commands that do not interact with Redis, but just report stuff about
+/* Commands that do not interact with ValkeyGlide, but just report stuff about
  * various options, etc */
 
-/* {{{ proto string RedisCluster::getmode() */
-PHP_METHOD(RedisCluster, getmode)
+/* {{{ proto string ValkeyGlideCluster::getmode() */
+PHP_METHOD(ValkeyGlideCluster, getmode)
 {
     redisCluster *c = GET_CONTEXT();
     RETURN_LONG(c->flags->mode);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::getlasterror() */
-PHP_METHOD(RedisCluster, getlasterror)
+/* {{{ proto string ValkeyGlideCluster::getlasterror() */
+PHP_METHOD(ValkeyGlideCluster, getlasterror)
 {
     redisCluster *c = GET_CONTEXT();
 
@@ -1768,8 +1768,8 @@ PHP_METHOD(RedisCluster, getlasterror)
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::clearlasterror() */
-PHP_METHOD(RedisCluster, clearlasterror)
+/* {{{ proto bool ValkeyGlideCluster::clearlasterror() */
+PHP_METHOD(ValkeyGlideCluster, clearlasterror)
 {
     redisCluster *c = GET_CONTEXT();
 
@@ -1818,7 +1818,7 @@ static void redisClearNodeBytes(redisClusterNode *node)
     }
 }
 
-PHP_METHOD(RedisCluster, gettransferredbytes)
+PHP_METHOD(ValkeyGlideCluster, gettransferredbytes)
 {
     redisCluster *c = GET_CONTEXT();
     zend_long rx = 0, tx = 0;
@@ -1836,7 +1836,7 @@ PHP_METHOD(RedisCluster, gettransferredbytes)
 }
 /* }}} */
 
-PHP_METHOD(RedisCluster, cleartransferredbytes)
+PHP_METHOD(ValkeyGlideCluster, cleartransferredbytes)
 {
     redisCluster *c = GET_CONTEXT();
     redisClusterNode *node;
@@ -1848,40 +1848,40 @@ PHP_METHOD(RedisCluster, cleartransferredbytes)
     ZEND_HASH_FOREACH_END();
 }
 
-/* {{{ proto long RedisCluster::getOption(long option */
-PHP_METHOD(RedisCluster, getoption)
+/* {{{ proto long ValkeyGlideCluster::getOption(long option */
+PHP_METHOD(ValkeyGlideCluster, getoption)
 {
     redisCluster *c = GET_CONTEXT();
     redis_getoption_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags, c);
 }
 /* }}} */
 
-/* {{{ proto bool RedisCluster::setOption(long option, mixed value) */
-PHP_METHOD(RedisCluster, setoption)
+/* {{{ proto bool ValkeyGlideCluster::setOption(long option, mixed value) */
+PHP_METHOD(ValkeyGlideCluster, setoption)
 {
     redisCluster *c = GET_CONTEXT();
     redis_setoption_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags, c);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::_prefix(string key) */
-PHP_METHOD(RedisCluster, _prefix)
+/* {{{ proto string ValkeyGlideCluster::_prefix(string key) */
+PHP_METHOD(ValkeyGlideCluster, _prefix)
 {
     redisCluster *c = GET_CONTEXT();
     redis_prefix_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::_serialize(mixed val) */
-PHP_METHOD(RedisCluster, _serialize)
+/* {{{ proto string ValkeyGlideCluster::_serialize(mixed val) */
+PHP_METHOD(ValkeyGlideCluster, _serialize)
 {
     redisCluster *c = GET_CONTEXT();
     redis_serialize_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags);
 }
 /* }}} */
 
-/* {{{ proto mixed RedisCluster::_unserialize(string val) */
-PHP_METHOD(RedisCluster, _unserialize)
+/* {{{ proto mixed ValkeyGlideCluster::_unserialize(string val) */
+PHP_METHOD(ValkeyGlideCluster, _unserialize)
 {
     redisCluster *c = GET_CONTEXT();
     redis_unserialize_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU,
@@ -1889,33 +1889,33 @@ PHP_METHOD(RedisCluster, _unserialize)
 }
 /* }}} */
 
-PHP_METHOD(RedisCluster, _compress)
+PHP_METHOD(ValkeyGlideCluster, _compress)
 {
     redisCluster *c = GET_CONTEXT();
     redis_compress_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags);
 }
 
-PHP_METHOD(RedisCluster, _uncompress)
+PHP_METHOD(ValkeyGlideCluster, _uncompress)
 {
     redisCluster *c = GET_CONTEXT();
     redis_uncompress_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags,
                              redis_cluster_exception_ce);
 }
 
-PHP_METHOD(RedisCluster, _pack)
+PHP_METHOD(ValkeyGlideCluster, _pack)
 {
     redisCluster *c = GET_CONTEXT();
     redis_pack_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags);
 }
 
-PHP_METHOD(RedisCluster, _unpack)
+PHP_METHOD(ValkeyGlideCluster, _unpack)
 {
     redisCluster *c = GET_CONTEXT();
     redis_unpack_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags);
 }
 
-/* {{{ proto array RedisCluster::_masters() */
-PHP_METHOD(RedisCluster, _masters)
+/* {{{ proto array ValkeyGlideCluster::_masters() */
+PHP_METHOD(ValkeyGlideCluster, _masters)
 {
     redisCluster *c = GET_CONTEXT();
     redisClusterNode *node;
@@ -1938,7 +1938,7 @@ PHP_METHOD(RedisCluster, _masters)
     ZEND_HASH_FOREACH_END();
 }
 
-PHP_METHOD(RedisCluster, _redir)
+PHP_METHOD(ValkeyGlideCluster, _redir)
 {
     redisCluster *c = GET_CONTEXT();
     char buf[255];
@@ -1959,8 +1959,8 @@ PHP_METHOD(RedisCluster, _redir)
  * Transaction handling
  */
 
-/* {{{ proto bool RedisCluster::multi() */
-PHP_METHOD(RedisCluster, multi)
+/* {{{ proto bool ValkeyGlideCluster::multi() */
+PHP_METHOD(ValkeyGlideCluster, multi)
 {
     redisCluster *c = GET_CONTEXT();
     zend_long value = MULTI;
@@ -1972,13 +1972,13 @@ PHP_METHOD(RedisCluster, multi)
 
     if (value != MULTI)
     {
-        php_error_docref(NULL, E_WARNING, "RedisCluster does not support PIPELINING");
+        php_error_docref(NULL, E_WARNING, "ValkeyGlideCluster does not support PIPELINING");
     }
 
     if (c->flags->mode == MULTI)
     {
         php_error_docref(NULL, E_WARNING,
-                         "RedisCluster is already in MULTI mode, ignoring");
+                         "ValkeyGlideCluster is already in MULTI mode, ignoring");
         RETURN_FALSE;
     }
 
@@ -1992,8 +1992,8 @@ PHP_METHOD(RedisCluster, multi)
     RETVAL_ZVAL(getThis(), 1, 0);
 }
 
-/* {{{ proto bool RedisCluster::watch() */
-PHP_METHOD(RedisCluster, watch)
+/* {{{ proto bool ValkeyGlideCluster::watch() */
+PHP_METHOD(ValkeyGlideCluster, watch)
 {
     redisCluster *c = GET_CONTEXT();
     HashTable *ht_dist;
@@ -2091,8 +2091,8 @@ PHP_METHOD(RedisCluster, watch)
     RETURN_TRUE;
 }
 
-/* {{{ proto bool RedisCluster::unwatch() */
-PHP_METHOD(RedisCluster, unwatch)
+/* {{{ proto bool ValkeyGlideCluster::unwatch() */
+PHP_METHOD(ValkeyGlideCluster, unwatch)
 {
     redisCluster *c = GET_CONTEXT();
     short slot;
@@ -2117,8 +2117,8 @@ PHP_METHOD(RedisCluster, unwatch)
     CLUSTER_RETURN_BOOL(c, 1);
 }
 
-/* {{{ proto array RedisCluster::exec() */
-PHP_METHOD(RedisCluster, exec)
+/* {{{ proto array ValkeyGlideCluster::exec() */
+PHP_METHOD(ValkeyGlideCluster, exec)
 {
     redisCluster *c = GET_CONTEXT();
     clusterFoldItem *fi;
@@ -2126,7 +2126,7 @@ PHP_METHOD(RedisCluster, exec)
     // Verify we are in fact in multi mode
     if (CLUSTER_IS_ATOMIC(c))
     {
-        php_error_docref(NULL, E_WARNING, "RedisCluster is not in MULTI mode");
+        php_error_docref(NULL, E_WARNING, "ValkeyGlideCluster is not in MULTI mode");
         RETURN_FALSE;
     }
 
@@ -2162,8 +2162,8 @@ PHP_METHOD(RedisCluster, exec)
     CLUSTER_RESET_MULTI(c);
 }
 
-/* {{{ proto bool RedisCluster::discard() */
-PHP_METHOD(RedisCluster, discard)
+/* {{{ proto bool ValkeyGlideCluster::discard() */
+PHP_METHOD(ValkeyGlideCluster, discard)
 {
     redisCluster *c = GET_CONTEXT();
 
@@ -2517,7 +2517,7 @@ static int redis_acl_op_readonly(zend_string *op)
     return 0;
 }
 
-PHP_METHOD(RedisCluster, acl)
+PHP_METHOD(ValkeyGlideCluster, acl)
 {
     redisCluster *c = GET_CONTEXT();
     smart_string cmdstr = {0};
@@ -2600,8 +2600,8 @@ PHP_METHOD(RedisCluster, acl)
     efree(zargs);
 }
 
-/* {{{ proto RedisCluster::scan(string master, long it [, string pat, long cnt]) */
-PHP_METHOD(RedisCluster, scan)
+/* {{{ proto ValkeyGlideCluster::scan(string master, long it [, string pat, long cnt]) */
+PHP_METHOD(ValkeyGlideCluster, scan)
 {
     redisCluster *c = GET_CONTEXT();
     char *cmd, *pat = NULL;
@@ -2642,7 +2642,7 @@ PHP_METHOD(RedisCluster, scan)
     }
 
     /* With SCAN_RETRY on, loop until we get some keys, otherwise just return
-     * what Redis does, as it does */
+     * what ValkeyGlide does, as it does */
     do
     {
         /* Free our return value if we're back in the loop */
@@ -2690,93 +2690,93 @@ PHP_METHOD(RedisCluster, scan)
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::sscan(string key, long it [string pat, long cnt]) */
-PHP_METHOD(RedisCluster, sscan)
+/* {{{ proto ValkeyGlideCluster::sscan(string key, long it [string pat, long cnt]) */
+PHP_METHOD(ValkeyGlideCluster, sscan)
 {
     cluster_kscan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_SSCAN);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::zscan(string key, long it [string pat, long cnt]) */
-PHP_METHOD(RedisCluster, zscan)
+/* {{{ proto ValkeyGlideCluster::zscan(string key, long it [string pat, long cnt]) */
+PHP_METHOD(ValkeyGlideCluster, zscan)
 {
     cluster_kscan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_ZSCAN);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::hscan(string key, long it [string pat, long cnt]) */
-PHP_METHOD(RedisCluster, hscan)
+/* {{{ proto ValkeyGlideCluster::hscan(string key, long it [string pat, long cnt]) */
+PHP_METHOD(ValkeyGlideCluster, hscan)
 {
     cluster_kscan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_HSCAN);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::save(string key)
- *     proto RedisCluster::save(array host_port) */
-PHP_METHOD(RedisCluster, save)
+/* {{{ proto ValkeyGlideCluster::save(string key)
+ *     proto ValkeyGlideCluster::save(array host_port) */
+PHP_METHOD(ValkeyGlideCluster, save)
 {
     cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "SAVE", TYPE_LINE,
                            cluster_bool_resp);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::bgsave(string key)
- *     proto RedisCluster::bgsave(array host_port) */
-PHP_METHOD(RedisCluster, bgsave)
+/* {{{ proto ValkeyGlideCluster::bgsave(string key)
+ *     proto ValkeyGlideCluster::bgsave(array host_port) */
+PHP_METHOD(ValkeyGlideCluster, bgsave)
 {
     cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "BGSAVE",
                            TYPE_LINE, cluster_bool_resp);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::flushdb(string key, [bool async])
- *     proto RedisCluster::flushdb(array host_port, [bool async]) */
-PHP_METHOD(RedisCluster, flushdb)
+/* {{{ proto ValkeyGlideCluster::flushdb(string key, [bool async])
+ *     proto ValkeyGlideCluster::flushdb(array host_port, [bool async]) */
+PHP_METHOD(ValkeyGlideCluster, flushdb)
 {
     cluster_flush_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "FLUSHDB",
                       TYPE_LINE, cluster_bool_resp);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::flushall(string key, [bool async])
- *     proto RedisCluster::flushall(array host_port, [bool async]) */
-PHP_METHOD(RedisCluster, flushall)
+/* {{{ proto ValkeyGlideCluster::flushall(string key, [bool async])
+ *     proto ValkeyGlideCluster::flushall(array host_port, [bool async]) */
+PHP_METHOD(ValkeyGlideCluster, flushall)
 {
     cluster_flush_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "FLUSHALL",
                       TYPE_LINE, cluster_bool_resp);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::dbsize(string key)
- *     proto RedisCluster::dbsize(array host_port) */
-PHP_METHOD(RedisCluster, dbsize)
+/* {{{ proto ValkeyGlideCluster::dbsize(string key)
+ *     proto ValkeyGlideCluster::dbsize(array host_port) */
+PHP_METHOD(ValkeyGlideCluster, dbsize)
 {
     cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "DBSIZE",
                            TYPE_INT, cluster_long_resp);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::bgrewriteaof(string key)
- *     proto RedisCluster::bgrewriteaof(array host_port) */
-PHP_METHOD(RedisCluster, bgrewriteaof)
+/* {{{ proto ValkeyGlideCluster::bgrewriteaof(string key)
+ *     proto ValkeyGlideCluster::bgrewriteaof(array host_port) */
+PHP_METHOD(ValkeyGlideCluster, bgrewriteaof)
 {
     cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "BGREWRITEAOF",
                            TYPE_LINE, cluster_bool_resp);
 }
 /* }}} */
 
-/* {{{ proto RedisCluster::lastsave(string key)
- *     proto RedisCluster::lastsave(array $host_port) */
-PHP_METHOD(RedisCluster, lastsave)
+/* {{{ proto ValkeyGlideCluster::lastsave(string key)
+ *     proto ValkeyGlideCluster::lastsave(array $host_port) */
+PHP_METHOD(ValkeyGlideCluster, lastsave)
 {
     cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "LASTSAVE",
                            TYPE_INT, cluster_long_resp);
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::info(string key, [string $arg])
- *     proto array RedisCluster::info(array host_port, [string $arg]) */
-PHP_METHOD(RedisCluster, info)
+/* {{{ proto array ValkeyGlideCluster::info(string key, [string $arg])
+ *     proto array ValkeyGlideCluster::info(array host_port, [string $arg]) */
+PHP_METHOD(ValkeyGlideCluster, info)
 {
     redisCluster *c = GET_CONTEXT();
     zval *node = NULL, *args = NULL;
@@ -2829,12 +2829,12 @@ PHP_METHOD(RedisCluster, info)
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::client('list')
- *     proto bool RedisCluster::client('kill', $ipport)
- *     proto bool RedisCluster::client('setname', $name)
- *     proto string RedisCluster::client('getname')
+/* {{{ proto array ValkeyGlideCluster::client('list')
+ *     proto bool ValkeyGlideCluster::client('kill', $ipport)
+ *     proto bool ValkeyGlideCluster::client('setname', $name)
+ *     proto string ValkeyGlideCluster::client('getname')
  */
-PHP_METHOD(RedisCluster, client)
+PHP_METHOD(ValkeyGlideCluster, client)
 {
     redisCluster *c = GET_CONTEXT();
     char *cmd, *opt = NULL, *arg = NULL;
@@ -2920,8 +2920,8 @@ PHP_METHOD(RedisCluster, client)
     efree(cmd);
 }
 
-/* {{{ proto mixed RedisCluster::cluster(variant) */
-PHP_METHOD(RedisCluster, cluster)
+/* {{{ proto mixed ValkeyGlideCluster::cluster(variant) */
+PHP_METHOD(ValkeyGlideCluster, cluster)
 {
     cluster_raw_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "CLUSTER",
                     sizeof("CLUSTER") - 1);
@@ -2930,27 +2930,27 @@ PHP_METHOD(RedisCluster, cluster)
 
 /* }}} */
 
-/* {{{ proto mixed RedisCluster::config(string key, ...)
- *     proto mixed RedisCluster::config(array host_port, ...) */
-PHP_METHOD(RedisCluster, config)
+/* {{{ proto mixed ValkeyGlideCluster::config(string key, ...)
+ *     proto mixed ValkeyGlideCluster::config(array host_port, ...) */
+PHP_METHOD(ValkeyGlideCluster, config)
 {
     cluster_raw_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "CONFIG",
                     sizeof("CONFIG") - 1);
 }
 /* }}} */
 
-/* {{{ proto mixed RedisCluster::pubsub(string key, ...)
- *     proto mixed RedisCluster::pubsub(array host_port, ...) */
-PHP_METHOD(RedisCluster, pubsub)
+/* {{{ proto mixed ValkeyGlideCluster::pubsub(string key, ...)
+ *     proto mixed ValkeyGlideCluster::pubsub(array host_port, ...) */
+PHP_METHOD(ValkeyGlideCluster, pubsub)
 {
     cluster_raw_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "PUBSUB",
                     sizeof("PUBSUB") - 1);
 }
 /* }}} */
 
-/* {{{ proto mixed RedisCluster::script(string key, ...)
- *     proto mixed RedisCluster::script(array host_port, ...) */
-PHP_METHOD(RedisCluster, script)
+/* {{{ proto mixed ValkeyGlideCluster::script(string key, ...)
+ *     proto mixed ValkeyGlideCluster::script(array host_port, ...) */
+PHP_METHOD(ValkeyGlideCluster, script)
 {
     redisCluster *c = GET_CONTEXT();
     smart_string cmd = {0};
@@ -3003,100 +3003,100 @@ PHP_METHOD(RedisCluster, script)
 }
 /* }}} */
 
-/* {{{ proto mixed RedisCluster::slowlog(string key, ...)
- *     proto mixed RedisCluster::slowlog(array host_port, ...) */
-PHP_METHOD(RedisCluster, slowlog)
+/* {{{ proto mixed ValkeyGlideCluster::slowlog(string key, ...)
+ *     proto mixed ValkeyGlideCluster::slowlog(array host_port, ...) */
+PHP_METHOD(ValkeyGlideCluster, slowlog)
 {
     cluster_raw_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "SLOWLOG",
                     sizeof("SLOWLOG") - 1);
 }
 /* }}} */
 
-/* {{{ proto int RedisCluster::geoadd(string key, float long float lat string mem, ...) */
-PHP_METHOD(RedisCluster, geoadd)
+/* {{{ proto int ValkeyGlideCluster::geoadd(string key, float long float lat string mem, ...) */
+PHP_METHOD(ValkeyGlideCluster, geoadd)
 {
     CLUSTER_PROCESS_CMD(geoadd, cluster_long_resp, 0);
 }
 
-/* {{{ proto array RedisCluster::geohash(string key, string mem1, [string mem2...]) */
-PHP_METHOD(RedisCluster, geohash)
+/* {{{ proto array ValkeyGlideCluster::geohash(string key, string mem1, [string mem2...]) */
+PHP_METHOD(ValkeyGlideCluster, geohash)
 {
     CLUSTER_PROCESS_KW_CMD("GEOHASH", redis_key_varval_cmd, cluster_mbulk_raw_resp, 1);
 }
 
-/* {{{ proto array RedisCluster::geopos(string key, string mem1, [string mem2...]) */
-PHP_METHOD(RedisCluster, geopos)
+/* {{{ proto array ValkeyGlideCluster::geopos(string key, string mem1, [string mem2...]) */
+PHP_METHOD(ValkeyGlideCluster, geopos)
 {
     CLUSTER_PROCESS_KW_CMD("GEOPOS", redis_key_varval_cmd, cluster_variant_resp, 1);
 }
 
-/* {{{ proto array RedisCluster::geodist(string key, string mem1, string mem2 [string unit]) */
-PHP_METHOD(RedisCluster, geodist)
+/* {{{ proto array ValkeyGlideCluster::geodist(string key, string mem1, string mem2 [string unit]) */
+PHP_METHOD(ValkeyGlideCluster, geodist)
 {
     CLUSTER_PROCESS_CMD(geodist, cluster_dbl_resp, 1);
 }
 
-/* {{{ proto array RedisCluster::georadius() }}} */
-PHP_METHOD(RedisCluster, georadius)
+/* {{{ proto array ValkeyGlideCluster::georadius() }}} */
+PHP_METHOD(ValkeyGlideCluster, georadius)
 {
     CLUSTER_PROCESS_KW_CMD("GEORADIUS", redis_georadius_cmd, cluster_variant_resp, 1);
 }
 
-/* {{{ proto array RedisCluster::georadius() }}} */
-PHP_METHOD(RedisCluster, georadius_ro)
+/* {{{ proto array ValkeyGlideCluster::georadius() }}} */
+PHP_METHOD(ValkeyGlideCluster, georadius_ro)
 {
     CLUSTER_PROCESS_KW_CMD("GEORADIUS_RO", redis_georadius_cmd, cluster_variant_resp, 1);
 }
 
-/* {{{ proto array RedisCluster::georadiusbymember() }}} */
-PHP_METHOD(RedisCluster, georadiusbymember)
+/* {{{ proto array ValkeyGlideCluster::georadiusbymember() }}} */
+PHP_METHOD(ValkeyGlideCluster, georadiusbymember)
 {
     CLUSTER_PROCESS_KW_CMD("GEORADIUSBYMEMBER", redis_georadiusbymember_cmd, cluster_variant_resp, 1);
 }
 
-/* {{{ proto array RedisCluster::georadiusbymember() }}} */
-PHP_METHOD(RedisCluster, georadiusbymember_ro)
+/* {{{ proto array ValkeyGlideCluster::georadiusbymember() }}} */
+PHP_METHOD(ValkeyGlideCluster, georadiusbymember_ro)
 {
     CLUSTER_PROCESS_KW_CMD("GEORADIUSBYMEMBER_RO", redis_georadiusbymember_cmd, cluster_variant_resp, 1);
 }
 
-PHP_METHOD(RedisCluster, geosearch)
+PHP_METHOD(ValkeyGlideCluster, geosearch)
 {
     CLUSTER_PROCESS_CMD(geosearch, cluster_geosearch_resp, 1);
 }
 
-PHP_METHOD(RedisCluster, geosearchstore)
+PHP_METHOD(ValkeyGlideCluster, geosearchstore)
 {
     CLUSTER_PROCESS_CMD(geosearchstore, cluster_long_resp, 0);
 }
 
-/* {{{ proto array RedisCluster::role(string key)
- *     proto array RedisCluster::role(array host_port) */
-PHP_METHOD(RedisCluster, role)
+/* {{{ proto array ValkeyGlideCluster::role(string key)
+ *     proto array ValkeyGlideCluster::role(array host_port) */
+PHP_METHOD(ValkeyGlideCluster, role)
 {
     cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "ROLE",
                            TYPE_MULTIBULK, cluster_variant_resp);
 }
 
-/* {{{ proto array RedisCluster::time(string key)
- *     proto array RedisCluster::time(array host_port) */
-PHP_METHOD(RedisCluster, time)
+/* {{{ proto array ValkeyGlideCluster::time(string key)
+ *     proto array ValkeyGlideCluster::time(array host_port) */
+PHP_METHOD(ValkeyGlideCluster, time)
 {
     cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "TIME",
                            TYPE_MULTIBULK, cluster_variant_resp);
 }
 /* }}} */
 
-/* {{{ proto string RedisCluster::randomkey(string key)
- *     proto string RedisCluster::randomkey(array host_port) */
-PHP_METHOD(RedisCluster, randomkey)
+/* {{{ proto string ValkeyGlideCluster::randomkey(string key)
+ *     proto string ValkeyGlideCluster::randomkey(array host_port) */
+PHP_METHOD(ValkeyGlideCluster, randomkey)
 {
     cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "RANDOMKEY",
                            TYPE_BULK, cluster_bulk_resp);
 }
 /* }}} */
 
-PHP_METHOD(RedisCluster, waitaof)
+PHP_METHOD(ValkeyGlideCluster, waitaof)
 {
     zend_long numlocal, numreplicas, timeout;
     redisCluster *c = GET_CONTEXT();
@@ -3150,9 +3150,9 @@ PHP_METHOD(RedisCluster, waitaof)
     smart_string_free(&cmdstr);
 }
 
-/* {{{ proto bool RedisCluster::ping(string key| string msg)
- *     proto bool RedisCluster::ping(array host_port| string msg) */
-PHP_METHOD(RedisCluster, ping)
+/* {{{ proto bool ValkeyGlideCluster::ping(string key| string msg)
+ *     proto bool ValkeyGlideCluster::ping(array host_port| string msg) */
+PHP_METHOD(ValkeyGlideCluster, ping)
 {
     redisCluster *c = GET_CONTEXT();
     REDIS_REPLY_TYPE rtype;
@@ -3231,86 +3231,86 @@ PHP_METHOD(RedisCluster, ping)
 }
 /* }}} */
 
-/* {{{ proto long RedisCluster::xack(string key, string group, array ids) }}} */
-PHP_METHOD(RedisCluster, xack)
+/* {{{ proto long ValkeyGlideCluster::xack(string key, string group, array ids) }}} */
+PHP_METHOD(ValkeyGlideCluster, xack)
 {
     CLUSTER_PROCESS_CMD(xack, cluster_long_resp, 0);
 }
 
-/* {{{ proto string RedisCluster::xadd(string key, string id, array field_values) }}} */
-PHP_METHOD(RedisCluster, xadd)
+/* {{{ proto string ValkeyGlideCluster::xadd(string key, string id, array field_values) }}} */
+PHP_METHOD(ValkeyGlideCluster, xadd)
 {
     CLUSTER_PROCESS_CMD(xadd, cluster_bulk_raw_resp, 0);
 }
 
-/* {{{ proto array RedisCluster::xclaim(string key, string group, string consumer,
+/* {{{ proto array ValkeyGlideCluster::xclaim(string key, string group, string consumer,
  *                                      long min_idle_time, array ids, array options) */
-PHP_METHOD(RedisCluster, xclaim)
+PHP_METHOD(ValkeyGlideCluster, xclaim)
 {
     CLUSTER_PROCESS_CMD(xclaim, cluster_xclaim_resp, 0);
 }
 
-PHP_METHOD(RedisCluster, xautoclaim)
+PHP_METHOD(ValkeyGlideCluster, xautoclaim)
 {
     CLUSTER_PROCESS_CMD(xautoclaim, cluster_xclaim_resp, 0);
 }
 
-PHP_METHOD(RedisCluster, xdel)
+PHP_METHOD(ValkeyGlideCluster, xdel)
 {
     CLUSTER_PROCESS_KW_CMD("XDEL", redis_key_str_arr_cmd, cluster_long_resp, 0);
 }
 
-/* {{{ proto variant RedisCluster::xgroup(string op, [string key, string arg1, string arg2]) }}} */
-PHP_METHOD(RedisCluster, xgroup)
+/* {{{ proto variant ValkeyGlideCluster::xgroup(string op, [string key, string arg1, string arg2]) }}} */
+PHP_METHOD(ValkeyGlideCluster, xgroup)
 {
     CLUSTER_PROCESS_CMD(xgroup, cluster_variant_resp, 0);
 }
 
-/* {{{ proto variant RedisCluster::xinfo(string op, [string arg1, string arg2]); */
-PHP_METHOD(RedisCluster, xinfo)
+/* {{{ proto variant ValkeyGlideCluster::xinfo(string op, [string arg1, string arg2]); */
+PHP_METHOD(ValkeyGlideCluster, xinfo)
 {
     CLUSTER_PROCESS_CMD(xinfo, cluster_xinfo_resp, 0);
 }
 
-/* {{{ proto string RedisCluster::xlen(string key) }}} */
-PHP_METHOD(RedisCluster, xlen)
+/* {{{ proto string ValkeyGlideCluster::xlen(string key) }}} */
+PHP_METHOD(ValkeyGlideCluster, xlen)
 {
     CLUSTER_PROCESS_KW_CMD("XLEN", redis_key_cmd, cluster_long_resp, 1);
 }
 
-PHP_METHOD(RedisCluster, xpending)
+PHP_METHOD(ValkeyGlideCluster, xpending)
 {
     CLUSTER_PROCESS_CMD(xpending, cluster_variant_resp_strings, 1);
 }
 
-PHP_METHOD(RedisCluster, xrange)
+PHP_METHOD(ValkeyGlideCluster, xrange)
 {
     CLUSTER_PROCESS_KW_CMD("XRANGE", redis_xrange_cmd, cluster_xrange_resp, 1);
 }
 
-PHP_METHOD(RedisCluster, xrevrange)
+PHP_METHOD(ValkeyGlideCluster, xrevrange)
 {
     CLUSTER_PROCESS_KW_CMD("XREVRANGE", redis_xrange_cmd, cluster_xrange_resp, 1);
 }
 
-PHP_METHOD(RedisCluster, xread)
+PHP_METHOD(ValkeyGlideCluster, xread)
 {
     CLUSTER_PROCESS_CMD(xread, cluster_xread_resp, 1);
 }
 
-PHP_METHOD(RedisCluster, xreadgroup)
+PHP_METHOD(ValkeyGlideCluster, xreadgroup)
 {
     CLUSTER_PROCESS_CMD(xreadgroup, cluster_xread_resp, 0);
 }
 
-PHP_METHOD(RedisCluster, xtrim)
+PHP_METHOD(ValkeyGlideCluster, xtrim)
 {
     CLUSTER_PROCESS_CMD(xtrim, cluster_long_resp, 0);
 }
 
-/* {{{ proto string RedisCluster::echo(string key, string msg)
- *     proto string RedisCluster::echo(array host_port, string msg) */
-PHP_METHOD(RedisCluster, echo)
+/* {{{ proto string ValkeyGlideCluster::echo(string key, string msg)
+ *     proto string ValkeyGlideCluster::echo(array host_port, string msg) */
+PHP_METHOD(ValkeyGlideCluster, echo)
 {
     redisCluster *c = GET_CONTEXT();
     REDIS_REPLY_TYPE rtype;
@@ -3363,9 +3363,9 @@ PHP_METHOD(RedisCluster, echo)
 }
 /* }}} */
 
-/* {{{ proto mixed RedisCluster::rawcommand(string $key, string $cmd, [ $argv1 .. $argvN])
- *     proto mixed RedisCluster::rawcommand(array $host_port, string $cmd, [ $argv1 .. $argvN]) */
-PHP_METHOD(RedisCluster, rawcommand)
+/* {{{ proto mixed ValkeyGlideCluster::rawcommand(string $key, string $cmd, [ $argv1 .. $argvN])
+ *     proto mixed ValkeyGlideCluster::rawcommand(array $host_port, string $cmd, [ $argv1 .. $argvN]) */
+PHP_METHOD(ValkeyGlideCluster, rawcommand)
 {
     REDIS_REPLY_TYPE rtype;
     int argc = ZEND_NUM_ARGS(), cmd_len;
@@ -3425,15 +3425,15 @@ PHP_METHOD(RedisCluster, rawcommand)
 }
 /* }}} */
 
-/* {{{ proto array RedisCluster::command()
- *     proto array RedisCluster::command('INFO', string cmd)
- *     proto array RedisCluster::command('GETKEYS', array cmd_args) */
-PHP_METHOD(RedisCluster, command)
+/* {{{ proto array ValkeyGlideCluster::command()
+ *     proto array ValkeyGlideCluster::command('INFO', string cmd)
+ *     proto array ValkeyGlideCluster::command('GETKEYS', array cmd_args) */
+PHP_METHOD(ValkeyGlideCluster, command)
 {
     CLUSTER_PROCESS_CMD(command, cluster_variant_resp, 0);
 }
 
-PHP_METHOD(RedisCluster, copy)
+PHP_METHOD(ValkeyGlideCluster, copy)
 {
     CLUSTER_PROCESS_CMD(copy, cluster_1_resp, 0)
 }

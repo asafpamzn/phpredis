@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | Redis Glide FFI integration for phpredis                             |
+  | ValkeyGlide Glide FFI integration for phpredis                             |
   +----------------------------------------------------------------------+
   | Copyright (c) 2023-2025 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -256,7 +256,7 @@ int execute_bitcount_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -303,7 +303,7 @@ int execute_bitop_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -358,7 +358,7 @@ int execute_bitpos_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -414,7 +414,7 @@ int execute_set_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -595,7 +595,7 @@ int execute_setex_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -633,7 +633,7 @@ int execute_psetex_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -680,7 +680,7 @@ int execute_setnx_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -743,7 +743,7 @@ int execute_echo_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -797,7 +797,7 @@ int execute_ping_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -907,7 +907,7 @@ int execute_info_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1098,7 +1098,7 @@ int execute_get_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1151,7 +1151,7 @@ int execute_randomkey_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1205,7 +1205,7 @@ int execute_getbit_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1251,7 +1251,7 @@ int execute_setbit_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1405,7 +1405,7 @@ int execute_strlen_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1445,7 +1445,7 @@ int execute_setrange_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1535,7 +1535,7 @@ int execute_ttl_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1586,7 +1586,7 @@ int execute_pttl_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1626,7 +1626,7 @@ int execute_getset_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1700,7 +1700,7 @@ int execute_lcs_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {

@@ -6,7 +6,7 @@
  * @generate-class-entries
  */
 
-class RedisCluster {
+class ValkeyGlideCluster {
     /**
      *
      * @var int
@@ -50,37 +50,37 @@ class RedisCluster {
     public function __construct(string|null $name, ?array $seeds = null, int|float $timeout = 0, int|float $read_timeout = 0, bool $persistent = false, #[\SensitiveParameter] mixed $auth = null, ?array $context = null);
 
     /**
-     * @see Redis::_compress()
+     * @see ValkeyGlide::_compress()
      */
     public function _compress(string $value): string;
 
     /**
-     * @see Redis::_uncompress()
+     * @see ValkeyGlide::_uncompress()
      */
     public function _uncompress(string $value): string;
 
     /**
-     * @see Redis::_serialize()
+     * @see ValkeyGlide::_serialize()
      */
     public function _serialize(mixed $value): bool|string;
 
     /**
-     * @see Redis::_unserialize()
+     * @see ValkeyGlide::_unserialize()
      */
     public function _unserialize(string $value): mixed;
 
     /**
-     * @see Redis::_pack()
+     * @see ValkeyGlide::_pack()
      */
     public function _pack(mixed $value): string;
 
     /**
-     * @see Redis::_unpack()
+     * @see ValkeyGlide::_unpack()
      */
     public function _unpack(string $value): mixed;
 
     /**
-     * @see Redis::_prefix()
+     * @see ValkeyGlide::_prefix()
      */
     public function _prefix(string $key): bool|string;
 
@@ -89,37 +89,37 @@ class RedisCluster {
     public function _redir(): string|null;
 
     /**
-     * @see Redis::acl
+     * @see ValkeyGlide::acl
      */
     public function acl(string|array $key_or_address, string $subcmd, string ...$args): mixed;
 
     /**
-     * @see Redis::append()
+     * @see ValkeyGlide::append()
      */
-    public function append(string $key, mixed $value): RedisCluster|bool|int;
+    public function append(string $key, mixed $value): ValkeyGlideCluster|bool|int;
 
     /**
-     * @see Redis::bgrewriteaof
+     * @see ValkeyGlide::bgrewriteaof
      */
-    public function bgrewriteaof(string|array $key_or_address): RedisCluster|bool;
+    public function bgrewriteaof(string|array $key_or_address): ValkeyGlideCluster|bool;
 
     public function waitaof(string|array $key_or_address, int $numlocal,
-                            int $numreplicas, int $timeout): RedisCluster|array|false;
+                            int $numreplicas, int $timeout): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::bgsave
+     * @see ValkeyGlide::bgsave
      */
-    public function bgsave(string|array $key_or_address): RedisCluster|bool;
+    public function bgsave(string|array $key_or_address): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::bitcount
+     * @see ValkeyGlide::bitcount
      */
-    public function bitcount(string $key, int $start = 0, int $end = -1, bool $bybit = false): RedisCluster|bool|int;
+    public function bitcount(string $key, int $start = 0, int $end = -1, bool $bybit = false): ValkeyGlideCluster|bool|int;
 
     /**
-     * @see Redis::bitop
+     * @see ValkeyGlide::bitop
      */
-    public function bitop(string $operation, string $deskey, string $srckey, string ...$otherkeys): RedisCluster|bool|int;
+    public function bitop(string $operation, string $deskey, string $srckey, string ...$otherkeys): ValkeyGlideCluster|bool|int;
 
     /**
      * Return the position of the first bit set to 0 or 1 in a string.
@@ -130,430 +130,430 @@ class RedisCluster {
      * @param bool   $bit   Whether to look for an unset (0) or set (1) bit.
      * @param int    $start Where in the string to start looking.
      * @param int    $end   Where in the string to stop looking.
-     * @param bool   $bybit If true, Redis will treat $start and $end as BIT values and not bytes, so if start
-     *                      was 0 and end was 2, Redis would only search the first two bits.
+     * @param bool   $bybit If true, ValkeyGlide will treat $start and $end as BIT values and not bytes, so if start
+     *                      was 0 and end was 2, ValkeyGlide would only search the first two bits.
      */
-    public function bitpos(string $key, bool $bit, int $start = 0, int $end = -1, bool $bybit = false): RedisCluster|int|false;
+    public function bitpos(string $key, bool $bit, int $start = 0, int $end = -1, bool $bybit = false): ValkeyGlideCluster|int|false;
 
     /**
-     * See Redis::blpop()
+     * See ValkeyGlide::blpop()
      */
-    public function blpop(string|array $key, string|float|int $timeout_or_key, mixed ...$extra_args): RedisCluster|array|null|false;
+    public function blpop(string|array $key, string|float|int $timeout_or_key, mixed ...$extra_args): ValkeyGlideCluster|array|null|false;
 
     /**
-     * See Redis::brpop()
+     * See ValkeyGlide::brpop()
      */
-    public function brpop(string|array $key, string|float|int $timeout_or_key, mixed ...$extra_args): RedisCluster|array|null|false;
+    public function brpop(string|array $key, string|float|int $timeout_or_key, mixed ...$extra_args): ValkeyGlideCluster|array|null|false;
 
     /**
-     * See Redis::brpoplpush()
+     * See ValkeyGlide::brpoplpush()
      */
     public function brpoplpush(string $srckey, string $deskey, int $timeout): mixed;
 
     /**
      * Move an element from one list into another.
      *
-     * @see Redis::lmove
+     * @see ValkeyGlide::lmove
      */
-    public function lmove(string $src, string $dst, string $wherefrom, string $whereto): Redis|string|false;
+    public function lmove(string $src, string $dst, string $wherefrom, string $whereto): ValkeyGlide|string|false;
 
     /**
      * Move an element from one list to another, blocking up to a timeout until an element is available.
      *
-     * @see Redis::blmove
+     * @see ValkeyGlide::blmove
      *
      */
-    public function blmove(string $src, string $dst, string $wherefrom, string $whereto, float $timeout): Redis|string|false;
+    public function blmove(string $src, string $dst, string $wherefrom, string $whereto, float $timeout): ValkeyGlide|string|false;
 
     /**
-     * @see Redis::bzpopmax
+     * @see ValkeyGlide::bzpopmax
      */
     public function bzpopmax(string|array $key, string|int $timeout_or_key, mixed ...$extra_args): array;
 
     /**
-     * @see Redis::bzpopmin
+     * @see ValkeyGlide::bzpopmin
      */
     public function bzpopmin(string|array $key, string|int $timeout_or_key, mixed ...$extra_args): array;
 
     /**
-     * @see Redis::bzmpop
+     * @see ValkeyGlide::bzmpop
      */
-    public function bzmpop(float $timeout, array $keys, string $from, int $count = 1): RedisCluster|array|null|false;
+    public function bzmpop(float $timeout, array $keys, string $from, int $count = 1): ValkeyGlideCluster|array|null|false;
 
     /**
-     * @see Redis::zmpop
+     * @see ValkeyGlide::zmpop
      */
-    public function zmpop(array $keys, string $from, int $count = 1): RedisCluster|array|null|false;
+    public function zmpop(array $keys, string $from, int $count = 1): ValkeyGlideCluster|array|null|false;
 
     /**
-     * @see Redis::blmpop()
+     * @see ValkeyGlide::blmpop()
      */
-    public function blmpop(float $timeout, array $keys, string $from, int $count = 1): RedisCluster|array|null|false;
+    public function blmpop(float $timeout, array $keys, string $from, int $count = 1): ValkeyGlideCluster|array|null|false;
 
     /**
-     * @see Redis::lmpop()
+     * @see ValkeyGlide::lmpop()
      */
-    public function lmpop(array $keys, string $from, int $count = 1): RedisCluster|array|null|false;
+    public function lmpop(array $keys, string $from, int $count = 1): ValkeyGlideCluster|array|null|false;
 
     /**
-     * @see Redis::clearlasterror()
+     * @see ValkeyGlide::clearlasterror()
      */
     public function clearlasterror(): bool;
 
     /**
-     * @see Redis::client
+     * @see ValkeyGlide::client
      */
     public function client(string|array $key_or_address, string $subcommand, ?string $arg = null): array|string|bool;
 
     /**
-     * @see Redis::close
+     * @see ValkeyGlide::close
      */
     public function close(): bool;
 
     /**
-     * @see Redis::cluster
+     * @see ValkeyGlide::cluster
      */
     public function cluster(string|array $key_or_address, string $command, mixed ...$extra_args): mixed;
 
     /**
-     * @see Redis::command
+     * @see ValkeyGlide::command
      */
     public function command(mixed ...$extra_args): mixed;
 
     /**
-     * @see Redis::config()
+     * @see ValkeyGlide::config()
      */
     public function config(string|array $key_or_address, string $subcommand, mixed ...$extra_args): mixed;
 
     /**
-     * @see Redis::dbsize()
+     * @see ValkeyGlide::dbsize()
      */
-    public function dbsize(string|array $key_or_address): RedisCluster|int;
+    public function dbsize(string|array $key_or_address): ValkeyGlideCluster|int;
 
     /**
      * @see https://redis.io/commands/copy
      */
-    public function copy(string $src, string $dst, ?array $options = null): RedisCluster|bool;
+    public function copy(string $src, string $dst, ?array $options = null): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::decr()
+     * @see ValkeyGlide::decr()
      */
-    public function decr(string $key, int $by = 1): RedisCluster|int|false;
+    public function decr(string $key, int $by = 1): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::decrby()
+     * @see ValkeyGlide::decrby()
      */
-    public function decrby(string $key, int $value): RedisCluster|int|false;
+    public function decrby(string $key, int $value): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::decrbyfloat
+     * @see ValkeyGlide::decrbyfloat
      */
     public function decrbyfloat(string $key, float $value): float;
 
     /**
-     * @see Redis::del()
+     * @see ValkeyGlide::del()
      */
-    public function del(array|string $key, string ...$other_keys): RedisCluster|int|false;
+    public function del(array|string $key, string ...$other_keys): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::discard
+     * @see ValkeyGlide::discard
      */
     public function discard(): bool;
 
     /**
-     * @see Redis::dump
+     * @see ValkeyGlide::dump
      */
-    public function dump(string $key): RedisCluster|string|false;
+    public function dump(string $key): ValkeyGlideCluster|string|false;
 
     /**
-     * @see Redis::echo()
+     * @see ValkeyGlide::echo()
      */
-    public function echo(string|array $key_or_address, string $msg): RedisCluster|string|false;
+    public function echo(string|array $key_or_address, string $msg): ValkeyGlideCluster|string|false;
 
     /**
-     * @see Redis::eval
+     * @see ValkeyGlide::eval
      */
     public function eval(string $script, array $args = [], int $num_keys = 0): mixed;
 
     /**
-     * @see Redis::eval_ro
+     * @see ValkeyGlide::eval_ro
      */
     public function eval_ro(string $script, array $args = [], int $num_keys = 0): mixed;
 
     /**
-     * @see Redis::evalsha
+     * @see ValkeyGlide::evalsha
      */
     public function evalsha(string $script_sha, array $args = [], int $num_keys = 0): mixed;
 
     /**
-     * @see Redis::evalsha_ro
+     * @see ValkeyGlide::evalsha_ro
      */
     public function evalsha_ro(string $script_sha, array $args = [], int $num_keys = 0): mixed;
 
     /**
-     * @see Redis::exec()
+     * @see ValkeyGlide::exec()
      */
     public function exec(): array|false;
 
     /**
-     * @see Redis::exists
+     * @see ValkeyGlide::exists
      */
-    public function exists(mixed $key, mixed ...$other_keys): RedisCluster|int|bool;
+    public function exists(mixed $key, mixed ...$other_keys): ValkeyGlideCluster|int|bool;
 
     /**
-     * @see Redis::touch()
+     * @see ValkeyGlide::touch()
      */
-    public function touch(mixed $key, mixed ...$other_keys): RedisCluster|int|bool;
+    public function touch(mixed $key, mixed ...$other_keys): ValkeyGlideCluster|int|bool;
 
     /**
-     * @see Redis::expire
+     * @see ValkeyGlide::expire
      */
-    public function expire(string $key, int $timeout, ?string $mode = null): RedisCluster|bool;
+    public function expire(string $key, int $timeout, ?string $mode = null): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::expireat
+     * @see ValkeyGlide::expireat
      */
-    public function expireat(string $key, int $timestamp, ?string $mode = null): RedisCluster|bool;
+    public function expireat(string $key, int $timestamp, ?string $mode = null): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::expiretime()
+     * @see ValkeyGlide::expiretime()
      */
-    public function expiretime(string $key): RedisCluster|int|false;
+    public function expiretime(string $key): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::pexpiretime()
+     * @see ValkeyGlide::pexpiretime()
      */
-    public function pexpiretime(string $key): RedisCluster|int|false;
+    public function pexpiretime(string $key): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::flushall
+     * @see ValkeyGlide::flushall
      */
-    public function flushall(string|array $key_or_address, bool $async = false): RedisCluster|bool;
+    public function flushall(string|array $key_or_address, bool $async = false): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::flushdb
+     * @see ValkeyGlide::flushdb
      */
-    public function flushdb(string|array $key_or_address, bool $async = false): RedisCluster|bool;
+    public function flushdb(string|array $key_or_address, bool $async = false): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::geoadd
+     * @see ValkeyGlide::geoadd
      */
-    public function geoadd(string $key, float $lng, float $lat, string $member, mixed ...$other_triples_and_options): RedisCluster|int|false;
+    public function geoadd(string $key, float $lng, float $lat, string $member, mixed ...$other_triples_and_options): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::geodist
+     * @see ValkeyGlide::geodist
      */
-    public function geodist(string $key, string $src, string $dest, ?string $unit = null): RedisCluster|float|false;
+    public function geodist(string $key, string $src, string $dest, ?string $unit = null): ValkeyGlideCluster|float|false;
 
     /**
-     * @see Redis::geohash
+     * @see ValkeyGlide::geohash
      */
-    public function geohash(string $key, string $member, string ...$other_members): RedisCluster|array|false;
+    public function geohash(string $key, string $member, string ...$other_members): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::geopos
+     * @see ValkeyGlide::geopos
      */
-    public function geopos(string $key, string $member, string ...$other_members): RedisCluster|array|false;
+    public function geopos(string $key, string $member, string ...$other_members): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::georadius
+     * @see ValkeyGlide::georadius
      */
     public function georadius(string $key, float $lng, float $lat, float $radius, string $unit, array $options = []): mixed;
 
     /**
-     * @see Redis::georadius_ro
+     * @see ValkeyGlide::georadius_ro
      */
     public function georadius_ro(string $key, float $lng, float $lat, float $radius, string $unit, array $options = []): mixed;
 
     /**
-     * @see Redis::georadiusbymember
+     * @see ValkeyGlide::georadiusbymember
      */
     public function georadiusbymember(string $key, string $member, float $radius, string $unit, array $options = []): mixed;
 
     /**
-     * @see Redis::georadiusbymember_ro
+     * @see ValkeyGlide::georadiusbymember_ro
      */
     public function georadiusbymember_ro(string $key, string $member, float $radius, string $unit, array $options = []): mixed;
 
     /**
      * @see https://redis.io/commands/geosearch
      */
-    public function geosearch(string $key, array|string $position, array|int|float $shape, string $unit, array $options = []): RedisCluster|array;
+    public function geosearch(string $key, array|string $position, array|int|float $shape, string $unit, array $options = []): ValkeyGlideCluster|array;
 
     /**
      * @see https://redis.io/commands/geosearchstore
      */
-    public function geosearchstore(string $dst, string $src, array|string $position, array|int|float $shape, string $unit, array $options = []): RedisCluster|array|int|false;
+    public function geosearchstore(string $dst, string $src, array|string $position, array|int|float $shape, string $unit, array $options = []): ValkeyGlideCluster|array|int|false;
 
     /**
-     * @see Redis::get
+     * @see ValkeyGlide::get
      */
     public function get(string $key): mixed;
 
     /**
-     * @see Redis::getdel
+     * @see ValkeyGlide::getdel
      */
     public function getdel(string $key): mixed;
 
     /**
-     * @see Redis::getWithMeta
+     * @see ValkeyGlide::getWithMeta
      */
-    public function getWithMeta(string $key): RedisCluster|array|false;
+    public function getWithMeta(string $key): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::getEx
+     * @see ValkeyGlide::getEx
      */
-    public function getex(string $key, array $options = []): RedisCluster|string|false;
+    public function getex(string $key, array $options = []): ValkeyGlideCluster|string|false;
 
     /**
-     * @see Redis::getbit
+     * @see ValkeyGlide::getbit
      */
-    public function getbit(string $key, int $value): RedisCluster|int|false;
+    public function getbit(string $key, int $value): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::getlasterror
+     * @see ValkeyGlide::getlasterror
      */
     public function getlasterror(): string|null;
 
     /**
-     * @see Redis::getmode
+     * @see ValkeyGlide::getmode
      */
     public function getmode(): int;
 
     /**
-     * @see Redis::getoption
+     * @see ValkeyGlide::getoption
      */
     public function getoption(int $option): mixed;
 
     /**
-     * @see Redis::getrange
+     * @see ValkeyGlide::getrange
      */
-    public function getrange(string $key, int $start, int $end): RedisCluster|string|false;
+    public function getrange(string $key, int $start, int $end): ValkeyGlideCluster|string|false;
 
     /**
-     * @see Redis::lcs
+     * @see ValkeyGlide::lcs
      */
-    public function lcs(string $key1, string $key2, ?array $options = null): RedisCluster|string|array|int|false;
+    public function lcs(string $key1, string $key2, ?array $options = null): ValkeyGlideCluster|string|array|int|false;
 
     /**
-     * @see Redis::getset
+     * @see ValkeyGlide::getset
      */
-    public function getset(string $key, mixed $value): RedisCluster|string|bool;
+    public function getset(string $key, mixed $value): ValkeyGlideCluster|string|bool;
 
     /**
-     * @see Redis::gettransferredbytes
+     * @see ValkeyGlide::gettransferredbytes
      */
     public function gettransferredbytes(): array|false;
 
     /**
-     * @see Redis::cleartransferredbytes
+     * @see ValkeyGlide::cleartransferredbytes
      */
     public function cleartransferredbytes(): void;
 
     /**
-     * @see Redis::hdel
+     * @see ValkeyGlide::hdel
      */
-    public function hdel(string $key, string $member, string ...$other_members): RedisCluster|int|false;
+    public function hdel(string $key, string $member, string ...$other_members): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::hexists
+     * @see ValkeyGlide::hexists
      */
-    public function hexists(string $key, string $member): RedisCluster|bool;
+    public function hexists(string $key, string $member): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::hget
+     * @see ValkeyGlide::hget
      */
     public function hget(string $key, string $member): mixed;
 
     /**
-     * @see Redis::hgetall
+     * @see ValkeyGlide::hgetall
      */
-    public function hgetall(string $key): RedisCluster|array|false;
+    public function hgetall(string $key): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::hincrby
+     * @see ValkeyGlide::hincrby
      */
-    public function hincrby(string $key, string $member, int $value): RedisCluster|int|false;
+    public function hincrby(string $key, string $member, int $value): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::hincrbyfloat
+     * @see ValkeyGlide::hincrbyfloat
      */
-    public function hincrbyfloat(string $key, string $member, float $value): RedisCluster|float|false;
+    public function hincrbyfloat(string $key, string $member, float $value): ValkeyGlideCluster|float|false;
 
     /**
-     * @see Redis::hkeys
+     * @see ValkeyGlide::hkeys
      */
-    public function hkeys(string $key): RedisCluster|array|false;
+    public function hkeys(string $key): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::hlen
+     * @see ValkeyGlide::hlen
      */
-    public function hlen(string $key): RedisCluster|int|false;
+    public function hlen(string $key): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::hmget
+     * @see ValkeyGlide::hmget
      */
-    public function hmget(string $key, array $keys): RedisCluster|array|false;
+    public function hmget(string $key, array $keys): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::hmset
+     * @see ValkeyGlide::hmset
      */
-    public function hmset(string $key, array $key_values): RedisCluster|bool;
+    public function hmset(string $key, array $key_values): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::hscan
+     * @see ValkeyGlide::hscan
      */
     public function hscan(string $key, null|int|string &$iterator, ?string $pattern = null, int $count = 0): array|bool;
 
     /**
-     * @see Redis::expiremember
+     * @see ValkeyGlide::expiremember
      */
-    public function expiremember(string $key, string $field, int $ttl, ?string $unit = null): Redis|int|false;
+    public function expiremember(string $key, string $field, int $ttl, ?string $unit = null): ValkeyGlide|int|false;
 
     /**
-     * @see Redis::expirememberat
+     * @see ValkeyGlide::expirememberat
      */
-    public function expirememberat(string $key, string $field, int $timestamp): Redis|int|false;
+    public function expirememberat(string $key, string $field, int $timestamp): ValkeyGlide|int|false;
 
     /**
      * @see https://redis.io/commands/hrandfield
      */
-    public function hrandfield(string $key, ?array $options = null): RedisCluster|string|array;
+    public function hrandfield(string $key, ?array $options = null): ValkeyGlideCluster|string|array;
 
     /**
-     * @see Redis::hset
+     * @see ValkeyGlide::hset
      */
-    public function hset(string $key, string $member, mixed $value): RedisCluster|int|false;
+    public function hset(string $key, string $member, mixed $value): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::hsetnx
+     * @see ValkeyGlide::hsetnx
      */
-    public function hsetnx(string $key, string $member, mixed $value): RedisCluster|bool;
+    public function hsetnx(string $key, string $member, mixed $value): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::hstrlen
+     * @see ValkeyGlide::hstrlen
      */
-    public function hstrlen(string $key, string $field): RedisCluster|int|false;
+    public function hstrlen(string $key, string $field): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::hvals
+     * @see ValkeyGlide::hvals
      */
-    public function hvals(string $key): RedisCluster|array|false;
+    public function hvals(string $key): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::incr
+     * @see ValkeyGlide::incr
      */
-    public function incr(string $key, int $by = 1): RedisCluster|int|false;
+    public function incr(string $key, int $by = 1): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::incrby
+     * @see ValkeyGlide::incrby
      */
-    public function incrby(string $key, int $value): RedisCluster|int|false;
+    public function incrby(string $key, int $value): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::incrbyfloat
+     * @see ValkeyGlide::incrbyfloat
      */
-    public function incrbyfloat(string $key, float $value): RedisCluster|float|false;
+    public function incrbyfloat(string $key, float $value): ValkeyGlideCluster|float|false;
 
     /**
      * Retrieve information about the connected redis-server.  If no arguments are passed to
@@ -561,151 +561,151 @@ class RedisCluster {
      * section you want returned (e.g. 'server', or 'memory') to receive only information pertaining
      * to that section.
      *
-     * If connected to Redis server >= 7.0.0 you may pass multiple optional sections.
+     * If connected to ValkeyGlide server >= 7.0.0 you may pass multiple optional sections.
      *
      * @see https://redis.io/commands/info/
      *
      * @param string|array $key_or_address Either a key name or array with host and port indicating
      *                                     which cluster node we want to send the command to.
-     * @param string       $sections       Optional section(s) you wish Redis server to return.
+     * @param string       $sections       Optional section(s) you wish ValkeyGlide server to return.
      *
-     * @return RedisCluster|array|false
+     * @return ValkeyGlideCluster|array|false
      */
-    public function info(string|array $key_or_address, string ...$sections): RedisCluster|array|false;
+    public function info(string|array $key_or_address, string ...$sections): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::keys
+     * @see ValkeyGlide::keys
      */
-    public function keys(string $pattern): RedisCluster|array|false;
+    public function keys(string $pattern): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::lastsave
+     * @see ValkeyGlide::lastsave
      */
-    public function lastsave(string|array $key_or_address): RedisCluster|int|false;
+    public function lastsave(string|array $key_or_address): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::lget
+     * @see ValkeyGlide::lget
      */
-    public function lget(string $key, int $index): RedisCluster|string|bool;
+    public function lget(string $key, int $index): ValkeyGlideCluster|string|bool;
 
     /**
-     * @see Redis::lindex
+     * @see ValkeyGlide::lindex
      */
     public function lindex(string $key, int $index): mixed;
 
     /**
-     * @see Redis::linsert
+     * @see ValkeyGlide::linsert
      */
-    public function linsert(string $key, string $pos, mixed $pivot, mixed $value): RedisCluster|int|false;
+    public function linsert(string $key, string $pos, mixed $pivot, mixed $value): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::llen
+     * @see ValkeyGlide::llen
      */
-    public function llen(string $key): RedisCluster|int|bool;
+    public function llen(string $key): ValkeyGlideCluster|int|bool;
 
     /**
-     * @see Redis::lpop
+     * @see ValkeyGlide::lpop
      */
-    public function lpop(string $key, int $count = 0): RedisCluster|bool|string|array;
+    public function lpop(string $key, int $count = 0): ValkeyGlideCluster|bool|string|array;
 
     /**
-     * @see Redis::lpos
+     * @see ValkeyGlide::lpos
      */
-    public function lpos(string $key, mixed $value, ?array $options = null): Redis|null|bool|int|array;
+    public function lpos(string $key, mixed $value, ?array $options = null): ValkeyGlide|null|bool|int|array;
 
     /**
-     * @see Redis::lpush
+     * @see ValkeyGlide::lpush
      */
-    public function lpush(string $key, mixed $value, mixed ...$other_values): RedisCluster|int|bool;
+    public function lpush(string $key, mixed $value, mixed ...$other_values): ValkeyGlideCluster|int|bool;
 
     /**
-     * @see Redis::lpushx
+     * @see ValkeyGlide::lpushx
      */
-    public function lpushx(string $key, mixed $value): RedisCluster|int|bool;
+    public function lpushx(string $key, mixed $value): ValkeyGlideCluster|int|bool;
 
     /**
-     * @see Redis::lrange
+     * @see ValkeyGlide::lrange
      */
-    public function lrange(string $key, int $start, int $end): RedisCluster|array|false;
+    public function lrange(string $key, int $start, int $end): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::lrem
+     * @see ValkeyGlide::lrem
      */
-    public function lrem(string $key, mixed $value, int $count = 0): RedisCluster|int|bool;
+    public function lrem(string $key, mixed $value, int $count = 0): ValkeyGlideCluster|int|bool;
 
     /**
-     * @see Redis::lset
+     * @see ValkeyGlide::lset
      */
-    public function lset(string $key, int $index, mixed $value): RedisCluster|bool;
+    public function lset(string $key, int $index, mixed $value): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::ltrim
+     * @see ValkeyGlide::ltrim
      */
-    public function ltrim(string $key, int $start, int $end): RedisCluster|bool;
+    public function ltrim(string $key, int $start, int $end): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::mget
+     * @see ValkeyGlide::mget
      */
-    public function mget(array $keys): RedisCluster|array|false;
+    public function mget(array $keys): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::mset
+     * @see ValkeyGlide::mset
      */
-    public function mset(array $key_values): RedisCluster|bool;
+    public function mset(array $key_values): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::msetnx
+     * @see ValkeyGlide::msetnx
      */
-    public function msetnx(array $key_values): RedisCluster|array|false;
+    public function msetnx(array $key_values): ValkeyGlideCluster|array|false;
 
-    /* We only support Redis::MULTI in RedisCluster but take the argument
-       so we can test MULTI..EXEC with RedisTest.php and in the event
+    /* We only support ValkeyGlide::MULTI in ValkeyGlideCluster but take the argument
+       so we can test MULTI..EXEC with ValkeyGlideTest.php and in the event
        we add pipeline support in the future. */
-    public function multi(int $value = Redis::MULTI): RedisCluster|bool;
+    public function multi(int $value = ValkeyGlide::MULTI): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::object
+     * @see ValkeyGlide::object
      */
-    public function object(string $subcommand, string $key): RedisCluster|int|string|false;
+    public function object(string $subcommand, string $key): ValkeyGlideCluster|int|string|false;
 
     /**
-     * @see Redis::persist
+     * @see ValkeyGlide::persist
      */
-    public function persist(string $key): RedisCluster|bool;
+    public function persist(string $key): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::pexpire
+     * @see ValkeyGlide::pexpire
      */
-    public function pexpire(string $key, int $timeout, ?string $mode = null): RedisCluster|bool;
+    public function pexpire(string $key, int $timeout, ?string $mode = null): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::pexpireat
+     * @see ValkeyGlide::pexpireat
      */
-    public function pexpireat(string $key, int $timestamp, ?string $mode = null): RedisCluster|bool;
+    public function pexpireat(string $key, int $timestamp, ?string $mode = null): ValkeyGlideCluster|bool;
 
 
     /**
-     * @see Redis::pfadd()
+     * @see ValkeyGlide::pfadd()
      */
-    public function pfadd(string $key, array $elements): RedisCluster|bool;
+    public function pfadd(string $key, array $elements): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::pfcount()
+     * @see ValkeyGlide::pfcount()
      */
-    public function pfcount(string $key): RedisCluster|int|false;
+    public function pfcount(string $key): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::pfmerge()
+     * @see ValkeyGlide::pfmerge()
      */
-    public function pfmerge(string $key, array $keys): RedisCluster|bool;
+    public function pfmerge(string $key, array $keys): ValkeyGlideCluster|bool;
 
     /**
      * PING an instance in the redis cluster.
      *
-     * @see Redis::ping()
+     * @see ValkeyGlide::ping()
      *
      * @param string|array $key_or_address Either a key name or a two element array with host and
-     *                                     address, informing RedisCluster which node to ping.
+     *                                     address, informing ValkeyGlideCluster which node to ping.
      *
      * @param string       $message        An optional message to send.
      *
@@ -715,506 +715,506 @@ class RedisCluster {
     public function ping(string|array $key_or_address, ?string $message = null): mixed;
 
     /**
-     * @see Redis::psetex
+     * @see ValkeyGlide::psetex
      */
-    public function psetex(string $key, int $timeout, string $value): RedisCluster|bool;
+    public function psetex(string $key, int $timeout, string $value): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::psubscribe
+     * @see ValkeyGlide::psubscribe
      */
     public function psubscribe(array $patterns, callable $callback): void;
 
     /**
-     * @see Redis::pttl
+     * @see ValkeyGlide::pttl
      */
-    public function pttl(string $key): RedisCluster|int|false;
+    public function pttl(string $key): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::publish
+     * @see ValkeyGlide::publish
      */
-    public function publish(string $channel, string $message): RedisCluster|bool|int;
+    public function publish(string $channel, string $message): ValkeyGlideCluster|bool|int;
 
     /**
-     * @see Redis::pubsub
+     * @see ValkeyGlide::pubsub
      */
     public function pubsub(string|array $key_or_address, string ...$values): mixed;
 
     /**
-     * @see Redis::punsubscribe
+     * @see ValkeyGlide::punsubscribe
      */
     public function punsubscribe(string $pattern, string ...$other_patterns): bool|array;
 
     /**
-     * @see Redis::randomkey
+     * @see ValkeyGlide::randomkey
      */
-    public function randomkey(string|array $key_or_address): RedisCluster|bool|string;
+    public function randomkey(string|array $key_or_address): ValkeyGlideCluster|bool|string;
 
     /**
-     * @see Redis::rawcommand
+     * @see ValkeyGlide::rawcommand
      */
     public function rawcommand(string|array $key_or_address, string $command, mixed ...$args): mixed;
 
     /**
-     * @see Redis::rename
+     * @see ValkeyGlide::rename
      */
-    public function rename(string $key_src, string $key_dst): RedisCluster|bool;
+    public function rename(string $key_src, string $key_dst): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::renamenx
+     * @see ValkeyGlide::renamenx
      */
-    public function renamenx(string $key, string $newkey): RedisCluster|bool;
+    public function renamenx(string $key, string $newkey): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::restore
+     * @see ValkeyGlide::restore
      */
-    public function restore(string $key, int $timeout, string $value, ?array $options = null): RedisCluster|bool;
+    public function restore(string $key, int $timeout, string $value, ?array $options = null): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::role
+     * @see ValkeyGlide::role
      */
     public function role(string|array $key_or_address): mixed;
 
     /**
-     * @see Redis::rpop()
+     * @see ValkeyGlide::rpop()
      */
-    public function rpop(string $key, int $count = 0): RedisCluster|bool|string|array;
+    public function rpop(string $key, int $count = 0): ValkeyGlideCluster|bool|string|array;
 
     /**
-     * @see Redis::rpoplpush()
+     * @see ValkeyGlide::rpoplpush()
      */
-    public function rpoplpush(string $src, string $dst): RedisCluster|bool|string;
+    public function rpoplpush(string $src, string $dst): ValkeyGlideCluster|bool|string;
 
     /**
-     * @see Redis::rpush
+     * @see ValkeyGlide::rpush
      */
-    public function rpush(string $key, mixed ...$elements): RedisCluster|int|false;
+    public function rpush(string $key, mixed ...$elements): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::rpushx
+     * @see ValkeyGlide::rpushx
      */
-    public function rpushx(string $key, string $value): RedisCluster|bool|int;
+    public function rpushx(string $key, string $value): ValkeyGlideCluster|bool|int;
 
     /**
-     * @see Redis::sadd()
+     * @see ValkeyGlide::sadd()
      */
-    public function sadd(string $key, mixed $value, mixed ...$other_values): RedisCluster|int|false;
+    public function sadd(string $key, mixed $value, mixed ...$other_values): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::saddarray()
+     * @see ValkeyGlide::saddarray()
      */
-    public function saddarray(string $key, array $values): RedisCluster|bool|int;
+    public function saddarray(string $key, array $values): ValkeyGlideCluster|bool|int;
 
     /**
-     * @see Redis::save
+     * @see ValkeyGlide::save
      */
-    public function save(string|array $key_or_address): RedisCluster|bool;
+    public function save(string|array $key_or_address): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::scan
+     * @see ValkeyGlide::scan
      */
     public function scan(null|int|string &$iterator, string|array $key_or_address, ?string $pattern = null, int $count = 0): bool|array;
 
     /**
-     * @see Redis::scard
+     * @see ValkeyGlide::scard
      */
-    public function scard(string $key): RedisCluster|int|false;
+    public function scard(string $key): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::script
+     * @see ValkeyGlide::script
      */
     public function script(string|array $key_or_address, mixed ...$args): mixed;
 
     /**
-     * @see Redis::sdiff()
+     * @see ValkeyGlide::sdiff()
      */
-    public function sdiff(string $key, string ...$other_keys): RedisCluster|array|false;
+    public function sdiff(string $key, string ...$other_keys): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::sdiffstore()
+     * @see ValkeyGlide::sdiffstore()
      */
-    public function sdiffstore(string $dst, string $key, string ...$other_keys): RedisCluster|int|false;
+    public function sdiffstore(string $dst, string $key, string ...$other_keys): ValkeyGlideCluster|int|false;
 
     /**
      * @see https://redis.io/commands/set
      */
-    public function set(string $key, mixed $value, mixed $options = null): RedisCluster|string|bool;
+    public function set(string $key, mixed $value, mixed $options = null): ValkeyGlideCluster|string|bool;
 
     /**
-     * @see Redis::setbit
+     * @see ValkeyGlide::setbit
      */
-    public function setbit(string $key, int $offset, bool $onoff): RedisCluster|int|false;
+    public function setbit(string $key, int $offset, bool $onoff): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::setex
+     * @see ValkeyGlide::setex
      */
-    public function setex(string $key, int $expire, mixed $value): RedisCluster|bool;
+    public function setex(string $key, int $expire, mixed $value): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::setnx
+     * @see ValkeyGlide::setnx
      */
-    public function setnx(string $key, mixed $value): RedisCluster|bool;
+    public function setnx(string $key, mixed $value): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::setoption
+     * @see ValkeyGlide::setoption
      */
     public function setoption(int $option, mixed $value): bool;
 
     /**
-     * @see Redis::setrange
+     * @see ValkeyGlide::setrange
      */
-    public function setrange(string $key, int $offset, string $value): RedisCluster|int|false;
+    public function setrange(string $key, int $offset, string $value): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::sinter()
+     * @see ValkeyGlide::sinter()
      */
-    public function sinter(array|string $key, string ...$other_keys): RedisCluster|array|false;
+    public function sinter(array|string $key, string ...$other_keys): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::sintercard
+     * @see ValkeyGlide::sintercard
      */
-    public function sintercard(array $keys, int $limit = -1): RedisCluster|int|false;
+    public function sintercard(array $keys, int $limit = -1): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::sinterstore()
+     * @see ValkeyGlide::sinterstore()
      */
-    public function sinterstore(array|string $key, string ...$other_keys): RedisCluster|int|false;
+    public function sinterstore(array|string $key, string ...$other_keys): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::sismember
+     * @see ValkeyGlide::sismember
      */
-    public function sismember(string $key, mixed $value): RedisCluster|bool;
+    public function sismember(string $key, mixed $value): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::smismember
+     * @see ValkeyGlide::smismember
      */
-    public function smismember(string $key, string $member, string ...$other_members): RedisCluster|array|false;
+    public function smismember(string $key, string $member, string ...$other_members): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::slowlog
+     * @see ValkeyGlide::slowlog
      */
     public function slowlog(string|array $key_or_address, mixed ...$args): mixed;
 
     /**
-     * @see Redis::smembers()
+     * @see ValkeyGlide::smembers()
      */
-    public function smembers(string $key): RedisCluster|array|false;
+    public function smembers(string $key): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::smove()
+     * @see ValkeyGlide::smove()
      */
-    public function smove(string $src, string $dst, string $member): RedisCluster|bool;
+    public function smove(string $src, string $dst, string $member): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::sort()
+     * @see ValkeyGlide::sort()
      */
-    public function sort(string $key, ?array $options = null): RedisCluster|array|bool|int|string;
+    public function sort(string $key, ?array $options = null): ValkeyGlideCluster|array|bool|int|string;
 
     /**
-     * @see Redis::sort_ro()
+     * @see ValkeyGlide::sort_ro()
      */
-    public function sort_ro(string $key, ?array $options = null): RedisCluster|array|bool|int|string;
+    public function sort_ro(string $key, ?array $options = null): ValkeyGlideCluster|array|bool|int|string;
 
     /**
-     * @see Redis::spop
+     * @see ValkeyGlide::spop
      */
-    public function spop(string $key, int $count = 0): RedisCluster|string|array|false;
+    public function spop(string $key, int $count = 0): ValkeyGlideCluster|string|array|false;
 
     /**
-     * @see Redis::srandmember
+     * @see ValkeyGlide::srandmember
      */
-    public function srandmember(string $key, int $count = 0): RedisCluster|string|array|false;
+    public function srandmember(string $key, int $count = 0): ValkeyGlideCluster|string|array|false;
 
     /**
-     * @see Redis::srem
+     * @see ValkeyGlide::srem
      */
-    public function srem(string $key, mixed $value, mixed ...$other_values): RedisCluster|int|false;
+    public function srem(string $key, mixed $value, mixed ...$other_values): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::sscan
+     * @see ValkeyGlide::sscan
      */
     public function sscan(string $key, null|int|string &$iterator, ?string $pattern = null, int $count = 0): array|false;
 
     /**
-     * @see Redis::strlen
+     * @see ValkeyGlide::strlen
      */
-    public function strlen(string $key): RedisCluster|int|false;
+    public function strlen(string $key): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::subscribe
+     * @see ValkeyGlide::subscribe
      */
     public function subscribe(array $channels, callable $cb): void;
 
     /**
-     * @see Redis::sunion()
+     * @see ValkeyGlide::sunion()
      */
-    public function sunion(string $key, string ...$other_keys): RedisCluster|bool|array;
+    public function sunion(string $key, string ...$other_keys): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::sunionstore()
+     * @see ValkeyGlide::sunionstore()
      */
-    public function sunionstore(string $dst, string $key, string ...$other_keys): RedisCluster|int|false;
+    public function sunionstore(string $dst, string $key, string ...$other_keys): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::time
+     * @see ValkeyGlide::time
      */
-    public function time(string|array $key_or_address): RedisCluster|bool|array;
+    public function time(string|array $key_or_address): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::ttl
+     * @see ValkeyGlide::ttl
      */
-    public function ttl(string $key): RedisCluster|int|false;
+    public function ttl(string $key): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::type
+     * @see ValkeyGlide::type
      */
-    public function type(string $key): RedisCluster|int|false;
+    public function type(string $key): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::unsubscribe
+     * @see ValkeyGlide::unsubscribe
      */
     public function unsubscribe(array $channels): bool|array;
 
     /**
-     * @see Redis::unlink
+     * @see ValkeyGlide::unlink
      */
-    public function unlink(array|string $key, string ...$other_keys): RedisCluster|int|false;
+    public function unlink(array|string $key, string ...$other_keys): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::unwatch
+     * @see ValkeyGlide::unwatch
      */
     public function unwatch(): bool;
 
     /**
-     * @see Redis::watch
+     * @see ValkeyGlide::watch
      */
-    public function watch(string $key, string ...$other_keys): RedisCluster|bool;
+    public function watch(string $key, string ...$other_keys): ValkeyGlideCluster|bool;
 
     /**
-     * @see Redis::xack
+     * @see ValkeyGlide::xack
      */
-    public function xack(string $key, string $group, array $ids): RedisCluster|int|false;
+    public function xack(string $key, string $group, array $ids): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::xadd
+     * @see ValkeyGlide::xadd
      */
-    public function xadd(string $key, string $id, array $values, int $maxlen = 0, bool $approx = false): RedisCluster|string|false;
+    public function xadd(string $key, string $id, array $values, int $maxlen = 0, bool $approx = false): ValkeyGlideCluster|string|false;
 
     /**
-     * @see Redis::xclaim
+     * @see ValkeyGlide::xclaim
      */
-    public function xclaim(string $key, string $group, string $consumer, int $min_iddle, array $ids, array $options): RedisCluster|string|array|false;
+    public function xclaim(string $key, string $group, string $consumer, int $min_iddle, array $ids, array $options): ValkeyGlideCluster|string|array|false;
 
     /**
-     * @see Redis::xdel
+     * @see ValkeyGlide::xdel
      */
-    public function xdel(string $key, array $ids): RedisCluster|int|false;
+    public function xdel(string $key, array $ids): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::xgroup
+     * @see ValkeyGlide::xgroup
      */
     public function xgroup(string $operation, ?string $key = null, ?string $group = null, ?string $id_or_consumer = null,
                            bool $mkstream = false, int $entries_read = -2): mixed;
 
     /**
-     * @see Redis::xautoclaim
+     * @see ValkeyGlide::xautoclaim
      */
-    public function xautoclaim(string $key, string $group, string $consumer, int $min_idle, string $start, int $count = -1, bool $justid = false): RedisCluster|bool|array;
+    public function xautoclaim(string $key, string $group, string $consumer, int $min_idle, string $start, int $count = -1, bool $justid = false): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::xinfo
+     * @see ValkeyGlide::xinfo
      */
     public function xinfo(string $operation, ?string $arg1 = null, ?string $arg2 = null, int $count = -1): mixed;
 
     /**
-     * @see Redis::xlen
+     * @see ValkeyGlide::xlen
      */
-    public function xlen(string $key): RedisCluster|int|false;
+    public function xlen(string $key): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::xpending
+     * @see ValkeyGlide::xpending
      */
-    public function xpending(string $key, string $group, ?string $start = null, ?string $end = null, int $count = -1, ?string $consumer = null): RedisCluster|array|false;
+    public function xpending(string $key, string $group, ?string $start = null, ?string $end = null, int $count = -1, ?string $consumer = null): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::xrange
+     * @see ValkeyGlide::xrange
      */
-    public function xrange(string $key, string $start, string $end, int $count = -1): RedisCluster|bool|array;
+    public function xrange(string $key, string $start, string $end, int $count = -1): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::xread
+     * @see ValkeyGlide::xread
      */
-    public function xread(array $streams, int $count = -1, int $block = -1): RedisCluster|bool|array;
+    public function xread(array $streams, int $count = -1, int $block = -1): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::xreadgroup
+     * @see ValkeyGlide::xreadgroup
      */
-    public function xreadgroup(string $group, string $consumer, array $streams, int $count = 1, int $block = 1): RedisCluster|bool|array;
+    public function xreadgroup(string $group, string $consumer, array $streams, int $count = 1, int $block = 1): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::xrevrange
+     * @see ValkeyGlide::xrevrange
      */
-    public function xrevrange(string $key, string $start, string $end, int $count = -1): RedisCluster|bool|array;
+    public function xrevrange(string $key, string $start, string $end, int $count = -1): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::xtrim
+     * @see ValkeyGlide::xtrim
      */
-    public function xtrim(string $key, int $maxlen, bool $approx = false, bool $minid = false, int $limit = -1): RedisCluster|int|false;
+    public function xtrim(string $key, int $maxlen, bool $approx = false, bool $minid = false, int $limit = -1): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::zadd
+     * @see ValkeyGlide::zadd
      */
-    public function zadd(string $key, array|float $score_or_options, mixed ...$more_scores_and_mems): RedisCluster|int|float|false;
+    public function zadd(string $key, array|float $score_or_options, mixed ...$more_scores_and_mems): ValkeyGlideCluster|int|float|false;
 
     /**
-     * @see Redis::zcard
+     * @see ValkeyGlide::zcard
      */
-    public function zcard(string $key): RedisCluster|int|false;
+    public function zcard(string $key): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::zcount
+     * @see ValkeyGlide::zcount
      */
-    public function zcount(string $key, string $start, string $end): RedisCluster|int|false;
+    public function zcount(string $key, string $start, string $end): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::zincrby
+     * @see ValkeyGlide::zincrby
      */
-    public function zincrby(string $key, float $value, string $member): RedisCluster|float|false;
+    public function zincrby(string $key, float $value, string $member): ValkeyGlideCluster|float|false;
 
     /**
-     * @see Redis::zinterstore
+     * @see ValkeyGlide::zinterstore
      */
-    public function zinterstore(string $dst, array $keys, ?array $weights = null, ?string $aggregate = null): RedisCluster|int|false;
+    public function zinterstore(string $dst, array $keys, ?array $weights = null, ?string $aggregate = null): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::zintercard
+     * @see ValkeyGlide::zintercard
      */
-    public function zintercard(array $keys, int $limit = -1): RedisCluster|int|false;
+    public function zintercard(array $keys, int $limit = -1): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::zlexcount
+     * @see ValkeyGlide::zlexcount
      */
-    public function zlexcount(string $key, string $min, string $max): RedisCluster|int|false;
+    public function zlexcount(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::zpopmax
+     * @see ValkeyGlide::zpopmax
      */
-    public function zpopmax(string $key, ?int $value = null): RedisCluster|bool|array;
+    public function zpopmax(string $key, ?int $value = null): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::zpopmin
+     * @see ValkeyGlide::zpopmin
      */
-    public function zpopmin(string $key, ?int $value = null): RedisCluster|bool|array;
+    public function zpopmin(string $key, ?int $value = null): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::zrange
+     * @see ValkeyGlide::zrange
      */
-    public function zrange(string $key, mixed $start, mixed $end, array|bool|null $options = null): RedisCluster|array|bool;
+    public function zrange(string $key, mixed $start, mixed $end, array|bool|null $options = null): ValkeyGlideCluster|array|bool;
 
     /**
-     * @see Redis::zrangestore
+     * @see ValkeyGlide::zrangestore
      */
     public function zrangestore(string $dstkey, string $srckey, int $start, int $end,
-                                array|bool|null $options = null): RedisCluster|int|false;
+                                array|bool|null $options = null): ValkeyGlideCluster|int|false;
 
     /**
      * @see https://redis.io/commands/zrandmember
      */
-    public function zrandmember(string $key, ?array $options = null): RedisCluster|string|array;
+    public function zrandmember(string $key, ?array $options = null): ValkeyGlideCluster|string|array;
 
     /**
-     * @see Redis::zrangebylex
+     * @see ValkeyGlide::zrangebylex
      */
-    public function zrangebylex(string $key, string $min, string $max, int $offset = -1, int $count = -1): RedisCluster|array|false;
+    public function zrangebylex(string $key, string $min, string $max, int $offset = -1, int $count = -1): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::zrangebyscore
+     * @see ValkeyGlide::zrangebyscore
      */
-    public function zrangebyscore(string $key, string $start, string $end, array $options = []): RedisCluster|array|false;
+    public function zrangebyscore(string $key, string $start, string $end, array $options = []): ValkeyGlideCluster|array|false;
 
     /**
-     * @see Redis::zrank
+     * @see ValkeyGlide::zrank
      */
-    public function zrank(string $key, mixed $member): RedisCluster|int|false;
+    public function zrank(string $key, mixed $member): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::zrem
+     * @see ValkeyGlide::zrem
      */
-    public function zrem(string $key, string $value, string ...$other_values): RedisCluster|int|false;
+    public function zrem(string $key, string $value, string ...$other_values): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::zremrangebylex
+     * @see ValkeyGlide::zremrangebylex
      */
-    public function zremrangebylex(string $key, string $min, string $max): RedisCluster|int|false;
+    public function zremrangebylex(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::zremrangebyrank
+     * @see ValkeyGlide::zremrangebyrank
      */
-    public function zremrangebyrank(string $key, string $min, string $max): RedisCluster|int|false;
+    public function zremrangebyrank(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::zremrangebyscore
+     * @see ValkeyGlide::zremrangebyscore
      */
-    public function zremrangebyscore(string $key, string $min, string $max): RedisCluster|int|false;
+    public function zremrangebyscore(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::zrevrange
+     * @see ValkeyGlide::zrevrange
      */
-    public function zrevrange(string $key, string $min, string $max, ?array $options = null): RedisCluster|bool|array;
+    public function zrevrange(string $key, string $min, string $max, ?array $options = null): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::zrevrangebylex
+     * @see ValkeyGlide::zrevrangebylex
      */
-    public function zrevrangebylex(string $key, string $min, string $max, ?array $options = null): RedisCluster|bool|array;
+    public function zrevrangebylex(string $key, string $min, string $max, ?array $options = null): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::zrevrangebyscore
+     * @see ValkeyGlide::zrevrangebyscore
      */
-    public function zrevrangebyscore(string $key, string $min, string $max, ?array $options = null): RedisCluster|bool|array;
+    public function zrevrangebyscore(string $key, string $min, string $max, ?array $options = null): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::zrevrank
+     * @see ValkeyGlide::zrevrank
      */
-    public function zrevrank(string $key, mixed $member): RedisCluster|int|false;
+    public function zrevrank(string $key, mixed $member): ValkeyGlideCluster|int|false;
 
     /**
-     * @see Redis::zscan
+     * @see ValkeyGlide::zscan
      */
-    public function zscan(string $key, null|int|string &$iterator, ?string $pattern = null, int $count = 0): RedisCluster|bool|array;
+    public function zscan(string $key, null|int|string &$iterator, ?string $pattern = null, int $count = 0): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see Redis::zscore
+     * @see ValkeyGlide::zscore
      */
-    public function zscore(string $key, mixed $member): RedisCluster|float|false;
+    public function zscore(string $key, mixed $member): ValkeyGlideCluster|float|false;
 
     /**
      * @see https://redis.io/commands/zmscore
      */
-    public function zmscore(string $key, mixed $member, mixed ...$other_members): Redis|array|false;
+    public function zmscore(string $key, mixed $member, mixed ...$other_members): ValkeyGlide|array|false;
 
     /**
-     * @see Redis::zunionstore
+     * @see ValkeyGlide::zunionstore
      */
-    public function zunionstore(string $dst, array $keys, ?array $weights = null, ?string $aggregate = null): RedisCluster|int|false;
+    public function zunionstore(string $dst, array $keys, ?array $weights = null, ?string $aggregate = null): ValkeyGlideCluster|int|false;
 
     /**
      * @see https://redis.io/commands/zinter
      */
-    public function zinter(array $keys, ?array $weights = null, ?array $options = null): RedisCluster|array|false;
+    public function zinter(array $keys, ?array $weights = null, ?array $options = null): ValkeyGlideCluster|array|false;
 
     /**
      * @see https://redis.io/commands/zdiffstore
      */
-    public function zdiffstore(string $dst, array $keys): RedisCluster|int|false;
+    public function zdiffstore(string $dst, array $keys): ValkeyGlideCluster|int|false;
 
     /**
      * @see https://redis.io/commands/zunion
      */
-    public function zunion(array $keys, ?array $weights = null, ?array $options = null): RedisCluster|array|false;
+    public function zunion(array $keys, ?array $weights = null, ?array $options = null): ValkeyGlideCluster|array|false;
 
     /**
      * @see https://redis.io/commands/zdiff
      */
-    public function zdiff(array $keys, ?array $options = null): RedisCluster|array|false;
+    public function zdiff(array $keys, ?array $options = null): ValkeyGlideCluster|array|false;
 }
 
-class RedisClusterException extends RuntimeException {}
+class ValkeyGlideClusterException extends RuntimeException {}

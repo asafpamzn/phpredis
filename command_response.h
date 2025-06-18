@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | Redis Glide FFI integration for phpredis                             |
+  | ValkeyGlide Glide FFI integration for phpredis                             |
   +----------------------------------------------------------------------+
   | Copyright (c) 2023-2025 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -141,7 +141,7 @@ char *double_to_string(double value, size_t *len);
 
 /*
  * Helper function to recursively extract field-value pairs from a stream entry
- * This function traverses the nested structure of Redis stream entries
+ * This function traverses the nested structure of ValkeyGlide stream entries
  * and populates the provided PHP array with the field-value pairs
  */
 void extract_stream_field_values(CommandResponse *response, zval *field_array);

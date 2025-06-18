@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | Redis Glide S-Commands Common Utilities                              |
+  | ValkeyGlide Glide S-Commands Common Utilities                              |
   +----------------------------------------------------------------------+
   | Copyright (c) 2023-2025 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -115,7 +115,7 @@ typedef struct _s_command_args_t
  */
 typedef struct _s_command_def_t
 {
-    enum RequestType cmd_type;       /* Redis command type */
+    enum RequestType cmd_type;       /* ValkeyGlide command type */
     s_command_category_t category;   /* Command category */
     s_response_type_t response_type; /* Expected response type */
 } s_command_def_t;

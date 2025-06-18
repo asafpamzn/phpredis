@@ -1,4 +1,4 @@
-<?php defined('PHPREDIS_TESTRUN') or die("Use TestRedis.php to run tests!\n");
+<?php defined('PHPREDIS_TESTRUN') or die("Use TestValkeyGlide.php to run tests!\n");
 
 /* A specific exception for when we skip a test */
 class TestSkippedException extends Exception {}
@@ -10,10 +10,10 @@ class TestSuite
     private string $host;
     private ?int $port = 6379;
 
-    /* Redis authentication we'll use */
+    /* ValkeyGlide authentication we'll use */
     private $auth;
 
-    /* Redis server version */
+    /* ValkeyGlide server version */
     protected $version;
     protected bool $is_valkey;
 

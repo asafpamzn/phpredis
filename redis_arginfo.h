@@ -1,75 +1,75 @@
 /* This is a generated file, edit the .stub.php file instead.
  * Stub hash: 3a08bc16dd5a73e721e0df8f7843acdbbb585df5 */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Redis___construct, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlide___construct, 0, 0, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Redis___destruct, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlide___destruct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis__compress, 0, 1, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide__compress, 0, 1, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis__uncompress arginfo_class_Redis__compress
+#define arginfo_class_ValkeyGlide__uncompress arginfo_class_ValkeyGlide__compress
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis__prefix, 0, 1, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide__prefix, 0, 1, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis__serialize, 0, 1, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide__serialize, 0, 1, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis__unserialize, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide__unserialize, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis__pack arginfo_class_Redis__serialize
+#define arginfo_class_ValkeyGlide__pack arginfo_class_ValkeyGlide__serialize
 
-#define arginfo_class_Redis__unpack arginfo_class_Redis__unserialize
+#define arginfo_class_ValkeyGlide__unpack arginfo_class_ValkeyGlide__unserialize
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_acl, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_acl, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, subcmd, IS_STRING, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_append, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_append, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_auth, 0, 1, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_auth, 0, 1, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, credentials, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_bgSave, 0, 0, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_bgSave, 0, 0, ValkeyGlide, MAY_BE_BOOL)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_bgrewriteaof arginfo_class_Redis_bgSave
+#define arginfo_class_ValkeyGlide_bgrewriteaof arginfo_class_ValkeyGlide_bgSave
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_waitaof, 0, 3, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_waitaof, 0, 3, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, numlocal, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, numreplicas, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, timeout, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_bitcount, 0, 1, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_bitcount, 0, 1, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, start, IS_LONG, 0, "0")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, end, IS_LONG, 0, "-1")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, bybit, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_bitop, 0, 3, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_bitop, 0, 3, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, operation, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, deskey, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, srckey, IS_STRING, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_keys, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_bitpos, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_bitpos, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, bit, _IS_BOOL, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, start, IS_LONG, 0, "0")
@@ -77,67 +77,67 @@ ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, end, IS_LONG, 0, "-1")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, bybit, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_blPop, 0, 2, Redis, MAY_BE_ARRAY | MAY_BE_NULL | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_blPop, 0, 2, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_NULL | MAY_BE_FALSE)
 ZEND_ARG_TYPE_MASK(0, key_or_keys, MAY_BE_STRING | MAY_BE_ARRAY, NULL)
 ZEND_ARG_TYPE_MASK(0, timeout_or_key, MAY_BE_STRING | MAY_BE_DOUBLE | MAY_BE_LONG, NULL)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, extra_args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_brPop arginfo_class_Redis_blPop
+#define arginfo_class_ValkeyGlide_brPop arginfo_class_ValkeyGlide_blPop
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_brpoplpush, 0, 3, Redis, MAY_BE_STRING | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_brpoplpush, 0, 3, ValkeyGlide, MAY_BE_STRING | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, src, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, dst, IS_STRING, 0)
 ZEND_ARG_TYPE_MASK(0, timeout, MAY_BE_LONG | MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_bzPopMax, 0, 2, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_bzPopMax, 0, 2, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_MASK(0, key, MAY_BE_STRING | MAY_BE_ARRAY, NULL)
 ZEND_ARG_TYPE_MASK(0, timeout_or_key, MAY_BE_STRING | MAY_BE_LONG, NULL)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, extra_args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_bzPopMin arginfo_class_Redis_bzPopMax
+#define arginfo_class_ValkeyGlide_bzPopMin arginfo_class_ValkeyGlide_bzPopMax
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_bzmpop, 0, 3, Redis, MAY_BE_ARRAY | MAY_BE_NULL | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_bzmpop, 0, 3, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_NULL | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, timeout, IS_DOUBLE, 0)
 ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
 ZEND_ARG_TYPE_INFO(0, from, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zmpop, 0, 2, Redis, MAY_BE_ARRAY | MAY_BE_NULL | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zmpop, 0, 2, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_NULL | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
 ZEND_ARG_TYPE_INFO(0, from, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "1")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_blmpop arginfo_class_Redis_bzmpop
+#define arginfo_class_ValkeyGlide_blmpop arginfo_class_ValkeyGlide_bzmpop
 
-#define arginfo_class_Redis_lmpop arginfo_class_Redis_zmpop
+#define arginfo_class_ValkeyGlide_lmpop arginfo_class_ValkeyGlide_zmpop
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_clearLastError, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_clearLastError, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_client, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_client, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, opt, IS_STRING, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_close arginfo_class_Redis_clearLastError
+#define arginfo_class_ValkeyGlide_close arginfo_class_ValkeyGlide_clearLastError
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_command, 0, 0, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_command, 0, 0, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, opt, IS_STRING, 1, "null")
 ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_config, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_config, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, operation, IS_STRING, 0)
 ZEND_ARG_TYPE_MASK(0, key_or_settings, MAY_BE_ARRAY | MAY_BE_STRING | MAY_BE_NULL, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_connect, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_connect, 0, 1, _IS_BOOL, 0)
 ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "6379")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout, IS_DOUBLE, 0, "0")
@@ -147,118 +147,118 @@ ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, read_timeout, IS_DOUBLE, 0, "0")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, context, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_copy, 0, 2, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_copy, 0, 2, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, src, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, dst, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_dbSize, 0, 0, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_dbSize, 0, 0, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_debug, 0, 1, Redis, MAY_BE_STRING)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_debug, 0, 1, ValkeyGlide, MAY_BE_STRING)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_decr, 0, 1, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_decr, 0, 1, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, by, IS_LONG, 0, "1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_decrBy, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_decrBy, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_del, 0, 1, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_del, 0, 1, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_MASK(0, key, MAY_BE_ARRAY | MAY_BE_STRING, NULL)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_keys, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_delete arginfo_class_Redis_del
+#define arginfo_class_ValkeyGlide_delete arginfo_class_ValkeyGlide_del
 
-#define arginfo_class_Redis_discard arginfo_class_Redis_bgSave
+#define arginfo_class_ValkeyGlide_discard arginfo_class_ValkeyGlide_bgSave
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_dump, 0, 1, Redis, MAY_BE_STRING | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_dump, 0, 1, ValkeyGlide, MAY_BE_STRING | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_echo, 0, 1, Redis, MAY_BE_STRING | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_echo, 0, 1, ValkeyGlide, MAY_BE_STRING | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_eval, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_eval, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, script, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, num_keys, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_eval_ro, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_eval_ro, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, script_sha, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, num_keys, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_evalsha, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_evalsha, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, sha1, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, num_keys, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_evalsha_ro arginfo_class_Redis_evalsha
+#define arginfo_class_ValkeyGlide_evalsha_ro arginfo_class_ValkeyGlide_evalsha
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_exec, 0, 0, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_exec, 0, 0, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_exists, 0, 1, Redis, MAY_BE_LONG | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_exists, 0, 1, ValkeyGlide, MAY_BE_LONG | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_MIXED, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_keys, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_expire, 0, 2, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_expire, 0, 2, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, timeout, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_expireAt, 0, 2, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_expireAt, 0, 2, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_failover, 0, 0, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_failover, 0, 0, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, to, IS_ARRAY, 1, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, abort, _IS_BOOL, 0, "false")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_expiretime, 0, 1, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_expiretime, 0, 1, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_pexpiretime arginfo_class_Redis_expiretime
+#define arginfo_class_ValkeyGlide_pexpiretime arginfo_class_ValkeyGlide_expiretime
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_fcall, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_fcall, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, fn, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, keys, IS_ARRAY, 0, "[]")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_fcall_ro arginfo_class_Redis_fcall
+#define arginfo_class_ValkeyGlide_fcall_ro arginfo_class_ValkeyGlide_fcall
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_flushAll, 0, 0, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_flushAll, 0, 0, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sync, _IS_BOOL, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_flushDB arginfo_class_Redis_flushAll
+#define arginfo_class_ValkeyGlide_flushDB arginfo_class_ValkeyGlide_flushAll
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_function, 0, 1, Redis, MAY_BE_BOOL | MAY_BE_STRING | MAY_BE_ARRAY)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_function, 0, 1, ValkeyGlide, MAY_BE_BOOL | MAY_BE_STRING | MAY_BE_ARRAY)
 ZEND_ARG_TYPE_INFO(0, operation, IS_STRING, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_geoadd, 0, 4, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_geoadd, 0, 4, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, lng, IS_DOUBLE, 0)
 ZEND_ARG_TYPE_INFO(0, lat, IS_DOUBLE, 0)
@@ -266,22 +266,22 @@ ZEND_ARG_TYPE_INFO(0, member, IS_STRING, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_triples_and_options, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_geodist, 0, 3, Redis, MAY_BE_DOUBLE | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_geodist, 0, 3, ValkeyGlide, MAY_BE_DOUBLE | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, src, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, dst, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, unit, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_geohash, 0, 2, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_geohash, 0, 2, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, member, IS_STRING, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_members, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_geopos arginfo_class_Redis_geohash
+#define arginfo_class_ValkeyGlide_geopos arginfo_class_ValkeyGlide_geohash
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_georadius, 0, 5, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_georadius, 0, 5, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, lng, IS_DOUBLE, 0)
 ZEND_ARG_TYPE_INFO(0, lat, IS_DOUBLE, 0)
@@ -290,9 +290,9 @@ ZEND_ARG_TYPE_INFO(0, unit, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_georadius_ro arginfo_class_Redis_georadius
+#define arginfo_class_ValkeyGlide_georadius_ro arginfo_class_ValkeyGlide_georadius
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_georadiusbymember, 0, 4, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_georadiusbymember, 0, 4, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, member, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, radius, IS_DOUBLE, 0)
@@ -300,9 +300,9 @@ ZEND_ARG_TYPE_INFO(0, unit, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_georadiusbymember_ro arginfo_class_Redis_georadiusbymember
+#define arginfo_class_ValkeyGlide_georadiusbymember_ro arginfo_class_ValkeyGlide_georadiusbymember
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_geosearch, 0, 4, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_geosearch, 0, 4, IS_ARRAY, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_MASK(0, position, MAY_BE_ARRAY | MAY_BE_STRING, NULL)
 ZEND_ARG_TYPE_MASK(0, shape, MAY_BE_ARRAY | MAY_BE_LONG | MAY_BE_DOUBLE, NULL)
@@ -310,7 +310,7 @@ ZEND_ARG_TYPE_INFO(0, unit, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_geosearchstore, 0, 5, Redis, MAY_BE_ARRAY | MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_geosearchstore, 0, 5, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, dst, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, src, IS_STRING, 0)
 ZEND_ARG_TYPE_MASK(0, position, MAY_BE_ARRAY | MAY_BE_STRING, NULL)
@@ -319,207 +319,207 @@ ZEND_ARG_TYPE_INFO(0, unit, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_get, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_get, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_getWithMeta, 0, 1, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_getWithMeta, 0, 1, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_getAuth, 0, 0, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_getAuth, 0, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_getBit, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_getBit, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, idx, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_getEx, 0, 1, Redis, MAY_BE_STRING | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_getEx, 0, 1, ValkeyGlide, MAY_BE_STRING | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_getDBNum, 0, 0, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_getDBNum, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_getDel, 0, 1, Redis, MAY_BE_STRING | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_getDel, 0, 1, ValkeyGlide, MAY_BE_STRING | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_getHost, 0, 0, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_getHost, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_getLastError, 0, 0, IS_STRING, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_getLastError, 0, 0, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_getMode arginfo_class_Redis_getDBNum
+#define arginfo_class_ValkeyGlide_getMode arginfo_class_ValkeyGlide_getDBNum
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_getOption, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_getOption, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_getPersistentID arginfo_class_Redis_getLastError
+#define arginfo_class_ValkeyGlide_getPersistentID arginfo_class_ValkeyGlide_getLastError
 
-#define arginfo_class_Redis_getPort arginfo_class_Redis_getDBNum
+#define arginfo_class_ValkeyGlide_getPort arginfo_class_ValkeyGlide_getDBNum
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Redis_serverName, 0, 0, MAY_BE_STRING | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ValkeyGlide_serverName, 0, 0, MAY_BE_STRING | MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_serverVersion arginfo_class_Redis_serverName
+#define arginfo_class_ValkeyGlide_serverVersion arginfo_class_ValkeyGlide_serverName
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_getRange, 0, 3, Redis, MAY_BE_STRING | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_getRange, 0, 3, ValkeyGlide, MAY_BE_STRING | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_lcs, 0, 2, Redis, MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_lcs, 0, 2, ValkeyGlide, MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key1, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, key2, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_getReadTimeout, 0, 0, IS_DOUBLE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_getReadTimeout, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_getset, 0, 2, Redis, MAY_BE_STRING | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_getset, 0, 2, ValkeyGlide, MAY_BE_STRING | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Redis_getTimeout, 0, 0, MAY_BE_DOUBLE | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ValkeyGlide_getTimeout, 0, 0, MAY_BE_DOUBLE | MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_getTransferredBytes, 0, 0, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_getTransferredBytes, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_clearTransferredBytes, 0, 0, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_clearTransferredBytes, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_hDel, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_hDel, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, field, IS_STRING, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_fields, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_hExists, 0, 2, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_hExists, 0, 2, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, field, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_hGet, 0, 2, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_hGet, 0, 2, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, member, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_hGetAll arginfo_class_Redis_getWithMeta
+#define arginfo_class_ValkeyGlide_hGetAll arginfo_class_ValkeyGlide_getWithMeta
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_hIncrBy, 0, 3, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_hIncrBy, 0, 3, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, field, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_hIncrByFloat, 0, 3, Redis, MAY_BE_DOUBLE | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_hIncrByFloat, 0, 3, ValkeyGlide, MAY_BE_DOUBLE | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, field, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_hKeys arginfo_class_Redis_getWithMeta
+#define arginfo_class_ValkeyGlide_hKeys arginfo_class_ValkeyGlide_getWithMeta
 
-#define arginfo_class_Redis_hLen arginfo_class_Redis_expiretime
+#define arginfo_class_ValkeyGlide_hLen arginfo_class_ValkeyGlide_expiretime
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_hMget, 0, 2, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_hMget, 0, 2, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, fields, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_hMset, 0, 2, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_hMset, 0, 2, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, fieldvals, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_hRandField, 0, 1, Redis, MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_hRandField, 0, 1, ValkeyGlide, MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_hSet, 0, 1, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_hSet, 0, 1, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, fields_and_vals, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_hSetNx, 0, 3, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_hSetNx, 0, 3, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, field, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_hStrLen, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_hStrLen, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, field, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_hVals arginfo_class_Redis_getWithMeta
+#define arginfo_class_ValkeyGlide_hVals arginfo_class_ValkeyGlide_getWithMeta
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_hscan, 0, 2, Redis, MAY_BE_ARRAY | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_hscan, 0, 2, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_MASK(1, iterator, MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING, NULL)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_expiremember, 0, 3, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_expiremember, 0, 3, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, field, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, ttl, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, unit, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_expirememberat, 0, 3, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_expirememberat, 0, 3, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, field, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_incr arginfo_class_Redis_decr
+#define arginfo_class_ValkeyGlide_incr arginfo_class_ValkeyGlide_decr
 
-#define arginfo_class_Redis_incrBy arginfo_class_Redis_decrBy
+#define arginfo_class_ValkeyGlide_incrBy arginfo_class_ValkeyGlide_decrBy
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_incrByFloat, 0, 2, Redis, MAY_BE_DOUBLE | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_incrByFloat, 0, 2, ValkeyGlide, MAY_BE_DOUBLE | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_info, 0, 0, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_info, 0, 0, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, sections, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_isConnected arginfo_class_Redis_clearLastError
+#define arginfo_class_ValkeyGlide_isConnected arginfo_class_ValkeyGlide_clearLastError
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Redis_keys, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlide_keys, 0, 0, 1)
 ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Redis_lInsert, 0, 0, 4)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlide_lInsert, 0, 0, 4)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, pos, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, pivot, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_lLen arginfo_class_Redis_expiretime
+#define arginfo_class_ValkeyGlide_lLen arginfo_class_ValkeyGlide_expiretime
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_lMove, 0, 4, Redis, MAY_BE_STRING | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_lMove, 0, 4, ValkeyGlide, MAY_BE_STRING | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, src, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, dst, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, wherefrom, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, whereto, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_blmove, 0, 5, Redis, MAY_BE_STRING | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_blmove, 0, 5, ValkeyGlide, MAY_BE_STRING | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, src, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, dst, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, wherefrom, IS_STRING, 0)
@@ -527,64 +527,64 @@ ZEND_ARG_TYPE_INFO(0, whereto, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, timeout, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_lPop, 0, 1, Redis, MAY_BE_BOOL | MAY_BE_STRING | MAY_BE_ARRAY)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_lPop, 0, 1, ValkeyGlide, MAY_BE_BOOL | MAY_BE_STRING | MAY_BE_ARRAY)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_lPos, 0, 2, Redis, MAY_BE_NULL | MAY_BE_BOOL | MAY_BE_LONG | MAY_BE_ARRAY)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_lPos, 0, 2, ValkeyGlide, MAY_BE_NULL | MAY_BE_BOOL | MAY_BE_LONG | MAY_BE_ARRAY)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_lPush, 0, 1, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_lPush, 0, 1, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, elements, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_rPush arginfo_class_Redis_lPush
+#define arginfo_class_ValkeyGlide_rPush arginfo_class_ValkeyGlide_lPush
 
-#define arginfo_class_Redis_lPushx arginfo_class_Redis_append
+#define arginfo_class_ValkeyGlide_lPushx arginfo_class_ValkeyGlide_append
 
-#define arginfo_class_Redis_rPushx arginfo_class_Redis_append
+#define arginfo_class_ValkeyGlide_rPushx arginfo_class_ValkeyGlide_append
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_lSet, 0, 3, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_lSet, 0, 3, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_lastSave arginfo_class_Redis_getDBNum
+#define arginfo_class_ValkeyGlide_lastSave arginfo_class_ValkeyGlide_getDBNum
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_lindex, 0, 2, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_lindex, 0, 2, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_lrange, 0, 3, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_lrange, 0, 3, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_lrem, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_lrem, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_ltrim, 0, 3, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_ltrim, 0, 3, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_mget, 0, 1, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_mget, 0, 1, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_migrate, 0, 5, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_migrate, 0, 5, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, port, IS_LONG, 0)
 ZEND_ARG_TYPE_MASK(0, key, MAY_BE_STRING | MAY_BE_ARRAY, NULL)
@@ -595,267 +595,267 @@ ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, replace, _IS_BOOL, 0, "false")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, credentials, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_move, 0, 2, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_move, 0, 2, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_mset, 0, 1, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_mset, 0, 1, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key_values, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_msetnx arginfo_class_Redis_mset
+#define arginfo_class_ValkeyGlide_msetnx arginfo_class_ValkeyGlide_mset
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_multi, 0, 0, Redis, MAY_BE_BOOL)
-ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_LONG, 0, "Redis::MULTI")
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_multi, 0, 0, ValkeyGlide, MAY_BE_BOOL)
+ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_LONG, 0, "ValkeyGlide::MULTI")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_object, 0, 2, Redis, MAY_BE_LONG | MAY_BE_STRING | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_object, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_STRING | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, subcommand, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_open arginfo_class_Redis_connect
+#define arginfo_class_ValkeyGlide_open arginfo_class_ValkeyGlide_connect
 
-#define arginfo_class_Redis_pconnect arginfo_class_Redis_connect
+#define arginfo_class_ValkeyGlide_pconnect arginfo_class_ValkeyGlide_connect
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_persist, 0, 1, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_persist, 0, 1, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_pexpire, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_pexpire, 0, 2, _IS_BOOL, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, timeout, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_pexpireAt arginfo_class_Redis_expireAt
+#define arginfo_class_ValkeyGlide_pexpireAt arginfo_class_ValkeyGlide_expireAt
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_pfadd, 0, 2, Redis, MAY_BE_LONG)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_pfadd, 0, 2, ValkeyGlide, MAY_BE_LONG)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, elements, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_pfcount, 0, 1, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_pfcount, 0, 1, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_MASK(0, key_or_keys, MAY_BE_ARRAY | MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_pfmerge, 0, 2, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_pfmerge, 0, 2, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, dst, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, srckeys, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_ping, 0, 0, Redis, MAY_BE_STRING | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_ping, 0, 0, ValkeyGlide, MAY_BE_STRING | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, message, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_pipeline, 0, 0, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_pipeline, 0, 0, ValkeyGlide, MAY_BE_BOOL)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_popen arginfo_class_Redis_connect
+#define arginfo_class_ValkeyGlide_popen arginfo_class_ValkeyGlide_connect
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_psetex, 0, 3, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_psetex, 0, 3, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, expire, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_psubscribe, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_psubscribe, 0, 2, _IS_BOOL, 0)
 ZEND_ARG_TYPE_INFO(0, patterns, IS_ARRAY, 0)
 ZEND_ARG_TYPE_INFO(0, cb, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_pttl arginfo_class_Redis_expiretime
+#define arginfo_class_ValkeyGlide_pttl arginfo_class_ValkeyGlide_expiretime
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_publish, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_publish, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, channel, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_pubsub, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_pubsub, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, command, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_punsubscribe, 0, 1, Redis, MAY_BE_ARRAY | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_punsubscribe, 0, 1, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, patterns, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_rPop, 0, 1, Redis, MAY_BE_ARRAY | MAY_BE_STRING | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_rPop, 0, 1, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_STRING | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_randomKey, 0, 0, Redis, MAY_BE_STRING | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_randomKey, 0, 0, ValkeyGlide, MAY_BE_STRING | MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_rawcommand, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_rawcommand, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, command, IS_STRING, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_rename, 0, 2, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_rename, 0, 2, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, old_name, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, new_name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_renameNx, 0, 2, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_renameNx, 0, 2, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key_src, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, key_dst, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_reset arginfo_class_Redis_bgSave
+#define arginfo_class_ValkeyGlide_reset arginfo_class_ValkeyGlide_bgSave
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_restore, 0, 3, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_restore, 0, 3, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, ttl, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_role arginfo_class_Redis_getAuth
+#define arginfo_class_ValkeyGlide_role arginfo_class_ValkeyGlide_getAuth
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_rpoplpush, 0, 2, Redis, MAY_BE_STRING | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_rpoplpush, 0, 2, ValkeyGlide, MAY_BE_STRING | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, srckey, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, dstkey, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_sAdd, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_sAdd, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_values, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_sAddArray, 0, 2, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_sAddArray, 0, 2, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_sDiff, 0, 1, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_sDiff, 0, 1, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_keys, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_sDiffStore, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_sDiffStore, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, dst, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_keys, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_sInter, 0, 1, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_sInter, 0, 1, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_MASK(0, key, MAY_BE_ARRAY | MAY_BE_STRING, NULL)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_keys, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_sintercard, 0, 1, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_sintercard, 0, 1, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, limit, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_sInterStore arginfo_class_Redis_del
+#define arginfo_class_ValkeyGlide_sInterStore arginfo_class_ValkeyGlide_del
 
-#define arginfo_class_Redis_sMembers arginfo_class_Redis_getWithMeta
+#define arginfo_class_ValkeyGlide_sMembers arginfo_class_ValkeyGlide_getWithMeta
 
-#define arginfo_class_Redis_sMisMember arginfo_class_Redis_geohash
+#define arginfo_class_ValkeyGlide_sMisMember arginfo_class_ValkeyGlide_geohash
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_sMove, 0, 3, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_sMove, 0, 3, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, src, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, dst, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_sPop, 0, 1, Redis, MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_sPop, 0, 1, ValkeyGlide, MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_sRandMember, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_sRandMember, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_sUnion arginfo_class_Redis_sDiff
+#define arginfo_class_ValkeyGlide_sUnion arginfo_class_ValkeyGlide_sDiff
 
-#define arginfo_class_Redis_sUnionStore arginfo_class_Redis_sDiffStore
+#define arginfo_class_ValkeyGlide_sUnionStore arginfo_class_ValkeyGlide_sDiffStore
 
-#define arginfo_class_Redis_save arginfo_class_Redis_bgSave
+#define arginfo_class_ValkeyGlide_save arginfo_class_ValkeyGlide_bgSave
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Redis_scan, 0, 1, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ValkeyGlide_scan, 0, 1, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_MASK(1, iterator, MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING, NULL)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "0")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_scard arginfo_class_Redis_expiretime
+#define arginfo_class_ValkeyGlide_scard arginfo_class_ValkeyGlide_expiretime
 
-#define arginfo_class_Redis_script arginfo_class_Redis_rawcommand
+#define arginfo_class_ValkeyGlide_script arginfo_class_ValkeyGlide_rawcommand
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_select, 0, 1, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_select, 0, 1, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, db, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_set, 0, 2, Redis, MAY_BE_STRING | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_set, 0, 2, ValkeyGlide, MAY_BE_STRING | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_setBit, 0, 3, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_setBit, 0, 3, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, idx, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, value, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_setRange, 0, 3, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_setRange, 0, 3, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_setOption, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_setOption, 0, 2, _IS_BOOL, 0)
 ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Redis_setex, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlide_setex, 0, 0, 3)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, expire, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_setnx, 0, 2, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_setnx, 0, 2, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_sismember arginfo_class_Redis_setnx
+#define arginfo_class_ValkeyGlide_sismember arginfo_class_ValkeyGlide_setnx
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_slaveof, 0, 0, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_slaveof, 0, 0, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, host, IS_STRING, 1, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "6379")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_replicaof arginfo_class_Redis_slaveof
+#define arginfo_class_ValkeyGlide_replicaof arginfo_class_ValkeyGlide_slaveof
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_touch, 0, 1, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_touch, 0, 1, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_MASK(0, key_or_array, MAY_BE_ARRAY | MAY_BE_STRING, NULL)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, more_keys, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_slowlog, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_slowlog, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, operation, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_sort, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_sort, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_sort_ro arginfo_class_Redis_sort
+#define arginfo_class_ValkeyGlide_sort_ro arginfo_class_ValkeyGlide_sort
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_sortAsc, 0, 1, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_sortAsc, 0, 1, IS_ARRAY, 0)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, get, IS_MIXED, 0, "null")
@@ -864,69 +864,69 @@ ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "-1")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, store, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_sortAscAlpha arginfo_class_Redis_sortAsc
+#define arginfo_class_ValkeyGlide_sortAscAlpha arginfo_class_ValkeyGlide_sortAsc
 
-#define arginfo_class_Redis_sortDesc arginfo_class_Redis_sortAsc
+#define arginfo_class_ValkeyGlide_sortDesc arginfo_class_ValkeyGlide_sortAsc
 
-#define arginfo_class_Redis_sortDescAlpha arginfo_class_Redis_sortAsc
+#define arginfo_class_ValkeyGlide_sortDescAlpha arginfo_class_ValkeyGlide_sortAsc
 
-#define arginfo_class_Redis_srem arginfo_class_Redis_sAdd
+#define arginfo_class_ValkeyGlide_srem arginfo_class_ValkeyGlide_sAdd
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Redis_sscan, 0, 2, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ValkeyGlide_sscan, 0, 2, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_MASK(1, iterator, MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING, NULL)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_ssubscribe, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_ssubscribe, 0, 2, _IS_BOOL, 0)
 ZEND_ARG_TYPE_INFO(0, channels, IS_ARRAY, 0)
 ZEND_ARG_TYPE_INFO(0, cb, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_strlen arginfo_class_Redis_expiretime
+#define arginfo_class_ValkeyGlide_strlen arginfo_class_ValkeyGlide_expiretime
 
-#define arginfo_class_Redis_subscribe arginfo_class_Redis_ssubscribe
+#define arginfo_class_ValkeyGlide_subscribe arginfo_class_ValkeyGlide_ssubscribe
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_sunsubscribe, 0, 1, Redis, MAY_BE_ARRAY | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_sunsubscribe, 0, 1, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, channels, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_swapdb, 0, 2, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_swapdb, 0, 2, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, src, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, dst, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_time, 0, 0, Redis, MAY_BE_ARRAY)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_time, 0, 0, ValkeyGlide, MAY_BE_ARRAY)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_ttl arginfo_class_Redis_expiretime
+#define arginfo_class_ValkeyGlide_ttl arginfo_class_ValkeyGlide_expiretime
 
-#define arginfo_class_Redis_type arginfo_class_Redis_expiretime
+#define arginfo_class_ValkeyGlide_type arginfo_class_ValkeyGlide_expiretime
 
-#define arginfo_class_Redis_unlink arginfo_class_Redis_del
+#define arginfo_class_ValkeyGlide_unlink arginfo_class_ValkeyGlide_del
 
-#define arginfo_class_Redis_unsubscribe arginfo_class_Redis_sunsubscribe
+#define arginfo_class_ValkeyGlide_unsubscribe arginfo_class_ValkeyGlide_sunsubscribe
 
-#define arginfo_class_Redis_unwatch arginfo_class_Redis_bgSave
+#define arginfo_class_ValkeyGlide_unwatch arginfo_class_ValkeyGlide_bgSave
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_watch, 0, 1, Redis, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_watch, 0, 1, ValkeyGlide, MAY_BE_BOOL)
 ZEND_ARG_TYPE_MASK(0, key, MAY_BE_ARRAY | MAY_BE_STRING, NULL)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_keys, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Redis_wait, 0, 2, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ValkeyGlide_wait, 0, 2, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, numreplicas, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, timeout, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Redis_xack, 0, 3, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ValkeyGlide_xack, 0, 3, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, group, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, ids, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_xadd, 0, 3, Redis, MAY_BE_STRING | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_xadd, 0, 3, ValkeyGlide, MAY_BE_STRING | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, id, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
@@ -935,7 +935,7 @@ ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, approx, _IS_BOOL, 0, "false")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nomkstream, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_xautoclaim, 0, 5, Redis, MAY_BE_BOOL | MAY_BE_ARRAY)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_xautoclaim, 0, 5, ValkeyGlide, MAY_BE_BOOL | MAY_BE_ARRAY)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, group, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, consumer, IS_STRING, 0)
@@ -945,7 +945,7 @@ ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "-1")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, justid, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_xclaim, 0, 6, Redis, MAY_BE_ARRAY | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_xclaim, 0, 6, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, group, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, consumer, IS_STRING, 0)
@@ -954,12 +954,12 @@ ZEND_ARG_TYPE_INFO(0, ids, IS_ARRAY, 0)
 ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_xdel, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_xdel, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, ids, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_xgroup, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_xgroup, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, operation, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, key, IS_STRING, 1, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, group, IS_STRING, 1, "null")
@@ -968,16 +968,16 @@ ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mkstream, _IS_BOOL, 0, "false")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, entries_read, IS_LONG, 0, "-2")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Redis_xinfo, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlide_xinfo, 0, 1, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, operation, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg1, IS_STRING, 1, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_STRING, 1, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_xlen arginfo_class_Redis_expiretime
+#define arginfo_class_ValkeyGlide_xlen arginfo_class_ValkeyGlide_expiretime
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_xpending, 0, 2, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_xpending, 0, 2, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, group, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, start, IS_STRING, 1, "null")
@@ -986,20 +986,20 @@ ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "-1")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, consumer, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_xrange, 0, 3, Redis, MAY_BE_ARRAY | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_xrange, 0, 3, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, start, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, end, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_xread, 0, 1, Redis, MAY_BE_ARRAY | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_xread, 0, 1, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, streams, IS_ARRAY, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "-1")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, block, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_xreadgroup, 0, 3, Redis, MAY_BE_ARRAY | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_xreadgroup, 0, 3, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, group, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, consumer, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, streams, IS_ARRAY, 0)
@@ -1007,14 +1007,14 @@ ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "1")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, block, IS_LONG, 0, "1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_xrevrange, 0, 3, Redis, MAY_BE_ARRAY | MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_xrevrange, 0, 3, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_BOOL)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, end, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, start, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_xtrim, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_xtrim, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, threshold, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, approx, _IS_BOOL, 0, "false")
@@ -1022,53 +1022,53 @@ ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, minid, _IS_BOOL, 0, "false")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, limit, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zAdd, 0, 2, Redis, MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zAdd, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_MASK(0, score_or_options, MAY_BE_ARRAY | MAY_BE_DOUBLE, NULL)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, more_scores_and_mems, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_zCard arginfo_class_Redis_expiretime
+#define arginfo_class_ValkeyGlide_zCard arginfo_class_ValkeyGlide_expiretime
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zCount, 0, 3, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zCount, 0, 3, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_MASK(0, start, MAY_BE_LONG | MAY_BE_STRING, NULL)
 ZEND_ARG_TYPE_MASK(0, end, MAY_BE_LONG | MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zIncrBy, 0, 3, Redis, MAY_BE_DOUBLE | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zIncrBy, 0, 3, ValkeyGlide, MAY_BE_DOUBLE | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
 ZEND_ARG_TYPE_INFO(0, member, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zLexCount, 0, 3, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zLexCount, 0, 3, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, min, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, max, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zMscore, 0, 2, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zMscore, 0, 2, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, member, IS_MIXED, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_members, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zPopMax, 0, 1, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zPopMax, 0, 1, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_zPopMin arginfo_class_Redis_zPopMax
+#define arginfo_class_ValkeyGlide_zPopMin arginfo_class_ValkeyGlide_zPopMax
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zRange, 0, 3, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zRange, 0, 3, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_MASK(0, start, MAY_BE_STRING | MAY_BE_LONG, NULL)
 ZEND_ARG_TYPE_MASK(0, end, MAY_BE_STRING | MAY_BE_LONG, NULL)
 ZEND_ARG_TYPE_MASK(0, options, MAY_BE_ARRAY | MAY_BE_BOOL | MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zRangeByLex, 0, 3, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zRangeByLex, 0, 3, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, min, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, max, IS_STRING, 0)
@@ -1076,14 +1076,14 @@ ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "-1")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zRangeByScore, 0, 3, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zRangeByScore, 0, 3, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, start, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, end, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zrangestore, 0, 4, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zrangestore, 0, 4, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, dstkey, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, srckey, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, start, IS_STRING, 0)
@@ -1091,44 +1091,44 @@ ZEND_ARG_TYPE_INFO(0, end, IS_STRING, 0)
 ZEND_ARG_TYPE_MASK(0, options, MAY_BE_ARRAY | MAY_BE_BOOL | MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zRandMember, 0, 1, Redis, MAY_BE_STRING | MAY_BE_ARRAY)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zRandMember, 0, 1, ValkeyGlide, MAY_BE_STRING | MAY_BE_ARRAY)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zRank, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zRank, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, member, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zRem, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zRem, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_MIXED, 0)
 ZEND_ARG_TYPE_INFO(0, member, IS_MIXED, 0)
 ZEND_ARG_VARIADIC_TYPE_INFO(0, other_members, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_zRemRangeByLex arginfo_class_Redis_zLexCount
+#define arginfo_class_ValkeyGlide_zRemRangeByLex arginfo_class_ValkeyGlide_zLexCount
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zRemRangeByRank, 0, 3, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zRemRangeByRank, 0, 3, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zRemRangeByScore, 0, 3, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zRemRangeByScore, 0, 3, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, start, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, end, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zRevRange, 0, 3, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zRevRange, 0, 3, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scores, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zRevRangeByLex, 0, 3, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zRevRangeByLex, 0, 3, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, max, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, min, IS_STRING, 0)
@@ -1136,585 +1136,585 @@ ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "-1")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zRevRangeByScore, 0, 3, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zRevRangeByScore, 0, 3, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, max, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, min, IS_STRING, 0)
 ZEND_ARG_TYPE_MASK(0, options, MAY_BE_ARRAY | MAY_BE_BOOL, "[]")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_zRevRank arginfo_class_Redis_zRank
+#define arginfo_class_ValkeyGlide_zRevRank arginfo_class_ValkeyGlide_zRank
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zScore, 0, 2, Redis, MAY_BE_DOUBLE | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zScore, 0, 2, ValkeyGlide, MAY_BE_DOUBLE | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, member, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zdiff, 0, 1, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zdiff, 0, 1, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zdiffstore, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zdiffstore, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, dst, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zinter, 0, 1, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zinter, 0, 1, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, weights, IS_ARRAY, 1, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_zintercard arginfo_class_Redis_sintercard
+#define arginfo_class_ValkeyGlide_zintercard arginfo_class_ValkeyGlide_sintercard
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zinterstore, 0, 2, Redis, MAY_BE_LONG | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zinterstore, 0, 2, ValkeyGlide, MAY_BE_LONG | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, dst, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, weights, IS_ARRAY, 1, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, aggregate, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Redis_zscan, 0, 2, Redis, MAY_BE_ARRAY | MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlide_zscan, 0, 2, ValkeyGlide, MAY_BE_ARRAY | MAY_BE_FALSE)
 ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_ARG_TYPE_MASK(1, iterator, MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING, NULL)
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Redis_zunion arginfo_class_Redis_zinter
+#define arginfo_class_ValkeyGlide_zunion arginfo_class_ValkeyGlide_zinter
 
-#define arginfo_class_Redis_zunionstore arginfo_class_Redis_zinterstore
+#define arginfo_class_ValkeyGlide_zunionstore arginfo_class_ValkeyGlide_zinterstore
 
-ZEND_METHOD(Redis, __construct);
-ZEND_METHOD(Redis, __destruct);
-ZEND_METHOD(Redis, _compress);
-ZEND_METHOD(Redis, _uncompress);
-ZEND_METHOD(Redis, _prefix);
-ZEND_METHOD(Redis, _serialize);
-ZEND_METHOD(Redis, _unserialize);
-ZEND_METHOD(Redis, _pack);
-ZEND_METHOD(Redis, _unpack);
-ZEND_METHOD(Redis, acl);
-ZEND_METHOD(Redis, append);
-ZEND_METHOD(Redis, auth);
-ZEND_METHOD(Redis, bgSave);
-ZEND_METHOD(Redis, bgrewriteaof);
-ZEND_METHOD(Redis, waitaof);
-ZEND_METHOD(Redis, bitcount);
-ZEND_METHOD(Redis, bitop);
-ZEND_METHOD(Redis, bitpos);
-ZEND_METHOD(Redis, blPop);
-ZEND_METHOD(Redis, brPop);
-ZEND_METHOD(Redis, brpoplpush);
-ZEND_METHOD(Redis, bzPopMax);
-ZEND_METHOD(Redis, bzPopMin);
-ZEND_METHOD(Redis, bzmpop);
-ZEND_METHOD(Redis, zmpop);
-ZEND_METHOD(Redis, blmpop);
-ZEND_METHOD(Redis, lmpop);
-ZEND_METHOD(Redis, clearLastError);
-ZEND_METHOD(Redis, client);
-ZEND_METHOD(Redis, close);
-ZEND_METHOD(Redis, command);
-ZEND_METHOD(Redis, config);
-ZEND_METHOD(Redis, connect);
-ZEND_METHOD(Redis, copy);
-ZEND_METHOD(Redis, dbSize);
-ZEND_METHOD(Redis, debug);
-ZEND_METHOD(Redis, decr);
-ZEND_METHOD(Redis, decrBy);
-ZEND_METHOD(Redis, del);
-ZEND_METHOD(Redis, discard);
-ZEND_METHOD(Redis, dump);
-ZEND_METHOD(Redis, echo);
-ZEND_METHOD(Redis, eval);
-ZEND_METHOD(Redis, eval_ro);
-ZEND_METHOD(Redis, evalsha);
-ZEND_METHOD(Redis, evalsha_ro);
-ZEND_METHOD(Redis, exec);
-ZEND_METHOD(Redis, exists);
-ZEND_METHOD(Redis, expire);
-ZEND_METHOD(Redis, expireAt);
-ZEND_METHOD(Redis, failover);
-ZEND_METHOD(Redis, expiretime);
-ZEND_METHOD(Redis, pexpiretime);
-ZEND_METHOD(Redis, fcall);
-ZEND_METHOD(Redis, fcall_ro);
-ZEND_METHOD(Redis, flushAll);
-ZEND_METHOD(Redis, flushDB);
-ZEND_METHOD(Redis, function);
-ZEND_METHOD(Redis, geoadd);
-ZEND_METHOD(Redis, geodist);
-ZEND_METHOD(Redis, geohash);
-ZEND_METHOD(Redis, geopos);
-ZEND_METHOD(Redis, georadius);
-ZEND_METHOD(Redis, georadius_ro);
-ZEND_METHOD(Redis, georadiusbymember);
-ZEND_METHOD(Redis, georadiusbymember_ro);
-ZEND_METHOD(Redis, geosearch);
-ZEND_METHOD(Redis, geosearchstore);
-ZEND_METHOD(Redis, get);
-ZEND_METHOD(Redis, getWithMeta);
-ZEND_METHOD(Redis, getAuth);
-ZEND_METHOD(Redis, getBit);
-ZEND_METHOD(Redis, getEx);
-ZEND_METHOD(Redis, getDBNum);
-ZEND_METHOD(Redis, getDel);
-ZEND_METHOD(Redis, getHost);
-ZEND_METHOD(Redis, getLastError);
-ZEND_METHOD(Redis, getMode);
-ZEND_METHOD(Redis, getOption);
-ZEND_METHOD(Redis, getPersistentID);
-ZEND_METHOD(Redis, getPort);
-ZEND_METHOD(Redis, serverName);
-ZEND_METHOD(Redis, serverVersion);
-ZEND_METHOD(Redis, getRange);
-ZEND_METHOD(Redis, lcs);
-ZEND_METHOD(Redis, getReadTimeout);
-ZEND_METHOD(Redis, getset);
-ZEND_METHOD(Redis, getTimeout);
-ZEND_METHOD(Redis, getTransferredBytes);
-ZEND_METHOD(Redis, clearTransferredBytes);
-ZEND_METHOD(Redis, hDel);
-ZEND_METHOD(Redis, hExists);
-ZEND_METHOD(Redis, hGet);
-ZEND_METHOD(Redis, hGetAll);
-ZEND_METHOD(Redis, hIncrBy);
-ZEND_METHOD(Redis, hIncrByFloat);
-ZEND_METHOD(Redis, hKeys);
-ZEND_METHOD(Redis, hLen);
-ZEND_METHOD(Redis, hMget);
-ZEND_METHOD(Redis, hMset);
-ZEND_METHOD(Redis, hRandField);
-ZEND_METHOD(Redis, hSet);
-ZEND_METHOD(Redis, hSetNx);
-ZEND_METHOD(Redis, hStrLen);
-ZEND_METHOD(Redis, hVals);
-ZEND_METHOD(Redis, hscan);
-ZEND_METHOD(Redis, expiremember);
-ZEND_METHOD(Redis, expirememberat);
-ZEND_METHOD(Redis, incr);
-ZEND_METHOD(Redis, incrBy);
-ZEND_METHOD(Redis, incrByFloat);
-ZEND_METHOD(Redis, info);
-ZEND_METHOD(Redis, isConnected);
-ZEND_METHOD(Redis, keys);
-ZEND_METHOD(Redis, lInsert);
-ZEND_METHOD(Redis, lLen);
-ZEND_METHOD(Redis, lMove);
-ZEND_METHOD(Redis, blmove);
-ZEND_METHOD(Redis, lPop);
-ZEND_METHOD(Redis, lPos);
-ZEND_METHOD(Redis, lPush);
-ZEND_METHOD(Redis, rPush);
-ZEND_METHOD(Redis, lPushx);
-ZEND_METHOD(Redis, rPushx);
-ZEND_METHOD(Redis, lSet);
-ZEND_METHOD(Redis, lastSave);
-ZEND_METHOD(Redis, lindex);
-ZEND_METHOD(Redis, lrange);
-ZEND_METHOD(Redis, lrem);
-ZEND_METHOD(Redis, ltrim);
-ZEND_METHOD(Redis, mget);
-ZEND_METHOD(Redis, migrate);
-ZEND_METHOD(Redis, move);
-ZEND_METHOD(Redis, mset);
-ZEND_METHOD(Redis, msetnx);
-ZEND_METHOD(Redis, multi);
-ZEND_METHOD(Redis, object);
-ZEND_METHOD(Redis, pconnect);
-ZEND_METHOD(Redis, persist);
-ZEND_METHOD(Redis, pexpire);
-ZEND_METHOD(Redis, pexpireAt);
-ZEND_METHOD(Redis, pfadd);
-ZEND_METHOD(Redis, pfcount);
-ZEND_METHOD(Redis, pfmerge);
-ZEND_METHOD(Redis, ping);
-ZEND_METHOD(Redis, pipeline);
-ZEND_METHOD(Redis, psetex);
-ZEND_METHOD(Redis, psubscribe);
-ZEND_METHOD(Redis, pttl);
-ZEND_METHOD(Redis, publish);
-ZEND_METHOD(Redis, pubsub);
-ZEND_METHOD(Redis, punsubscribe);
-ZEND_METHOD(Redis, rPop);
-ZEND_METHOD(Redis, randomKey);
-ZEND_METHOD(Redis, rawcommand);
-ZEND_METHOD(Redis, rename);
-ZEND_METHOD(Redis, renameNx);
-ZEND_METHOD(Redis, reset);
-ZEND_METHOD(Redis, restore);
-ZEND_METHOD(Redis, role);
-ZEND_METHOD(Redis, rpoplpush);
-ZEND_METHOD(Redis, sAdd);
-ZEND_METHOD(Redis, sAddArray);
-ZEND_METHOD(Redis, sDiff);
-ZEND_METHOD(Redis, sDiffStore);
-ZEND_METHOD(Redis, sInter);
-ZEND_METHOD(Redis, sintercard);
-ZEND_METHOD(Redis, sInterStore);
-ZEND_METHOD(Redis, sMembers);
-ZEND_METHOD(Redis, sMisMember);
-ZEND_METHOD(Redis, sMove);
-ZEND_METHOD(Redis, sPop);
-ZEND_METHOD(Redis, sRandMember);
-ZEND_METHOD(Redis, sUnion);
-ZEND_METHOD(Redis, sUnionStore);
-ZEND_METHOD(Redis, save);
-ZEND_METHOD(Redis, scan);
-ZEND_METHOD(Redis, scard);
-ZEND_METHOD(Redis, script);
-ZEND_METHOD(Redis, select);
-ZEND_METHOD(Redis, set);
-ZEND_METHOD(Redis, setBit);
-ZEND_METHOD(Redis, setRange);
-ZEND_METHOD(Redis, setOption);
-ZEND_METHOD(Redis, setex);
-ZEND_METHOD(Redis, setnx);
-ZEND_METHOD(Redis, sismember);
-ZEND_METHOD(Redis, slaveof);
-ZEND_METHOD(Redis, replicaof);
-ZEND_METHOD(Redis, touch);
-ZEND_METHOD(Redis, slowlog);
-ZEND_METHOD(Redis, sort);
-ZEND_METHOD(Redis, sort_ro);
-ZEND_METHOD(Redis, sortAsc);
-ZEND_METHOD(Redis, sortAscAlpha);
-ZEND_METHOD(Redis, sortDesc);
-ZEND_METHOD(Redis, sortDescAlpha);
-ZEND_METHOD(Redis, srem);
-ZEND_METHOD(Redis, sscan);
-ZEND_METHOD(Redis, ssubscribe);
-ZEND_METHOD(Redis, strlen);
-ZEND_METHOD(Redis, subscribe);
-ZEND_METHOD(Redis, sunsubscribe);
-ZEND_METHOD(Redis, swapdb);
-ZEND_METHOD(Redis, time);
-ZEND_METHOD(Redis, ttl);
-ZEND_METHOD(Redis, type);
-ZEND_METHOD(Redis, unlink);
-ZEND_METHOD(Redis, unsubscribe);
-ZEND_METHOD(Redis, unwatch);
-ZEND_METHOD(Redis, watch);
-ZEND_METHOD(Redis, wait);
-ZEND_METHOD(Redis, xack);
-ZEND_METHOD(Redis, xadd);
-ZEND_METHOD(Redis, xautoclaim);
-ZEND_METHOD(Redis, xclaim);
-ZEND_METHOD(Redis, xdel);
-ZEND_METHOD(Redis, xgroup);
-ZEND_METHOD(Redis, xinfo);
-ZEND_METHOD(Redis, xlen);
-ZEND_METHOD(Redis, xpending);
-ZEND_METHOD(Redis, xrange);
-ZEND_METHOD(Redis, xread);
-ZEND_METHOD(Redis, xreadgroup);
-ZEND_METHOD(Redis, xrevrange);
-ZEND_METHOD(Redis, xtrim);
-ZEND_METHOD(Redis, zAdd);
-ZEND_METHOD(Redis, zCard);
-ZEND_METHOD(Redis, zCount);
-ZEND_METHOD(Redis, zIncrBy);
-ZEND_METHOD(Redis, zLexCount);
-ZEND_METHOD(Redis, zMscore);
-ZEND_METHOD(Redis, zPopMax);
-ZEND_METHOD(Redis, zPopMin);
-ZEND_METHOD(Redis, zRange);
-ZEND_METHOD(Redis, zRangeByLex);
-ZEND_METHOD(Redis, zRangeByScore);
-ZEND_METHOD(Redis, zrangestore);
-ZEND_METHOD(Redis, zRandMember);
-ZEND_METHOD(Redis, zRank);
-ZEND_METHOD(Redis, zRem);
-ZEND_METHOD(Redis, zRemRangeByLex);
-ZEND_METHOD(Redis, zRemRangeByRank);
-ZEND_METHOD(Redis, zRemRangeByScore);
-ZEND_METHOD(Redis, zRevRange);
-ZEND_METHOD(Redis, zRevRangeByLex);
-ZEND_METHOD(Redis, zRevRangeByScore);
-ZEND_METHOD(Redis, zRevRank);
-ZEND_METHOD(Redis, zScore);
-ZEND_METHOD(Redis, zdiff);
-ZEND_METHOD(Redis, zdiffstore);
-ZEND_METHOD(Redis, zinter);
-ZEND_METHOD(Redis, zintercard);
-ZEND_METHOD(Redis, zinterstore);
-ZEND_METHOD(Redis, zscan);
-ZEND_METHOD(Redis, zunion);
-ZEND_METHOD(Redis, zunionstore);
+ZEND_METHOD(ValkeyGlide, __construct);
+ZEND_METHOD(ValkeyGlide, __destruct);
+ZEND_METHOD(ValkeyGlide, _compress);
+ZEND_METHOD(ValkeyGlide, _uncompress);
+ZEND_METHOD(ValkeyGlide, _prefix);
+ZEND_METHOD(ValkeyGlide, _serialize);
+ZEND_METHOD(ValkeyGlide, _unserialize);
+ZEND_METHOD(ValkeyGlide, _pack);
+ZEND_METHOD(ValkeyGlide, _unpack);
+ZEND_METHOD(ValkeyGlide, acl);
+ZEND_METHOD(ValkeyGlide, append);
+ZEND_METHOD(ValkeyGlide, auth);
+ZEND_METHOD(ValkeyGlide, bgSave);
+ZEND_METHOD(ValkeyGlide, bgrewriteaof);
+ZEND_METHOD(ValkeyGlide, waitaof);
+ZEND_METHOD(ValkeyGlide, bitcount);
+ZEND_METHOD(ValkeyGlide, bitop);
+ZEND_METHOD(ValkeyGlide, bitpos);
+ZEND_METHOD(ValkeyGlide, blPop);
+ZEND_METHOD(ValkeyGlide, brPop);
+ZEND_METHOD(ValkeyGlide, brpoplpush);
+ZEND_METHOD(ValkeyGlide, bzPopMax);
+ZEND_METHOD(ValkeyGlide, bzPopMin);
+ZEND_METHOD(ValkeyGlide, bzmpop);
+ZEND_METHOD(ValkeyGlide, zmpop);
+ZEND_METHOD(ValkeyGlide, blmpop);
+ZEND_METHOD(ValkeyGlide, lmpop);
+ZEND_METHOD(ValkeyGlide, clearLastError);
+ZEND_METHOD(ValkeyGlide, client);
+ZEND_METHOD(ValkeyGlide, close);
+ZEND_METHOD(ValkeyGlide, command);
+ZEND_METHOD(ValkeyGlide, config);
+ZEND_METHOD(ValkeyGlide, connect);
+ZEND_METHOD(ValkeyGlide, copy);
+ZEND_METHOD(ValkeyGlide, dbSize);
+ZEND_METHOD(ValkeyGlide, debug);
+ZEND_METHOD(ValkeyGlide, decr);
+ZEND_METHOD(ValkeyGlide, decrBy);
+ZEND_METHOD(ValkeyGlide, del);
+ZEND_METHOD(ValkeyGlide, discard);
+ZEND_METHOD(ValkeyGlide, dump);
+ZEND_METHOD(ValkeyGlide, echo);
+ZEND_METHOD(ValkeyGlide, eval);
+ZEND_METHOD(ValkeyGlide, eval_ro);
+ZEND_METHOD(ValkeyGlide, evalsha);
+ZEND_METHOD(ValkeyGlide, evalsha_ro);
+ZEND_METHOD(ValkeyGlide, exec);
+ZEND_METHOD(ValkeyGlide, exists);
+ZEND_METHOD(ValkeyGlide, expire);
+ZEND_METHOD(ValkeyGlide, expireAt);
+ZEND_METHOD(ValkeyGlide, failover);
+ZEND_METHOD(ValkeyGlide, expiretime);
+ZEND_METHOD(ValkeyGlide, pexpiretime);
+ZEND_METHOD(ValkeyGlide, fcall);
+ZEND_METHOD(ValkeyGlide, fcall_ro);
+ZEND_METHOD(ValkeyGlide, flushAll);
+ZEND_METHOD(ValkeyGlide, flushDB);
+ZEND_METHOD(ValkeyGlide, function);
+ZEND_METHOD(ValkeyGlide, geoadd);
+ZEND_METHOD(ValkeyGlide, geodist);
+ZEND_METHOD(ValkeyGlide, geohash);
+ZEND_METHOD(ValkeyGlide, geopos);
+ZEND_METHOD(ValkeyGlide, georadius);
+ZEND_METHOD(ValkeyGlide, georadius_ro);
+ZEND_METHOD(ValkeyGlide, georadiusbymember);
+ZEND_METHOD(ValkeyGlide, georadiusbymember_ro);
+ZEND_METHOD(ValkeyGlide, geosearch);
+ZEND_METHOD(ValkeyGlide, geosearchstore);
+ZEND_METHOD(ValkeyGlide, get);
+ZEND_METHOD(ValkeyGlide, getWithMeta);
+ZEND_METHOD(ValkeyGlide, getAuth);
+ZEND_METHOD(ValkeyGlide, getBit);
+ZEND_METHOD(ValkeyGlide, getEx);
+ZEND_METHOD(ValkeyGlide, getDBNum);
+ZEND_METHOD(ValkeyGlide, getDel);
+ZEND_METHOD(ValkeyGlide, getHost);
+ZEND_METHOD(ValkeyGlide, getLastError);
+ZEND_METHOD(ValkeyGlide, getMode);
+ZEND_METHOD(ValkeyGlide, getOption);
+ZEND_METHOD(ValkeyGlide, getPersistentID);
+ZEND_METHOD(ValkeyGlide, getPort);
+ZEND_METHOD(ValkeyGlide, serverName);
+ZEND_METHOD(ValkeyGlide, serverVersion);
+ZEND_METHOD(ValkeyGlide, getRange);
+ZEND_METHOD(ValkeyGlide, lcs);
+ZEND_METHOD(ValkeyGlide, getReadTimeout);
+ZEND_METHOD(ValkeyGlide, getset);
+ZEND_METHOD(ValkeyGlide, getTimeout);
+ZEND_METHOD(ValkeyGlide, getTransferredBytes);
+ZEND_METHOD(ValkeyGlide, clearTransferredBytes);
+ZEND_METHOD(ValkeyGlide, hDel);
+ZEND_METHOD(ValkeyGlide, hExists);
+ZEND_METHOD(ValkeyGlide, hGet);
+ZEND_METHOD(ValkeyGlide, hGetAll);
+ZEND_METHOD(ValkeyGlide, hIncrBy);
+ZEND_METHOD(ValkeyGlide, hIncrByFloat);
+ZEND_METHOD(ValkeyGlide, hKeys);
+ZEND_METHOD(ValkeyGlide, hLen);
+ZEND_METHOD(ValkeyGlide, hMget);
+ZEND_METHOD(ValkeyGlide, hMset);
+ZEND_METHOD(ValkeyGlide, hRandField);
+ZEND_METHOD(ValkeyGlide, hSet);
+ZEND_METHOD(ValkeyGlide, hSetNx);
+ZEND_METHOD(ValkeyGlide, hStrLen);
+ZEND_METHOD(ValkeyGlide, hVals);
+ZEND_METHOD(ValkeyGlide, hscan);
+ZEND_METHOD(ValkeyGlide, expiremember);
+ZEND_METHOD(ValkeyGlide, expirememberat);
+ZEND_METHOD(ValkeyGlide, incr);
+ZEND_METHOD(ValkeyGlide, incrBy);
+ZEND_METHOD(ValkeyGlide, incrByFloat);
+ZEND_METHOD(ValkeyGlide, info);
+ZEND_METHOD(ValkeyGlide, isConnected);
+ZEND_METHOD(ValkeyGlide, keys);
+ZEND_METHOD(ValkeyGlide, lInsert);
+ZEND_METHOD(ValkeyGlide, lLen);
+ZEND_METHOD(ValkeyGlide, lMove);
+ZEND_METHOD(ValkeyGlide, blmove);
+ZEND_METHOD(ValkeyGlide, lPop);
+ZEND_METHOD(ValkeyGlide, lPos);
+ZEND_METHOD(ValkeyGlide, lPush);
+ZEND_METHOD(ValkeyGlide, rPush);
+ZEND_METHOD(ValkeyGlide, lPushx);
+ZEND_METHOD(ValkeyGlide, rPushx);
+ZEND_METHOD(ValkeyGlide, lSet);
+ZEND_METHOD(ValkeyGlide, lastSave);
+ZEND_METHOD(ValkeyGlide, lindex);
+ZEND_METHOD(ValkeyGlide, lrange);
+ZEND_METHOD(ValkeyGlide, lrem);
+ZEND_METHOD(ValkeyGlide, ltrim);
+ZEND_METHOD(ValkeyGlide, mget);
+ZEND_METHOD(ValkeyGlide, migrate);
+ZEND_METHOD(ValkeyGlide, move);
+ZEND_METHOD(ValkeyGlide, mset);
+ZEND_METHOD(ValkeyGlide, msetnx);
+ZEND_METHOD(ValkeyGlide, multi);
+ZEND_METHOD(ValkeyGlide, object);
+ZEND_METHOD(ValkeyGlide, pconnect);
+ZEND_METHOD(ValkeyGlide, persist);
+ZEND_METHOD(ValkeyGlide, pexpire);
+ZEND_METHOD(ValkeyGlide, pexpireAt);
+ZEND_METHOD(ValkeyGlide, pfadd);
+ZEND_METHOD(ValkeyGlide, pfcount);
+ZEND_METHOD(ValkeyGlide, pfmerge);
+ZEND_METHOD(ValkeyGlide, ping);
+ZEND_METHOD(ValkeyGlide, pipeline);
+ZEND_METHOD(ValkeyGlide, psetex);
+ZEND_METHOD(ValkeyGlide, psubscribe);
+ZEND_METHOD(ValkeyGlide, pttl);
+ZEND_METHOD(ValkeyGlide, publish);
+ZEND_METHOD(ValkeyGlide, pubsub);
+ZEND_METHOD(ValkeyGlide, punsubscribe);
+ZEND_METHOD(ValkeyGlide, rPop);
+ZEND_METHOD(ValkeyGlide, randomKey);
+ZEND_METHOD(ValkeyGlide, rawcommand);
+ZEND_METHOD(ValkeyGlide, rename);
+ZEND_METHOD(ValkeyGlide, renameNx);
+ZEND_METHOD(ValkeyGlide, reset);
+ZEND_METHOD(ValkeyGlide, restore);
+ZEND_METHOD(ValkeyGlide, role);
+ZEND_METHOD(ValkeyGlide, rpoplpush);
+ZEND_METHOD(ValkeyGlide, sAdd);
+ZEND_METHOD(ValkeyGlide, sAddArray);
+ZEND_METHOD(ValkeyGlide, sDiff);
+ZEND_METHOD(ValkeyGlide, sDiffStore);
+ZEND_METHOD(ValkeyGlide, sInter);
+ZEND_METHOD(ValkeyGlide, sintercard);
+ZEND_METHOD(ValkeyGlide, sInterStore);
+ZEND_METHOD(ValkeyGlide, sMembers);
+ZEND_METHOD(ValkeyGlide, sMisMember);
+ZEND_METHOD(ValkeyGlide, sMove);
+ZEND_METHOD(ValkeyGlide, sPop);
+ZEND_METHOD(ValkeyGlide, sRandMember);
+ZEND_METHOD(ValkeyGlide, sUnion);
+ZEND_METHOD(ValkeyGlide, sUnionStore);
+ZEND_METHOD(ValkeyGlide, save);
+ZEND_METHOD(ValkeyGlide, scan);
+ZEND_METHOD(ValkeyGlide, scard);
+ZEND_METHOD(ValkeyGlide, script);
+ZEND_METHOD(ValkeyGlide, select);
+ZEND_METHOD(ValkeyGlide, set);
+ZEND_METHOD(ValkeyGlide, setBit);
+ZEND_METHOD(ValkeyGlide, setRange);
+ZEND_METHOD(ValkeyGlide, setOption);
+ZEND_METHOD(ValkeyGlide, setex);
+ZEND_METHOD(ValkeyGlide, setnx);
+ZEND_METHOD(ValkeyGlide, sismember);
+ZEND_METHOD(ValkeyGlide, slaveof);
+ZEND_METHOD(ValkeyGlide, replicaof);
+ZEND_METHOD(ValkeyGlide, touch);
+ZEND_METHOD(ValkeyGlide, slowlog);
+ZEND_METHOD(ValkeyGlide, sort);
+ZEND_METHOD(ValkeyGlide, sort_ro);
+ZEND_METHOD(ValkeyGlide, sortAsc);
+ZEND_METHOD(ValkeyGlide, sortAscAlpha);
+ZEND_METHOD(ValkeyGlide, sortDesc);
+ZEND_METHOD(ValkeyGlide, sortDescAlpha);
+ZEND_METHOD(ValkeyGlide, srem);
+ZEND_METHOD(ValkeyGlide, sscan);
+ZEND_METHOD(ValkeyGlide, ssubscribe);
+ZEND_METHOD(ValkeyGlide, strlen);
+ZEND_METHOD(ValkeyGlide, subscribe);
+ZEND_METHOD(ValkeyGlide, sunsubscribe);
+ZEND_METHOD(ValkeyGlide, swapdb);
+ZEND_METHOD(ValkeyGlide, time);
+ZEND_METHOD(ValkeyGlide, ttl);
+ZEND_METHOD(ValkeyGlide, type);
+ZEND_METHOD(ValkeyGlide, unlink);
+ZEND_METHOD(ValkeyGlide, unsubscribe);
+ZEND_METHOD(ValkeyGlide, unwatch);
+ZEND_METHOD(ValkeyGlide, watch);
+ZEND_METHOD(ValkeyGlide, wait);
+ZEND_METHOD(ValkeyGlide, xack);
+ZEND_METHOD(ValkeyGlide, xadd);
+ZEND_METHOD(ValkeyGlide, xautoclaim);
+ZEND_METHOD(ValkeyGlide, xclaim);
+ZEND_METHOD(ValkeyGlide, xdel);
+ZEND_METHOD(ValkeyGlide, xgroup);
+ZEND_METHOD(ValkeyGlide, xinfo);
+ZEND_METHOD(ValkeyGlide, xlen);
+ZEND_METHOD(ValkeyGlide, xpending);
+ZEND_METHOD(ValkeyGlide, xrange);
+ZEND_METHOD(ValkeyGlide, xread);
+ZEND_METHOD(ValkeyGlide, xreadgroup);
+ZEND_METHOD(ValkeyGlide, xrevrange);
+ZEND_METHOD(ValkeyGlide, xtrim);
+ZEND_METHOD(ValkeyGlide, zAdd);
+ZEND_METHOD(ValkeyGlide, zCard);
+ZEND_METHOD(ValkeyGlide, zCount);
+ZEND_METHOD(ValkeyGlide, zIncrBy);
+ZEND_METHOD(ValkeyGlide, zLexCount);
+ZEND_METHOD(ValkeyGlide, zMscore);
+ZEND_METHOD(ValkeyGlide, zPopMax);
+ZEND_METHOD(ValkeyGlide, zPopMin);
+ZEND_METHOD(ValkeyGlide, zRange);
+ZEND_METHOD(ValkeyGlide, zRangeByLex);
+ZEND_METHOD(ValkeyGlide, zRangeByScore);
+ZEND_METHOD(ValkeyGlide, zrangestore);
+ZEND_METHOD(ValkeyGlide, zRandMember);
+ZEND_METHOD(ValkeyGlide, zRank);
+ZEND_METHOD(ValkeyGlide, zRem);
+ZEND_METHOD(ValkeyGlide, zRemRangeByLex);
+ZEND_METHOD(ValkeyGlide, zRemRangeByRank);
+ZEND_METHOD(ValkeyGlide, zRemRangeByScore);
+ZEND_METHOD(ValkeyGlide, zRevRange);
+ZEND_METHOD(ValkeyGlide, zRevRangeByLex);
+ZEND_METHOD(ValkeyGlide, zRevRangeByScore);
+ZEND_METHOD(ValkeyGlide, zRevRank);
+ZEND_METHOD(ValkeyGlide, zScore);
+ZEND_METHOD(ValkeyGlide, zdiff);
+ZEND_METHOD(ValkeyGlide, zdiffstore);
+ZEND_METHOD(ValkeyGlide, zinter);
+ZEND_METHOD(ValkeyGlide, zintercard);
+ZEND_METHOD(ValkeyGlide, zinterstore);
+ZEND_METHOD(ValkeyGlide, zscan);
+ZEND_METHOD(ValkeyGlide, zunion);
+ZEND_METHOD(ValkeyGlide, zunionstore);
 
-static const zend_function_entry class_Redis_methods[] = {
-	ZEND_ME(Redis, __construct, arginfo_class_Redis___construct, ZEND_ACC_PUBLIC)
-		ZEND_ME(Redis, __destruct, arginfo_class_Redis___destruct, ZEND_ACC_PUBLIC)
-			ZEND_ME(Redis, _compress, arginfo_class_Redis__compress, ZEND_ACC_PUBLIC)
-				ZEND_ME(Redis, _uncompress, arginfo_class_Redis__uncompress, ZEND_ACC_PUBLIC)
-					ZEND_ME(Redis, _prefix, arginfo_class_Redis__prefix, ZEND_ACC_PUBLIC)
-						ZEND_ME(Redis, _serialize, arginfo_class_Redis__serialize, ZEND_ACC_PUBLIC)
-							ZEND_ME(Redis, _unserialize, arginfo_class_Redis__unserialize, ZEND_ACC_PUBLIC)
-								ZEND_ME(Redis, _pack, arginfo_class_Redis__pack, ZEND_ACC_PUBLIC)
-									ZEND_ME(Redis, _unpack, arginfo_class_Redis__unpack, ZEND_ACC_PUBLIC)
-										ZEND_ME(Redis, acl, arginfo_class_Redis_acl, ZEND_ACC_PUBLIC)
-											ZEND_ME(Redis, append, arginfo_class_Redis_append, ZEND_ACC_PUBLIC)
-												ZEND_ME(Redis, auth, arginfo_class_Redis_auth, ZEND_ACC_PUBLIC)
-													ZEND_ME(Redis, bgSave, arginfo_class_Redis_bgSave, ZEND_ACC_PUBLIC)
-														ZEND_ME(Redis, bgrewriteaof, arginfo_class_Redis_bgrewriteaof, ZEND_ACC_PUBLIC)
-															ZEND_ME(Redis, waitaof, arginfo_class_Redis_waitaof, ZEND_ACC_PUBLIC)
-																ZEND_ME(Redis, bitcount, arginfo_class_Redis_bitcount, ZEND_ACC_PUBLIC)
-																	ZEND_ME(Redis, bitop, arginfo_class_Redis_bitop, ZEND_ACC_PUBLIC)
-																		ZEND_ME(Redis, bitpos, arginfo_class_Redis_bitpos, ZEND_ACC_PUBLIC)
-																			ZEND_ME(Redis, blPop, arginfo_class_Redis_blPop, ZEND_ACC_PUBLIC)
-																				ZEND_ME(Redis, brPop, arginfo_class_Redis_brPop, ZEND_ACC_PUBLIC)
-																					ZEND_ME(Redis, brpoplpush, arginfo_class_Redis_brpoplpush, ZEND_ACC_PUBLIC)
-																						ZEND_ME(Redis, bzPopMax, arginfo_class_Redis_bzPopMax, ZEND_ACC_PUBLIC)
-																							ZEND_ME(Redis, bzPopMin, arginfo_class_Redis_bzPopMin, ZEND_ACC_PUBLIC)
-																								ZEND_ME(Redis, bzmpop, arginfo_class_Redis_bzmpop, ZEND_ACC_PUBLIC)
-																									ZEND_ME(Redis, zmpop, arginfo_class_Redis_zmpop, ZEND_ACC_PUBLIC)
-																										ZEND_ME(Redis, blmpop, arginfo_class_Redis_blmpop, ZEND_ACC_PUBLIC)
-																											ZEND_ME(Redis, lmpop, arginfo_class_Redis_lmpop, ZEND_ACC_PUBLIC)
-																												ZEND_ME(Redis, clearLastError, arginfo_class_Redis_clearLastError, ZEND_ACC_PUBLIC)
-																													ZEND_ME(Redis, client, arginfo_class_Redis_client, ZEND_ACC_PUBLIC)
-																														ZEND_ME(Redis, close, arginfo_class_Redis_close, ZEND_ACC_PUBLIC)
-																															ZEND_ME(Redis, command, arginfo_class_Redis_command, ZEND_ACC_PUBLIC)
-																																ZEND_ME(Redis, config, arginfo_class_Redis_config, ZEND_ACC_PUBLIC)
-																																	ZEND_ME(Redis, connect, arginfo_class_Redis_connect, ZEND_ACC_PUBLIC)
-																																		ZEND_ME(Redis, copy, arginfo_class_Redis_copy, ZEND_ACC_PUBLIC)
-																																			ZEND_ME(Redis, dbSize, arginfo_class_Redis_dbSize, ZEND_ACC_PUBLIC)
-																																				ZEND_ME(Redis, debug, arginfo_class_Redis_debug, ZEND_ACC_PUBLIC)
-																																					ZEND_ME(Redis, decr, arginfo_class_Redis_decr, ZEND_ACC_PUBLIC)
-																																						ZEND_ME(Redis, decrBy, arginfo_class_Redis_decrBy, ZEND_ACC_PUBLIC)
-																																							ZEND_ME(Redis, del, arginfo_class_Redis_del, ZEND_ACC_PUBLIC)
-																																								ZEND_MALIAS(Redis, delete, del, arginfo_class_Redis_delete, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
-																																									ZEND_ME(Redis, discard, arginfo_class_Redis_discard, ZEND_ACC_PUBLIC)
-																																										ZEND_ME(Redis, dump, arginfo_class_Redis_dump, ZEND_ACC_PUBLIC)
-																																											ZEND_ME(Redis, echo, arginfo_class_Redis_echo, ZEND_ACC_PUBLIC)
-																																												ZEND_ME(Redis, eval, arginfo_class_Redis_eval, ZEND_ACC_PUBLIC)
-																																													ZEND_ME(Redis, eval_ro, arginfo_class_Redis_eval_ro, ZEND_ACC_PUBLIC)
-																																														ZEND_ME(Redis, evalsha, arginfo_class_Redis_evalsha, ZEND_ACC_PUBLIC)
-																																															ZEND_ME(Redis, evalsha_ro, arginfo_class_Redis_evalsha_ro, ZEND_ACC_PUBLIC)
-																																																ZEND_ME(Redis, exec, arginfo_class_Redis_exec, ZEND_ACC_PUBLIC)
-																																																	ZEND_ME(Redis, exists, arginfo_class_Redis_exists, ZEND_ACC_PUBLIC)
-																																																		ZEND_ME(Redis, expire, arginfo_class_Redis_expire, ZEND_ACC_PUBLIC)
-																																																			ZEND_ME(Redis, expireAt, arginfo_class_Redis_expireAt, ZEND_ACC_PUBLIC)
-																																																				ZEND_ME(Redis, failover, arginfo_class_Redis_failover, ZEND_ACC_PUBLIC)
-																																																					ZEND_ME(Redis, expiretime, arginfo_class_Redis_expiretime, ZEND_ACC_PUBLIC)
-																																																						ZEND_ME(Redis, pexpiretime, arginfo_class_Redis_pexpiretime, ZEND_ACC_PUBLIC)
-																																																							ZEND_ME(Redis, fcall, arginfo_class_Redis_fcall, ZEND_ACC_PUBLIC)
-																																																								ZEND_ME(Redis, fcall_ro, arginfo_class_Redis_fcall_ro, ZEND_ACC_PUBLIC)
-																																																									ZEND_ME(Redis, flushAll, arginfo_class_Redis_flushAll, ZEND_ACC_PUBLIC)
-																																																										ZEND_ME(Redis, flushDB, arginfo_class_Redis_flushDB, ZEND_ACC_PUBLIC)
-																																																											ZEND_ME(Redis, function, arginfo_class_Redis_function, ZEND_ACC_PUBLIC)
-																																																												ZEND_ME(Redis, geoadd, arginfo_class_Redis_geoadd, ZEND_ACC_PUBLIC)
-																																																													ZEND_ME(Redis, geodist, arginfo_class_Redis_geodist, ZEND_ACC_PUBLIC)
-																																																														ZEND_ME(Redis, geohash, arginfo_class_Redis_geohash, ZEND_ACC_PUBLIC)
-																																																															ZEND_ME(Redis, geopos, arginfo_class_Redis_geopos, ZEND_ACC_PUBLIC)
-																																																																ZEND_ME(Redis, georadius, arginfo_class_Redis_georadius, ZEND_ACC_PUBLIC)
-																																																																	ZEND_ME(Redis, georadius_ro, arginfo_class_Redis_georadius_ro, ZEND_ACC_PUBLIC)
-																																																																		ZEND_ME(Redis, georadiusbymember, arginfo_class_Redis_georadiusbymember, ZEND_ACC_PUBLIC)
-																																																																			ZEND_ME(Redis, georadiusbymember_ro, arginfo_class_Redis_georadiusbymember_ro, ZEND_ACC_PUBLIC)
-																																																																				ZEND_ME(Redis, geosearch, arginfo_class_Redis_geosearch, ZEND_ACC_PUBLIC)
-																																																																					ZEND_ME(Redis, geosearchstore, arginfo_class_Redis_geosearchstore, ZEND_ACC_PUBLIC)
-																																																																						ZEND_ME(Redis, get, arginfo_class_Redis_get, ZEND_ACC_PUBLIC)
-																																																																							ZEND_ME(Redis, getWithMeta, arginfo_class_Redis_getWithMeta, ZEND_ACC_PUBLIC)
-																																																																								ZEND_ME(Redis, getAuth, arginfo_class_Redis_getAuth, ZEND_ACC_PUBLIC)
-																																																																									ZEND_ME(Redis, getBit, arginfo_class_Redis_getBit, ZEND_ACC_PUBLIC)
-																																																																										ZEND_ME(Redis, getEx, arginfo_class_Redis_getEx, ZEND_ACC_PUBLIC)
-																																																																											ZEND_ME(Redis, getDBNum, arginfo_class_Redis_getDBNum, ZEND_ACC_PUBLIC)
-																																																																												ZEND_ME(Redis, getDel, arginfo_class_Redis_getDel, ZEND_ACC_PUBLIC)
-																																																																													ZEND_ME(Redis, getHost, arginfo_class_Redis_getHost, ZEND_ACC_PUBLIC)
-																																																																														ZEND_ME(Redis, getLastError, arginfo_class_Redis_getLastError, ZEND_ACC_PUBLIC)
-																																																																															ZEND_ME(Redis, getMode, arginfo_class_Redis_getMode, ZEND_ACC_PUBLIC)
-																																																																																ZEND_ME(Redis, getOption, arginfo_class_Redis_getOption, ZEND_ACC_PUBLIC)
-																																																																																	ZEND_ME(Redis, getPersistentID, arginfo_class_Redis_getPersistentID, ZEND_ACC_PUBLIC)
-																																																																																		ZEND_ME(Redis, getPort, arginfo_class_Redis_getPort, ZEND_ACC_PUBLIC)
-																																																																																			ZEND_ME(Redis, serverName, arginfo_class_Redis_serverName, ZEND_ACC_PUBLIC)
-																																																																																				ZEND_ME(Redis, serverVersion, arginfo_class_Redis_serverVersion, ZEND_ACC_PUBLIC)
-																																																																																					ZEND_ME(Redis, getRange, arginfo_class_Redis_getRange, ZEND_ACC_PUBLIC)
-																																																																																						ZEND_ME(Redis, lcs, arginfo_class_Redis_lcs, ZEND_ACC_PUBLIC)
-																																																																																							ZEND_ME(Redis, getReadTimeout, arginfo_class_Redis_getReadTimeout, ZEND_ACC_PUBLIC)
-																																																																																								ZEND_ME(Redis, getset, arginfo_class_Redis_getset, ZEND_ACC_PUBLIC)
-																																																																																									ZEND_ME(Redis, getTimeout, arginfo_class_Redis_getTimeout, ZEND_ACC_PUBLIC)
-																																																																																										ZEND_ME(Redis, getTransferredBytes, arginfo_class_Redis_getTransferredBytes, ZEND_ACC_PUBLIC)
-																																																																																											ZEND_ME(Redis, clearTransferredBytes, arginfo_class_Redis_clearTransferredBytes, ZEND_ACC_PUBLIC)
-																																																																																												ZEND_ME(Redis, hDel, arginfo_class_Redis_hDel, ZEND_ACC_PUBLIC)
-																																																																																													ZEND_ME(Redis, hExists, arginfo_class_Redis_hExists, ZEND_ACC_PUBLIC)
-																																																																																														ZEND_ME(Redis, hGet, arginfo_class_Redis_hGet, ZEND_ACC_PUBLIC)
-																																																																																															ZEND_ME(Redis, hGetAll, arginfo_class_Redis_hGetAll, ZEND_ACC_PUBLIC)
-																																																																																																ZEND_ME(Redis, hIncrBy, arginfo_class_Redis_hIncrBy, ZEND_ACC_PUBLIC)
-																																																																																																	ZEND_ME(Redis, hIncrByFloat, arginfo_class_Redis_hIncrByFloat, ZEND_ACC_PUBLIC)
-																																																																																																		ZEND_ME(Redis, hKeys, arginfo_class_Redis_hKeys, ZEND_ACC_PUBLIC)
-																																																																																																			ZEND_ME(Redis, hLen, arginfo_class_Redis_hLen, ZEND_ACC_PUBLIC)
-																																																																																																				ZEND_ME(Redis, hMget, arginfo_class_Redis_hMget, ZEND_ACC_PUBLIC)
-																																																																																																					ZEND_ME(Redis, hMset, arginfo_class_Redis_hMset, ZEND_ACC_PUBLIC)
-																																																																																																						ZEND_ME(Redis, hRandField, arginfo_class_Redis_hRandField, ZEND_ACC_PUBLIC)
-																																																																																																							ZEND_ME(Redis, hSet, arginfo_class_Redis_hSet, ZEND_ACC_PUBLIC)
-																																																																																																								ZEND_ME(Redis, hSetNx, arginfo_class_Redis_hSetNx, ZEND_ACC_PUBLIC)
-																																																																																																									ZEND_ME(Redis, hStrLen, arginfo_class_Redis_hStrLen, ZEND_ACC_PUBLIC)
-																																																																																																										ZEND_ME(Redis, hVals, arginfo_class_Redis_hVals, ZEND_ACC_PUBLIC)
-																																																																																																											ZEND_ME(Redis, hscan, arginfo_class_Redis_hscan, ZEND_ACC_PUBLIC)
-																																																																																																												ZEND_ME(Redis, expiremember, arginfo_class_Redis_expiremember, ZEND_ACC_PUBLIC)
-																																																																																																													ZEND_ME(Redis, expirememberat, arginfo_class_Redis_expirememberat, ZEND_ACC_PUBLIC)
-																																																																																																														ZEND_ME(Redis, incr, arginfo_class_Redis_incr, ZEND_ACC_PUBLIC)
-																																																																																																															ZEND_ME(Redis, incrBy, arginfo_class_Redis_incrBy, ZEND_ACC_PUBLIC)
-																																																																																																																ZEND_ME(Redis, incrByFloat, arginfo_class_Redis_incrByFloat, ZEND_ACC_PUBLIC)
-																																																																																																																	ZEND_ME(Redis, info, arginfo_class_Redis_info, ZEND_ACC_PUBLIC)
-																																																																																																																		ZEND_ME(Redis, isConnected, arginfo_class_Redis_isConnected, ZEND_ACC_PUBLIC)
-																																																																																																																			ZEND_ME(Redis, keys, arginfo_class_Redis_keys, ZEND_ACC_PUBLIC)
-																																																																																																																				ZEND_ME(Redis, lInsert, arginfo_class_Redis_lInsert, ZEND_ACC_PUBLIC)
-																																																																																																																					ZEND_ME(Redis, lLen, arginfo_class_Redis_lLen, ZEND_ACC_PUBLIC)
-																																																																																																																						ZEND_ME(Redis, lMove, arginfo_class_Redis_lMove, ZEND_ACC_PUBLIC)
-																																																																																																																							ZEND_ME(Redis, blmove, arginfo_class_Redis_blmove, ZEND_ACC_PUBLIC)
-																																																																																																																								ZEND_ME(Redis, lPop, arginfo_class_Redis_lPop, ZEND_ACC_PUBLIC)
-																																																																																																																									ZEND_ME(Redis, lPos, arginfo_class_Redis_lPos, ZEND_ACC_PUBLIC)
-																																																																																																																										ZEND_ME(Redis, lPush, arginfo_class_Redis_lPush, ZEND_ACC_PUBLIC)
-																																																																																																																											ZEND_ME(Redis, rPush, arginfo_class_Redis_rPush, ZEND_ACC_PUBLIC)
-																																																																																																																												ZEND_ME(Redis, lPushx, arginfo_class_Redis_lPushx, ZEND_ACC_PUBLIC)
-																																																																																																																													ZEND_ME(Redis, rPushx, arginfo_class_Redis_rPushx, ZEND_ACC_PUBLIC)
-																																																																																																																														ZEND_ME(Redis, lSet, arginfo_class_Redis_lSet, ZEND_ACC_PUBLIC)
-																																																																																																																															ZEND_ME(Redis, lastSave, arginfo_class_Redis_lastSave, ZEND_ACC_PUBLIC)
-																																																																																																																																ZEND_ME(Redis, lindex, arginfo_class_Redis_lindex, ZEND_ACC_PUBLIC)
-																																																																																																																																	ZEND_ME(Redis, lrange, arginfo_class_Redis_lrange, ZEND_ACC_PUBLIC)
-																																																																																																																																		ZEND_ME(Redis, lrem, arginfo_class_Redis_lrem, ZEND_ACC_PUBLIC)
-																																																																																																																																			ZEND_ME(Redis, ltrim, arginfo_class_Redis_ltrim, ZEND_ACC_PUBLIC)
-																																																																																																																																				ZEND_ME(Redis, mget, arginfo_class_Redis_mget, ZEND_ACC_PUBLIC)
-																																																																																																																																					ZEND_ME(Redis, migrate, arginfo_class_Redis_migrate, ZEND_ACC_PUBLIC)
-																																																																																																																																						ZEND_ME(Redis, move, arginfo_class_Redis_move, ZEND_ACC_PUBLIC)
-																																																																																																																																							ZEND_ME(Redis, mset, arginfo_class_Redis_mset, ZEND_ACC_PUBLIC)
-																																																																																																																																								ZEND_ME(Redis, msetnx, arginfo_class_Redis_msetnx, ZEND_ACC_PUBLIC)
-																																																																																																																																									ZEND_ME(Redis, multi, arginfo_class_Redis_multi, ZEND_ACC_PUBLIC)
-																																																																																																																																										ZEND_ME(Redis, object, arginfo_class_Redis_object, ZEND_ACC_PUBLIC)
-																																																																																																																																											ZEND_MALIAS(Redis, open, connect, arginfo_class_Redis_open, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
-																																																																																																																																												ZEND_ME(Redis, pconnect, arginfo_class_Redis_pconnect, ZEND_ACC_PUBLIC)
-																																																																																																																																													ZEND_ME(Redis, persist, arginfo_class_Redis_persist, ZEND_ACC_PUBLIC)
-																																																																																																																																														ZEND_ME(Redis, pexpire, arginfo_class_Redis_pexpire, ZEND_ACC_PUBLIC)
-																																																																																																																																															ZEND_ME(Redis, pexpireAt, arginfo_class_Redis_pexpireAt, ZEND_ACC_PUBLIC)
-																																																																																																																																																ZEND_ME(Redis, pfadd, arginfo_class_Redis_pfadd, ZEND_ACC_PUBLIC)
-																																																																																																																																																	ZEND_ME(Redis, pfcount, arginfo_class_Redis_pfcount, ZEND_ACC_PUBLIC)
-																																																																																																																																																		ZEND_ME(Redis, pfmerge, arginfo_class_Redis_pfmerge, ZEND_ACC_PUBLIC)
-																																																																																																																																																			ZEND_ME(Redis, ping, arginfo_class_Redis_ping, ZEND_ACC_PUBLIC)
-																																																																																																																																																				ZEND_ME(Redis, pipeline, arginfo_class_Redis_pipeline, ZEND_ACC_PUBLIC)
-																																																																																																																																																					ZEND_MALIAS(Redis, popen, pconnect, arginfo_class_Redis_popen, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
-																																																																																																																																																						ZEND_ME(Redis, psetex, arginfo_class_Redis_psetex, ZEND_ACC_PUBLIC)
-																																																																																																																																																							ZEND_ME(Redis, psubscribe, arginfo_class_Redis_psubscribe, ZEND_ACC_PUBLIC)
-																																																																																																																																																								ZEND_ME(Redis, pttl, arginfo_class_Redis_pttl, ZEND_ACC_PUBLIC)
-																																																																																																																																																									ZEND_ME(Redis, publish, arginfo_class_Redis_publish, ZEND_ACC_PUBLIC)
-																																																																																																																																																										ZEND_ME(Redis, pubsub, arginfo_class_Redis_pubsub, ZEND_ACC_PUBLIC)
-																																																																																																																																																											ZEND_ME(Redis, punsubscribe, arginfo_class_Redis_punsubscribe, ZEND_ACC_PUBLIC)
-																																																																																																																																																												ZEND_ME(Redis, rPop, arginfo_class_Redis_rPop, ZEND_ACC_PUBLIC)
-																																																																																																																																																													ZEND_ME(Redis, randomKey, arginfo_class_Redis_randomKey, ZEND_ACC_PUBLIC)
-																																																																																																																																																														ZEND_ME(Redis, rawcommand, arginfo_class_Redis_rawcommand, ZEND_ACC_PUBLIC)
-																																																																																																																																																															ZEND_ME(Redis, rename, arginfo_class_Redis_rename, ZEND_ACC_PUBLIC)
-																																																																																																																																																																ZEND_ME(Redis, renameNx, arginfo_class_Redis_renameNx, ZEND_ACC_PUBLIC)
-																																																																																																																																																																	ZEND_ME(Redis, reset, arginfo_class_Redis_reset, ZEND_ACC_PUBLIC)
-																																																																																																																																																																		ZEND_ME(Redis, restore, arginfo_class_Redis_restore, ZEND_ACC_PUBLIC)
-																																																																																																																																																																			ZEND_ME(Redis, role, arginfo_class_Redis_role, ZEND_ACC_PUBLIC)
-																																																																																																																																																																				ZEND_ME(Redis, rpoplpush, arginfo_class_Redis_rpoplpush, ZEND_ACC_PUBLIC)
-																																																																																																																																																																					ZEND_ME(Redis, sAdd, arginfo_class_Redis_sAdd, ZEND_ACC_PUBLIC)
-																																																																																																																																																																						ZEND_ME(Redis, sAddArray, arginfo_class_Redis_sAddArray, ZEND_ACC_PUBLIC)
-																																																																																																																																																																							ZEND_ME(Redis, sDiff, arginfo_class_Redis_sDiff, ZEND_ACC_PUBLIC)
-																																																																																																																																																																								ZEND_ME(Redis, sDiffStore, arginfo_class_Redis_sDiffStore, ZEND_ACC_PUBLIC)
-																																																																																																																																																																									ZEND_ME(Redis, sInter, arginfo_class_Redis_sInter, ZEND_ACC_PUBLIC)
-																																																																																																																																																																										ZEND_ME(Redis, sintercard, arginfo_class_Redis_sintercard, ZEND_ACC_PUBLIC)
-																																																																																																																																																																											ZEND_ME(Redis, sInterStore, arginfo_class_Redis_sInterStore, ZEND_ACC_PUBLIC)
-																																																																																																																																																																												ZEND_ME(Redis, sMembers, arginfo_class_Redis_sMembers, ZEND_ACC_PUBLIC)
-																																																																																																																																																																													ZEND_ME(Redis, sMisMember, arginfo_class_Redis_sMisMember, ZEND_ACC_PUBLIC)
-																																																																																																																																																																														ZEND_ME(Redis, sMove, arginfo_class_Redis_sMove, ZEND_ACC_PUBLIC)
-																																																																																																																																																																															ZEND_ME(Redis, sPop, arginfo_class_Redis_sPop, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																ZEND_ME(Redis, sRandMember, arginfo_class_Redis_sRandMember, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																	ZEND_ME(Redis, sUnion, arginfo_class_Redis_sUnion, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																		ZEND_ME(Redis, sUnionStore, arginfo_class_Redis_sUnionStore, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																			ZEND_ME(Redis, save, arginfo_class_Redis_save, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																				ZEND_ME(Redis, scan, arginfo_class_Redis_scan, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																					ZEND_ME(Redis, scard, arginfo_class_Redis_scard, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																						ZEND_ME(Redis, script, arginfo_class_Redis_script, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																							ZEND_ME(Redis, select, arginfo_class_Redis_select, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																								ZEND_ME(Redis, set, arginfo_class_Redis_set, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																									ZEND_ME(Redis, setBit, arginfo_class_Redis_setBit, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																										ZEND_ME(Redis, setRange, arginfo_class_Redis_setRange, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																											ZEND_ME(Redis, setOption, arginfo_class_Redis_setOption, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																												ZEND_ME(Redis, setex, arginfo_class_Redis_setex, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																													ZEND_ME(Redis, setnx, arginfo_class_Redis_setnx, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																														ZEND_ME(Redis, sismember, arginfo_class_Redis_sismember, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																															ZEND_ME(Redis, slaveof, arginfo_class_Redis_slaveof, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
-																																																																																																																																																																																																ZEND_ME(Redis, replicaof, arginfo_class_Redis_replicaof, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																	ZEND_ME(Redis, touch, arginfo_class_Redis_touch, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																		ZEND_ME(Redis, slowlog, arginfo_class_Redis_slowlog, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																			ZEND_ME(Redis, sort, arginfo_class_Redis_sort, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																				ZEND_ME(Redis, sort_ro, arginfo_class_Redis_sort_ro, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																					ZEND_ME(Redis, sortAsc, arginfo_class_Redis_sortAsc, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
-																																																																																																																																																																																																						ZEND_ME(Redis, sortAscAlpha, arginfo_class_Redis_sortAscAlpha, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
-																																																																																																																																																																																																							ZEND_ME(Redis, sortDesc, arginfo_class_Redis_sortDesc, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
-																																																																																																																																																																																																								ZEND_ME(Redis, sortDescAlpha, arginfo_class_Redis_sortDescAlpha, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
-																																																																																																																																																																																																									ZEND_ME(Redis, srem, arginfo_class_Redis_srem, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																										ZEND_ME(Redis, sscan, arginfo_class_Redis_sscan, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																											ZEND_ME(Redis, ssubscribe, arginfo_class_Redis_ssubscribe, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																												ZEND_ME(Redis, strlen, arginfo_class_Redis_strlen, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																													ZEND_ME(Redis, subscribe, arginfo_class_Redis_subscribe, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																														ZEND_ME(Redis, sunsubscribe, arginfo_class_Redis_sunsubscribe, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																															ZEND_ME(Redis, swapdb, arginfo_class_Redis_swapdb, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																ZEND_ME(Redis, time, arginfo_class_Redis_time, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																	ZEND_ME(Redis, ttl, arginfo_class_Redis_ttl, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																		ZEND_ME(Redis, type, arginfo_class_Redis_type, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																			ZEND_ME(Redis, unlink, arginfo_class_Redis_unlink, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																				ZEND_ME(Redis, unsubscribe, arginfo_class_Redis_unsubscribe, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																					ZEND_ME(Redis, unwatch, arginfo_class_Redis_unwatch, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																						ZEND_ME(Redis, watch, arginfo_class_Redis_watch, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																							ZEND_ME(Redis, wait, arginfo_class_Redis_wait, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																								ZEND_ME(Redis, xack, arginfo_class_Redis_xack, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																									ZEND_ME(Redis, xadd, arginfo_class_Redis_xadd, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																										ZEND_ME(Redis, xautoclaim, arginfo_class_Redis_xautoclaim, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																											ZEND_ME(Redis, xclaim, arginfo_class_Redis_xclaim, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																												ZEND_ME(Redis, xdel, arginfo_class_Redis_xdel, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																													ZEND_ME(Redis, xgroup, arginfo_class_Redis_xgroup, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																														ZEND_ME(Redis, xinfo, arginfo_class_Redis_xinfo, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																															ZEND_ME(Redis, xlen, arginfo_class_Redis_xlen, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																ZEND_ME(Redis, xpending, arginfo_class_Redis_xpending, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																	ZEND_ME(Redis, xrange, arginfo_class_Redis_xrange, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																		ZEND_ME(Redis, xread, arginfo_class_Redis_xread, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																			ZEND_ME(Redis, xreadgroup, arginfo_class_Redis_xreadgroup, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																				ZEND_ME(Redis, xrevrange, arginfo_class_Redis_xrevrange, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																					ZEND_ME(Redis, xtrim, arginfo_class_Redis_xtrim, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																						ZEND_ME(Redis, zAdd, arginfo_class_Redis_zAdd, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																							ZEND_ME(Redis, zCard, arginfo_class_Redis_zCard, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																								ZEND_ME(Redis, zCount, arginfo_class_Redis_zCount, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																									ZEND_ME(Redis, zIncrBy, arginfo_class_Redis_zIncrBy, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																										ZEND_ME(Redis, zLexCount, arginfo_class_Redis_zLexCount, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																											ZEND_ME(Redis, zMscore, arginfo_class_Redis_zMscore, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																												ZEND_ME(Redis, zPopMax, arginfo_class_Redis_zPopMax, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																													ZEND_ME(Redis, zPopMin, arginfo_class_Redis_zPopMin, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																														ZEND_ME(Redis, zRange, arginfo_class_Redis_zRange, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																															ZEND_ME(Redis, zRangeByLex, arginfo_class_Redis_zRangeByLex, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																ZEND_ME(Redis, zRangeByScore, arginfo_class_Redis_zRangeByScore, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																	ZEND_ME(Redis, zrangestore, arginfo_class_Redis_zrangestore, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																		ZEND_ME(Redis, zRandMember, arginfo_class_Redis_zRandMember, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																			ZEND_ME(Redis, zRank, arginfo_class_Redis_zRank, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																				ZEND_ME(Redis, zRem, arginfo_class_Redis_zRem, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																					ZEND_ME(Redis, zRemRangeByLex, arginfo_class_Redis_zRemRangeByLex, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																						ZEND_ME(Redis, zRemRangeByRank, arginfo_class_Redis_zRemRangeByRank, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																							ZEND_ME(Redis, zRemRangeByScore, arginfo_class_Redis_zRemRangeByScore, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																								ZEND_ME(Redis, zRevRange, arginfo_class_Redis_zRevRange, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																									ZEND_ME(Redis, zRevRangeByLex, arginfo_class_Redis_zRevRangeByLex, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																										ZEND_ME(Redis, zRevRangeByScore, arginfo_class_Redis_zRevRangeByScore, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																											ZEND_ME(Redis, zRevRank, arginfo_class_Redis_zRevRank, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																												ZEND_ME(Redis, zScore, arginfo_class_Redis_zScore, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																													ZEND_ME(Redis, zdiff, arginfo_class_Redis_zdiff, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																														ZEND_ME(Redis, zdiffstore, arginfo_class_Redis_zdiffstore, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																															ZEND_ME(Redis, zinter, arginfo_class_Redis_zinter, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																																ZEND_ME(Redis, zintercard, arginfo_class_Redis_zintercard, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																																	ZEND_ME(Redis, zinterstore, arginfo_class_Redis_zinterstore, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																																		ZEND_ME(Redis, zscan, arginfo_class_Redis_zscan, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																																			ZEND_ME(Redis, zunion, arginfo_class_Redis_zunion, ZEND_ACC_PUBLIC)
-																																																																																																																																																																																																																																																																				ZEND_ME(Redis, zunionstore, arginfo_class_Redis_zunionstore, ZEND_ACC_PUBLIC)
+static const zend_function_entry class_ValkeyGlide_methods[] = {
+	ZEND_ME(ValkeyGlide, __construct, arginfo_class_ValkeyGlide___construct, ZEND_ACC_PUBLIC)
+		ZEND_ME(ValkeyGlide, __destruct, arginfo_class_ValkeyGlide___destruct, ZEND_ACC_PUBLIC)
+			ZEND_ME(ValkeyGlide, _compress, arginfo_class_ValkeyGlide__compress, ZEND_ACC_PUBLIC)
+				ZEND_ME(ValkeyGlide, _uncompress, arginfo_class_ValkeyGlide__uncompress, ZEND_ACC_PUBLIC)
+					ZEND_ME(ValkeyGlide, _prefix, arginfo_class_ValkeyGlide__prefix, ZEND_ACC_PUBLIC)
+						ZEND_ME(ValkeyGlide, _serialize, arginfo_class_ValkeyGlide__serialize, ZEND_ACC_PUBLIC)
+							ZEND_ME(ValkeyGlide, _unserialize, arginfo_class_ValkeyGlide__unserialize, ZEND_ACC_PUBLIC)
+								ZEND_ME(ValkeyGlide, _pack, arginfo_class_ValkeyGlide__pack, ZEND_ACC_PUBLIC)
+									ZEND_ME(ValkeyGlide, _unpack, arginfo_class_ValkeyGlide__unpack, ZEND_ACC_PUBLIC)
+										ZEND_ME(ValkeyGlide, acl, arginfo_class_ValkeyGlide_acl, ZEND_ACC_PUBLIC)
+											ZEND_ME(ValkeyGlide, append, arginfo_class_ValkeyGlide_append, ZEND_ACC_PUBLIC)
+												ZEND_ME(ValkeyGlide, auth, arginfo_class_ValkeyGlide_auth, ZEND_ACC_PUBLIC)
+													ZEND_ME(ValkeyGlide, bgSave, arginfo_class_ValkeyGlide_bgSave, ZEND_ACC_PUBLIC)
+														ZEND_ME(ValkeyGlide, bgrewriteaof, arginfo_class_ValkeyGlide_bgrewriteaof, ZEND_ACC_PUBLIC)
+															ZEND_ME(ValkeyGlide, waitaof, arginfo_class_ValkeyGlide_waitaof, ZEND_ACC_PUBLIC)
+																ZEND_ME(ValkeyGlide, bitcount, arginfo_class_ValkeyGlide_bitcount, ZEND_ACC_PUBLIC)
+																	ZEND_ME(ValkeyGlide, bitop, arginfo_class_ValkeyGlide_bitop, ZEND_ACC_PUBLIC)
+																		ZEND_ME(ValkeyGlide, bitpos, arginfo_class_ValkeyGlide_bitpos, ZEND_ACC_PUBLIC)
+																			ZEND_ME(ValkeyGlide, blPop, arginfo_class_ValkeyGlide_blPop, ZEND_ACC_PUBLIC)
+																				ZEND_ME(ValkeyGlide, brPop, arginfo_class_ValkeyGlide_brPop, ZEND_ACC_PUBLIC)
+																					ZEND_ME(ValkeyGlide, brpoplpush, arginfo_class_ValkeyGlide_brpoplpush, ZEND_ACC_PUBLIC)
+																						ZEND_ME(ValkeyGlide, bzPopMax, arginfo_class_ValkeyGlide_bzPopMax, ZEND_ACC_PUBLIC)
+																							ZEND_ME(ValkeyGlide, bzPopMin, arginfo_class_ValkeyGlide_bzPopMin, ZEND_ACC_PUBLIC)
+																								ZEND_ME(ValkeyGlide, bzmpop, arginfo_class_ValkeyGlide_bzmpop, ZEND_ACC_PUBLIC)
+																									ZEND_ME(ValkeyGlide, zmpop, arginfo_class_ValkeyGlide_zmpop, ZEND_ACC_PUBLIC)
+																										ZEND_ME(ValkeyGlide, blmpop, arginfo_class_ValkeyGlide_blmpop, ZEND_ACC_PUBLIC)
+																											ZEND_ME(ValkeyGlide, lmpop, arginfo_class_ValkeyGlide_lmpop, ZEND_ACC_PUBLIC)
+																												ZEND_ME(ValkeyGlide, clearLastError, arginfo_class_ValkeyGlide_clearLastError, ZEND_ACC_PUBLIC)
+																													ZEND_ME(ValkeyGlide, client, arginfo_class_ValkeyGlide_client, ZEND_ACC_PUBLIC)
+																														ZEND_ME(ValkeyGlide, close, arginfo_class_ValkeyGlide_close, ZEND_ACC_PUBLIC)
+																															ZEND_ME(ValkeyGlide, command, arginfo_class_ValkeyGlide_command, ZEND_ACC_PUBLIC)
+																																ZEND_ME(ValkeyGlide, config, arginfo_class_ValkeyGlide_config, ZEND_ACC_PUBLIC)
+																																	ZEND_ME(ValkeyGlide, connect, arginfo_class_ValkeyGlide_connect, ZEND_ACC_PUBLIC)
+																																		ZEND_ME(ValkeyGlide, copy, arginfo_class_ValkeyGlide_copy, ZEND_ACC_PUBLIC)
+																																			ZEND_ME(ValkeyGlide, dbSize, arginfo_class_ValkeyGlide_dbSize, ZEND_ACC_PUBLIC)
+																																				ZEND_ME(ValkeyGlide, debug, arginfo_class_ValkeyGlide_debug, ZEND_ACC_PUBLIC)
+																																					ZEND_ME(ValkeyGlide, decr, arginfo_class_ValkeyGlide_decr, ZEND_ACC_PUBLIC)
+																																						ZEND_ME(ValkeyGlide, decrBy, arginfo_class_ValkeyGlide_decrBy, ZEND_ACC_PUBLIC)
+																																							ZEND_ME(ValkeyGlide, del, arginfo_class_ValkeyGlide_del, ZEND_ACC_PUBLIC)
+																																								ZEND_MALIAS(ValkeyGlide, delete, del, arginfo_class_ValkeyGlide_delete, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
+																																									ZEND_ME(ValkeyGlide, discard, arginfo_class_ValkeyGlide_discard, ZEND_ACC_PUBLIC)
+																																										ZEND_ME(ValkeyGlide, dump, arginfo_class_ValkeyGlide_dump, ZEND_ACC_PUBLIC)
+																																											ZEND_ME(ValkeyGlide, echo, arginfo_class_ValkeyGlide_echo, ZEND_ACC_PUBLIC)
+																																												ZEND_ME(ValkeyGlide, eval, arginfo_class_ValkeyGlide_eval, ZEND_ACC_PUBLIC)
+																																													ZEND_ME(ValkeyGlide, eval_ro, arginfo_class_ValkeyGlide_eval_ro, ZEND_ACC_PUBLIC)
+																																														ZEND_ME(ValkeyGlide, evalsha, arginfo_class_ValkeyGlide_evalsha, ZEND_ACC_PUBLIC)
+																																															ZEND_ME(ValkeyGlide, evalsha_ro, arginfo_class_ValkeyGlide_evalsha_ro, ZEND_ACC_PUBLIC)
+																																																ZEND_ME(ValkeyGlide, exec, arginfo_class_ValkeyGlide_exec, ZEND_ACC_PUBLIC)
+																																																	ZEND_ME(ValkeyGlide, exists, arginfo_class_ValkeyGlide_exists, ZEND_ACC_PUBLIC)
+																																																		ZEND_ME(ValkeyGlide, expire, arginfo_class_ValkeyGlide_expire, ZEND_ACC_PUBLIC)
+																																																			ZEND_ME(ValkeyGlide, expireAt, arginfo_class_ValkeyGlide_expireAt, ZEND_ACC_PUBLIC)
+																																																				ZEND_ME(ValkeyGlide, failover, arginfo_class_ValkeyGlide_failover, ZEND_ACC_PUBLIC)
+																																																					ZEND_ME(ValkeyGlide, expiretime, arginfo_class_ValkeyGlide_expiretime, ZEND_ACC_PUBLIC)
+																																																						ZEND_ME(ValkeyGlide, pexpiretime, arginfo_class_ValkeyGlide_pexpiretime, ZEND_ACC_PUBLIC)
+																																																							ZEND_ME(ValkeyGlide, fcall, arginfo_class_ValkeyGlide_fcall, ZEND_ACC_PUBLIC)
+																																																								ZEND_ME(ValkeyGlide, fcall_ro, arginfo_class_ValkeyGlide_fcall_ro, ZEND_ACC_PUBLIC)
+																																																									ZEND_ME(ValkeyGlide, flushAll, arginfo_class_ValkeyGlide_flushAll, ZEND_ACC_PUBLIC)
+																																																										ZEND_ME(ValkeyGlide, flushDB, arginfo_class_ValkeyGlide_flushDB, ZEND_ACC_PUBLIC)
+																																																											ZEND_ME(ValkeyGlide, function, arginfo_class_ValkeyGlide_function, ZEND_ACC_PUBLIC)
+																																																												ZEND_ME(ValkeyGlide, geoadd, arginfo_class_ValkeyGlide_geoadd, ZEND_ACC_PUBLIC)
+																																																													ZEND_ME(ValkeyGlide, geodist, arginfo_class_ValkeyGlide_geodist, ZEND_ACC_PUBLIC)
+																																																														ZEND_ME(ValkeyGlide, geohash, arginfo_class_ValkeyGlide_geohash, ZEND_ACC_PUBLIC)
+																																																															ZEND_ME(ValkeyGlide, geopos, arginfo_class_ValkeyGlide_geopos, ZEND_ACC_PUBLIC)
+																																																																ZEND_ME(ValkeyGlide, georadius, arginfo_class_ValkeyGlide_georadius, ZEND_ACC_PUBLIC)
+																																																																	ZEND_ME(ValkeyGlide, georadius_ro, arginfo_class_ValkeyGlide_georadius_ro, ZEND_ACC_PUBLIC)
+																																																																		ZEND_ME(ValkeyGlide, georadiusbymember, arginfo_class_ValkeyGlide_georadiusbymember, ZEND_ACC_PUBLIC)
+																																																																			ZEND_ME(ValkeyGlide, georadiusbymember_ro, arginfo_class_ValkeyGlide_georadiusbymember_ro, ZEND_ACC_PUBLIC)
+																																																																				ZEND_ME(ValkeyGlide, geosearch, arginfo_class_ValkeyGlide_geosearch, ZEND_ACC_PUBLIC)
+																																																																					ZEND_ME(ValkeyGlide, geosearchstore, arginfo_class_ValkeyGlide_geosearchstore, ZEND_ACC_PUBLIC)
+																																																																						ZEND_ME(ValkeyGlide, get, arginfo_class_ValkeyGlide_get, ZEND_ACC_PUBLIC)
+																																																																							ZEND_ME(ValkeyGlide, getWithMeta, arginfo_class_ValkeyGlide_getWithMeta, ZEND_ACC_PUBLIC)
+																																																																								ZEND_ME(ValkeyGlide, getAuth, arginfo_class_ValkeyGlide_getAuth, ZEND_ACC_PUBLIC)
+																																																																									ZEND_ME(ValkeyGlide, getBit, arginfo_class_ValkeyGlide_getBit, ZEND_ACC_PUBLIC)
+																																																																										ZEND_ME(ValkeyGlide, getEx, arginfo_class_ValkeyGlide_getEx, ZEND_ACC_PUBLIC)
+																																																																											ZEND_ME(ValkeyGlide, getDBNum, arginfo_class_ValkeyGlide_getDBNum, ZEND_ACC_PUBLIC)
+																																																																												ZEND_ME(ValkeyGlide, getDel, arginfo_class_ValkeyGlide_getDel, ZEND_ACC_PUBLIC)
+																																																																													ZEND_ME(ValkeyGlide, getHost, arginfo_class_ValkeyGlide_getHost, ZEND_ACC_PUBLIC)
+																																																																														ZEND_ME(ValkeyGlide, getLastError, arginfo_class_ValkeyGlide_getLastError, ZEND_ACC_PUBLIC)
+																																																																															ZEND_ME(ValkeyGlide, getMode, arginfo_class_ValkeyGlide_getMode, ZEND_ACC_PUBLIC)
+																																																																																ZEND_ME(ValkeyGlide, getOption, arginfo_class_ValkeyGlide_getOption, ZEND_ACC_PUBLIC)
+																																																																																	ZEND_ME(ValkeyGlide, getPersistentID, arginfo_class_ValkeyGlide_getPersistentID, ZEND_ACC_PUBLIC)
+																																																																																		ZEND_ME(ValkeyGlide, getPort, arginfo_class_ValkeyGlide_getPort, ZEND_ACC_PUBLIC)
+																																																																																			ZEND_ME(ValkeyGlide, serverName, arginfo_class_ValkeyGlide_serverName, ZEND_ACC_PUBLIC)
+																																																																																				ZEND_ME(ValkeyGlide, serverVersion, arginfo_class_ValkeyGlide_serverVersion, ZEND_ACC_PUBLIC)
+																																																																																					ZEND_ME(ValkeyGlide, getRange, arginfo_class_ValkeyGlide_getRange, ZEND_ACC_PUBLIC)
+																																																																																						ZEND_ME(ValkeyGlide, lcs, arginfo_class_ValkeyGlide_lcs, ZEND_ACC_PUBLIC)
+																																																																																							ZEND_ME(ValkeyGlide, getReadTimeout, arginfo_class_ValkeyGlide_getReadTimeout, ZEND_ACC_PUBLIC)
+																																																																																								ZEND_ME(ValkeyGlide, getset, arginfo_class_ValkeyGlide_getset, ZEND_ACC_PUBLIC)
+																																																																																									ZEND_ME(ValkeyGlide, getTimeout, arginfo_class_ValkeyGlide_getTimeout, ZEND_ACC_PUBLIC)
+																																																																																										ZEND_ME(ValkeyGlide, getTransferredBytes, arginfo_class_ValkeyGlide_getTransferredBytes, ZEND_ACC_PUBLIC)
+																																																																																											ZEND_ME(ValkeyGlide, clearTransferredBytes, arginfo_class_ValkeyGlide_clearTransferredBytes, ZEND_ACC_PUBLIC)
+																																																																																												ZEND_ME(ValkeyGlide, hDel, arginfo_class_ValkeyGlide_hDel, ZEND_ACC_PUBLIC)
+																																																																																													ZEND_ME(ValkeyGlide, hExists, arginfo_class_ValkeyGlide_hExists, ZEND_ACC_PUBLIC)
+																																																																																														ZEND_ME(ValkeyGlide, hGet, arginfo_class_ValkeyGlide_hGet, ZEND_ACC_PUBLIC)
+																																																																																															ZEND_ME(ValkeyGlide, hGetAll, arginfo_class_ValkeyGlide_hGetAll, ZEND_ACC_PUBLIC)
+																																																																																																ZEND_ME(ValkeyGlide, hIncrBy, arginfo_class_ValkeyGlide_hIncrBy, ZEND_ACC_PUBLIC)
+																																																																																																	ZEND_ME(ValkeyGlide, hIncrByFloat, arginfo_class_ValkeyGlide_hIncrByFloat, ZEND_ACC_PUBLIC)
+																																																																																																		ZEND_ME(ValkeyGlide, hKeys, arginfo_class_ValkeyGlide_hKeys, ZEND_ACC_PUBLIC)
+																																																																																																			ZEND_ME(ValkeyGlide, hLen, arginfo_class_ValkeyGlide_hLen, ZEND_ACC_PUBLIC)
+																																																																																																				ZEND_ME(ValkeyGlide, hMget, arginfo_class_ValkeyGlide_hMget, ZEND_ACC_PUBLIC)
+																																																																																																					ZEND_ME(ValkeyGlide, hMset, arginfo_class_ValkeyGlide_hMset, ZEND_ACC_PUBLIC)
+																																																																																																						ZEND_ME(ValkeyGlide, hRandField, arginfo_class_ValkeyGlide_hRandField, ZEND_ACC_PUBLIC)
+																																																																																																							ZEND_ME(ValkeyGlide, hSet, arginfo_class_ValkeyGlide_hSet, ZEND_ACC_PUBLIC)
+																																																																																																								ZEND_ME(ValkeyGlide, hSetNx, arginfo_class_ValkeyGlide_hSetNx, ZEND_ACC_PUBLIC)
+																																																																																																									ZEND_ME(ValkeyGlide, hStrLen, arginfo_class_ValkeyGlide_hStrLen, ZEND_ACC_PUBLIC)
+																																																																																																										ZEND_ME(ValkeyGlide, hVals, arginfo_class_ValkeyGlide_hVals, ZEND_ACC_PUBLIC)
+																																																																																																											ZEND_ME(ValkeyGlide, hscan, arginfo_class_ValkeyGlide_hscan, ZEND_ACC_PUBLIC)
+																																																																																																												ZEND_ME(ValkeyGlide, expiremember, arginfo_class_ValkeyGlide_expiremember, ZEND_ACC_PUBLIC)
+																																																																																																													ZEND_ME(ValkeyGlide, expirememberat, arginfo_class_ValkeyGlide_expirememberat, ZEND_ACC_PUBLIC)
+																																																																																																														ZEND_ME(ValkeyGlide, incr, arginfo_class_ValkeyGlide_incr, ZEND_ACC_PUBLIC)
+																																																																																																															ZEND_ME(ValkeyGlide, incrBy, arginfo_class_ValkeyGlide_incrBy, ZEND_ACC_PUBLIC)
+																																																																																																																ZEND_ME(ValkeyGlide, incrByFloat, arginfo_class_ValkeyGlide_incrByFloat, ZEND_ACC_PUBLIC)
+																																																																																																																	ZEND_ME(ValkeyGlide, info, arginfo_class_ValkeyGlide_info, ZEND_ACC_PUBLIC)
+																																																																																																																		ZEND_ME(ValkeyGlide, isConnected, arginfo_class_ValkeyGlide_isConnected, ZEND_ACC_PUBLIC)
+																																																																																																																			ZEND_ME(ValkeyGlide, keys, arginfo_class_ValkeyGlide_keys, ZEND_ACC_PUBLIC)
+																																																																																																																				ZEND_ME(ValkeyGlide, lInsert, arginfo_class_ValkeyGlide_lInsert, ZEND_ACC_PUBLIC)
+																																																																																																																					ZEND_ME(ValkeyGlide, lLen, arginfo_class_ValkeyGlide_lLen, ZEND_ACC_PUBLIC)
+																																																																																																																						ZEND_ME(ValkeyGlide, lMove, arginfo_class_ValkeyGlide_lMove, ZEND_ACC_PUBLIC)
+																																																																																																																							ZEND_ME(ValkeyGlide, blmove, arginfo_class_ValkeyGlide_blmove, ZEND_ACC_PUBLIC)
+																																																																																																																								ZEND_ME(ValkeyGlide, lPop, arginfo_class_ValkeyGlide_lPop, ZEND_ACC_PUBLIC)
+																																																																																																																									ZEND_ME(ValkeyGlide, lPos, arginfo_class_ValkeyGlide_lPos, ZEND_ACC_PUBLIC)
+																																																																																																																										ZEND_ME(ValkeyGlide, lPush, arginfo_class_ValkeyGlide_lPush, ZEND_ACC_PUBLIC)
+																																																																																																																											ZEND_ME(ValkeyGlide, rPush, arginfo_class_ValkeyGlide_rPush, ZEND_ACC_PUBLIC)
+																																																																																																																												ZEND_ME(ValkeyGlide, lPushx, arginfo_class_ValkeyGlide_lPushx, ZEND_ACC_PUBLIC)
+																																																																																																																													ZEND_ME(ValkeyGlide, rPushx, arginfo_class_ValkeyGlide_rPushx, ZEND_ACC_PUBLIC)
+																																																																																																																														ZEND_ME(ValkeyGlide, lSet, arginfo_class_ValkeyGlide_lSet, ZEND_ACC_PUBLIC)
+																																																																																																																															ZEND_ME(ValkeyGlide, lastSave, arginfo_class_ValkeyGlide_lastSave, ZEND_ACC_PUBLIC)
+																																																																																																																																ZEND_ME(ValkeyGlide, lindex, arginfo_class_ValkeyGlide_lindex, ZEND_ACC_PUBLIC)
+																																																																																																																																	ZEND_ME(ValkeyGlide, lrange, arginfo_class_ValkeyGlide_lrange, ZEND_ACC_PUBLIC)
+																																																																																																																																		ZEND_ME(ValkeyGlide, lrem, arginfo_class_ValkeyGlide_lrem, ZEND_ACC_PUBLIC)
+																																																																																																																																			ZEND_ME(ValkeyGlide, ltrim, arginfo_class_ValkeyGlide_ltrim, ZEND_ACC_PUBLIC)
+																																																																																																																																				ZEND_ME(ValkeyGlide, mget, arginfo_class_ValkeyGlide_mget, ZEND_ACC_PUBLIC)
+																																																																																																																																					ZEND_ME(ValkeyGlide, migrate, arginfo_class_ValkeyGlide_migrate, ZEND_ACC_PUBLIC)
+																																																																																																																																						ZEND_ME(ValkeyGlide, move, arginfo_class_ValkeyGlide_move, ZEND_ACC_PUBLIC)
+																																																																																																																																							ZEND_ME(ValkeyGlide, mset, arginfo_class_ValkeyGlide_mset, ZEND_ACC_PUBLIC)
+																																																																																																																																								ZEND_ME(ValkeyGlide, msetnx, arginfo_class_ValkeyGlide_msetnx, ZEND_ACC_PUBLIC)
+																																																																																																																																									ZEND_ME(ValkeyGlide, multi, arginfo_class_ValkeyGlide_multi, ZEND_ACC_PUBLIC)
+																																																																																																																																										ZEND_ME(ValkeyGlide, object, arginfo_class_ValkeyGlide_object, ZEND_ACC_PUBLIC)
+																																																																																																																																											ZEND_MALIAS(ValkeyGlide, open, connect, arginfo_class_ValkeyGlide_open, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
+																																																																																																																																												ZEND_ME(ValkeyGlide, pconnect, arginfo_class_ValkeyGlide_pconnect, ZEND_ACC_PUBLIC)
+																																																																																																																																													ZEND_ME(ValkeyGlide, persist, arginfo_class_ValkeyGlide_persist, ZEND_ACC_PUBLIC)
+																																																																																																																																														ZEND_ME(ValkeyGlide, pexpire, arginfo_class_ValkeyGlide_pexpire, ZEND_ACC_PUBLIC)
+																																																																																																																																															ZEND_ME(ValkeyGlide, pexpireAt, arginfo_class_ValkeyGlide_pexpireAt, ZEND_ACC_PUBLIC)
+																																																																																																																																																ZEND_ME(ValkeyGlide, pfadd, arginfo_class_ValkeyGlide_pfadd, ZEND_ACC_PUBLIC)
+																																																																																																																																																	ZEND_ME(ValkeyGlide, pfcount, arginfo_class_ValkeyGlide_pfcount, ZEND_ACC_PUBLIC)
+																																																																																																																																																		ZEND_ME(ValkeyGlide, pfmerge, arginfo_class_ValkeyGlide_pfmerge, ZEND_ACC_PUBLIC)
+																																																																																																																																																			ZEND_ME(ValkeyGlide, ping, arginfo_class_ValkeyGlide_ping, ZEND_ACC_PUBLIC)
+																																																																																																																																																				ZEND_ME(ValkeyGlide, pipeline, arginfo_class_ValkeyGlide_pipeline, ZEND_ACC_PUBLIC)
+																																																																																																																																																					ZEND_MALIAS(ValkeyGlide, popen, pconnect, arginfo_class_ValkeyGlide_popen, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
+																																																																																																																																																						ZEND_ME(ValkeyGlide, psetex, arginfo_class_ValkeyGlide_psetex, ZEND_ACC_PUBLIC)
+																																																																																																																																																							ZEND_ME(ValkeyGlide, psubscribe, arginfo_class_ValkeyGlide_psubscribe, ZEND_ACC_PUBLIC)
+																																																																																																																																																								ZEND_ME(ValkeyGlide, pttl, arginfo_class_ValkeyGlide_pttl, ZEND_ACC_PUBLIC)
+																																																																																																																																																									ZEND_ME(ValkeyGlide, publish, arginfo_class_ValkeyGlide_publish, ZEND_ACC_PUBLIC)
+																																																																																																																																																										ZEND_ME(ValkeyGlide, pubsub, arginfo_class_ValkeyGlide_pubsub, ZEND_ACC_PUBLIC)
+																																																																																																																																																											ZEND_ME(ValkeyGlide, punsubscribe, arginfo_class_ValkeyGlide_punsubscribe, ZEND_ACC_PUBLIC)
+																																																																																																																																																												ZEND_ME(ValkeyGlide, rPop, arginfo_class_ValkeyGlide_rPop, ZEND_ACC_PUBLIC)
+																																																																																																																																																													ZEND_ME(ValkeyGlide, randomKey, arginfo_class_ValkeyGlide_randomKey, ZEND_ACC_PUBLIC)
+																																																																																																																																																														ZEND_ME(ValkeyGlide, rawcommand, arginfo_class_ValkeyGlide_rawcommand, ZEND_ACC_PUBLIC)
+																																																																																																																																																															ZEND_ME(ValkeyGlide, rename, arginfo_class_ValkeyGlide_rename, ZEND_ACC_PUBLIC)
+																																																																																																																																																																ZEND_ME(ValkeyGlide, renameNx, arginfo_class_ValkeyGlide_renameNx, ZEND_ACC_PUBLIC)
+																																																																																																																																																																	ZEND_ME(ValkeyGlide, reset, arginfo_class_ValkeyGlide_reset, ZEND_ACC_PUBLIC)
+																																																																																																																																																																		ZEND_ME(ValkeyGlide, restore, arginfo_class_ValkeyGlide_restore, ZEND_ACC_PUBLIC)
+																																																																																																																																																																			ZEND_ME(ValkeyGlide, role, arginfo_class_ValkeyGlide_role, ZEND_ACC_PUBLIC)
+																																																																																																																																																																				ZEND_ME(ValkeyGlide, rpoplpush, arginfo_class_ValkeyGlide_rpoplpush, ZEND_ACC_PUBLIC)
+																																																																																																																																																																					ZEND_ME(ValkeyGlide, sAdd, arginfo_class_ValkeyGlide_sAdd, ZEND_ACC_PUBLIC)
+																																																																																																																																																																						ZEND_ME(ValkeyGlide, sAddArray, arginfo_class_ValkeyGlide_sAddArray, ZEND_ACC_PUBLIC)
+																																																																																																																																																																							ZEND_ME(ValkeyGlide, sDiff, arginfo_class_ValkeyGlide_sDiff, ZEND_ACC_PUBLIC)
+																																																																																																																																																																								ZEND_ME(ValkeyGlide, sDiffStore, arginfo_class_ValkeyGlide_sDiffStore, ZEND_ACC_PUBLIC)
+																																																																																																																																																																									ZEND_ME(ValkeyGlide, sInter, arginfo_class_ValkeyGlide_sInter, ZEND_ACC_PUBLIC)
+																																																																																																																																																																										ZEND_ME(ValkeyGlide, sintercard, arginfo_class_ValkeyGlide_sintercard, ZEND_ACC_PUBLIC)
+																																																																																																																																																																											ZEND_ME(ValkeyGlide, sInterStore, arginfo_class_ValkeyGlide_sInterStore, ZEND_ACC_PUBLIC)
+																																																																																																																																																																												ZEND_ME(ValkeyGlide, sMembers, arginfo_class_ValkeyGlide_sMembers, ZEND_ACC_PUBLIC)
+																																																																																																																																																																													ZEND_ME(ValkeyGlide, sMisMember, arginfo_class_ValkeyGlide_sMisMember, ZEND_ACC_PUBLIC)
+																																																																																																																																																																														ZEND_ME(ValkeyGlide, sMove, arginfo_class_ValkeyGlide_sMove, ZEND_ACC_PUBLIC)
+																																																																																																																																																																															ZEND_ME(ValkeyGlide, sPop, arginfo_class_ValkeyGlide_sPop, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																ZEND_ME(ValkeyGlide, sRandMember, arginfo_class_ValkeyGlide_sRandMember, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																	ZEND_ME(ValkeyGlide, sUnion, arginfo_class_ValkeyGlide_sUnion, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																		ZEND_ME(ValkeyGlide, sUnionStore, arginfo_class_ValkeyGlide_sUnionStore, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																			ZEND_ME(ValkeyGlide, save, arginfo_class_ValkeyGlide_save, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																				ZEND_ME(ValkeyGlide, scan, arginfo_class_ValkeyGlide_scan, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																					ZEND_ME(ValkeyGlide, scard, arginfo_class_ValkeyGlide_scard, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																						ZEND_ME(ValkeyGlide, script, arginfo_class_ValkeyGlide_script, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																							ZEND_ME(ValkeyGlide, select, arginfo_class_ValkeyGlide_select, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																								ZEND_ME(ValkeyGlide, set, arginfo_class_ValkeyGlide_set, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																									ZEND_ME(ValkeyGlide, setBit, arginfo_class_ValkeyGlide_setBit, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																										ZEND_ME(ValkeyGlide, setRange, arginfo_class_ValkeyGlide_setRange, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																											ZEND_ME(ValkeyGlide, setOption, arginfo_class_ValkeyGlide_setOption, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																												ZEND_ME(ValkeyGlide, setex, arginfo_class_ValkeyGlide_setex, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																													ZEND_ME(ValkeyGlide, setnx, arginfo_class_ValkeyGlide_setnx, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																														ZEND_ME(ValkeyGlide, sismember, arginfo_class_ValkeyGlide_sismember, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																															ZEND_ME(ValkeyGlide, slaveof, arginfo_class_ValkeyGlide_slaveof, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
+																																																																																																																																																																																																ZEND_ME(ValkeyGlide, replicaof, arginfo_class_ValkeyGlide_replicaof, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																	ZEND_ME(ValkeyGlide, touch, arginfo_class_ValkeyGlide_touch, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																		ZEND_ME(ValkeyGlide, slowlog, arginfo_class_ValkeyGlide_slowlog, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																			ZEND_ME(ValkeyGlide, sort, arginfo_class_ValkeyGlide_sort, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																				ZEND_ME(ValkeyGlide, sort_ro, arginfo_class_ValkeyGlide_sort_ro, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																					ZEND_ME(ValkeyGlide, sortAsc, arginfo_class_ValkeyGlide_sortAsc, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
+																																																																																																																																																																																																						ZEND_ME(ValkeyGlide, sortAscAlpha, arginfo_class_ValkeyGlide_sortAscAlpha, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
+																																																																																																																																																																																																							ZEND_ME(ValkeyGlide, sortDesc, arginfo_class_ValkeyGlide_sortDesc, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
+																																																																																																																																																																																																								ZEND_ME(ValkeyGlide, sortDescAlpha, arginfo_class_ValkeyGlide_sortDescAlpha, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
+																																																																																																																																																																																																									ZEND_ME(ValkeyGlide, srem, arginfo_class_ValkeyGlide_srem, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																										ZEND_ME(ValkeyGlide, sscan, arginfo_class_ValkeyGlide_sscan, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																											ZEND_ME(ValkeyGlide, ssubscribe, arginfo_class_ValkeyGlide_ssubscribe, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																												ZEND_ME(ValkeyGlide, strlen, arginfo_class_ValkeyGlide_strlen, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																													ZEND_ME(ValkeyGlide, subscribe, arginfo_class_ValkeyGlide_subscribe, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																														ZEND_ME(ValkeyGlide, sunsubscribe, arginfo_class_ValkeyGlide_sunsubscribe, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																															ZEND_ME(ValkeyGlide, swapdb, arginfo_class_ValkeyGlide_swapdb, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																ZEND_ME(ValkeyGlide, time, arginfo_class_ValkeyGlide_time, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																	ZEND_ME(ValkeyGlide, ttl, arginfo_class_ValkeyGlide_ttl, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																		ZEND_ME(ValkeyGlide, type, arginfo_class_ValkeyGlide_type, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																			ZEND_ME(ValkeyGlide, unlink, arginfo_class_ValkeyGlide_unlink, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																				ZEND_ME(ValkeyGlide, unsubscribe, arginfo_class_ValkeyGlide_unsubscribe, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																					ZEND_ME(ValkeyGlide, unwatch, arginfo_class_ValkeyGlide_unwatch, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																						ZEND_ME(ValkeyGlide, watch, arginfo_class_ValkeyGlide_watch, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																							ZEND_ME(ValkeyGlide, wait, arginfo_class_ValkeyGlide_wait, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																								ZEND_ME(ValkeyGlide, xack, arginfo_class_ValkeyGlide_xack, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																									ZEND_ME(ValkeyGlide, xadd, arginfo_class_ValkeyGlide_xadd, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																										ZEND_ME(ValkeyGlide, xautoclaim, arginfo_class_ValkeyGlide_xautoclaim, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																											ZEND_ME(ValkeyGlide, xclaim, arginfo_class_ValkeyGlide_xclaim, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																												ZEND_ME(ValkeyGlide, xdel, arginfo_class_ValkeyGlide_xdel, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																													ZEND_ME(ValkeyGlide, xgroup, arginfo_class_ValkeyGlide_xgroup, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																														ZEND_ME(ValkeyGlide, xinfo, arginfo_class_ValkeyGlide_xinfo, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																															ZEND_ME(ValkeyGlide, xlen, arginfo_class_ValkeyGlide_xlen, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																ZEND_ME(ValkeyGlide, xpending, arginfo_class_ValkeyGlide_xpending, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																	ZEND_ME(ValkeyGlide, xrange, arginfo_class_ValkeyGlide_xrange, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																		ZEND_ME(ValkeyGlide, xread, arginfo_class_ValkeyGlide_xread, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																			ZEND_ME(ValkeyGlide, xreadgroup, arginfo_class_ValkeyGlide_xreadgroup, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																				ZEND_ME(ValkeyGlide, xrevrange, arginfo_class_ValkeyGlide_xrevrange, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																					ZEND_ME(ValkeyGlide, xtrim, arginfo_class_ValkeyGlide_xtrim, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																						ZEND_ME(ValkeyGlide, zAdd, arginfo_class_ValkeyGlide_zAdd, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																							ZEND_ME(ValkeyGlide, zCard, arginfo_class_ValkeyGlide_zCard, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																								ZEND_ME(ValkeyGlide, zCount, arginfo_class_ValkeyGlide_zCount, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																									ZEND_ME(ValkeyGlide, zIncrBy, arginfo_class_ValkeyGlide_zIncrBy, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																										ZEND_ME(ValkeyGlide, zLexCount, arginfo_class_ValkeyGlide_zLexCount, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																											ZEND_ME(ValkeyGlide, zMscore, arginfo_class_ValkeyGlide_zMscore, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																												ZEND_ME(ValkeyGlide, zPopMax, arginfo_class_ValkeyGlide_zPopMax, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																													ZEND_ME(ValkeyGlide, zPopMin, arginfo_class_ValkeyGlide_zPopMin, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																														ZEND_ME(ValkeyGlide, zRange, arginfo_class_ValkeyGlide_zRange, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																															ZEND_ME(ValkeyGlide, zRangeByLex, arginfo_class_ValkeyGlide_zRangeByLex, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																ZEND_ME(ValkeyGlide, zRangeByScore, arginfo_class_ValkeyGlide_zRangeByScore, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																	ZEND_ME(ValkeyGlide, zrangestore, arginfo_class_ValkeyGlide_zrangestore, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																		ZEND_ME(ValkeyGlide, zRandMember, arginfo_class_ValkeyGlide_zRandMember, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																			ZEND_ME(ValkeyGlide, zRank, arginfo_class_ValkeyGlide_zRank, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																				ZEND_ME(ValkeyGlide, zRem, arginfo_class_ValkeyGlide_zRem, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																					ZEND_ME(ValkeyGlide, zRemRangeByLex, arginfo_class_ValkeyGlide_zRemRangeByLex, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																						ZEND_ME(ValkeyGlide, zRemRangeByRank, arginfo_class_ValkeyGlide_zRemRangeByRank, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																							ZEND_ME(ValkeyGlide, zRemRangeByScore, arginfo_class_ValkeyGlide_zRemRangeByScore, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																								ZEND_ME(ValkeyGlide, zRevRange, arginfo_class_ValkeyGlide_zRevRange, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																									ZEND_ME(ValkeyGlide, zRevRangeByLex, arginfo_class_ValkeyGlide_zRevRangeByLex, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																										ZEND_ME(ValkeyGlide, zRevRangeByScore, arginfo_class_ValkeyGlide_zRevRangeByScore, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																											ZEND_ME(ValkeyGlide, zRevRank, arginfo_class_ValkeyGlide_zRevRank, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																												ZEND_ME(ValkeyGlide, zScore, arginfo_class_ValkeyGlide_zScore, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																													ZEND_ME(ValkeyGlide, zdiff, arginfo_class_ValkeyGlide_zdiff, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																														ZEND_ME(ValkeyGlide, zdiffstore, arginfo_class_ValkeyGlide_zdiffstore, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																															ZEND_ME(ValkeyGlide, zinter, arginfo_class_ValkeyGlide_zinter, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																																ZEND_ME(ValkeyGlide, zintercard, arginfo_class_ValkeyGlide_zintercard, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																																	ZEND_ME(ValkeyGlide, zinterstore, arginfo_class_ValkeyGlide_zinterstore, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																																		ZEND_ME(ValkeyGlide, zscan, arginfo_class_ValkeyGlide_zscan, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																																			ZEND_ME(ValkeyGlide, zunion, arginfo_class_ValkeyGlide_zunion, ZEND_ACC_PUBLIC)
+																																																																																																																																																																																																																																																																				ZEND_ME(ValkeyGlide, zunionstore, arginfo_class_ValkeyGlide_zunionstore, ZEND_ACC_PUBLIC)
 																																																																																																																																																																																																																																																																					ZEND_FE_END};
 
-static const zend_function_entry class_RedisException_methods[] = {
+static const zend_function_entry class_ValkeyGlideException_methods[] = {
 	ZEND_FE_END};
 
-static zend_class_entry *register_class_Redis(void)
+static zend_class_entry *register_class_ValkeyGlide(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "Redis", class_Redis_methods);
+	INIT_CLASS_ENTRY(ce, "ValkeyGlide", class_ValkeyGlide_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
 	zval const_REDIS_NOT_FOUND_value;
@@ -1848,11 +1848,11 @@ static zend_class_entry *register_class_Redis(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_RedisException(zend_class_entry *class_entry_RuntimeException)
+static zend_class_entry *register_class_ValkeyGlideException(zend_class_entry *class_entry_RuntimeException)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "RedisException", class_RedisException_methods);
+	INIT_CLASS_ENTRY(ce, "ValkeyGlideException", class_ValkeyGlideException_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
 
 	return class_entry;

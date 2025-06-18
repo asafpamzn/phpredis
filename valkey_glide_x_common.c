@@ -574,7 +574,7 @@ int process_x_int_result(CommandResult *result, void *output)
 {
     long *output_value = (long *)output;
 
-    /* For Redis stream commands, integer response is the count */
+    /* For ValkeyGlide stream commands, integer response is the count */
     if (result->response->response_type == Int)
     {
         /* Store the count in output_value */

@@ -6,7 +6,7 @@
  * @generate-class-entries
  */
 
-class Redis {
+class ValkeyGlide {
     /**
      *
      * @var int
@@ -155,7 +155,7 @@ class Redis {
      * @var int
      * @cvalue REDIS_OPT_PACK_IGNORE_NUMBERS
      *
-     * When enabled, this option tells PhpRedis to ignore purely numeric values
+     * When enabled, this option tells PhpValkeyGlide to ignore purely numeric values
      * when packing and unpacking data. This does not include numeric strings.
      * If you want numeric strings to be ignored, typecast them to an int or float.
      *
@@ -167,8 +167,8 @@ class Redis {
      * or float.
      *
      * @example
-     * $redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_IGBINARY);
-     * $redis->setOption(Redis::OPT_PACK_IGNORE_NUMBERS, true);
+     * $redis->setOption(ValkeyGlide::OPT_SERIALIZER, ValkeyGlide::SERIALIZER_IGBINARY);
+     * $redis->setOption(ValkeyGlide::OPT_PACK_IGNORE_NUMBERS, true);
      *
      * $redis->set('answer', 32);
      *
@@ -456,7 +456,7 @@ class Redis {
     public const OPT_BACKOFF_CAP = UNKNOWN;
 
     /**
-     * Create a new Redis instance.  If passed sufficient information in the
+     * Create a new ValkeyGlide instance.  If passed sufficient information in the
      * options array it is also possible to connect to an instance at the same
      * time.
      *
@@ -493,22 +493,22 @@ class Redis {
      *          // delay redis will use when reconnecting, and the maximum delay
      *          // we will reach while retrying.
      *         'backoff' => [
-     *             'algorithm' => Redis::BACKOFF_ALGORITHM_DECORRELATED_JITTER,
+     *             'algorithm' => ValkeyGlide::BACKOFF_ALGORITHM_DECORRELATED_JITTER,
      *             'base'      => 500,
      *             'cap'       => 750,
      *         ]
      *     ];
      *
      * Note: If you do wish to connect via the constructor, only 'host' is
-     *       strictly required, which will cause PhpRedis to connect to that
-     *       host on Redis' default port (6379).
+     *       strictly required, which will cause PhpValkeyGlide to connect to that
+     *       host on ValkeyGlide' default port (6379).
      *
      *
-     * @see Redis::connect()
+     * @see ValkeyGlide::connect()
      * @see https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
      * @param array $options
      *
-     * @return Redis
+     * @return ValkeyGlide
      */
     public function __construct(?array $options = null);
 
@@ -516,9 +516,9 @@ class Redis {
 
     /**
      * Compress a value with the currently configured compressor as set with
-     * Redis::setOption().
+     * ValkeyGlide::setOption().
      *
-     * @see Redis::setOption()
+     * @see ValkeyGlide::setOption()
      *
      * @param  string $value The value to be compressed
      * @return string        The compressed result
@@ -528,9 +528,9 @@ class Redis {
 
     /**
      * Uncompress the provided argument that has been compressed with the
-     * currently configured compressor as set with Redis::setOption().
+     * currently configured compressor as set with ValkeyGlide::setOption().
      *
-     * @see Redis::setOption()
+     * @see ValkeyGlide::setOption()
      *
      * @param  string $value  The compressed value to uncompress.
      * @return string         The uncompressed result.
@@ -540,7 +540,7 @@ class Redis {
 
     /**
      * Prefix the passed argument with the currently set key prefix as set
-     * with Redis::setOption().
+     * with ValkeyGlide::setOption().
      *
      * @param string  $key The key/string to prefix
      * @return string      The prefixed string
@@ -550,9 +550,9 @@ class Redis {
 
     /**
      * Serialize the provided value with the currently set serializer as set
-     * with Redis::setOption().
+     * with ValkeyGlide::setOption().
      *
-     * @see Redis::setOption()
+     * @see ValkeyGlide::setOption()
      *
      * @param mixed $value The value to serialize
      * @return string      The serialized result
@@ -562,9 +562,9 @@ class Redis {
 
     /**
      * Unserialize the passed argument with the currently set serializer as set
-     * with Redis::setOption().
+     * with ValkeyGlide::setOption().
      *
-     * @see Redis::setOption()
+     * @see ValkeyGlide::setOption()
      *
      * @param string $value The value to unserialize
      * @return mixed        The unserialized result
@@ -574,7 +574,7 @@ class Redis {
 
     /**
      * Pack the provided value with the configured serializer and compressor
-     * as set with Redis::setOption().
+     * as set with ValkeyGlide::setOption().
      *
      * @param  mixed $value  The value to pack
      * @return string        The packed result having been serialized and
@@ -584,7 +584,7 @@ class Redis {
 
     /**
      * Unpack the provided value with the configured compressor and serializer
-     * as set with Redis::setOption().
+     * as set with ValkeyGlide::setOption().
      *
      * @param  string $value  The value which has been serialized and compressed.
      * @return mixed          The uncompressed and eserialized value.
@@ -595,12 +595,12 @@ class Redis {
     public function acl(string $subcmd, string ...$args): mixed;
 
     /**
-     * Append data to a Redis STRING key.
+     * Append data to a ValkeyGlide STRING key.
      *
      * @param string $key   The key in question
      * @param mixed $value  The data to append to the key.
      *
-     * @return Redis|int|false The new string length of the key or false on failure.
+     * @return ValkeyGlide|int|false The new string length of the key or false on failure.
      *
      * @see https://redis.io/commands/append
      *
@@ -608,10 +608,10 @@ class Redis {
      * $redis->set('foo', 'hello);
      * $redis->append('foo', 'world');
      */
-    public function append(string $key, mixed $value): Redis|int|false;
+    public function append(string $key, mixed $value): ValkeyGlide|int|false;
 
     /**
-     * Authenticate a Redis connection after its been established.
+     * Authenticate a ValkeyGlide connection after its been established.
      *
      *     $redis->auth('password');
      *     $redis->auth(['password']);
@@ -620,56 +620,56 @@ class Redis {
      * @see https://redis.io/commands/auth
      *
      * @param mixed $credentials A string password, or an array with one or two string elements.
-     * @return Redis|bool Whether the AUTH was successful.
+     * @return ValkeyGlide|bool Whether the AUTH was successful.
      *
      */
-    public function auth(#[\SensitiveParameter] mixed $credentials): Redis|bool;
+    public function auth(#[\SensitiveParameter] mixed $credentials): ValkeyGlide|bool;
 
     /**
-     * Execute a save of the Redis database in the background.
+     * Execute a save of the ValkeyGlide database in the background.
      *
      * @see https://redis.io/commands/bgsave
      *
-     * @return Redis|bool Whether the command was successful.
+     * @return ValkeyGlide|bool Whether the command was successful.
      */
-    public function bgSave(): Redis|bool;
+    public function bgSave(): ValkeyGlide|bool;
 
     /**
-     * Asynchronously rewrite Redis' append-only file
+     * Asynchronously rewrite ValkeyGlide' append-only file
      *
      * @see https://redis.io/commands/bgrewriteaof
      *
-     * @return Redis|bool Whether the command was successful.
+     * @return ValkeyGlide|bool Whether the command was successful.
      */
-    public function bgrewriteaof(): Redis|bool;
+    public function bgrewriteaof(): ValkeyGlide|bool;
 
     /**
      * @see https://redis.io/commands/waitaof
      *
-     * @return Redis|array
+     * @return ValkeyGlide|array
      */
-    public function waitaof(int $numlocal, int $numreplicas, int $timeout): Redis|array|false;
+    public function waitaof(int $numlocal, int $numreplicas, int $timeout): ValkeyGlide|array|false;
 
     /**
-     * Count the number of set bits in a Redis string.
+     * Count the number of set bits in a ValkeyGlide string.
      *
      * @see https://redis.io/commands/bitcount/
      *
      * @param string $key     The key in question (must be a string key)
-     * @param int    $start   The index where Redis should start counting.  If omitted it
+     * @param int    $start   The index where ValkeyGlide should start counting.  If omitted it
      *                        defaults to zero, which means the start of the string.
-     * @param int    $end     The index where Redis should stop counting.  If omitted it
+     * @param int    $end     The index where ValkeyGlide should stop counting.  If omitted it
      *                        defaults to -1, meaning the very end of the string.
      *
-     * @param bool   $bybit   Whether or not Redis should treat $start and $end as bit
+     * @param bool   $bybit   Whether or not ValkeyGlide should treat $start and $end as bit
      *                        positions, rather than bytes.
      *
-     * @return Redis|int|false The number of bits set in the requested range.
+     * @return ValkeyGlide|int|false The number of bits set in the requested range.
      *
      */
-    public function bitcount(string $key, int $start = 0, int $end = -1, bool $bybit = false): Redis|int|false;
+    public function bitcount(string $key, int $start = 0, int $end = -1, bool $bybit = false): ValkeyGlide|int|false;
 
-    public function bitop(string $operation, string $deskey, string $srckey, string ...$other_keys): Redis|int|false;
+    public function bitop(string $operation, string $deskey, string $srckey, string ...$other_keys): ValkeyGlide|int|false;
 
     /**
      * Return the position of the first bit set to 0 or 1 in a string.
@@ -680,15 +680,15 @@ class Redis {
      * @param bool   $bit   Whether to look for an unset (0) or set (1) bit.
      * @param int    $start Where in the string to start looking.
      * @param int    $end   Where in the string to stop looking.
-     * @param bool   $bybit If true, Redis will treat $start and $end as BIT values and not bytes, so if start
-     *                      was 0 and end was 2, Redis would only search the first two bits.
+     * @param bool   $bybit If true, ValkeyGlide will treat $start and $end as BIT values and not bytes, so if start
+     *                      was 0 and end was 2, ValkeyGlide would only search the first two bits.
      *
-     * @return Redis|int|false The position of the first set or unset bit.
+     * @return ValkeyGlide|int|false The position of the first set or unset bit.
      **/
-    public function bitpos(string $key, bool $bit, int $start = 0, int $end = -1, bool $bybit = false): Redis|int|false;
+    public function bitpos(string $key, bool $bit, int $start = 0, int $end = -1, bool $bybit = false): ValkeyGlide|int|false;
 
     /**
-     * Pop an element off the beginning of a Redis list or lists, potentially blocking up to a specified
+     * Pop an element off the beginning of a ValkeyGlide list or lists, potentially blocking up to a specified
      * timeout.  This method may be called in two distinct ways, of which examples are provided below.
      *
      * @see https://redis.io/commands/blpop/
@@ -699,26 +699,26 @@ class Redis {
      *                                         be an additional key, or the timeout you wish to send to
      *                                         the command.
      *
-     * @return Redis|array|null|false Can return various things depending on command and data in Redis.
+     * @return ValkeyGlide|array|null|false Can return various things depending on command and data in ValkeyGlide.
      *
      * @example
      * $redis->blPop('list1', 'list2', 'list3', 1.5);
      * $relay->blPop(['list1', 'list2', 'list3'], 1.5);
      */
-    public function blPop(string|array $key_or_keys, string|float|int $timeout_or_key, mixed ...$extra_args): Redis|array|null|false;
+    public function blPop(string|array $key_or_keys, string|float|int $timeout_or_key, mixed ...$extra_args): ValkeyGlide|array|null|false;
 
     /**
-     * Pop an element off of the end of a Redis list or lists, potentially blocking up to a specified timeout.
-     * The calling convention is identical to Redis::blPop() so see that documentation for more details.
+     * Pop an element off of the end of a ValkeyGlide list or lists, potentially blocking up to a specified timeout.
+     * The calling convention is identical to ValkeyGlide::blPop() so see that documentation for more details.
      *
      * @see https://redis.io/commands/brpop/
-     * @see Redis::blPop()
+     * @see ValkeyGlide::blPop()
      *
      */
-    public function brPop(string|array $key_or_keys, string|float|int $timeout_or_key, mixed ...$extra_args): Redis|array|null|false;
+    public function brPop(string|array $key_or_keys, string|float|int $timeout_or_key, mixed ...$extra_args): ValkeyGlide|array|null|false;
 
     /**
-     * Pop an element from the end of a Redis list, pushing it to the beginning of another Redis list,
+     * Pop an element from the end of a ValkeyGlide list, pushing it to the beginning of another ValkeyGlide list,
      * optionally blocking up to a specified timeout.
      *
      * @see https://redis.io/commands/brpoplpush/
@@ -726,10 +726,10 @@ class Redis {
      * @param string    $src     The source list
      * @param string    $dst     The destination list
      * @param int|float $timeout The number of seconds to wait.  Note that you must be connected
-     *                           to Redis >= 6.0.0 to send a floating point timeout.
+     *                           to ValkeyGlide >= 6.0.0 to send a floating point timeout.
      *
      */
-    public function brpoplpush(string $src, string $dst, int|float $timeout): Redis|string|false;
+    public function brpoplpush(string $src, string $dst, int|float $timeout): ValkeyGlide|string|false;
 
     /**
      * POP the maximum scoring element off of one or more sorted sets, blocking up to a specified
@@ -738,7 +738,7 @@ class Redis {
      * Following are examples of the two main ways to call this method.
      *
      * **NOTE**:  We recommend calling this function with an array and a timeout as the other strategy
-     *            may be deprecated in future versions of PhpRedis
+     *            may be deprecated in future versions of PhpValkeyGlide
      *
      * @see https://redis.io/commands/bzpopmax
      *
@@ -749,13 +749,13 @@ class Redis {
      * @param mixed       $extra_args      Can consist of additional keys, until the last argument
      *                                     which needs to be a timeout.
      *
-     * @return Redis|array|false The popped elements.
+     * @return ValkeyGlide|array|false The popped elements.
      *
      * @example
      * $redis->bzPopMax('key1', 'key2', 'key3', 1.5);
      * $redis->bzPopMax(['key1', 'key2', 'key3'], 1.5);
      */
-    public function bzPopMax(string|array $key, string|int $timeout_or_key, mixed ...$extra_args): Redis|array|false;
+    public function bzPopMax(string|array $key, string|int $timeout_or_key, mixed ...$extra_args): ValkeyGlide|array|false;
 
     /**
      * POP the minimum scoring element off of one or more sorted sets, blocking up to a specified timeout
@@ -764,10 +764,10 @@ class Redis {
      * This command is identical in semantics to bzPopMax so please see that method for more information.
      *
      * @see https://redis.io/commands/bzpopmin
-     * @see Redis::bzPopMax()
+     * @see ValkeyGlide::bzPopMax()
      *
      */
-    public function bzPopMin(string|array $key, string|int $timeout_or_key, mixed ...$extra_args): Redis|array|false;
+    public function bzPopMin(string|array $key, string|int $timeout_or_key, mixed ...$extra_args): ValkeyGlide|array|false;
 
     /**
      * POP one or more elements from one or more sorted sets, blocking up to a specified amount of time
@@ -775,18 +775,18 @@ class Redis {
      *
      * @param float  $timeout How long to block if there are no element available
      * @param array  $keys    The sorted sets to pop from
-     * @param string $from    The string 'MIN' or 'MAX' (case insensitive) telling Redis whether you wish to
+     * @param string $from    The string 'MIN' or 'MAX' (case insensitive) telling ValkeyGlide whether you wish to
      *                        pop the lowest or highest scoring members from the set(s).
      * @param int    $count   Pop up to how many elements.
      *
-     * @return Redis|array|null|false This function will return an array of popped elements, or false
+     * @return ValkeyGlide|array|null|false This function will return an array of popped elements, or false
      *                                depending on whether any elements could be popped within the
      *                                specified timeout.
      *
-     * NOTE:  If Redis::OPT_NULL_MULTIBULK_AS_NULL is set to true via Redis::setOption(), this method will
-     *        instead return NULL when Redis doesn't pop any elements.
+     * NOTE:  If ValkeyGlide::OPT_NULL_MULTIBULK_AS_NULL is set to true via ValkeyGlide::setOption(), this method will
+     *        instead return NULL when ValkeyGlide doesn't pop any elements.
      */
-    public function bzmpop(float $timeout, array $keys, string $from, int $count = 1): Redis|array|null|false;
+    public function bzmpop(float $timeout, array $keys, string $from, int $count = 1): ValkeyGlide|array|null|false;
 
     /**
      * POP one or more of the highest or lowest scoring elements from one or more sorted sets.
@@ -794,55 +794,55 @@ class Redis {
      * @see https://redis.io/commands/zmpop
      *
      * @param array  $keys  One or more sorted sets
-     * @param string $from  The string 'MIN' or 'MAX' (case insensitive) telling Redis whether you want to
+     * @param string $from  The string 'MIN' or 'MAX' (case insensitive) telling ValkeyGlide whether you want to
      *                      pop the lowest or highest scoring elements.
      * @param int    $count Pop up to how many elements at once.
      *
-     * @return Redis|array|null|false An array of popped elements or false if none could be popped.
+     * @return ValkeyGlide|array|null|false An array of popped elements or false if none could be popped.
      */
-    public function zmpop(array $keys, string $from, int $count = 1): Redis|array|null|false;
+    public function zmpop(array $keys, string $from, int $count = 1): ValkeyGlide|array|null|false;
 
     /**
-     * Pop one or more elements from one or more Redis LISTs, blocking up to a specified timeout when
+     * Pop one or more elements from one or more ValkeyGlide LISTs, blocking up to a specified timeout when
      * no elements are available.
      *
      * @see https://redis.io/commands/blmpop
      *
-     * @param float  $timeout The number of seconds Redis will block when no elements are available.
-     * @param array  $keys    One or more Redis LISTs to pop from.
-     * @param string $from    The string 'LEFT' or 'RIGHT' (case insensitive), telling Redis whether
+     * @param float  $timeout The number of seconds ValkeyGlide will block when no elements are available.
+     * @param array  $keys    One or more ValkeyGlide LISTs to pop from.
+     * @param string $from    The string 'LEFT' or 'RIGHT' (case insensitive), telling ValkeyGlide whether
      *                        to pop elements from the beginning or end of the LISTs.
      * @param int    $count   Pop up to how many elements at once.
      *
-     * @return Redis|array|null|false One or more elements popped from the list(s) or false if all LISTs
+     * @return ValkeyGlide|array|null|false One or more elements popped from the list(s) or false if all LISTs
      *                                were empty.
      */
-    public function blmpop(float $timeout, array $keys, string $from, int $count = 1): Redis|array|null|false;
+    public function blmpop(float $timeout, array $keys, string $from, int $count = 1): ValkeyGlide|array|null|false;
 
     /**
-     * Pop one or more elements off of one or more Redis LISTs.
+     * Pop one or more elements off of one or more ValkeyGlide LISTs.
      *
      * @see https://redis.io/commands/lmpop
      *
-     * @param array  $keys  An array with one or more Redis LIST key names.
-     * @param string $from  The string 'LEFT' or 'RIGHT' (case insensitive), telling Redis whether to pop\
+     * @param array  $keys  An array with one or more ValkeyGlide LIST key names.
+     * @param string $from  The string 'LEFT' or 'RIGHT' (case insensitive), telling ValkeyGlide whether to pop\
      *                      elements from the beginning or end of the LISTs.
      * @param int    $count The maximum number of elements to pop at once.
      *
-     * @return Redis|array|null|false One or more elements popped from the LIST(s) or false if all the LISTs
+     * @return ValkeyGlide|array|null|false One or more elements popped from the LIST(s) or false if all the LISTs
      *                                were empty.
      *
      */
-    public function lmpop(array $keys, string $from, int $count = 1): Redis|array|null|false;
+    public function lmpop(array $keys, string $from, int $count = 1): ValkeyGlide|array|null|false;
 
     /**
      * Reset any last error on the connection to NULL
      *
-     * @see Redis::getLastError()
+     * @see ValkeyGlide::getLastError()
      * @return bool This should always return true or throw an exception if we're not connected.
      *
      * @example
-     * $redis = new Redis(['host' => 'localhost']);
+     * $redis = new ValkeyGlide(['host' => 'localhost']);
      * $redis->set('string', 'this_is_a_string');
      * $redis->smembers('string');
      * var_dump($redis->getLastError());
@@ -858,10 +858,10 @@ class Redis {
     public function command(?string $opt = null, mixed ...$args): mixed;
 
     /**
-     *  Execute the Redis CONFIG command in a variety of ways.
+     *  Execute the ValkeyGlide CONFIG command in a variety of ways.
      *
      *  What the command does in particular depends on the `$operation` qualifier.
-     *  Operations that PhpRedis supports are: RESETSTAT, REWRITE, GET, and SET.
+     *  Operations that PhpValkeyGlide supports are: RESETSTAT, REWRITE, GET, and SET.
      *
      * @param string $operation The CONFIG operation to execute (e.g. GET, SET, REWRITE).
      * @param array|string|null $key_or_settings One or more keys or values.
@@ -882,7 +882,7 @@ class Redis {
     /**
      * Make a copy of a key.
      *
-     * $redis = new Redis(['host' => 'localhost']);
+     * $redis = new ValkeyGlide(['host' => 'localhost']);
      *
      * @param string $src     The key to copy
      * @param string $dst     The name of the new key created from the source key.
@@ -894,7 +894,7 @@ class Redis {
      *                        ];
      *                        </code>
      *
-     * @return Redis|bool True if the copy was completed and false if not.
+     * @return ValkeyGlide|bool True if the copy was completed and false if not.
      *
      * @see https://redis.io/commands/copy
      *
@@ -912,37 +912,37 @@ class Redis {
      * var_dump($redis->copy('source1', 'exists'));
      * var_dump($redis->copy('source1', 'exists', ['REPLACE' => true]));
      */
-    public function copy(string $src, string $dst, ?array $options = null): Redis|bool;
+    public function copy(string $src, string $dst, ?array $options = null): ValkeyGlide|bool;
 
     /**
-     * Return the number of keys in the currently selected Redis database.
+     * Return the number of keys in the currently selected ValkeyGlide database.
      *
      * @see https://redis.io/commands/dbsize
      *
-     * @return Redis|int The number of keys or false on failure.
+     * @return ValkeyGlide|int The number of keys or false on failure.
      *
      * @example
-     * $redis = new Redis(['host' => 'localhost']);
+     * $redis = new ValkeyGlide(['host' => 'localhost']);
      * $redis->flushdb();
      * $redis->set('foo', 'bar');
      * var_dump($redis->dbsize());
      * $redis->mset(['a' => 'a', 'b' => 'b', 'c' => 'c', 'd' => 'd']);
      * var_dump($redis->dbsize());
      */
-    public function dbSize(): Redis|int|false;
+    public function dbSize(): ValkeyGlide|int|false;
 
-    public function debug(string $key): Redis|string;
+    public function debug(string $key): ValkeyGlide|string;
 
     /**
-     * Decrement a Redis integer by 1 or a provided value.
+     * Decrement a ValkeyGlide integer by 1 or a provided value.
      *
      * @param string $key The key to decrement
      * @param int    $by  How much to decrement the key.  Note that if this value is
-     *                    not sent or is set to `1`, PhpRedis will actually invoke
+     *                    not sent or is set to `1`, PhpValkeyGlide will actually invoke
      *                    the 'DECR' command.  If it is any value other than `1`
-     *                    PhpRedis will actually send the `DECRBY` command.
+     *                    PhpValkeyGlide will actually send the `DECRBY` command.
      *
-     * @return Redis|int|false The new value of the key or false on failure.
+     * @return ValkeyGlide|int|false The new value of the key or false on failure.
      *
      * @see https://redis.io/commands/decr
      * @see https://redis.io/commands/decrby
@@ -950,7 +950,7 @@ class Redis {
      * @example $redis->decr('counter');
      * @example $redis->decr('counter', 2);
      */
-    public function decr(string $key, int $by = 1): Redis|int|false;
+    public function decr(string $key, int $by = 1): ValkeyGlide|int|false;
 
     /**
      * Decrement a redis integer by a value
@@ -958,17 +958,17 @@ class Redis {
      * @param string $key   The integer key to decrement.
      * @param int    $value How much to decrement the key.
      *
-     * @return Redis|int|false The new value of the key or false on failure.
+     * @return ValkeyGlide|int|false The new value of the key or false on failure.
      *
      * @see https://redis.io/commands/decrby
      *
      * @example $redis->decrby('counter', 1);
      * @example $redis->decrby('counter', 2);
      */
-    public function decrBy(string $key, int $value): Redis|int|false;
+    public function decrBy(string $key, int $value): ValkeyGlide|int|false;
 
     /**
-     * Delete one or more keys from Redis.
+     * Delete one or more keys from ValkeyGlide.
      *
      * This method can be called in two distinct ways.  The first is to pass a single array
      * of keys to delete, and the second is to pass N arguments, all names of keys.  See
@@ -978,25 +978,25 @@ class Redis {
      *                                  the name of a key.
      * @param string       $other_keys  One or more additional keys passed in a variadic fashion.
      *
-     * @return Redis|int|false The number of keys that were deleted
+     * @return ValkeyGlide|int|false The number of keys that were deleted
      *
      * @see https://redis.io/commands/del
      *
      * @example $redis->del('key:0', 'key:1');
      * @example $redis->del(['key:2', 'key:3', 'key:4']);
      */
-    public function del(array|string $key, string ...$other_keys): Redis|int|false;
+    public function del(array|string $key, string ...$other_keys): ValkeyGlide|int|false;
 
     /**
      * @deprecated
-     * @alias Redis::del
+     * @alias ValkeyGlide::del
      */
-    public function delete(array|string $key, string ...$other_keys): Redis|int|false;
+    public function delete(array|string $key, string ...$other_keys): ValkeyGlide|int|false;
 
     /**
      * Discard a transaction currently in progress.
      *
-     * @return Redis|bool  True if we could discard the transaction.
+     * @return ValkeyGlide|bool  True if we could discard the transaction.
      *
      * @example
      * $redis->getMode();
@@ -1004,10 +1004,10 @@ class Redis {
      * $redis->discard();
      * $redis->getMode();
      */
-    public function discard(): Redis|bool;
+    public function discard(): ValkeyGlide|bool;
 
     /**
-     * Dump Redis' internal binary representation of a key.
+     * Dump ValkeyGlide' internal binary representation of a key.
      *
      * <code>
      * $redis->zRange('new-zset', 0, -1, true);
@@ -1015,7 +1015,7 @@ class Redis {
      *
      * @param string $key The key to dump.
      *
-     * @return Redis|string A binary string representing the key's value.
+     * @return ValkeyGlide|string A binary string representing the key's value.
      *
      * @see https://redis.io/commands/dump
      *
@@ -1024,20 +1024,20 @@ class Redis {
      * $binary = $redis->dump('zset');
      * $redis->restore('new-zset', 0, $binary);
      */
-    public function dump(string $key): Redis|string|false;
+    public function dump(string $key): ValkeyGlide|string|false;
 
     /**
-     * Have Redis repeat back an arbitrary string to the client.
+     * Have ValkeyGlide repeat back an arbitrary string to the client.
      *
      * @param string $str The string to echo
      *
-     * @return Redis|string|false The string sent to Redis or false on failure.
+     * @return ValkeyGlide|string|false The string sent to ValkeyGlide or false on failure.
      *
      * @see https://redis.io/commands/echo
      *
      * @example $redis->echo('Hello, World');
      */
-    public function echo(string $str): Redis|string|false;
+    public function echo(string $str): ValkeyGlide|string|false;
 
     /**
      * Execute a LUA script on the redis server.
@@ -1059,7 +1059,7 @@ class Redis {
      * This is simply the read-only variant of eval, meaning the underlying script
      * may not modify data in redis.
      *
-     * @see Redis::eval_ro()
+     * @see ValkeyGlide::eval_ro()
      */
     public function eval_ro(string $script_sha, array $args = [], int $num_keys = 0): mixed;
 
@@ -1077,7 +1077,7 @@ class Redis {
      * @return mixed Returns whatever the specific script does.
      *
      * @see https://redis.io/commands/evalsha/
-     * @see Redis::eval();
+     * @see ValkeyGlide::eval();
      *
      */
     public function evalsha(string $sha1, array $args = [], int $num_keys = 0): mixed;
@@ -1086,19 +1086,19 @@ class Redis {
      * This is simply the read-only variant of evalsha, meaning the underlying script
      * may not modify data in redis.
      *
-     * @see Redis::evalsha()
+     * @see ValkeyGlide::evalsha()
      */
     public function evalsha_ro(string $sha1, array $args = [], int $num_keys = 0): mixed;
 
     /**
      * Execute either a MULTI or PIPELINE block and return the array of replies.
      *
-     * @return Redis|array|false The array of pipeline'd or multi replies or false on failure.
+     * @return ValkeyGlide|array|false The array of pipeline'd or multi replies or false on failure.
      *
      * @see https://redis.io/commands/exec
      * @see https://redis.io/commands/multi
-     * @see Redis::pipeline()
-     * @see Redis::multi()
+     * @see ValkeyGlide::pipeline()
+     * @see ValkeyGlide::multi()
      *
      * @example
      * $res = $redis->multi()
@@ -1108,7 +1108,7 @@ class Redis {
      *              ->rpush('list', 'one', 'two', 'three')
      *              ->exec();
      */
-    public function exec(): Redis|array|false;
+    public function exec(): ValkeyGlide|array|false;
 
     /**
      * Test if one or more keys exist.
@@ -1117,14 +1117,14 @@ class Redis {
      * @param mixed $other_keys  If the previous argument was a string, you may send any number of
      *                           additional keys to test.
      *
-     * @return Redis|int|bool    The number of keys that do exist and false on failure
+     * @return ValkeyGlide|int|bool    The number of keys that do exist and false on failure
      *
      * @see https://redis.io/commands/exists
      *
      * @example $redis->exists(['k1', 'k2', 'k3']);
      * @example $redis->exists('k4', 'k5', 'notakey');
      */
-    public function exists(mixed $key, mixed ...$other_keys): Redis|int|bool;
+    public function exists(mixed $key, mixed ...$other_keys): ValkeyGlide|int|bool;
 
     /**
      * Sets an expiration in seconds on the key in question.  If connected to
@@ -1142,21 +1142,21 @@ class Redis {
      *                      GT - Set expiry only when new expiry is > current expiry
      *                      </code>
      *
-     * @return Redis|bool True if an expiration was set and false otherwise.
+     * @return ValkeyGlide|bool True if an expiration was set and false otherwise.
      * @see https://redis.io/commands/expire
      *
      */
-    public function expire(string $key, int $timeout, ?string $mode = null): Redis|bool;
+    public function expire(string $key, int $timeout, ?string $mode = null): ValkeyGlide|bool;
 
     /*
      * Set a key's expiration to a specific Unix timestamp in seconds.
      *
-     * If connected to Redis >= 7.0.0 you can pass an optional 'mode' argument.
-     * @see Redis::expire() For a description of the mode argument.
+     * If connected to ValkeyGlide >= 7.0.0 you can pass an optional 'mode' argument.
+     * @see ValkeyGlide::expire() For a description of the mode argument.
      *
      * @param string $key The key to set an expiration on.
      *
-     * @return Redis|bool True if an expiration was set, false if not.
+     * @return ValkeyGlide|bool True if an expiration was set, false if not.
      *
      */
 
@@ -1165,23 +1165,23 @@ class Redis {
      *
      * @param string      $key The key to set an expiration on.
      * @param int         $timestamp The unix timestamp to expire at.
-     * @param string|null $mode An option 'mode' that modifies how the command acts (see {@link Redis::expire}).
-     * @return Redis|bool True if an expiration was set, false if not.
+     * @param string|null $mode An option 'mode' that modifies how the command acts (see {@link ValkeyGlide::expire}).
+     * @return ValkeyGlide|bool True if an expiration was set, false if not.
      *
      * @see https://redis.io/commands/expireat
      * @see https://redis.io/commands/expire
-     * @see Redis::expire()
+     * @see ValkeyGlide::expire()
      */
-    public function expireAt(string $key, int $timestamp, ?string $mode = null): Redis|bool;
+    public function expireAt(string $key, int $timestamp, ?string $mode = null): ValkeyGlide|bool;
 
-    public function failover(?array $to = null, bool $abort = false, int $timeout = 0): Redis|bool;
+    public function failover(?array $to = null, bool $abort = false, int $timeout = 0): ValkeyGlide|bool;
 
     /**
      * Get the expiration of a given key as a unix timestamp
      *
      * @param string $key      The key to check.
      *
-     * @return Redis|int|false The timestamp when the key expires, or -1 if the key has no expiry
+     * @return ValkeyGlide|int|false The timestamp when the key expires, or -1 if the key has no expiry
      *                         and -2 if the key doesn't exist.
      *
      * @see https://redis.io/commands/expiretime
@@ -1190,20 +1190,20 @@ class Redis {
      * $redis->setEx('mykey', 60, 'myval');
      * $redis->expiretime('mykey');
      */
-    public function expiretime(string $key): Redis|int|false;
+    public function expiretime(string $key): ValkeyGlide|int|false;
 
     /**
-     * Get the expiration timestamp of a given Redis key but in milliseconds.
+     * Get the expiration timestamp of a given ValkeyGlide key but in milliseconds.
      *
      * @see https://redis.io/commands/pexpiretime
-     * @see Redis::expiretime()
+     * @see ValkeyGlide::expiretime()
      *
      * @param string $key      The key to check
      *
-     * @return Redis|int|false The expiration timestamp of this key (in milliseconds) or -1 if the
+     * @return ValkeyGlide|int|false The expiration timestamp of this key (in milliseconds) or -1 if the
      *                         key has no expiration, and -2 if it does not exist.
      */
-    public function pexpiretime(string $key): Redis|int|false;
+    public function pexpiretime(string $key): ValkeyGlide|int|false;
 
     /**
      * Invoke a function.
@@ -1234,14 +1234,14 @@ class Redis {
     public function fcall_ro(string $fn, array $keys = [], array $args = []): mixed;
 
     /**
-     * Deletes every key in all Redis databases
+     * Deletes every key in all ValkeyGlide databases
      *
      * @param  bool  $sync Whether to perform the task in a blocking or non-blocking way.
      * @return bool
      *
      * @see https://redis.io/commands/flushall
      */
-    public function flushAll(?bool $sync = null): Redis|bool;
+    public function flushAll(?bool $sync = null): ValkeyGlide|bool;
 
     /**
      * Deletes all the keys of the currently selected database.
@@ -1251,7 +1251,7 @@ class Redis {
      *
      * @see https://redis.io/commands/flushdb
      */
-    public function flushDB(?bool $sync = null): Redis|bool;
+    public function flushDB(?bool $sync = null): ValkeyGlide|bool;
 
     /**
      * Functions is an API for managing code to be executed on the server.
@@ -1267,11 +1267,11 @@ class Redis {
      *                                  'RESTORE'   - Restore the libraries represented by the given payload
      * @param member $args              Additional arguments
      *
-     * @return Redis|bool|string|array  Depends on subcommand.
+     * @return ValkeyGlide|bool|string|array  Depends on subcommand.
      *
      * @see https://redis.io/commands/function
      */
-    public function function(string $operation, mixed ...$args): Redis|bool|string|array;
+    public function function(string $operation, mixed ...$args): ValkeyGlide|bool|string|array;
 
     /**
      * Add one or more members to a geospacial sorted set
@@ -1281,9 +1281,9 @@ class Redis {
      * @param float  $lat The latitude of the first member.
      * @param member $other_triples_and_options You can continue to pass longitude, latitude, and member
      *               arguments to add as many members as you wish.  Optionally, the final argument may be
-     *               a string with options for the command @see Redis documentation for the options.
+     *               a string with options for the command @see ValkeyGlide documentation for the options.
      *
-     * @return Redis|int|false The number of added elements is returned.  If the 'CH' option is specified,
+     * @return ValkeyGlide|int|false The number of added elements is returned.  If the 'CH' option is specified,
      *                         the return value is the number of members *changed*.
      *
      * @example $redis->geoAdd('cities', -121.8374, 39.7284, 'Chico', -122.03218, 37.322, 'Cupertino');
@@ -1292,7 +1292,7 @@ class Redis {
      * @see https://redis.io/commands/geoadd
      */
 
-    public function geoadd(string $key, float $lng, float $lat, string $member, mixed ...$other_triples_and_options): Redis|int|false;
+    public function geoadd(string $key, float $lng, float $lat, string $member, mixed ...$other_triples_and_options): ValkeyGlide|int|false;
 
     /**
      * Get the distance between two members of a geospacially encoded sorted set.
@@ -1308,14 +1308,14 @@ class Redis {
      *                     MI - miles
      *                     </code>
      *
-     * @return Redis|float|false The calculated distance in whichever units were specified or false
+     * @return ValkeyGlide|float|false The calculated distance in whichever units were specified or false
      *                           if one or both members did not exist.
      *
      * @example $redis->geodist('cities', 'Chico', 'Cupertino', 'mi');
      *
      * @see https://redis.io/commands/geodist
      */
-    public function geodist(string $key, string $src, string $dst, ?string $unit = null): Redis|float|false;
+    public function geodist(string $key, string $src, string $dst, ?string $unit = null): ValkeyGlide|float|false;
 
     /**
      * Retrieve one or more GeoHash encoded strings for members of the set.
@@ -1324,14 +1324,14 @@ class Redis {
      * @param string $member        The first member to request
      * @param string $other_members One or more additional members to request.
      *
-     * @return Redis|array|false    An array of GeoHash encoded values.
+     * @return ValkeyGlide|array|false    An array of GeoHash encoded values.
      *
      * @see https://redis.io/commands/geohash
      * @see https://en.wikipedia.org/wiki/Geohash
      *
      * @example $redis->geohash('cities', 'Chico', 'Cupertino');
      */
-    public function geohash(string $key, string $member, string ...$other_members): Redis|array|false;
+    public function geohash(string $key, string $member, string ...$other_members): ValkeyGlide|array|false;
 
     /**
      * Return the longitude and latitude for one or more members of a geospacially encoded sorted set.
@@ -1346,7 +1346,7 @@ class Redis {
      *
      * @example $redis->geopos('cities', 'Seattle', 'New York');
      */
-    public function geopos(string $key, string $member, string ...$other_members): Redis|array|false;
+    public function geopos(string $key, string $member, string ...$other_members): ValkeyGlide|array|false;
 
     /**
      * Retrieve members of a geospacially sorted set that are within a certain radius of a location.
@@ -1356,7 +1356,7 @@ class Redis {
      * @param float  $lat     The latitude of the location to query.
      * @param float  $radius  The radius of the area to include.
      * @param string $unit    The unit of the provided radius (defaults to 'meters).
-     *                        See {@link Redis::geodist} for possible units.
+     *                        See {@link ValkeyGlide::geodist} for possible units.
      * @param array  $options An array of options that modifies how the command behaves.
      *                        <code>
      *                        $options = [
@@ -1388,7 +1388,7 @@ class Redis {
     /**
      * A readonly variant of `GEORADIUS` that may be executed on replicas.
      *
-     * @see Redis::georadius
+     * @see ValkeyGlide::georadius
      */
     public function georadius_ro(string $key, float $lng, float $lat, float $radius, string $unit, array $options = []): mixed;
 
@@ -1399,9 +1399,9 @@ class Redis {
      * @param string $member  The member to treat as the center of the query.
      * @param float  $radius  The radius from the member to include.
      * @param string $unit    The unit of the provided radius
-     *                        See {@link Redis::geodist} for possible units.
+     *                        See {@link ValkeyGlide::geodist} for possible units.
      * @param array  $options An array with various options to modify the command's behavior.
-     *                        See {@link Redis::georadius} for options.
+     *                        See {@link ValkeyGlide::georadius} for options.
      *
      * @return mixed This command can return various things depending on options.
      *
@@ -1423,8 +1423,8 @@ class Redis {
      * @param array|int|float $shape    Either a number representine the radius of a circle to search, or
      *                                  a two element array representing the width and height of a box
      *                                  to search.
-     * @param string          $unit     The unit of our shape.  See {@link Redis::geodist} for possible units.
-     * @param array           $options  @see {@link Redis::georadius} for options.  Note that the `STORE`
+     * @param string          $unit     The unit of our shape.  See {@link ValkeyGlide::geodist} for possible units.
+     * @param array           $options  @see {@link ValkeyGlide::georadius} for options.  Note that the `STORE`
      *                                  options are not allowed for this command.
      */
     public function geosearch(string $key, array|string $position, array|int|float $shape, string $unit, array $options = []): array;
@@ -1440,7 +1440,7 @@ class Redis {
      * @param array|int|float $shape    Either a number representine the radius of a circle to search, or
      *                                  a two element array representing the width and height of a box
      *                                  to search.
-     * @param string          $unit     The unit of our shape.  See {@link Redis::geodist} for possible units.
+     * @param string          $unit     The unit of our shape.  See {@link ValkeyGlide::geodist} for possible units.
      * @param array           $options
      *                        <code>
      *                        $options = [
@@ -1453,7 +1453,7 @@ class Redis {
      *                        ];
      *                        </code>
      */
-    public function geosearchstore(string $dst, string $src, array|string $position, array|int|float $shape, string $unit, array $options = []): Redis|array|int|false;
+    public function geosearchstore(string $dst, string $src, array|string $position, array|int|float $shape, string $unit, array $options = []): ValkeyGlide|array|int|false;
 
     /**
      * Retrieve a string keys value.
@@ -1471,18 +1471,18 @@ class Redis {
      * Retrieve a value and metadata of key.
      *
      * @param  string  $key The key to query
-     * @return Redis|array|false
+     * @return ValkeyGlide|array|false
      *
      * @example $redis->getWithMeta('foo');
      */
-    public function getWithMeta(string $key): Redis|array|false;
+    public function getWithMeta(string $key): ValkeyGlide|array|false;
 
     /**
      * Get the authentication information on the connection, if any.
      *
      * @return mixed The authentication information used to authenticate the connection.
      *
-     * @see Redis::auth()
+     * @see ValkeyGlide::auth()
      */
     public function getAuth(): mixed;
 
@@ -1496,7 +1496,7 @@ class Redis {
      *
      * @see https://redis.io/commands/getbit
      */
-    public function getBit(string $key, int $idx): Redis|int|false;
+    public function getBit(string $key, int $idx): ValkeyGlide|int|false;
 
     /**
      * Get the value of a key and optionally set it's expiration.
@@ -1513,37 +1513,37 @@ class Redis {
      *                       ];
      *                       </code>
      *
-     * @return Redis|string|bool The key's value or false if it didn't exist.
+     * @return ValkeyGlide|string|bool The key's value or false if it didn't exist.
      *
      * @see https://redis.io/commands/getex
      *
      * @example $redis->getEx('mykey', ['EX' => 60]);
      */
-    public function getEx(string $key, array $options = []): Redis|string|bool;
+    public function getEx(string $key, array $options = []): ValkeyGlide|string|bool;
 
     /**
-     * Get the database number PhpRedis thinks we're connected to.
+     * Get the database number PhpValkeyGlide thinks we're connected to.
      *
-     * This value is updated internally in PhpRedis each time {@link Redis::select} is called.
+     * This value is updated internally in PhpValkeyGlide each time {@link ValkeyGlide::select} is called.
      *
      * @return The database we're connected to.
      *
-     * @see Redis::select()
+     * @see ValkeyGlide::select()
      * @see https://redis.io/commands/select
      */
     public function getDBNum(): int;
 
     /**
-     * Get a key from Redis and delete it in an atomic operation.
+     * Get a key from ValkeyGlide and delete it in an atomic operation.
      *
      * @param string $key The key to get/delete.
-     * @return Redis|string|bool The value of the key or false if it didn't exist.
+     * @return ValkeyGlide|string|bool The value of the key or false if it didn't exist.
      *
      * @see https://redis.io/commands/getdel
      *
      * @example $redis->getdel('token:123');
      */
-    public function getDel(string $key): Redis|string|bool;
+    public function getDel(string $key): ValkeyGlide|string|bool;
 
     /**
      * Return the host or Unix socket we are connected to.
@@ -1553,7 +1553,7 @@ class Redis {
     public function getHost(): string;
 
     /**
-     * Get the last error returned to us from Redis, if any.
+     * Get the last error returned to us from ValkeyGlide, if any.
      *
      * @return string The error string or NULL if there is none.
      */
@@ -1568,9 +1568,9 @@ class Redis {
     public function getMode(): int;
 
     /**
-     * Retrieve the value of a configuration setting as set by Redis::setOption()
+     * Retrieve the value of a configuration setting as set by ValkeyGlide::setOption()
      *
-     * @see Redis::setOption() for a detailed list of options and their values.
+     * @see ValkeyGlide::setOption() for a detailed list of options and their values.
      *
      * @return mixed The setting itself or false on failure
      */
@@ -1611,7 +1611,7 @@ class Redis {
      * @param int    $start The zero-based starting index.
      * @param int    $end   The zero-based ending index.
      *
-     * @return Redis|string|false The substring or false on failure.
+     * @return ValkeyGlide|string|false The substring or false on failure.
      *
      * @see https://redis.io/commands/getrange
      *
@@ -1619,7 +1619,7 @@ class Redis {
      * $redis->set('silly-word', 'Supercalifragilisticexpialidocious');
      * echo $redis->getRange('silly-word', 0, 4) . "\n";
      */
-    public function getRange(string $key, int $start, int $end): Redis|string|false;
+    public function getRange(string $key, int $start, int $end): ValkeyGlide|string|false;
 
     /**
      * Get the longest common subsequence between two string keys.
@@ -1643,7 +1643,7 @@ class Redis {
      *
      *                        NOTE:  'LEN' cannot be used with 'IDX'.
      *
-     * @return Redis|string|array|int|false Various reply types depending on options.
+     * @return ValkeyGlide|string|array|int|false Various reply types depending on options.
      *
      * @see https://redis.io/commands/lcs
      *
@@ -1652,7 +1652,7 @@ class Redis {
      * $redis->set('seq2', 'aactcggcgcgagtaccaggccaaggtcgttccagagcaaagactcgtgccccgctgagc');
      * echo $redis->lcs('seq1', 'seq2') . "\n";
      */
-    public function lcs(string $key1, string $key2, ?array $options = null): Redis|string|array|int|false;
+    public function lcs(string $key1, string $key2, ?array $options = null): ValkeyGlide|string|array|int|false;
 
     /**
      * Get the currently set read timeout on the connection.
@@ -1667,7 +1667,7 @@ class Redis {
      * @param string $key The key to set.
      * @param mixed $value The value to set the key to.
      *
-     * @return Redis|string|false The old value of the key or false if it didn't exist.
+     * @return ValkeyGlide|string|false The old value of the key or false if it didn't exist.
      *
      * @see https://redis.io/commands/getset
      *
@@ -1675,7 +1675,7 @@ class Redis {
      * $redis->getset('captain', 'Pike');
      * $redis->getset('captain', 'Kirk');
      */
-    public function getset(string $key, mixed $value): Redis|string|false;
+    public function getset(string $key, mixed $value): ValkeyGlide|string|false;
 
     /**
      * Retrieve any set connection timeout
@@ -1705,13 +1705,13 @@ class Redis {
      * @param string $field        The first field to remove
      * @param string $other_fields One or more additional fields to remove.
      *
-     * @return Redis|int|false     The number of fields actually removed.
+     * @return ValkeyGlide|int|false     The number of fields actually removed.
      *
      * @see https://redis.io/commands/hdel
      *
      * @example $redis->hDel('communication', 'Alice', 'Bob');
      */
-    public function hDel(string $key, string $field, string ...$other_fields): Redis|int|false;
+    public function hDel(string $key, string $field, string ...$other_fields): ValkeyGlide|int|false;
 
     /**
      * Checks whether a field exists in a hash.
@@ -1719,13 +1719,13 @@ class Redis {
      * @param string $key   The hash to query.
      * @param string $field The field to check
      *
-     * @return Redis|bool   True if it exists, false if not.
+     * @return ValkeyGlide|bool   True if it exists, false if not.
      *
      * @see https://redis.io/commands/hexists
      *
      * @example $redis->hExists('communication', 'Alice');
      */
-    public function hExists(string $key, string $field): Redis|bool;
+    public function hExists(string $key, string $field): ValkeyGlide|bool;
 
     public function hGet(string $key, string $member): mixed;
 
@@ -1733,13 +1733,13 @@ class Redis {
      * Read every field and value from a hash.
      *
      * @param string $key The hash to query.
-     * @return Redis|array<string|int, mixed>|false All fields and values or false if the key didn't exist.
+     * @return ValkeyGlide|array<string|int, mixed>|false All fields and values or false if the key didn't exist.
      *
      * @see https://redis.io/commands/hgetall
      *
      * @example $redis->hgetall('myhash');
      */
-    public function hGetAll(string $key): Redis|array|false;
+    public function hGetAll(string $key): ValkeyGlide|array|false;
 
     /**
      * Increment a hash field's value by an integer
@@ -1748,7 +1748,7 @@ class Redis {
      * @param string $field The field to increment
      * @param int    $value How much to increment the value.
      *
-     * @return Redis|int|false The new value of the field.
+     * @return ValkeyGlide|int|false The new value of the field.
      *
      * @see https://redis.io/commands/hincrby
      *
@@ -1757,7 +1757,7 @@ class Redis {
      * $redis->hincrby('player:1', 'score', 10);
      *
      */
-    public function hIncrBy(string $key, string $field, int $value): Redis|int|false;
+    public function hIncrBy(string $key, string $field, int $value): ValkeyGlide|int|false;
 
     /**
      * Increment a hash field by a floating point value
@@ -1765,27 +1765,27 @@ class Redis {
      * @param string $key The hash with the field to increment.
      * @param string $field The field to increment.
      *
-     * @return Redis|float|false The field value after incremented.
+     * @return ValkeyGlide|float|false The field value after incremented.
      *
      * @see https://redis.io/commands/hincrbyfloat
      *
      * @example
      * $redis->hincrbyfloat('numbers', 'tau', 2 * 3.1415926);
      */
-    public function hIncrByFloat(string $key, string $field, float $value): Redis|float|false;
+    public function hIncrByFloat(string $key, string $field, float $value): ValkeyGlide|float|false;
 
     /**
      * Retrieve all of the fields of a hash.
      *
      * @param string $key The hash to query.
      *
-     * @return Redis|list<string>|false The fields in the hash or false if the hash doesn't exist.
+     * @return ValkeyGlide|list<string>|false The fields in the hash or false if the hash doesn't exist.
      *
      * @see https://redis.io/commands/hkeys
      *
      * @example $redis->hkeys('myhash');
      */
-    public function hKeys(string $key): Redis|array|false;
+    public function hKeys(string $key): ValkeyGlide|array|false;
 
     /**
      * Get the number of fields in a hash.
@@ -1794,11 +1794,11 @@ class Redis {
      *
      * @param string $key The hash to check.
      *
-     * @return Redis|int|false The number of fields or false if the key didn't exist.
+     * @return ValkeyGlide|int|false The number of fields or false if the key didn't exist.
      *
      * @example $redis->hlen('myhash');
      */
-    public function hLen(string $key): Redis|int|false;
+    public function hLen(string $key): ValkeyGlide|int|false;
 
     /**
      * Get one or more fields from a hash.
@@ -1806,13 +1806,13 @@ class Redis {
      * @param string $key    The hash to query.
      * @param array  $fields One or more fields to query in the hash.
      *
-     * @return Redis|array|false The fields and values or false if the key didn't exist.
+     * @return ValkeyGlide|array|false The fields and values or false if the key didn't exist.
      *
      * @see https://redis.io/commands/hmget
      *
      * @example $redis->hMGet('player:1', ['name', 'score']);
      */
-    public function hMget(string $key, array $fields): Redis|array|false;
+    public function hMget(string $key, array $fields): ValkeyGlide|array|false;
 
     /**
      * Add or update one or more hash fields and values
@@ -1820,13 +1820,13 @@ class Redis {
      * @param string $key        The hash to create/update
      * @param array  $fieldvals  An associative array with fields and their values.
      *
-     * @return Redis|bool True if the operation was successful
+     * @return ValkeyGlide|bool True if the operation was successful
      *
      * @see https://redis.io/commands/hmset
      *
      * @example $redis->hmset('updates', ['status' => 'starting', 'elapsed' => 0]);
      */
-    public function hMset(string $key, array $fieldvals): Redis|bool;
+    public function hMset(string $key, array $fieldvals): ValkeyGlide|bool;
 
     /**
      * Get one or more random field from a hash.
@@ -1841,14 +1841,14 @@ class Redis {
      *                        ];
      *                        </code>
      *
-     * @return Redis|array|string One or more random fields (and possibly values).
+     * @return ValkeyGlide|array|string One or more random fields (and possibly values).
      *
      * @see https://redis.io/commands/hrandfield
      *
      * @example $redis->hrandfield('settings');
      * @example $redis->hrandfield('settings', ['count' => 2, 'withvalues' => true]);
      */
-    public function hRandField(string $key, ?array $options = null): Redis|string|array|false;
+    public function hRandField(string $key, ?array $options = null): ValkeyGlide|string|array|false;
 
     /**
      * Add or update one or more hash fields and values.
@@ -1857,14 +1857,14 @@ class Redis {
      * @param mixed  $fields_and_vals Argument pairs of fields and values. Alternatively, an associative array with the
      *                                fields and their values.
      *
-     * @return Redis|int|false The number of fields that were added, or false on failure.
+     * @return ValkeyGlide|int|false The number of fields that were added, or false on failure.
      *
      * @see https://redis.io/commands/hset/
      *
      * @example $redis->hSet('player:1', 'name', 'Kim', 'score', 78);
      * @example $redis->hSet('player:1', ['name' => 'Kim', 'score' => 78]);
      */
-    public function hSet(string $key, mixed ...$fields_and_vals): Redis|int|false;
+    public function hSet(string $key, mixed ...$fields_and_vals): ValkeyGlide|int|false;
 
     /**
      * Set a hash field and value, but only if that field does not exist
@@ -1872,7 +1872,7 @@ class Redis {
      * @param string $key   The hash to update.
      * @param string $field The value to set.
      *
-     * @return Redis|bool True if the field was set and false if not.
+     * @return ValkeyGlide|bool True if the field was set and false if not.
      *
      * @see https://redis.io/commands/hsetnx
      *
@@ -1880,7 +1880,7 @@ class Redis {
      * $redis->hsetnx('player:1', 'lock', 'enabled');
      * $redis->hsetnx('player:1', 'lock', 'enabled');
      */
-    public function hSetNx(string $key, string $field, mixed $value): Redis|bool;
+    public function hSetNx(string $key, string $field, mixed $value): ValkeyGlide|bool;
 
     /**
      * Get the string length of a hash field
@@ -1888,30 +1888,30 @@ class Redis {
      * @param string $key   The hash to query.
      * @param string $field The field to query.
      *
-     * @return Redis|int|false The string length of the field or false.
+     * @return ValkeyGlide|int|false The string length of the field or false.
      *
      * @example
-     * $redis = new Redis(['host' => 'localhost']);
+     * $redis = new ValkeyGlide(['host' => 'localhost']);
      * $redis->del('hash');
      * $redis->hmset('hash', ['50bytes' => str_repeat('a', 50)]);
      * $redis->hstrlen('hash', '50bytes');
      *
      * @see https://redis.io/commands/hstrlen
      */
-    public function hStrLen(string $key, string $field): Redis|int|false;
+    public function hStrLen(string $key, string $field): ValkeyGlide|int|false;
 
     /**
      * Get all of the values from a hash.
      *
      * @param string $key The hash to query.
      *
-     * @return Redis|list<mixed>|false The values from the hash.
+     * @return ValkeyGlide|list<mixed>|false The values from the hash.
      *
      * @see https://redis.io/commands/hvals
      *
      * @example $redis->hvals('player:1');
      */
-    public function hVals(string $key): Redis|array|false;
+    public function hVals(string $key): ValkeyGlide|array|false;
 
 
     /**
@@ -1925,12 +1925,12 @@ class Redis {
      *                          This value will be updated after every call to hscan, until it reaches zero
      *                          meaning the scan is complete.
      * @param string|null $pattern An optional glob-style pattern to filter fields with.
-     * @param int    $count     An optional hint to Redis about how many fields and values to return per HSCAN.
+     * @param int    $count     An optional hint to ValkeyGlide about how many fields and values to return per HSCAN.
      *
-     * @return Redis|array|bool An array with a subset of fields and values.
+     * @return ValkeyGlide|array|bool An array with a subset of fields and values.
      *
      * @example
-     * $redis = new Redis(['host' => 'localhost']);
+     * $redis = new ValkeyGlide(['host' => 'localhost']);
      *
      * $redis->del('big-hash');
      *
@@ -1951,7 +1951,7 @@ class Redis {
      *     }
      * } while ($it != 0);
      */
-    public function hscan(string $key, null|int|string &$iterator, ?string $pattern = null, int $count = 0): Redis|array|bool;
+    public function hscan(string $key, null|int|string &$iterator, ?string $pattern = null, int $count = 0): ValkeyGlide|array|bool;
 
     /**
      * Set an expiration on a key member (KeyDB only).
@@ -1962,7 +1962,7 @@ class Redis {
      * @param string $field The field to expire
      * @param string|null $unit The unit of the ttl (s, or ms).
      */
-    public function expiremember(string $key, string $field, int $ttl, ?string $unit = null): Redis|int|false;
+    public function expiremember(string $key, string $field, int $ttl, ?string $unit = null): ValkeyGlide|int|false;
 
     /**
      * Set an expiration on a key membert to a specific unix timestamp (KeyDB only).
@@ -1973,7 +1973,7 @@ class Redis {
      * @param string $field The field to expire
      * @param int $timestamp The unix timestamp to expire at.
      */
-    public function expirememberat(string $key, string $field, int $timestamp): Redis|int|false;
+    public function expirememberat(string $key, string $field, int $timestamp): ValkeyGlide|int|false;
 
     /**
      * Increment a key's value, optionally by a specific amount.
@@ -1984,12 +1984,12 @@ class Redis {
      * @param string $key The key to increment
      * @param int    $by  An optional amount to increment by.
      *
-     * @return Redis|int|false  The new value of the key after incremented.
+     * @return ValkeyGlide|int|false  The new value of the key after incremented.
      *
      * @example $redis->incr('mycounter');
      * @example $redis->incr('mycounter', 10);
      */
-    public function incr(string $key, int $by = 1): Redis|int|false;
+    public function incr(string $key, int $by = 1): ValkeyGlide|int|false;
 
     /**
      * Increment a key by a specific integer value
@@ -2006,7 +2006,7 @@ class Redis {
      * $redis->incrby('primes', 2);
      * $redis->incrby('primes', 4);
      */
-    public function incrBy(string $key, int $value): Redis|int|false;
+    public function incrBy(string $key, int $value): ValkeyGlide|int|false;
 
     /**
      * Increment a numeric key by a floating point value.
@@ -2014,13 +2014,13 @@ class Redis {
      * @param string $key The key to increment
      * @param floag $value How much to increment (or decrement) the value.
      *
-     * @return Redis|float|false The new value of the key or false if the key didn't contain a string.
+     * @return ValkeyGlide|float|false The new value of the key or false if the key didn't contain a string.
      *
      * @example
      * $redis->incrbyfloat('tau', 3.1415926);
      * $redis->incrbyfloat('tau', 3.1415926);
      */
-    public function incrByFloat(string $key, float $value): Redis|float|false;
+    public function incrByFloat(string $key, float $value): ValkeyGlide|float|false;
 
     /**
      * Retrieve information about the connected redis-server.  If no arguments are passed to
@@ -2028,18 +2028,18 @@ class Redis {
      * section you want returned (e.g. 'server', or 'memory') to receive only information pertaining
      * to that section.
      *
-     * If connected to Redis server >= 7.0.0 you may pass multiple optional sections.
+     * If connected to ValkeyGlide server >= 7.0.0 you may pass multiple optional sections.
      *
      * @see https://redis.io/commands/info/
      *
-     * @param string $sections Optional section(s) you wish Redis server to return.
+     * @param string $sections Optional section(s) you wish ValkeyGlide server to return.
      *
-     * @return Redis|array|false
+     * @return ValkeyGlide|array|false
      */
-    public function info(string ...$sections): Redis|array|false;
+    public function info(string ...$sections): ValkeyGlide|array|false;
 
     /**
-     * Check if we are currently connected to a Redis instance.
+     * Check if we are currently connected to a ValkeyGlide instance.
      *
      * @return bool True if we are, false if not
      */
@@ -2047,13 +2047,13 @@ class Redis {
 
     /**
      * @param string $pattern
-     * @return Redis|list<string>|false
+     * @return ValkeyGlide|list<string>|false
      */
     public function keys(string $pattern);
 
     /**
      * @param mixed $elements
-     * @return Redis|int|false
+     * @return ValkeyGlide|int|false
      */
     public function lInsert(string $key, string $pos, mixed $pivot, mixed $value);
 
@@ -2062,9 +2062,9 @@ class Redis {
      *
      * @param string $key The list
      *
-     * @return Redis|int|false The number of elements in the list or false on failure.
+     * @return ValkeyGlide|int|false The number of elements in the list or false on failure.
      */
-    public function lLen(string $key): Redis|int|false;
+    public function lLen(string $key): ValkeyGlide|int|false;
 
     /**
      * Move an element from one list into another.
@@ -2072,16 +2072,16 @@ class Redis {
      * @param string $src       The source list.
      * @param string $dst       The destination list
      * @param string $wherefrom Where in the source list to retrieve the element.  This can be either
-     *                          - `Redis::LEFT`, or `Redis::RIGHT`.
+     *                          - `ValkeyGlide::LEFT`, or `ValkeyGlide::RIGHT`.
      * @param string $whereto   Where in the destination list to put the element.  This can be either
-     *                          - `Redis::LEFT`, or `Redis::RIGHT`.
-     * @return Redis|string|false The element removed from the source list.
+     *                          - `ValkeyGlide::LEFT`, or `ValkeyGlide::RIGHT`.
+     * @return ValkeyGlide|string|false The element removed from the source list.
      *
      * @example
      * $redis->rPush('numbers', 'one', 'two', 'three');
-     * $redis->lMove('numbers', 'odds', Redis::LEFT, Redis::LEFT);
+     * $redis->lMove('numbers', 'odds', ValkeyGlide::LEFT, ValkeyGlide::LEFT);
      */
-    public function lMove(string $src, string $dst, string $wherefrom, string $whereto): Redis|string|false;
+    public function lMove(string $src, string $dst, string $wherefrom, string $whereto): ValkeyGlide|string|false;
 
     /**
      * Move an element from one list to another, blocking up to a timeout until an element is available.
@@ -2089,27 +2089,27 @@ class Redis {
      * @param string $src       The source list
      * @param string $dst       The destination list
      * @param string $wherefrom Where in the source list to extract the element.
-     *                          - `Redis::LEFT`, or `Redis::RIGHT`.
+     *                          - `ValkeyGlide::LEFT`, or `ValkeyGlide::RIGHT`.
      * @param string $whereto   Where in the destination list to put the element.
-     *                          - `Redis::LEFT`, or `Redis::RIGHT`.
+     *                          - `ValkeyGlide::LEFT`, or `ValkeyGlide::RIGHT`.
      * @param float $timeout    How long to block for an element.
      *
-     * @return Redis|string|false;
+     * @return ValkeyGlide|string|false;
      *
      * @example
      * @redis->lPush('numbers', 'one');
-     * @redis->blmove('numbers', 'odds', Redis::LEFT, Redis::LEFT 1.0);
+     * @redis->blmove('numbers', 'odds', ValkeyGlide::LEFT, ValkeyGlide::LEFT 1.0);
      * // This call will block, if no additional elements are in 'numbers'
-     * @redis->blmove('numbers', 'odds', Redis::LEFT, Redis::LEFT, 1.0);
+     * @redis->blmove('numbers', 'odds', ValkeyGlide::LEFT, ValkeyGlide::LEFT, 1.0);
      */
-    public function blmove(string $src, string $dst, string $wherefrom, string $whereto, float $timeout): Redis|string|false;
+    public function blmove(string $src, string $dst, string $wherefrom, string $whereto, float $timeout): ValkeyGlide|string|false;
 
     /**
      * Pop one or more elements off a list.
      *
      * @param string $key   The list to pop from.
      * @param int    $count Optional number of elements to remove.  By default one element is popped.
-     * @return Redis|null|bool|int|array Will return the element(s) popped from the list or false/NULL
+     * @return ValkeyGlide|null|bool|int|array Will return the element(s) popped from the list or false/NULL
      *                                   if none was removed.
      *
      * @see https://redis.io/commands/lpop
@@ -2117,7 +2117,7 @@ class Redis {
      * @example $redis->lpop('mylist');
      * @example $redis->lpop('mylist', 4);
      */
-    public function lPop(string $key, int $count = 0): Redis|bool|string|array;
+    public function lPop(string $key, int $count = 0): ValkeyGlide|bool|string|array;
 
     /**
      * Retrieve the index of an element in a list.
@@ -2136,16 +2136,16 @@ class Redis {
      *                            # RANK is computed right to left, so a `RANK` of -1 means "the last match".
      *                            'RANK'  => <rank>
      *
-     *                            # This argument allows you to limit how many elements Redis will search before
-     *                            # returning.  This is useful to prevent Redis searching very long lists while
+     *                            # This argument allows you to limit how many elements ValkeyGlide will search before
+     *                            # returning.  This is useful to prevent ValkeyGlide searching very long lists while
      *                            # blocking the client.
      *                            'MAXLEN => <max-len>
      *                        ];
      *                        </code>
      *
-     * @return Redis|null|bool|int|array Returns one or more of the matching indexes, or null/false if none were found.
+     * @return ValkeyGlide|null|bool|int|array Returns one or more of the matching indexes, or null/false if none were found.
      */
-    public function lPos(string $key, mixed $value, ?array $options = null): Redis|null|bool|int|array;
+    public function lPos(string $key, mixed $value, ?array $options = null): ValkeyGlide|null|bool|int|array;
 
     /**
      * Prepend one or more elements to a list.
@@ -2153,13 +2153,13 @@ class Redis {
      * @param string      $key       The list to prepend.
      * @param mixed       $elements  One or more elements to prepend.
      *
-     * @return Redis|int The new length of the list after prepending.
+     * @return ValkeyGlide|int The new length of the list after prepending.
      *
      * @see https://redis.io/commands/lpush
      *
      * @example $redis->lPush('mylist', 'cat', 'bear', 'aligator');
      */
-    public function lPush(string $key, mixed ...$elements): Redis|int|false;
+    public function lPush(string $key, mixed ...$elements): ValkeyGlide|int|false;
 
     /**
      * Append one or more elements to a list.
@@ -2167,13 +2167,13 @@ class Redis {
      * @param string $key      The list to append to.
      * @param mixed  $elements one or more elements to append.
      *
-     * @return Redis|int|false The new length of the list
+     * @return ValkeyGlide|int|false The new length of the list
      *
      * @see https://redis.io/commands/rpush
      *
      * @example $redis->rPush('mylist', 'xray', 'yankee', 'zebra');
      */
-    public function rPush(string $key, mixed ...$elements): Redis|int|false;
+    public function rPush(string $key, mixed ...$elements): ValkeyGlide|int|false;
 
     /**
      * Prepend an element to a list but only if the list exists
@@ -2181,10 +2181,10 @@ class Redis {
      * @param string $key   The key to prepend to.
      * @param mixed  $value The value to prepend.
      *
-     * @return Redis|int|false The new length of the list.
+     * @return ValkeyGlide|int|false The new length of the list.
      *
      */
-    public function lPushx(string $key, mixed $value): Redis|int|false;
+    public function lPushx(string $key, mixed $value): ValkeyGlide|int|false;
 
     /**
      * Append an element to a list but only if the list exists
@@ -2192,10 +2192,10 @@ class Redis {
      * @param string $key   The key to prepend to.
      * @param mixed  $value The value to prepend.
      *
-     * @return Redis|int|false The new length of the list.
+     * @return ValkeyGlide|int|false The new length of the list.
      *
      */
-    public function rPushx(string $key, mixed $value): Redis|int|false;
+    public function rPushx(string $key, mixed $value): ValkeyGlide|int|false;
 
     /**
      * Set a list element at an index to a specific value.
@@ -2204,14 +2204,14 @@ class Redis {
      * @param int    $index The position of the element to change.
      * @param mixed  $value The new value.
      *
-     * @return Redis|bool True if the list was modified.
+     * @return ValkeyGlide|bool True if the list was modified.
      *
      * @see https://redis.io/commands/lset
      */
-    public function lSet(string $key, int $index, mixed $value): Redis|bool;
+    public function lSet(string $key, int $index, mixed $value): ValkeyGlide|bool;
 
     /**
-     * Retrieve the last time Redis' database was persisted to disk.
+     * Retrieve the last time ValkeyGlide' database was persisted to disk.
      *
      * @return int The unix timestamp of the last save time
      *
@@ -2237,12 +2237,12 @@ class Redis {
      * @param int    $end   The end index to retrieve.  This can also be negative to start
      *                      from the end of the list.
      *
-     * @return Redis|array|false The range of elements between the indexes.
+     * @return ValkeyGlide|array|false The range of elements between the indexes.
      *
      * @example $redis->lrange('mylist', 0, -1);  // the whole list
      * @example $redis->lrange('mylist', -2, -1); // the last two elements in the list.
      */
-    public function lrange(string $key, int $start , int $end): Redis|array|false;
+    public function lrange(string $key, int $start , int $end): ValkeyGlide|array|false;
 
     /**
      * Remove one or more matching elements from a list.
@@ -2251,11 +2251,11 @@ class Redis {
      * @param mixed  $value The value to remove.
      * @param int    $count How many elements matching the value to remove.
      *
-     * @return Redis|int|false The number of elements removed.
+     * @return ValkeyGlide|int|false The number of elements removed.
      *
      * @see https://redis.io/commands/lrem
      */
-    public function lrem(string $key, mixed $value, int $count = 0): Redis|int|false;
+    public function lrem(string $key, mixed $value, int $count = 0): ValkeyGlide|int|false;
 
     /**
      * Trim a list to a subrange of elements.
@@ -2264,66 +2264,66 @@ class Redis {
      * @param int    $start The starting index to keep
      * @param int    $end   The ending index to keep.
      *
-     * @return Redis|bool true if the list was trimmed.
+     * @return ValkeyGlide|bool true if the list was trimmed.
      *
      * @example $redis->ltrim('mylist', 0, 3);  // Keep the first four elements
      */
-    public function ltrim(string $key, int $start , int $end): Redis|bool;
+    public function ltrim(string $key, int $start , int $end): ValkeyGlide|bool;
 
     /**
      * Get one or more string keys.
      *
      * @param array $keys The keys to retrieve
-     * @return Redis|array|false an array of keys with their values.
+     * @return ValkeyGlide|array|false an array of keys with their values.
      *
      * @example $redis->mget(['key1', 'key2']);
      */
-    public function mget(array $keys): Redis|array|false;
+    public function mget(array $keys): ValkeyGlide|array|false;
 
     public function migrate(string $host, int $port, string|array $key, int $dstdb, int $timeout,
                             bool $copy = false, bool $replace = false,
-                            #[\SensitiveParameter] mixed $credentials = null): Redis|bool;
+                            #[\SensitiveParameter] mixed $credentials = null): ValkeyGlide|bool;
 
     /**
      * Move a key to a different database on the same redis instance.
      *
      * @param string $key The key to move
-     * @return Redis|bool True if the key was moved
+     * @return ValkeyGlide|bool True if the key was moved
      */
-    public function move(string $key, int $index): Redis|bool;
+    public function move(string $key, int $index): ValkeyGlide|bool;
 
     /**
      * Set one or more string keys.
      *
      * @param array $key_values An array with keys and their values.
-     * @return Redis|bool True if the keys could be set.
+     * @return ValkeyGlide|bool True if the keys could be set.
      *
      * @see https://redis.io/commands/mset
      *
      * @example $redis->mSet(['foo' => 'bar', 'baz' => 'bop']);
      */
-    public function mset(array $key_values): Redis|bool;
+    public function mset(array $key_values): ValkeyGlide|bool;
 
     /**
      * Set one or more string keys but only if none of the key exist.
      *
      * @param array $key_values An array of keys with their values.
      *
-     * @return Redis|bool True if the keys were set and false if not.
+     * @return ValkeyGlide|bool True if the keys were set and false if not.
      *
      * @see https://redis.io/commands/msetnx
      *
      * @example $redis->msetnx(['foo' => 'bar', 'baz' => 'bop']);
      */
-    public function msetnx(array $key_values): Redis|bool;
+    public function msetnx(array $key_values): ValkeyGlide|bool;
 
     /**
      * Begin a transaction.
      *
-     * @param int $value  The type of transaction to start.  This can either be `Redis::MULTI` or
-     *                    `Redis::PIPELINE'.
+     * @param int $value  The type of transaction to start.  This can either be `ValkeyGlide::MULTI` or
+     *                    `ValkeyGlide::PIPELINE'.
      *
-     * @return Redis|bool True if the transaction could be started.
+     * @return ValkeyGlide|bool True if the transaction could be started.
      *
      * @see https://redis.io/commands/multi
      *
@@ -2333,13 +2333,13 @@ class Redis {
      * $redis->get('foo');
      * $redis->exec();
      */
-    public function multi(int $value = Redis::MULTI): bool|Redis;
+    public function multi(int $value = ValkeyGlide::MULTI): bool|ValkeyGlide;
 
-    public function object(string $subcommand, string $key): Redis|int|string|false;
+    public function object(string $subcommand, string $key): ValkeyGlide|int|string|false;
 
     /**
      * @deprecated
-     * @alias Redis::connect
+     * @alias ValkeyGlide::connect
      */
     public function open(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = null, int $retry_interval = 0, float $read_timeout = 0, ?array $context = null): bool;
 
@@ -2350,42 +2350,42 @@ class Redis {
      *
      * @param string $key The key to operate against.
      *
-     * @return Redis|bool True if a timeout was removed and false if it was not or the key didn't exist.
+     * @return ValkeyGlide|bool True if a timeout was removed and false if it was not or the key didn't exist.
      */
-    public function persist(string $key): Redis|bool;
+    public function persist(string $key): ValkeyGlide|bool;
 
     /**
-     *  Sets an expiration in milliseconds on a given key.  If connected to Redis >= 7.0.0
+     *  Sets an expiration in milliseconds on a given key.  If connected to ValkeyGlide >= 7.0.0
      *  you can pass an optional mode argument that modifies how the command will execute.
      *
-     *  @see Redis::expire() for a description of the mode argument.
+     *  @see ValkeyGlide::expire() for a description of the mode argument.
      *
      *  @param string      $key  The key to set an expiration on.
      *  @param int         $timeout  The number of milliseconds after which key will be automatically deleted.
      *  @param string|null $mode  A two character modifier that changes how the
      *                       command works.
      *
-     *  @return Redis|bool   True if an expiry was set on the key, and false otherwise.
+     *  @return ValkeyGlide|bool   True if an expiry was set on the key, and false otherwise.
      */
     public function pexpire(string $key, int $timeout, ?string $mode = null): bool;
 
     /**
      * Set a key's expiration to a specific Unix Timestamp in milliseconds.  If connected to
-     * Redis >= 7.0.0 you can pass an optional 'mode' argument.
+     * ValkeyGlide >= 7.0.0 you can pass an optional 'mode' argument.
      *
-     * @see Redis::expire() For a description of the mode argument.
+     * @see ValkeyGlide::expire() For a description of the mode argument.
      *
      *  @param string      $key  The key to set an expiration on.
      *  @param int         $timestamp The unix timestamp to expire at.
      *  @param string|null $mode A two character modifier that changes how the
      *                       command works.
      *
-     *  @return Redis|bool   True if an expiration was set on the key, false otherwise.
+     *  @return ValkeyGlide|bool   True if an expiration was set on the key, false otherwise.
      */
-    public function pexpireAt(string $key, int $timestamp, ?string $mode = null): Redis|bool;
+    public function pexpireAt(string $key, int $timestamp, ?string $mode = null): ValkeyGlide|bool;
 
     /**
-     * Add one or more elements to a Redis HyperLogLog key
+     * Add one or more elements to a ValkeyGlide HyperLogLog key
      *
      * @see https://redis.io/commands/pfadd
      *
@@ -2393,20 +2393,20 @@ class Redis {
      *
      * @param array  $elements One or more elements to add.
      *
-     * @return Redis|int Returns 1 if the set was altered, and zero if not.
+     * @return ValkeyGlide|int Returns 1 if the set was altered, and zero if not.
      */
-    public function pfadd(string $key, array $elements): Redis|int;
+    public function pfadd(string $key, array $elements): ValkeyGlide|int;
 
     /**
-     * Retrieve the cardinality of a Redis HyperLogLog key.
+     * Retrieve the cardinality of a ValkeyGlide HyperLogLog key.
      *
      * @see https://redis.io/commands/pfcount
      *
      * @param string $key_or_keys Either one key or an array of keys
      *
-     * @return Redis|int The estimated cardinality of the set.
+     * @return ValkeyGlide|int The estimated cardinality of the set.
      */
-    public function pfcount(array|string $key_or_keys): Redis|int|false;
+    public function pfcount(array|string $key_or_keys): ValkeyGlide|int|false;
 
     /**
      * Merge one or more source HyperLogLog sets into a destination set.
@@ -2416,35 +2416,35 @@ class Redis {
      * @param string $dst     The destination key.
      * @param array  $srckeys One or more source keys.
      *
-     * @return Redis|bool Always returns true.
+     * @return ValkeyGlide|bool Always returns true.
      */
-    public function pfmerge(string $dst, array $srckeys): Redis|bool;
+    public function pfmerge(string $dst, array $srckeys): ValkeyGlide|bool;
 
     /**
      * PING the redis server with an optional string argument.
      *
      * @see https://redis.io/commands/ping
      *
-     * @param string $message An optional string message that Redis will reply with, if passed.
+     * @param string $message An optional string message that ValkeyGlide will reply with, if passed.
      *
-     * @return Redis|string|false If passed no message, this command will simply return `true`.
+     * @return ValkeyGlide|string|false If passed no message, this command will simply return `true`.
      *                            If a message is passed, it will return the message.
      *
      * @example $redis->ping();
      * @example $redis->ping('beep boop');
      */
-    public function ping(?string $message = null): Redis|string|bool;
+    public function ping(?string $message = null): ValkeyGlide|string|bool;
 
     /**
      * Enter into pipeline mode.
      *
-     * Pipeline mode is the highest performance way to send many commands to Redis
+     * Pipeline mode is the highest performance way to send many commands to ValkeyGlide
      * as they are aggregated into one stream of commands and then all sent at once
-     * when the user calls Redis::exec().
+     * when the user calls ValkeyGlide::exec().
      *
-     * NOTE:  That this is shorthand for Redis::multi(Redis::PIPELINE)
+     * NOTE:  That this is shorthand for ValkeyGlide::multi(ValkeyGlide::PIPELINE)
      *
-     * @return Redis The redis object is returned, to facilitate method chaining.
+     * @return ValkeyGlide The redis object is returned, to facilitate method chaining.
      *
      * @example
      * $redis->pipeline()
@@ -2453,11 +2453,11 @@ class Redis {
      *       ->rpush('mylist', 'a', 'b', 'c')
      *       ->exec();
      */
-    public function pipeline(): bool|Redis;
+    public function pipeline(): bool|ValkeyGlide;
 
     /**
      * @deprecated
-     * @alias Redis::pconnect
+     * @alias ValkeyGlide::pconnect
      */
     public function popen(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = null, int $retry_interval = 0, float $read_timeout = 0, ?array $context = null): bool;
 
@@ -2468,11 +2468,11 @@ class Redis {
      * @param int    $expire The TTL to set, in milliseconds.
      * @param mixed  $value  The value to set the key to.
      *
-     * @return Redis|bool True if the key could be set.
+     * @return ValkeyGlide|bool True if the key could be set.
      *
      * @example $redis->psetex('mykey', 1000, 'myval');
      */
-    public function psetex(string $key, int $expire, mixed $value): Redis|bool;
+    public function psetex(string $key, int $expire, mixed $value): ValkeyGlide|bool;
 
     /**
      * Subscribe to one or more glob-style patterns
@@ -2495,7 +2495,7 @@ class Redis {
      *
      * @param string $key The key to check.
      *
-     * @return Redis|int|false The key's TTL or one of two special values if it has none.
+     * @return ValkeyGlide|int|false The key's TTL or one of two special values if it has none.
      *                         <code>
      *                         -1 - The key has no TTL.
      *                         -2 - The key did not exist.
@@ -2505,7 +2505,7 @@ class Redis {
      *
      * @example $redis->pttl('ttl-key');
      */
-    public function pttl(string $key): Redis|int|false;
+    public function pttl(string $key): ValkeyGlide|int|false;
 
     /**
      * Publish a message to a pubsub channel
@@ -2515,9 +2515,9 @@ class Redis {
      * @param string $channel The channel to publish to.
      * @param string $message The message itself.
      *
-     * @return Redis|int The number of subscribed clients to the given channel.
+     * @return ValkeyGlide|int The number of subscribed clients to the given channel.
      */
-    public function publish(string $channel, string $message): Redis|int|false;
+    public function publish(string $channel, string $message): ValkeyGlide|int|false;
 
     public function pubsub(string $command, mixed $arg = null): mixed;
 
@@ -2526,42 +2526,42 @@ class Redis {
      *
      * @see https://redis.io/commands/punsubscribe
      * @see https://redis.io/commands/subscribe
-     * @see Redis::subscribe()
+     * @see ValkeyGlide::subscribe()
      *
      * @param array $patterns One or more glob-style patterns of channel names.
      *
-     * @return Redis|array|bool  The array of subscribed patterns or false on failure.
+     * @return ValkeyGlide|array|bool  The array of subscribed patterns or false on failure.
      */
-    public function punsubscribe(array $patterns): Redis|array|bool;
+    public function punsubscribe(array $patterns): ValkeyGlide|array|bool;
 
     /**
      * Pop one or more elements from the end of a list.
      *
      * @param string $key   A redis LIST key name.
      * @param int    $count The maximum number of elements to pop at once.
-     *                      NOTE:  The `count` argument requires Redis >= 6.2.0
+     *                      NOTE:  The `count` argument requires ValkeyGlide >= 6.2.0
      *
-     * @return Redis|array|string|bool One or more popped elements or false if all were empty.
+     * @return ValkeyGlide|array|string|bool One or more popped elements or false if all were empty.
      *
      * @see https://redis.io/commands/rpop
      *
      * @example $redis->rPop('mylist');
      * @example $redis->rPop('mylist', 4);
      */
-    public function rPop(string $key, int $count = 0): Redis|array|string|bool;
+    public function rPop(string $key, int $count = 0): ValkeyGlide|array|string|bool;
 
     /**
      * Return a random key from the current database
      *
      * @see https://redis.io/commands/randomkey
      *
-     * @return Redis|string|false A random key name or false if no keys exist
+     * @return ValkeyGlide|string|false A random key name or false if no keys exist
      *
      */
-    public function randomKey(): Redis|string|false;
+    public function randomKey(): ValkeyGlide|string|false;
 
     /**
-     * Execute any arbitrary Redis command by name.
+     * Execute any arbitrary ValkeyGlide command by name.
      *
      * @param string $command The command to execute
      * @param mixed  $args    One or more arguments to pass to the command.
@@ -2582,9 +2582,9 @@ class Redis {
      * @param string $old_name The original name of the key
      * @param string $new_name The new name for the key
      *
-     * @return Redis|bool True if the key was renamed or false if not.
+     * @return ValkeyGlide|bool True if the key was renamed or false if not.
      */
-    public function rename(string $old_name, string $new_name): Redis|bool;
+    public function rename(string $old_name, string $new_name): ValkeyGlide|bool;
 
     /**
      * Renames $key_src to $key_dst but only if newkey does not exist.
@@ -2594,7 +2594,7 @@ class Redis {
      * @param string $key_src The source key name
      * @param string $key_dst The destination key name.
      *
-     * @return Redis|bool True if the key was renamed, false if not.
+     * @return ValkeyGlide|bool True if the key was renamed, false if not.
      *
      * @example
      * $redis->set('src', 'src_key');
@@ -2603,20 +2603,20 @@ class Redis {
      * $redis->renamenx('src', 'dst');
      * $redis->renamenx('dst', 'existing-dst');
      */
-    public function renameNx(string $key_src, string $key_dst): Redis|bool;
+    public function renameNx(string $key_src, string $key_dst): ValkeyGlide|bool;
 
     /**
      * Reset the state of the connection.
      *
-     * @return Redis|bool Should always return true unless there is an error.
+     * @return ValkeyGlide|bool Should always return true unless there is an error.
      */
-    public function reset(): Redis|bool;
+    public function reset(): ValkeyGlide|bool;
 
     /**
      * Restore a key by the binary payload generated by the DUMP command.
      *
      * @param string $key     The name of the key you wish to create.
-     * @param int    $ttl     What Redis should set the key's TTL (in milliseconds) to once it is created.
+     * @param int    $ttl     What ValkeyGlide should set the key's TTL (in milliseconds) to once it is created.
      *                        Zero means no TTL at all.
      * @param string $value   The serialized binary value of the string (generated by DUMP).
      * @param array  $options An array of additional options that modifies how the command operates.
@@ -2626,21 +2626,21 @@ class Redis {
      *                            'ABSTTL'          # If this is present, the `$ttl` provided by the user should
      *                                              # be an absolute timestamp, in milliseconds()
      *
-     *                            'REPLACE'         # This flag instructs Redis to store the key even if a key with
+     *                            'REPLACE'         # This flag instructs ValkeyGlide to store the key even if a key with
      *                                              # that name already exists.
      *
-     *                            'IDLETIME' => int # Tells Redis to set the keys internal 'idletime' value to a
-     *                                              # specific number (see the Redis command OBJECT for more info).
-     *                            'FREQ'     => int # Tells Redis to set the keys internal 'FREQ' value to a specific
-     *                                              # number (this relates to Redis' LFU eviction algorithm).
+     *                            'IDLETIME' => int # Tells ValkeyGlide to set the keys internal 'idletime' value to a
+     *                                              # specific number (see the ValkeyGlide command OBJECT for more info).
+     *                            'FREQ'     => int # Tells ValkeyGlide to set the keys internal 'FREQ' value to a specific
+     *                                              # number (this relates to ValkeyGlide' LFU eviction algorithm).
      *                        ];
      *                        </code>
      *
-     * @return Redis|bool     True if the key was stored, false if not.
+     * @return ValkeyGlide|bool     True if the key was stored, false if not.
      *
      * @see https://redis.io/commands/restore
      * @see https://redis.io/commands/dump
-     * @see Redis::dump()
+     * @see ValkeyGlide::dump()
      *
      * @example
      * $redis->sAdd('captains', 'Janeway', 'Picard', 'Sisko', 'Kirk', 'Archer');
@@ -2648,7 +2648,7 @@ class Redis {
      *
      * $redis->restore('captains-backup', 0, $serialized);
      */
-    public function restore(string $key, int $ttl, string $value, ?array $options = null): Redis|bool;
+    public function restore(string $key, int $ttl, string $value, ?array $options = null): ValkeyGlide|bool;
 
     /**
      * Query whether the connected instance is a primary or replica
@@ -2659,13 +2659,13 @@ class Redis {
     public function role(): mixed;
 
     /**
-     * Atomically pop an element off the end of a Redis LIST and push it to the beginning of
+     * Atomically pop an element off the end of a ValkeyGlide LIST and push it to the beginning of
      * another.
      *
      * @param string $srckey The source key to pop from.
      * @param string $dstkey The destination key to push to.
      *
-     * @return Redis|string|false The popped element or false if the source key was empty.
+     * @return ValkeyGlide|string|false The popped element or false if the source key was empty.
      *
      * @see https://redis.io/commands/rpoplpush
      *
@@ -2678,16 +2678,16 @@ class Redis {
      *
      * $redis->rpoplpush('list2', 'list1');
      */
-    public function rpoplpush(string $srckey, string $dstkey): Redis|string|false;
+    public function rpoplpush(string $srckey, string $dstkey): ValkeyGlide|string|false;
 
     /**
-     * Add one or more values to a Redis SET key.
+     * Add one or more values to a ValkeyGlide SET key.
      *
      * @param string $key           The key name
      * @param mixed  $member        A value to add to the set.
      * @param mixed  $other_members One or more additional values to add
      *
-     * @return Redis|int|false The number of values added to the set.
+     * @return ValkeyGlide|int|false The number of values added to the set.
      *
      * @see https://redis.io/commands/sadd
      *
@@ -2697,18 +2697,18 @@ class Redis {
      * $redis->sadd('myset', 'foo', 'bar', 'baz');
      * $redis->sadd('myset', 'foo', 'new');
      */
-    public function sAdd(string $key, mixed $value, mixed ...$other_values): Redis|int|false;
+    public function sAdd(string $key, mixed $value, mixed ...$other_values): ValkeyGlide|int|false;
 
     /**
-     * Add one or more values to a Redis SET key.  This is an alternative to Redis::sadd() but
+     * Add one or more values to a ValkeyGlide SET key.  This is an alternative to ValkeyGlide::sadd() but
      * instead of being variadic, takes a single array of values.
      *
      * @see https://redis.io/commands/sadd
-     * @see Redis::sadd()
+     * @see ValkeyGlide::sadd()
      *
      * @param string $key       The set to add values to.
      * @param array  $values    One or more members to add to the set.
-     * @return Redis|int|false  The number of members added to the set.
+     * @return ValkeyGlide|int|false  The number of members added to the set.
      *
      * @example
      * $redis->del('myset');
@@ -2719,13 +2719,13 @@ class Redis {
     public function sAddArray(string $key, array $values): int;
 
     /**
-     * Given one or more Redis SETS, this command returns all of the members from the first
+     * Given one or more ValkeyGlide SETS, this command returns all of the members from the first
      * set that are not in any subsequent set.
      *
      * @param string $key        The first set
      * @param string $other_keys One or more additional sets
      *
-     * @return Redis|array|false Returns the elements from keys 2..N that don't exist in the
+     * @return ValkeyGlide|array|false Returns the elements from keys 2..N that don't exist in the
      *                           first sorted set, or false on failure.
      *
      * @see https://redis.io/commands/sdiff
@@ -2740,31 +2740,31 @@ class Redis {
      *
      * $redis->sdiff('set1', 'set2', 'set3');
      */
-    public function sDiff(string $key, string ...$other_keys): Redis|array|false;
+    public function sDiff(string $key, string ...$other_keys): ValkeyGlide|array|false;
 
     /**
      * This method performs the same operation as SDIFF except it stores the resulting diff
      * values in a specified destination key.
      *
      * @see https://redis.io/commands/sdiffstore
-     * @see Redis::sdiff()
+     * @see ValkeyGlide::sdiff()
      *
      * @param string $dst The key where to store the result
      * @param string $key The first key to perform the DIFF on
      * @param string $other_keys One or more additional keys.
      *
-     * @return Redis|int|false The number of values stored in the destination set or false on failure.
+     * @return ValkeyGlide|int|false The number of values stored in the destination set or false on failure.
      */
-    public function sDiffStore(string $dst, string $key, string ...$other_keys): Redis|int|false;
+    public function sDiffStore(string $dst, string $key, string ...$other_keys): ValkeyGlide|int|false;
 
     /**
-     * Given one or more Redis SET keys, this command will return all of the elements that are
+     * Given one or more ValkeyGlide SET keys, this command will return all of the elements that are
      * in every one.
      *
      * @see https://redis.io/commands/sinter
      *
      * @param string $key        The first SET key to intersect.
-     * @param string $other_keys One or more Redis SET keys.
+     * @param string $other_keys One or more ValkeyGlide SET keys.
      *
      * @example
      * <code>
@@ -2778,16 +2778,16 @@ class Redis {
      * var_dump($redis->sinter('alice_likes', 'bob_likes', 'bill_likes'));
      * </code>
      */
-    public function sInter(array|string $key, string ...$other_keys): Redis|array|false;
+    public function sInter(array|string $key, string ...$other_keys): ValkeyGlide|array|false;
 
     /**
      * Compute the intersection of one or more sets and return the cardinality of the result.
      *
      * @param array $keys  One or more set key names.
      * @param int   $limit A maximum cardinality to return.  This is useful to put an upper bound
-     *                     on the amount of work Redis will do.
+     *                     on the amount of work ValkeyGlide will do.
      *
-     * @return Redis|int|false The
+     * @return ValkeyGlide|int|false The
      *
      * @see https://redis.io/commands/sintercard
      *
@@ -2800,10 +2800,10 @@ class Redis {
      * $redis->sInterCard(['set1', 'set2', 'set3']);
      * </code>
      */
-    public function sintercard(array $keys, int $limit = -1): Redis|int|false;
+    public function sintercard(array $keys, int $limit = -1): ValkeyGlide|int|false;
 
     /**
-     * Perform the intersection of one or more Redis SETs, storing the result in a destination
+     * Perform the intersection of one or more ValkeyGlide SETs, storing the result in a destination
      * key, rather than returning them.
      *
      * @param array|string $key_or_keys Either a string key, or an array of keys (with at least two
@@ -2812,23 +2812,23 @@ class Redis {
      * @param string       $other_keys  If the first argument was a string, subsequent arguments should
      *                                  be source key names.
      *
-     * @return Redis|int|false          The number of values stored in the destination key or false on failure.
+     * @return ValkeyGlide|int|false          The number of values stored in the destination key or false on failure.
      *
      * @see https://redis.io/commands/sinterstore
-     * @see Redis::sinter()
+     * @see ValkeyGlide::sinter()
      * <code>
      * @example $redis->sInterStore(['dst', 'src1', 'src2', 'src3']);
      * @example $redis->sInterStore('dst', 'src1', 'src'2', 'src3');
      * </code>
      */
-    public function sInterStore(array|string $key, string ...$other_keys): Redis|int|false;
+    public function sInterStore(array|string $key, string ...$other_keys): ValkeyGlide|int|false;
 
     /**
      * Retrieve every member from a set key.
      *
      * @param string $key The set name.
      *
-     * @return Redis|array|false Every element in the set or false on failure.
+     * @return ValkeyGlide|array|false Every element in the set or false on failure.
      *
      * @see https://redis.io/commands/smembers
      *
@@ -2836,27 +2836,27 @@ class Redis {
      * $redis->sAdd('tng-crew', ...['Picard', 'Riker', 'Data', 'Worf', 'La Forge', 'Troi', 'Crusher', 'Broccoli']);
      * $redis->sMembers('tng-crew');
      */
-    public function sMembers(string $key): Redis|array|false;
+    public function sMembers(string $key): ValkeyGlide|array|false;
 
     /**
      * Check if one or more values are members of a set.
      *
      * @see https://redis.io/commands/smismember
      * @see https://redis.io/commands/smember
-     * @see Redis::smember()
+     * @see ValkeyGlide::smember()
      *
      * @param string $key           The set to query.
      * @param string $member        The first value to test if exists in the set.
      * @param string $other_members Any number of additional values to check.
      *
-     * @return Redis|array|false An array of integers representing whether each passed value
+     * @return ValkeyGlide|array|false An array of integers representing whether each passed value
      *                           was a member of the set.
      *
      * @example
      * $redis->sAdd('ds9-crew', ...["Sisko", "Kira", "Dax", "Worf", "Bashir", "O'Brien"]);
      * $members = $redis->sMIsMember('ds9-crew', ...['Sisko', 'Picard', 'Data', 'Worf']);
      */
-    public function sMisMember(string $key, string $member, string ...$other_members): Redis|array|false;
+    public function sMisMember(string $key, string $member, string ...$other_members): ValkeyGlide|array|false;
 
     /**
      * Pop a member from one set and push it onto another.  This command will create the
@@ -2868,7 +2868,7 @@ class Redis {
      * @param string $dst   The destination set.
      * @param mixed  $value The member you wish to move.
      *
-     * @return Redis|bool   True if the member was moved, and false if it wasn't in the set.
+     * @return ValkeyGlide|bool   True if the member was moved, and false if it wasn't in the set.
      *
      * @example
      * $redis->sAdd('numbers', 'zero', 'one', 'two', 'three', 'four');
@@ -2876,7 +2876,7 @@ class Redis {
      * $redis->sMove('numbers', 'evens', 'two');
      * $redis->sMove('numbers', 'evens', 'four');
      */
-    public function sMove(string $src, string $dst, mixed $value): Redis|bool;
+    public function sMove(string $src, string $dst, mixed $value): ValkeyGlide|bool;
 
     /**
      * Remove one or more elements from a set.
@@ -2892,7 +2892,7 @@ class Redis {
      * $redis->sAdd('numbers', 'zero', 'one', 'two', 'three', 'four');
      * $redis->sPop('numbers');
      */
-    public function sPop(string $key, int $count = 0): Redis|string|array|false;
+    public function sPop(string $key, int $count = 0): ValkeyGlide|string|array|false;
 
     /**
      * Retrieve one or more random members of a set.
@@ -2900,14 +2900,14 @@ class Redis {
      * @param string $key   The set to query.
      * @param int    $count An optional count of members to return.
      *
-     *                      If this value is positive, Redis will return *up to* the requested
+     *                      If this value is positive, ValkeyGlide will return *up to* the requested
      *                      number but with unique elements that will never repeat.  This means
      *                      you may receive fewer then `$count` replies.
      *
-     *                      If the number is negative, Redis will return the exact number requested
+     *                      If the number is negative, ValkeyGlide will return the exact number requested
      *                      but the result may contain duplicate elements.
      *
-     * @return Redis|array|string|false One or more random members or false on failure.
+     * @return ValkeyGlide|array|string|false One or more random members or false on failure.
      *
      * @see https://redis.io/commands/srandmember
      *
@@ -2918,84 +2918,84 @@ class Redis {
     public function sRandMember(string $key, int $count = 0): mixed;
 
     /**
-     * Returns the union of one or more Redis SET keys.
+     * Returns the union of one or more ValkeyGlide SET keys.
      *
      * @see https://redis.io/commands/sunion
      *
      * @param string $key         The first SET to do a union with
      * @param string $other_keys  One or more subsequent keys
      *
-     * @return Redis|array|false  The union of the one or more input sets or false on failure.
+     * @return ValkeyGlide|array|false  The union of the one or more input sets or false on failure.
      *
      * @example $redis->sunion('set1', 'set2');
      */
-    public function sUnion(string $key, string ...$other_keys): Redis|array|false;
+    public function sUnion(string $key, string ...$other_keys): ValkeyGlide|array|false;
 
     /**
-     * Perform a union of one or more Redis SET keys and store the result in a new set
+     * Perform a union of one or more ValkeyGlide SET keys and store the result in a new set
      *
      * @see https://redis.io/commands/sunionstore
-     * @see Redis::sunion()
+     * @see ValkeyGlide::sunion()
      *
      * @param string $dst        The destination key
      * @param string $key        The first source key
      * @param string $other_keys One or more additional source keys
      *
-     * @return Redis|int|false   The number of elements stored in the destination SET or
+     * @return ValkeyGlide|int|false   The number of elements stored in the destination SET or
      *                           false on failure.
      */
-    public function sUnionStore(string $dst, string $key, string ...$other_keys): Redis|int|false;
+    public function sUnionStore(string $dst, string $key, string ...$other_keys): ValkeyGlide|int|false;
 
     /**
-     * Persist the Redis database to disk.  This command will block the server until the save is
-     * completed.  For a nonblocking alternative, see Redis::bgsave().
+     * Persist the ValkeyGlide database to disk.  This command will block the server until the save is
+     * completed.  For a nonblocking alternative, see ValkeyGlide::bgsave().
      *
      * @see https://redis.io/commands/save
-     * @see Redis::bgsave()
+     * @see ValkeyGlide::bgsave()
      *
-     * @return Redis|bool Returns true unless an error occurs.
+     * @return ValkeyGlide|bool Returns true unless an error occurs.
      */
-    public function save(): Redis|bool;
+    public function save(): ValkeyGlide|bool;
 
     /**
-     * Incrementally scan the Redis keyspace, with optional pattern and type matching.
+     * Incrementally scan the ValkeyGlide keyspace, with optional pattern and type matching.
      *
-     * A note about Redis::SCAN_NORETRY and Redis::SCAN_RETRY.
+     * A note about ValkeyGlide::SCAN_NORETRY and ValkeyGlide::SCAN_RETRY.
      *
-     * For convenience, PhpRedis can retry SCAN commands itself when Redis returns an empty array of
+     * For convenience, PhpValkeyGlide can retry SCAN commands itself when ValkeyGlide returns an empty array of
      * keys with a nonzero iterator.  This can happen when matching against a pattern that very few
      * keys match inside a key space with a great many keys.  The following example demonstrates how
-     * to use Redis::scan() with the option disabled and enabled.
+     * to use ValkeyGlide::scan() with the option disabled and enabled.
      *
-     * @param int    $iterator The cursor returned by Redis for every subsequent call to SCAN.  On
+     * @param int    $iterator The cursor returned by ValkeyGlide for every subsequent call to SCAN.  On
      *                         the initial invocation of the call, it should be initialized by the
      *                         caller to NULL.  Each time SCAN is invoked, the iterator will be
-     *                         updated to a new number, until finally Redis will set the value to
+     *                         updated to a new number, until finally ValkeyGlide will set the value to
      *                         zero, indicating that the scan is complete.
      *
      * @param string|null $pattern An optional glob-style pattern for matching key names.  If passed as
      *                         NULL, it is the equivalent of sending '*' (match every key).
      *
      * @param int    $count    A hint to redis that tells it how many keys to return in a single
-     *                         call to SCAN.  The larger the number, the longer Redis may block
+     *                         call to SCAN.  The larger the number, the longer ValkeyGlide may block
      *                         clients while iterating the key space.
      *
      * @param string $type     An optional argument to specify which key types to scan (e.g.
      *                         'STRING', 'LIST', 'SET')
      *
      * @return array|false     An array of keys, or false if no keys were returned for this
-     *                         invocation of scan.  Note that it is possible for Redis to return
+     *                         invocation of scan.  Note that it is possible for ValkeyGlide to return
      *                         zero keys before having scanned the entire key space, so the caller
      *                         should instead continue to SCAN until the iterator reference is
      *                         returned to zero.
      *
      * @see https://redis.io/commands/scan
-     * @see Redis::setOption()
+     * @see ValkeyGlide::setOption()
      *
      * @example
-     * $redis = new Redis(['host' => 'localhost']);
+     * $redis = new ValkeyGlide(['host' => 'localhost']);
      *
-     * $redis->setOption(Redis::OPT_SCAN, Redis::SCAN_NORETRY);
+     * $redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_NORETRY);
      *
      * $it = null;
      *
@@ -3006,11 +3006,11 @@ class Redis {
      *     }
      * } while ($it != 0);
      *
-     * $redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
+     * $redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_RETRY);
      *
      * $it = null;
      *
-     * // When Redis::SCAN_RETRY is enabled, we can use simpler logic, as we will never receive an
+     * // When ValkeyGlide::SCAN_RETRY is enabled, we can use simpler logic, as we will never receive an
      * // empty array of keys when the iterator is nonzero.
      * while ($keys = $redis->scan($it, '*zorg*')) {
      *     foreach ($keys as $key) {
@@ -3021,17 +3021,17 @@ class Redis {
     public function scan(null|int|string &$iterator, ?string $pattern = null, int $count = 0, ?string $type = null): array|false;
 
     /**
-     * Retrieve the number of members in a Redis set.
+     * Retrieve the number of members in a ValkeyGlide set.
      *
      * @param string $key The set to get the cardinality of.
      *
-     * @return Redis|int|false The cardinality of the set or false on failure.
+     * @return ValkeyGlide|int|false The cardinality of the set or false on failure.
      *
      * @see https://redis.io/commands/scard
      *
      * @example $redis->scard('set');
      */
-    public function scard(string $key): Redis|int|false;
+    public function scard(string $key): ValkeyGlide|int|false;
 
     /**
      * An administrative command used to interact with LUA scripts stored on the server.
@@ -3049,25 +3049,25 @@ class Redis {
     public function script(string $command, mixed ...$args): mixed;
 
     /**
-     * Select a specific Redis database.
+     * Select a specific ValkeyGlide database.
      *
-     * @param int $db The database to select.  Note that by default Redis has 16 databases (0-15).
+     * @param int $db The database to select.  Note that by default ValkeyGlide has 16 databases (0-15).
      *
-     * @return Redis|bool true on success and false on failure
+     * @return ValkeyGlide|bool true on success and false on failure
      *
      * @see https://redis.io/commands/select
      *
      * @example $redis->select(1);
      */
-    public function select(int $db): Redis|bool;
+    public function select(int $db): ValkeyGlide|bool;
 
     /**
-     * Create or set a Redis STRING key to a value.
+     * Create or set a ValkeyGlide STRING key to a value.
      *
      * @param string    $key     The key name to set.
      * @param mixed     $value   The value to set the key to.
      * @param array|int $options Either an array with options for how to perform the set or an
-     *                           integer with an expiration.  If an expiration is set PhpRedis
+     *                           integer with an expiration.  If an expiration is set PhpValkeyGlide
      *                           will actually send the `SETEX` command.
      *
      * OPTION                         DESCRIPTION
@@ -3076,13 +3076,13 @@ class Redis {
      * ['PX' => 6000]                 expire in 6000 milliseconds.
      * ['EXAT' => time() + 10]        expire in 10 seconds.
      * ['PXAT' => time()*1000 + 1000] expire in 1 second.
-     * ['KEEPTTL' => true]            Redis will not update the key's current TTL.
+     * ['KEEPTTL' => true]            ValkeyGlide will not update the key's current TTL.
      * ['XX']                         Only set the key if it already exists.
      * ['NX']                         Only set the key if it doesn't exist.
      * ['GET']                        Instead of returning `+OK` return the previous value of the
      *                                key or NULL if the key didn't exist.
      *
-     * @return Redis|string|bool True if the key was set or false on failure.
+     * @return ValkeyGlide|string|bool True if the key was set or false on failure.
      *
      * @see https://redis.io/commands/set
      * @see https://redis.io/commands/setex
@@ -3090,26 +3090,26 @@ class Redis {
      * @example $redis->set('key', 'value');
      * @example $redis->set('key', 'expires_in_60_seconds', 60);
      */
-    public function set(string $key, mixed $value, mixed $options = null): Redis|string|bool;
+    public function set(string $key, mixed $value, mixed $options = null): ValkeyGlide|string|bool;
 
     /**
-     * Set a specific bit in a Redis string to zero or one
+     * Set a specific bit in a ValkeyGlide string to zero or one
      *
      * @see https://redis.io/commands/setbit
      *
-     * @param string $key    The Redis STRING key to modify
+     * @param string $key    The ValkeyGlide STRING key to modify
      * @param bool   $value  Whether to set the bit to zero or one.
      *
-     * @return Redis|int|false The original value of the bit or false on failure.
+     * @return ValkeyGlide|int|false The original value of the bit or false on failure.
      *
      * @example
      * $redis->set('foo', 'bar');
      * $redis->setbit('foo', 7, 1);
      */
-    public function setBit(string $key, int $idx, bool $value): Redis|int|false;
+    public function setBit(string $key, int $idx, bool $value): ValkeyGlide|int|false;
 
     /**
-     * Update or append to a Redis string at a specific starting index
+     * Update or append to a ValkeyGlide string at a specific starting index
      *
      * @see https://redis.io/commands/setrange
      *
@@ -3117,37 +3117,37 @@ class Redis {
      * @param int    $index  Where to insert the provided value
      * @param string $value  The value to copy into the string.
      *
-     * @return Redis|int|false The new length of the string or false on failure
+     * @return ValkeyGlide|int|false The new length of the string or false on failure
      *
      * @example
      * $redis->set('message', 'Hello World');
-     * $redis->setRange('message', 6, 'Redis');
+     * $redis->setRange('message', 6, 'ValkeyGlide');
      */
-    public function setRange(string $key, int $index, string $value): Redis|int|false;
+    public function setRange(string $key, int $index, string $value): ValkeyGlide|int|false;
 
     /**
-     * Set a configurable option on the Redis object.
+     * Set a configurable option on the ValkeyGlide object.
      *
      * Following are a list of options you can set:
      *
      * | OPTION          | TYPE | DESCRIPTION |
      * | --------------- | ---- | ----------- |
-     * | OPT_MAX_RETRIES | int  | The maximum number of times Redis will attempt to reconnect if it gets disconnected, before throwing an exception. |
-     * | OPT_SCAN        | enum | Redis::OPT_SCAN_RETRY, or Redis::OPT_SCAN_NORETRY.  Whether PhpRedis should automatically SCAN again when zero keys but a nonzero iterator are returned. |
-     * | OPT_SERIALIZER  | enum | Set the automatic data serializer.<br>`Redis::SERIALIZER_NONE`<br>`Redis::SERIALIZER_PHP`<br>`Redis::SERIALIZER_IGBINARY`<br>`Redis::SERIALIZER_MSGPACK`, `Redis::SERIALIZER_JSON`|
-     * | OPT_PREFIX | string | A string PhpRedis will use to prefix every key we read or write. |
-     * | OPT_READ_TIMEOUT | float | How long PhpRedis will block for a response from Redis before throwing a 'read error on connection' exception. |
+     * | OPT_MAX_RETRIES | int  | The maximum number of times ValkeyGlide will attempt to reconnect if it gets disconnected, before throwing an exception. |
+     * | OPT_SCAN        | enum | ValkeyGlide::OPT_SCAN_RETRY, or ValkeyGlide::OPT_SCAN_NORETRY.  Whether PhpValkeyGlide should automatically SCAN again when zero keys but a nonzero iterator are returned. |
+     * | OPT_SERIALIZER  | enum | Set the automatic data serializer.<br>`ValkeyGlide::SERIALIZER_NONE`<br>`ValkeyGlide::SERIALIZER_PHP`<br>`ValkeyGlide::SERIALIZER_IGBINARY`<br>`ValkeyGlide::SERIALIZER_MSGPACK`, `ValkeyGlide::SERIALIZER_JSON`|
+     * | OPT_PREFIX | string | A string PhpValkeyGlide will use to prefix every key we read or write. |
+     * | OPT_READ_TIMEOUT | float | How long PhpValkeyGlide will block for a response from ValkeyGlide before throwing a 'read error on connection' exception. |
      * | OPT_TCP_KEEPALIVE | bool |   Set or disable TCP_KEEPALIVE on the connection. |
-     * | OPT_COMPRESSION | enum | Set the compression algorithm<br>`Redis::COMPRESSION_NONE`<br>`Redis::COMPRESSION_LZF`<br>`Redis::COMPRESSION_LZ4`<br> `Redis::COMPRESSION_ZSTD` |
-     * | OPT_REPLY_LITERAL | bool | If set to true, PhpRedis will return the literal string Redis returns for LINE replies (e.g. '+OK'), rather than `true`. |
-     * | OPT_COMPRESSION_LEVEL | int | Set a specific compression level if Redis is compressing data. |
-     * | OPT_NULL_MULTIBULK_AS_NULL | bool | Causes PhpRedis to return `NULL` rather than `false` for NULL MULTIBULK replies |
+     * | OPT_COMPRESSION | enum | Set the compression algorithm<br>`ValkeyGlide::COMPRESSION_NONE`<br>`ValkeyGlide::COMPRESSION_LZF`<br>`ValkeyGlide::COMPRESSION_LZ4`<br> `ValkeyGlide::COMPRESSION_ZSTD` |
+     * | OPT_REPLY_LITERAL | bool | If set to true, PhpValkeyGlide will return the literal string ValkeyGlide returns for LINE replies (e.g. '+OK'), rather than `true`. |
+     * | OPT_COMPRESSION_LEVEL | int | Set a specific compression level if ValkeyGlide is compressing data. |
+     * | OPT_NULL_MULTIBULK_AS_NULL | bool | Causes PhpValkeyGlide to return `NULL` rather than `false` for NULL MULTIBULK replies |
      * | OPT_BACKOFF_ALGORITHM | enum | The exponential backoff strategy to use. |
      * | OPT_BACKOFF_BASE | int | The minimum delay between retries when backing off. |
      * | OPT_BACKOFF_CAP  | int | The maximum delay between replies when backing off. |
      *
-     * @see Redis::getOption()
-     * @see Redis::__construct() for details about backoff strategies.
+     * @see ValkeyGlide::getOption()
+     * @see ValkeyGlide::__construct() for details about backoff strategies.
      *
      * @param int    $option The option constant.
      * @param mixed  $value  The option value.
@@ -3158,13 +3158,13 @@ class Redis {
     public function setOption(int $option, mixed $value): bool;
 
     /**
-     * Set a Redis STRING key with a specific expiration in seconds.
+     * Set a ValkeyGlide STRING key with a specific expiration in seconds.
      *
      * @param string $key     The name of the key to set.
      * @param int    $expire  The key's expiration in seconds.
      * @param mixed  $value   The value to set the key.
      *
-     * @return Redis|bool True on success or false on failure.
+     * @return ValkeyGlide|bool True on success or false on failure.
      *
      * @example $redis->setex('60s-ttl', 60, 'some-value');
      */
@@ -3178,66 +3178,66 @@ class Redis {
      * @param string $key   The key name to set.
      * @param mixed  $value What to set the key to.
      *
-     * @return Redis|bool Returns true if the key was set and false otherwise.
+     * @return ValkeyGlide|bool Returns true if the key was set and false otherwise.
      *
      * @example $redis->setnx('existing-key', 'existing-value');
      * @example $redis->setnx('new-key', 'new-value');
      */
-    public function setnx(string $key, mixed $value): Redis|bool;
+    public function setnx(string $key, mixed $value): ValkeyGlide|bool;
 
     /**
-     * Check whether a given value is the member of a Redis SET.
+     * Check whether a given value is the member of a ValkeyGlide SET.
      *
      * @param string $key   The redis set to check.
      * @param mixed  $value The value to test.
      *
-     * @return Redis|bool True if the member exists and false if not.
+     * @return ValkeyGlide|bool True if the member exists and false if not.
      *
      * @example $redis->sismember('myset', 'mem1', 'mem2');
      */
-    public function sismember(string $key, mixed $value): Redis|bool;
+    public function sismember(string $key, mixed $value): ValkeyGlide|bool;
 
     /**
      * Turn a redis instance into a replica of another or promote a replica
      * to a primary.
      *
-     * This method and the corresponding command in Redis has been marked deprecated
-     * and users should instead use Redis::replicaof() if connecting to redis-server
+     * This method and the corresponding command in ValkeyGlide has been marked deprecated
+     * and users should instead use ValkeyGlide::replicaof() if connecting to redis-server
      * >= 5.0.0.
      *
      * @deprecated
      *
      * @see https://redis.io/commands/slaveof
      * @see https://redis.io/commands/replicaof
-     * @see Redis::replicaof()
+     * @see ValkeyGlide::replicaof()
      */
-    public function slaveof(?string $host = null, int $port = 6379): Redis|bool;
+    public function slaveof(?string $host = null, int $port = 6379): ValkeyGlide|bool;
 
     /**
-     * Used to turn a Redis instance into a replica of another, or to remove
+     * Used to turn a ValkeyGlide instance into a replica of another, or to remove
      * replica status promoting the instance to a primary.
      *
      * @see https://redis.io/commands/replicaof
      * @see https://redis.io/commands/slaveof
-     * @see Redis::slaveof()
+     * @see ValkeyGlide::slaveof()
      *
      * @param string $host The host of the primary to start replicating.
      * @param string $port The port of the primary to start replicating.
      *
-     * @return Redis|bool Success if we were successfully able to start replicating a primary or
+     * @return ValkeyGlide|bool Success if we were successfully able to start replicating a primary or
      *                    were able to promote the replicat to a primary.
      *
      * @example
-     * $redis = new Redis(['host' => 'localhost']);
+     * $redis = new ValkeyGlide(['host' => 'localhost']);
      *
-     * // Attempt to become a replica of a Redis instance at 127.0.0.1:9999
+     * // Attempt to become a replica of a ValkeyGlide instance at 127.0.0.1:9999
      * $redis->replicaof('127.0.0.1', 9999);
      *
-     * // When passed no arguments, PhpRedis will deliver the command `REPLICAOF NO ONE`
+     * // When passed no arguments, PhpValkeyGlide will deliver the command `REPLICAOF NO ONE`
      * // attempting to promote the instance to a primary.
      * $redis->replicaof();
      */
-    public function replicaof(?string $host = null, int $port = 6379): Redis|bool;
+    public function replicaof(?string $host = null, int $port = 6379): ValkeyGlide|bool;
 
     /**
      * Update one or more keys last modified metadata.
@@ -3248,28 +3248,28 @@ class Redis {
      *                             an array of keys.
      * @param string $more_keys    One or more keys to send to the command.
      *
-     * @return Redis|int|false     This command returns the number of keys that exist and
+     * @return ValkeyGlide|int|false     This command returns the number of keys that exist and
      *                             had their last modified time reset
      */
-    public function touch(array|string $key_or_array, string ...$more_keys): Redis|int|false;
+    public function touch(array|string $key_or_array, string ...$more_keys): ValkeyGlide|int|false;
 
     /**
-     * Interact with Redis' slowlog functionality in various ways, depending
+     * Interact with ValkeyGlide' slowlog functionality in various ways, depending
      * on the value of 'operation'.
      *
      * @category administration
      *
      * @param string $operation  The operation you wish to perform.  This can
      *                           be one of the following values:
-     *                           'GET'   - Retrieve the Redis slowlog as an array.
+     *                           'GET'   - Retrieve the ValkeyGlide slowlog as an array.
      *                           'LEN'   - Retrieve the length of the slowlog.
      *                           'RESET' - Remove all slowlog entries.
      * @param int    $length     This optional argument can be passed when operation
      *                           is 'get' and will specify how many elements to retrieve.
-     *                           If omitted Redis will send up to a default number of
+     *                           If omitted ValkeyGlide will send up to a default number of
      *                           entries, which is configurable.
      *
-     *                           Note:  With Redis >= 7.0.0 you can send -1 to mean "all".
+     *                           Note:  With ValkeyGlide >= 7.0.0 you can send -1 to mean "all".
      *
      * @return mixed
      *
@@ -3282,7 +3282,7 @@ class Redis {
     public function slowlog(string $operation, int $length = 0): mixed;
 
     /**
-     * Sort the contents of a Redis key in various ways.
+     * Sort the contents of a ValkeyGlide key in various ways.
      *
      * @see https://redis.io/commands/sort/
      *
@@ -3313,7 +3313,7 @@ class Redis {
     /**
      * This is simply a read-only variant of the sort command
      *
-     * @see Redis::sort()
+     * @see ValkeyGlide::sort()
      */
     public function sort_ro(string $key, ?array $options = null): mixed;
 
@@ -3338,35 +3338,35 @@ class Redis {
     public function sortDescAlpha(string $key, ?string $pattern = null, mixed $get = null, int $offset = -1, int $count = -1, ?string $store = null): array;
 
     /**
-     * Remove one or more values from a Redis SET key.
+     * Remove one or more values from a ValkeyGlide SET key.
      *
      * @see https://redis.io/commands/srem
      *
-     * @param string $key         The Redis SET key in question.
+     * @param string $key         The ValkeyGlide SET key in question.
      * @param mixed  $value       The first value to remove.
      * @param mixed  $more_values One or more additional values to remove.
      *
-     * @return Redis|int|false    The number of values removed from the set or false on failure.
+     * @return ValkeyGlide|int|false    The number of values removed from the set or false on failure.
      *
      * @example $redis->sRem('set1', 'mem1', 'mem2', 'not-in-set');
      */
-    public function srem(string $key, mixed $value, mixed ...$other_values): Redis|int|false;
+    public function srem(string $key, mixed $value, mixed ...$other_values): ValkeyGlide|int|false;
 
     /**
      * Scan the members of a redis SET key.
      *
      * @see https://redis.io/commands/sscan
      * @see https://redis.io/commands/scan
-     * @see Redis::setOption()
+     * @see ValkeyGlide::setOption()
      *
-     * @param string $key       The Redis SET key in question.
+     * @param string $key       The ValkeyGlide SET key in question.
      * @param int    $iterator  A reference to an iterator which should be initialized to NULL that
-     *                          PhpRedis will update with the value returned from Redis after each
+     *                          PhpValkeyGlide will update with the value returned from ValkeyGlide after each
      *                          subsequent call to SSCAN.  Once this cursor is zero you know all
      *                          members have been traversed.
-     * @param string|null $pattern An optional glob style pattern to match against, so Redis only
+     * @param string|null $pattern An optional glob style pattern to match against, so ValkeyGlide only
      *                          returns the subset of members matching this pattern.
-     * @param int    $count     A hint to Redis as to how many members it should scan in one command
+     * @param int    $count     A hint to ValkeyGlide as to how many members it should scan in one command
      *                          before returning members for that iteration.
      *
      * @example
@@ -3376,12 +3376,12 @@ class Redis {
      * }
      * $redis->sadd('myset', 'foofoo');
      *
-     * $redis->setOption(Redis::OPT_SCAN, Redis::SCAN_NORETRY);
+     * $redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_NORETRY);
      *
      * $scanned = 0;
      * $it = null;
      *
-     * // Without Redis::SCAN_RETRY we may receive empty results and
+     * // Without ValkeyGlide::SCAN_RETRY we may receive empty results and
      * // a nonzero iterator.
      * do {
      *     // Scan members containing '5'
@@ -3393,12 +3393,12 @@ class Redis {
      * } while ($it != 0);
      * echo "TOTAL: $scanned\n";
      *
-     * $redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
+     * $redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_RETRY);
      *
      * $scanned = 0;
      * $it = null;
      *
-     * // With Redis::SCAN_RETRY PhpRedis will never return an empty array
+     * // With ValkeyGlide::SCAN_RETRY PhpValkeyGlide will never return an empty array
      * // when the cursor is non-zero
      * while (($members = $redis->sscan('myset', $it, '*5*'))) {
      *     foreach ($members as $member) {
@@ -3413,7 +3413,7 @@ class Redis {
      * Subscribes the client to the specified shard channels.
      *
      * @param array    $channels One or more channel names.
-     * @param callable $cb       The callback PhpRedis will invoke when we receive a message
+     * @param callable $cb       The callback PhpValkeyGlide will invoke when we receive a message
      *                           from one of the subscribed channels.
      *
      * @return bool True on success, false on faiilure.  Note that this command will block the
@@ -3422,7 +3422,7 @@ class Redis {
      * @see https://redis.io/commands/ssubscribe
      *
      * @example
-     * $redis = new Redis(['host' => 'localhost']);
+     * $redis = new ValkeyGlide(['host' => 'localhost']);
      *
      * $redis->ssubscribe(['channel-1', 'channel-2'], function ($redis, $channel, $message) {
      *     echo "[$channel]: $message\n";
@@ -3441,24 +3441,24 @@ class Redis {
     public function ssubscribe(array $channels, callable $cb): bool;
 
     /**
-     * Retrieve the length of a Redis STRING key.
+     * Retrieve the length of a ValkeyGlide STRING key.
      *
      * @param string $key The key we want the length of.
      *
-     * @return Redis|int|false The length of the string key if it exists, zero if it does not, and
+     * @return ValkeyGlide|int|false The length of the string key if it exists, zero if it does not, and
      *                         false on failure.
      *
      * @see https://redis.io/commands/strlen
      *
      * @example $redis->strlen('mykey');
      */
-    public function strlen(string $key): Redis|int|false;
+    public function strlen(string $key): ValkeyGlide|int|false;
 
     /**
-     * Subscribe to one or more Redis pubsub channels.
+     * Subscribe to one or more ValkeyGlide pubsub channels.
      *
      * @param array    $channels One or more channel names.
-     * @param callable $cb       The callback PhpRedis will invoke when we receive a message
+     * @param callable $cb       The callback PhpValkeyGlide will invoke when we receive a message
      *                           from one of the subscribed channels.
      *
      * @return bool True on success, false on faiilure.  Note that this command will block the
@@ -3467,7 +3467,7 @@ class Redis {
      * @see https://redis.io/commands/subscribe
      *
      * @example
-     * $redis = new Redis(['host' => 'localhost']);
+     * $redis = new ValkeyGlide(['host' => 'localhost']);
      *
      * $redis->subscribe(['channel-1', 'channel-2'], function ($redis, $channel, $message) {
      *     echo "[$channel]: $message\n";
@@ -3490,10 +3490,10 @@ class Redis {
      * or from all of them if none is given.
      *
      * @param array $channels One or more channels to unsubscribe from.
-     * @return Redis|array|bool The array of unsubscribed channels.
+     * @return ValkeyGlide|array|bool The array of unsubscribed channels.
      *
      * @see https://redis.io/commands/sunsubscribe
-     * @see Redis::ssubscribe()
+     * @see ValkeyGlide::ssubscribe()
      *
      * @example
      * $redis->ssubscribe(['channel-1', 'channel-2'], function ($redis, $channel, $message) {
@@ -3507,22 +3507,22 @@ class Redis {
      *
      * echo "We've unsubscribed from both channels, exiting\n";
      */
-    public function sunsubscribe(array $channels): Redis|array|bool;
+    public function sunsubscribe(array $channels): ValkeyGlide|array|bool;
 
     /**
-     * Atomically swap two Redis databases so that all of the keys in the source database will
+     * Atomically swap two ValkeyGlide databases so that all of the keys in the source database will
      * now be in the destination database and vice-versa.
      *
-     * Note: This command simply swaps Redis' internal pointer to the database and is therefore
+     * Note: This command simply swaps ValkeyGlide' internal pointer to the database and is therefore
      * very fast, regardless of the size of the underlying databases.
      *
      * @param int $src The source database number
      * @param int $dst The destination database number
      *
-     * @return Redis|bool Success if the databases could be swapped and false on failure.
+     * @return ValkeyGlide|bool Success if the databases could be swapped and false on failure.
      *
      * @see https://redis.io/commands/swapdb
-     * @see Redis::del()
+     * @see ValkeyGlide::del()
      *
      * @example
      * $redis->select(0);
@@ -3530,10 +3530,10 @@ class Redis {
      * $redis->swapdb(0, 1);
      * $redis->get('db0-key');
      */
-    public function swapdb(int $src, int $dst): Redis|bool;
+    public function swapdb(int $src, int $dst): ValkeyGlide|bool;
 
     /**
-     * Retrieve the server time from the connected Redis instance.
+     * Retrieve the server time from the connected ValkeyGlide instance.
      *
      * @see https://redis.io/commands/time
      *
@@ -3542,13 +3542,13 @@ class Redis {
      *
      * @example $redis->time();
      */
-    public function time(): Redis|array;
+    public function time(): ValkeyGlide|array;
 
     /**
-     * Get the amount of time a Redis key has before it will expire, in seconds.
+     * Get the amount of time a ValkeyGlide key has before it will expire, in seconds.
      *
      * @param string $key      The Key we want the TTL for.
-     * @return Redis|int|false (a) The number of seconds until the key expires, or -1 if the key has
+     * @return ValkeyGlide|int|false (a) The number of seconds until the key expires, or -1 if the key has
      *                         no expiration, and -2 if the key does not exist.  In the event of an
      *                         error, this command will return false.
      *
@@ -3556,62 +3556,62 @@ class Redis {
      *
      * @example $redis->ttl('mykey');
      */
-    public function ttl(string $key): Redis|int|false;
+    public function ttl(string $key): ValkeyGlide|int|false;
 
     /**
-     * Get the type of a given Redis key.
+     * Get the type of a given ValkeyGlide key.
      *
      * @see https://redis.io/commands/type
      *
      * @param  string $key     The key to check
-     * @return Redis|int|false The Redis type constant or false on failure.
+     * @return ValkeyGlide|int|false The ValkeyGlide type constant or false on failure.
      *
-     * The Redis class defines several type constants that correspond with Redis key types.
+     * The ValkeyGlide class defines several type constants that correspond with ValkeyGlide key types.
      *
-     *     Redis::REDIS_NOT_FOUND
-     *     Redis::REDIS_STRING
-     *     Redis::REDIS_SET
-     *     Redis::REDIS_LIST
-     *     Redis::REDIS_ZSET
-     *     Redis::REDIS_HASH
-     *     Redis::REDIS_STREAM
+     *     ValkeyGlide::REDIS_NOT_FOUND
+     *     ValkeyGlide::REDIS_STRING
+     *     ValkeyGlide::REDIS_SET
+     *     ValkeyGlide::REDIS_LIST
+     *     ValkeyGlide::REDIS_ZSET
+     *     ValkeyGlide::REDIS_HASH
+     *     ValkeyGlide::REDIS_STREAM
      *
      * @example
      * foreach ($redis->keys('*') as $key) {
      *     echo "$key => " . $redis->type($key) . "\n";
      * }
      */
-    public function type(string $key): Redis|int|false;
+    public function type(string $key): ValkeyGlide|int|false;
 
     /**
-     * Delete one or more keys from the Redis database.  Unlike this operation, the actual
+     * Delete one or more keys from the ValkeyGlide database.  Unlike this operation, the actual
      * deletion is asynchronous, meaning it is safe to delete large keys without fear of
-     * Redis blocking for a long period of time.
+     * ValkeyGlide blocking for a long period of time.
      *
      * @param array|string $key_or_keys Either an array with one or more keys or a string with
      *                                  the first key to delete.
      * @param string       $other_keys  If the first argument passed to this method was a string
      *                                  you may pass any number of additional key names.
      *
-     * @return Redis|int|false The number of keys deleted or false on failure.
+     * @return ValkeyGlide|int|false The number of keys deleted or false on failure.
      *
      * @see https://redis.io/commands/unlink
      * @see https://redis.io/commands/del
-     * @see Redis::del()
+     * @see ValkeyGlide::del()
      *
      * @example $redis->unlink('key1', 'key2', 'key3');
      * @example $redis->unlink(['key1', 'key2', 'key3']);
      */
-    public function unlink(array|string $key, string ...$other_keys): Redis|int|false;
+    public function unlink(array|string $key, string ...$other_keys): ValkeyGlide|int|false;
 
     /**
      * Unsubscribe from one or more subscribed channels.
      *
      * @param array $channels One or more channels to unsubscribe from.
-     * @return Redis|array|bool The array of unsubscribed channels.
+     * @return ValkeyGlide|array|bool The array of unsubscribed channels.
      *
      * @see https://redis.io/commands/unsubscribe
-     * @see Redis::subscribe()
+     * @see ValkeyGlide::subscribe()
      *
      * @example
      * $redis->subscribe(['channel-1', 'channel-2'], function ($redis, $channel, $message) {
@@ -3625,18 +3625,18 @@ class Redis {
      *
      * echo "We've unsubscribed from both channels, exiting\n";
      */
-    public function unsubscribe(array $channels): Redis|array|bool;
+    public function unsubscribe(array $channels): ValkeyGlide|array|bool;
 
     /**
      * Remove any previously WATCH'ed keys in a transaction.
      *
      * @see https://redis.io/commands/unwatch
      * @see https://redis.io/commands/unwatch
-     * @see Redis::watch()
+     * @see ValkeyGlide::watch()
      *
      * @return True on success and false on failure.
      */
-    public function unwatch(): Redis|bool;
+    public function unwatch(): ValkeyGlide|bool;
 
     /**
      * Watch one or more keys for conditional execution of a transaction.
@@ -3644,15 +3644,15 @@ class Redis {
      * @param array|string $key_or_keys  Either an array with one or more key names, or a string key name
      * @param string       $other_keys   If the first argument was passed as a string, any number of additional
      *                                   string key names may be passed variadically.
-     * @return Redis|bool
+     * @return ValkeyGlide|bool
      *
      *
      * @see https://redis.io/commands/watch
      * @see https://redis.io/commands/unwatch
      *
      * @example
-     * $redis1 = new Redis(['host' => 'localhost']);
-     * $redis2 = new Redis(['host' => 'localhost']);
+     * $redis1 = new ValkeyGlide(['host' => 'localhost']);
+     * $redis2 = new ValkeyGlide(['host' => 'localhost']);
      *
      * // Start watching 'incr-key'
      * $redis1->watch('incr-key');
@@ -3676,7 +3676,7 @@ class Redis {
      * // bool(false)
      * var_dump($res);
      */
-    public function watch(array|string $key, string ...$other_keys): Redis|bool;
+    public function watch(array|string $key, string ...$other_keys): ValkeyGlide|bool;
 
     /**
      * Block the client up to the provided timeout until a certain number of replicas have confirmed
@@ -3687,7 +3687,7 @@ class Redis {
      * @param int $numreplicas The number of replicas we want to confirm write operations
      * @param int $timeout     How long to wait (zero meaning forever).
      *
-     * @return Redis|int|false The number of replicas that have confirmed or false on failure.
+     * @return ValkeyGlide|int|false The number of replicas that have confirmed or false on failure.
      *
      */
     public function wait(int $numreplicas, int $timeout): int|false;
@@ -3704,7 +3704,7 @@ class Redis {
      *
      * @see https://redis.io/commands/xack
      * @see https://redis.io/commands/xreadgroup
-     * @see Redis::xack()
+     * @see ValkeyGlide::xack()
      *
      * @example
      * $redis->xAdd('ships', '*', ['name' => 'Enterprise']);
@@ -3723,7 +3723,7 @@ class Redis {
      * $res = $redis->xPending('ships', 'Federation'));
      * var_dump($res);
      *
-     * // We can tell Redis we were able to process the message by using XACK
+     * // We can tell ValkeyGlide we were able to process the message by using XACK
      * $res = $redis->xAck('ships', 'Federation', [$id]);
      * assert($res === 1);
      *
@@ -3738,23 +3738,23 @@ class Redis {
      *
      * @param string $key        The stream name.
      * @param string $id         The ID for the message we want to add.  This can be the special value '*'
-     *                           which means Redis will generate the ID that appends the message to the
+     *                           which means ValkeyGlide will generate the ID that appends the message to the
      *                           end of the stream.  It can also be a value in the form <ms>-* which will
      *                           generate an ID that appends to the end of entries with the same <ms> value
      *                           (if any exist).
-     * @param int    $maxlen     If specified Redis will append the new message but trim any number of the
+     * @param int    $maxlen     If specified ValkeyGlide will append the new message but trim any number of the
      *                           oldest messages in the stream until the length is <= $maxlen.
-     * @param bool   $approx     Used in conjunction with `$maxlen`, this flag tells Redis to trim the stream
+     * @param bool   $approx     Used in conjunction with `$maxlen`, this flag tells ValkeyGlide to trim the stream
      *                           but in a more efficient way, meaning the trimming may not be exactly to
      *                           `$maxlen` values.
-     * @param bool   $nomkstream If passed as `TRUE`, the stream must exist for Redis to append the message.
+     * @param bool   $nomkstream If passed as `TRUE`, the stream must exist for ValkeyGlide to append the message.
      *
      * @see https://redis.io/commands/xadd
      *
      * @example $redis->xAdd('ds9-season-1', '1-1', ['title' => 'Emissary Part 1']);
      * @example $redis->xAdd('ds9-season-1', '1-2', ['title' => 'A Man Alone']);
      */
-    public function xadd(string $key, string $id, array $values, int $maxlen = 0, bool $approx = false, bool $nomkstream = false): Redis|string|false;
+    public function xadd(string $key, string $id, array $values, int $maxlen = 0, bool $approx = false, bool $nomkstream = false): ValkeyGlide|string|false;
 
     /**
      * This command allows a consumer to claim pending messages that have been idle for a specified period of time.
@@ -3772,7 +3772,7 @@ class Redis {
      * @param int    $count    An optional limit on how many messages are returned.
      * @param bool   $justid   If the client only wants message IDs and not all of their data.
      *
-     * @return Redis|array|bool An array of pending IDs or false if there are none, or on failure.
+     * @return ValkeyGlide|array|bool An array of pending IDs or false if there are none, or on failure.
      *
      * @example
      * $redis->xGroup('CREATE', 'ships', 'combatants', '0-0', true);
@@ -3793,11 +3793,11 @@ class Redis {
      * $pending = $redis->xPending('ships', 'combatants');
      * var_dump($pending);
      */
-    public function xautoclaim(string $key, string $group, string $consumer, int $min_idle, string $start, int $count = -1, bool $justid = false): Redis|bool|array;
+    public function xautoclaim(string $key, string $group, string $consumer, int $min_idle, string $start, int $count = -1, bool $justid = false): ValkeyGlide|bool|array;
 
     /**
      * This method allows a consumer to take ownership of pending stream entries, by ID.  Another
-     * command that does much the same thing but does not require passing specific IDs is `Redis::xAutoClaim`.
+     * command that does much the same thing but does not require passing specific IDs is `ValkeyGlide::xAutoClaim`.
      *
      * @see https://redis.io/commands/xclaim
      * @see https://redis.io/commands/xautoclaim.
@@ -3826,7 +3826,7 @@ class Redis {
      *                               ];
      *                               </code>
      *
-     * @return Redis|array|bool      An array of claimed messages or false on failure.
+     * @return ValkeyGlide|array|bool      An array of claimed messages or false on failure.
      *
      * @example
      * $redis->xGroup('CREATE', 'ships', 'combatants', '0-0', true);
@@ -3850,7 +3850,7 @@ class Redis {
      * $pending = $redis->xPending('ships', 'combatants');
      * var_dump($pending);
      */
-    public function xclaim(string $key, string $group, string $consumer, int $min_idle, array $ids, array $options): Redis|array|bool;
+    public function xclaim(string $key, string $group, string $consumer, int $min_idle, array $ids, array $options): ValkeyGlide|array|bool;
 
     /**
      * Remove one or more specific IDs from a stream.
@@ -3858,22 +3858,22 @@ class Redis {
      * @param string $key The stream to modify.
      * @param array $ids One or more message IDs to remove.
      *
-     * @return Redis|int|false The number of messages removed or false on failure.
+     * @return ValkeyGlide|int|false The number of messages removed or false on failure.
      *
      * @example $redis->xDel('stream', ['1-1', '2-1', '3-1']);
      */
-    public function xdel(string $key, array $ids): Redis|int|false;
+    public function xdel(string $key, array $ids): ValkeyGlide|int|false;
 
     /**
      * XGROUP
      *
-     * Perform various operation on consumer groups for a particular Redis STREAM.  What the command does
+     * Perform various operation on consumer groups for a particular ValkeyGlide STREAM.  What the command does
      * is primarily based on which operation is passed.
      *
      * @see https://redis.io/commands/xgroup/
      *
      * @param string $operation      The subcommand you intend to execute.  Valid options are as follows
-     *                               'HELP'           - Redis will return information about the command
+     *                               'HELP'           - ValkeyGlide will return information about the command
      *                                                  Requires: none
      *                               'CREATE'         - Create a consumer group.
      *                                                  Requires:  Key, group, consumer.
@@ -3892,11 +3892,11 @@ class Redis {
      * @param string $id_or_consumer The STREAM id (e.g. '$') or consumer group.  See the operation section
      *                               for information about which to send.
      * @param bool   $mkstream       This flag may be sent in combination with the 'CREATE' operation, and
-     *                               cause Redis to also create the STREAM if it doesn't currently exist.
+     *                               cause ValkeyGlide to also create the STREAM if it doesn't currently exist.
      *
-     * @param bool   $entriesread    Allows you to set Redis' 'entries-read' STREAM value.  This argument is
+     * @param bool   $entriesread    Allows you to set ValkeyGlide' 'entries-read' STREAM value.  This argument is
      *                               only relevant to the 'CREATE' and 'SETID' operations.
-     *                               Note:  Requires Redis >= 7.0.0.
+     *                               Note:  Requires ValkeyGlide >= 7.0.0.
      *
      * @return mixed                 This command return various results depending on the operation performed.
      */
@@ -3923,17 +3923,17 @@ class Redis {
 
 
     /**
-     * Get the number of messages in a Redis STREAM key.
+     * Get the number of messages in a ValkeyGlide STREAM key.
      *
      * @param string $key The Stream to check.
      *
-     * @return Redis|int|false The number of messages or false on failure.
+     * @return ValkeyGlide|int|false The number of messages or false on failure.
      *
      * @see https://redis.io/commands/xlen
      *
      * @example $redis->xLen('stream');
      */
-    public function xlen(string $key): Redis|int|false;
+    public function xlen(string $key): ValkeyGlide|int|false;
 
     /**
      * Interact with stream messages that have been consumed by a consumer group but not yet
@@ -3949,10 +3949,10 @@ class Redis {
      * @param string $count    Optional maximum number of messages to return.
      * @param string $consumer If provided, limit the returned messages to a specific consumer.
      *
-     * @return Redis|array|false The pending messages belonging to the stream or false on failure.
+     * @return ValkeyGlide|array|false The pending messages belonging to the stream or false on failure.
      *
      */
-    public function xpending(string $key, string $group, ?string $start = null, ?string $end = null, int $count = -1, ?string $consumer = null): Redis|array|false;
+    public function xpending(string $key, string $group, ?string $start = null, ?string $end = null, int $count = -1, ?string $consumer = null): ValkeyGlide|array|false;
 
     /**
      * Get a range of entries from a STREAM key.
@@ -3962,14 +3962,14 @@ class Redis {
      * @param string $end   The maximum ID to return.
      * @param int    $count An optional maximum number of entries to return.
      *
-     * @return Redis|array|bool The entries in the stream within the requested range or false on failure.
+     * @return ValkeyGlide|array|bool The entries in the stream within the requested range or false on failure.
      *
      * @see https://redis.io/commands/xrange
      *
      * @example $redis->xRange('stream', '0-1', '0-2');
      * @example $redis->xRange('stream', '-', '+');
      */
-    public function xrange(string $key, string $start, string $end, int $count = -1): Redis|array|bool;
+    public function xrange(string $key, string $start, string $end, int $count = -1): ValkeyGlide|array|bool;
 
     /**
      * Consume one or more unconsumed elements in one or more streams.
@@ -3979,7 +3979,7 @@ class Redis {
      * @param int   $block   An optional maximum number of milliseconds to block the caller if no
      *                       data is available on any of the provided streams.
      *
-     * @return Redis|array|bool An array of read elements or false if there aren't any.
+     * @return ValkeyGlide|array|bool An array of read elements or false if there aren't any.
      *
      * @see https://redis.io/commands/xread
      *
@@ -3993,7 +3993,7 @@ class Redis {
      *
      * $redis->xRead(['s03' => '3-2', 's04' => '4-1']);
      */
-    public function xread(array $streams, int $count = -1, int $block = -1): Redis|array|bool;
+    public function xread(array $streams, int $count = -1, int $block = -1): ValkeyGlide|array|bool;
 
     /**
      * Read one or more messages using a consumer group.
@@ -4004,7 +4004,7 @@ class Redis {
      * @param int    $count     Optional maximum number of messages to return
      * @param int    $block     How long to block if there are no messages available.
      *
-     * @return Redis|array|bool Zero or more unread messages or false on failure.
+     * @return ValkeyGlide|array|bool Zero or more unread messages or false on failure.
      *
      * @see https://redis.io/commands/xreadgroup
      *
@@ -4028,7 +4028,7 @@ class Redis {
      * // We can now pick up where we left off, and will only get the final message
      * $msgs = $redis->xReadGroup('ds9', 'sisko', ['episodes' => '>']);
      */
-    public function xreadgroup(string $group, string $consumer, array $streams, int $count = 1, int $block = 1): Redis|array|bool;
+    public function xreadgroup(string $group, string $consumer, array $streams, int $count = 1, int $block = 1): ValkeyGlide|array|bool;
 
     /**
      * Get a range of entries from a STREAM key in reverse chronological order.
@@ -4038,7 +4038,7 @@ class Redis {
      * @param string $start The minimum message ID to include.
      * @param int    $count An optional maximum number of messages to include.
      *
-     * @return Redis|array|bool The entries within the requested range, from newest to oldest.
+     * @return ValkeyGlide|array|bool The entries within the requested range, from newest to oldest.
      *
      * @see https://redis.io/commands/xrevrange
      * @see https://redis.io/commands/xrange
@@ -4046,7 +4046,7 @@ class Redis {
      * @example $redis->xRevRange('stream', '0-2', '0-1');
      * @example $redis->xRevRange('stream', '+', '-');
      */
-    public function xrevrange(string $key, string $end, string $start, int $count = -1): Redis|array|bool;
+    public function xrevrange(string $key, string $end, string $start, int $count = -1): ValkeyGlide|array|bool;
 
     /**
      * Truncate a STREAM key in various ways.
@@ -4054,24 +4054,24 @@ class Redis {
      * @param string $key       The STREAM key to trim.
      * @param string $threshold This can either be a maximum length, or a minimum id.
      *                          MAXLEN - An integer describing the maximum desired length of the stream after the command.
-     *                          MINID  - An ID that will become the new minimum ID in the stream, as Redis will trim all
+     *                          MINID  - An ID that will become the new minimum ID in the stream, as ValkeyGlide will trim all
      *                                   messages older than this ID.
      * @param bool   $approx    Whether redis is allowed to do an approximate trimming of the stream.  This is
-     *                          more efficient for Redis given how streams are stored internally.
+     *                          more efficient for ValkeyGlide given how streams are stored internally.
      * @param bool   $minid     When set to `true`, users should pass a minimum ID to the `$threshold` argument.
      * @param int    $limit     An optional upper bound on how many entries to trim during the command.
      *
-     * @return Redis|int|false  The number of entries deleted from the stream.
+     * @return ValkeyGlide|int|false  The number of entries deleted from the stream.
      *
      * @see https://redis.io/commands/xtrim
      *
      * @example $redis->xTrim('stream', 3);
      * @example $redis->xTrim('stream', '2-1', false, true);
      */
-    public function xtrim(string $key, string $threshold, bool $approx = false, bool $minid = false, int $limit = -1): Redis|int|false;
+    public function xtrim(string $key, string $threshold, bool $approx = false, bool $minid = false, int $limit = -1): ValkeyGlide|int|false;
 
     /**
-     * Add one or more elements and scores to a Redis sorted set.
+     * Add one or more elements and scores to a ValkeyGlide sorted set.
      *
      * @param string       $key                  The sorted set in question.
      * @param array|float  $score_or_options     Either the score for the first element, or an array of options.
@@ -4086,7 +4086,7 @@ class Redis {
      *                                                            # greater than the existing one.
      *
      *                                                'CH'        # Instead of returning the number of elements added,
-     *                                                            # Redis will return the number Of elements that were
+     *                                                            # ValkeyGlide will return the number Of elements that were
      *                                                            # changed in the operation.
      *
      *                                                'INCR'      # Instead of setting each element to the provide score,
@@ -4095,12 +4095,12 @@ class Redis {
      *                                                            # is passed, you may only send a single score and member.
      *                                            ];
      *
-     *                                            Note:  'GX', 'LT', and 'NX' cannot be passed together, and PhpRedis
+     *                                            Note:  'GX', 'LT', and 'NX' cannot be passed together, and PhpValkeyGlide
      *                                                   will send whichever one is last in the options array.
      *
      * @param mixed        $more_scores_and_mems A variadic number of additional scores and members.
      *
-     * @return Redis|int|false The return value varies depending on the options passed.
+     * @return ValkeyGlide|int|false The return value varies depending on the options passed.
      *
      * Following is information about the options that may be passed as the second argument:
      *
@@ -4109,20 +4109,20 @@ class Redis {
      * @example $redis->zadd('zs', 1, 'first', 2, 'second', 3, 'third');
      * @example $redis->zAdd('zs', ['XX'], 8, 'second', 99, 'new-element');
      */
-    public function zAdd(string $key, array|float $score_or_options, mixed ...$more_scores_and_mems): Redis|int|float|false;
+    public function zAdd(string $key, array|float $score_or_options, mixed ...$more_scores_and_mems): ValkeyGlide|int|float|false;
 
     /**
      * Return the number of elements in a sorted set.
      *
      * @param string $key The sorted set to retrieve cardinality from.
      *
-     * @return Redis|int|false The number of elements in the set or false on failure
+     * @return ValkeyGlide|int|false The number of elements in the set or false on failure
      *
      * @see https://redis.io/commands/zcard
      *
      * @example $redis->zCard('zs');
      */
-    public function zCard(string $key): Redis|int|false;
+    public function zCard(string $key): ValkeyGlide|int|false;
 
     /**
      * Count the number of members in a sorted set with scores inside a provided range.
@@ -4140,22 +4140,22 @@ class Redis {
      * @example $redis->zCount('fruit-rankings', 50, 60);
      * @example $redis->zCount('fruit-rankings', '-inf', 0);
      */
-    public function zCount(string $key, int|string $start, int|string $end): Redis|int|false;
+    public function zCount(string $key, int|string $start, int|string $end): ValkeyGlide|int|false;
 
     /**
-     * Create or increment the score of a member in a Redis sorted set
+     * Create or increment the score of a member in a ValkeyGlide sorted set
      *
      * @param string $key   The sorted set in question.
      * @param float  $value How much to increment the score.
      *
-     * @return Redis|float|false The new score of the member or false on failure.
+     * @return ValkeyGlide|float|false The new score of the member or false on failure.
      *
      * @see https://redis.io/commands/zincrby
      *
      * @example $redis->zIncrBy('zs', 5.0, 'bananas');
      * @example $redis->zIncrBy('zs', 2.0, 'eggplants');
      */
-    public function zIncrBy(string $key, float $value, mixed $member): Redis|float|false;
+    public function zIncrBy(string $key, float $value, mixed $member): ValkeyGlide|float|false;
 
     /**
      * Count the number of elements in a sorted set whose members fall within the provided
@@ -4165,7 +4165,7 @@ class Redis {
      * @param string $min The minimum matching lexographical string
      * @param string $max The maximum matching lexographical string
      *
-     * @return Redis|int|false The number of members that fall within the range or false on failure.
+     * @return ValkeyGlide|int|false The number of members that fall within the range or false on failure.
      *
      * @see https://redis.io/commands/zlexcount
      *
@@ -4173,7 +4173,7 @@ class Redis {
      * $redis->zAdd('captains', 0, 'Janeway', 0, 'Kirk', 0, 'Picard', 0, 'Sisko', 0, 'Archer');
      * $redis->zLexCount('captains', '[A', '[S');
      */
-    public function zLexCount(string $key, string $min, string $max): Redis|int|false;
+    public function zLexCount(string $key, string $min, string $max): ValkeyGlide|int|false;
 
     /**
      * Retrieve the score of one or more members in a sorted set.
@@ -4184,7 +4184,7 @@ class Redis {
      * @param mixed  $member        The first member to return the score from
      * @param mixed  $other_members One or more additional members to return the scores of.
      *
-     * @return Redis|array|false An array of the scores of the requested elements.
+     * @return ValkeyGlide|array|false An array of the scores of the requested elements.
      *
      * @example
      * $redis->zAdd('zs', 0, 'zero', 1, 'one', 2, 'two', 3, 'three');
@@ -4192,7 +4192,7 @@ class Redis {
      * $redis->zMScore('zs', 'zero', 'two');
      * $redis->zMScore('zs', 'one', 'not-a-member');
      */
-    public function zMscore(string $key, mixed $member, mixed ...$other_members): Redis|array|false;
+    public function zMscore(string $key, mixed $member, mixed ...$other_members): ValkeyGlide|array|false;
 
     /**
      * Pop one or more of the highest scoring elements from a sorted set.
@@ -4200,7 +4200,7 @@ class Redis {
      * @param string $key   The sorted set to pop elements from.
      * @param int    $count An optional count of elements to pop.
      *
-     * @return Redis|array|false All of the popped elements with scores or false on failure
+     * @return ValkeyGlide|array|false All of the popped elements with scores or false on failure
      *
      * @see https://redis.io/commands/zpopmax
      *
@@ -4210,7 +4210,7 @@ class Redis {
      * $redis->zPopMax('zs');
      * $redis->zPopMax('zs', 2);.
      */
-    public function zPopMax(string $key, ?int $count = null): Redis|array|false;
+    public function zPopMax(string $key, ?int $count = null): ValkeyGlide|array|false;
 
     /**
      * Pop one or more of the lowest scoring elements from a sorted set.
@@ -4218,7 +4218,7 @@ class Redis {
      * @param string $key   The sorted set to pop elements from.
      * @param int    $count An optional count of elements to pop.
      *
-     * @return Redis|array|false The popped elements with their scores or false on failure.
+     * @return ValkeyGlide|array|false The popped elements with their scores or false on failure.
      *
      * @see https://redis.io/commands/zpopmin
      *
@@ -4228,7 +4228,7 @@ class Redis {
      * $redis->zPopMin('zs');
      * $redis->zPopMin('zs', 2);
      */
-    public function zPopMin(string $key, ?int $count = null): Redis|array|false;
+    public function zPopMin(string $key, ?int $count = null): ValkeyGlide|array|false;
 
     /**
      * Retrieve a range of elements of a sorted set between a start and end point.
@@ -4255,7 +4255,7 @@ class Redis {
      *                                 Note:  'BYLEX' and 'BYSCORE' are mutually exclusive.
      *
      *
-     * @return Redis|array|false  An array with matching elements or false on failure.
+     * @return ValkeyGlide|array|false  An array with matching elements or false on failure.
      *
      * @see https://redis.io/commands/zrange/
      * @category zset
@@ -4263,7 +4263,7 @@ class Redis {
      * @example $redis->zRange('zset', 0, -1);
      * @example $redis->zRange('zset', '-inf', 'inf', ['byscore']);
      */
-    public function zRange(string $key, string|int $start, string|int $end, array|bool|null $options = null): Redis|array|false;
+    public function zRange(string $key, string|int $start, string|int $end, array|bool|null $options = null): ValkeyGlide|array|false;
 
     /**
      * Retrieve a range of elements from a sorted set by legographical range.
@@ -4274,39 +4274,39 @@ class Redis {
      * @param int    $offset An optional offset within the matching values to return
      * @param int    $count  An optional count to limit the replies to (used in conjunction with offset)
      *
-     * @return Redis|array|false An array of matching elements or false on failure.
+     * @return ValkeyGlide|array|false An array of matching elements or false on failure.
      *
      * @see https://redis.io/commands/zrangebylex
      *
      * @example
-     * $redis = new Redis(['host' => 'localhost']);
+     * $redis = new ValkeyGlide(['host' => 'localhost']);
      * $redis->zAdd('captains', 0, 'Janeway', 0, 'Kirk', 0, 'Picard', 0, 'Sisko', 0, 'Archer');
      *
      * $redis->zRangeByLex('captains', '[A', '[S');
      * $redis->zRangeByLex('captains', '[A', '[S', 2, 2);
      */
-    public function zRangeByLex(string $key, string $min, string $max, int $offset = -1, int $count = -1): Redis|array|false;
+    public function zRangeByLex(string $key, string $min, string $max, int $offset = -1, int $count = -1): ValkeyGlide|array|false;
 
     /**
      * Retrieve a range of members from a sorted set by their score.
      *
      * @param string $key     The sorted set to query.
-     * @param string $start   The minimum score of elements that Redis should return.
-     * @param string $end     The maximum score of elements that Redis should return.
-     * @param array  $options Options that change how Redis will execute the command.
+     * @param string $start   The minimum score of elements that ValkeyGlide should return.
+     * @param string $end     The maximum score of elements that ValkeyGlide should return.
+     * @param array  $options Options that change how ValkeyGlide will execute the command.
      *
      *                        OPTION       TYPE            MEANING
      *                        'WITHSCORES' bool            Whether to also return scores.
      *                        'LIMIT'      [offset, count] Limit the reply to a subset of elements.
      *
-     * @return Redis|array|false The number of matching elements or false on failure.
+     * @return ValkeyGlide|array|false The number of matching elements or false on failure.
      *
      * @see https://redis.io/commands/zrangebyscore
      *
      * @example $redis->zRangeByScore('zs', 20, 30, ['WITHSCORES' => true]);
      * @example $redis->zRangeByScore('zs', 20, 30, ['WITHSCORES' => true, 'LIMIT' => [5, 5]]);
      */
-    public function zRangeByScore(string $key, string $start, string $end, array $options = []): Redis|array|false;
+    public function zRangeByScore(string $key, string $start, string $end, array $options = []): ValkeyGlide|array|false;
 
     /**
      * This command is similar to ZRANGE except that instead of returning the values directly
@@ -4318,19 +4318,19 @@ class Redis {
      * @param string           $end     The ending index to store
      * @param array|bool|null  $options Our options array that controls how the command will function.
      *
-     * @return Redis|int|false The number of elements stored in $dstkey or false on failure.
+     * @return ValkeyGlide|int|false The number of elements stored in $dstkey or false on failure.
      *
      * @see https://redis.io/commands/zrange/
-     * @see Redis::zRange
+     * @see ValkeyGlide::zRange
      * @category zset
      *
-     * See {@link Redis::zRange} for a full description of the possible options.
+     * See {@link ValkeyGlide::zRange} for a full description of the possible options.
      */
     public function zrangestore(string $dstkey, string $srckey, string $start, string $end,
-                                array|bool|null $options = null): Redis|int|false;
+                                array|bool|null $options = null): ValkeyGlide|int|false;
 
     /**
-     * Retrieve one or more random members from a Redis sorted set.
+     * Retrieve one or more random members from a ValkeyGlide sorted set.
      *
      * @param string $key     The sorted set to pull random members from.
      * @param array  $options One or more options that determine exactly how the command operates.
@@ -4339,13 +4339,13 @@ class Redis {
      *                        'COUNT'      int      The number of random members to return.
      *                        'WITHSCORES' bool     Whether to return scores and members instead of
      *
-     * @return Redis|string|array One or more random elements.
+     * @return ValkeyGlide|string|array One or more random elements.
      *
      * @see https://redis.io/commands/zrandmember
      *
      * @example $redis->zRandMember('zs', ['COUNT' => 2, 'WITHSCORES' => true]);
      */
-    public function zRandMember(string $key, ?array $options = null): Redis|string|array;
+    public function zRandMember(string $key, ?array $options = null): ValkeyGlide|string|array;
 
     /**
      * Get the rank of a member of a sorted set, by score.
@@ -4353,45 +4353,45 @@ class Redis {
      * @param string $key     The sorted set to check.
      * @param mixed  $member The member to test.
      *
-     * @return Redis|int|false The rank of the requested member.
+     * @return ValkeyGlide|int|false The rank of the requested member.
      * @see https://redis.io/commands/zrank
      *
      * @example $redis->zRank('zs', 'zero');
      * @example $redis->zRank('zs', 'three');
      */
-    public function zRank(string $key, mixed $member): Redis|int|false;
+    public function zRank(string $key, mixed $member): ValkeyGlide|int|false;
 
     /**
-     * Remove one or more members from a Redis sorted set.
+     * Remove one or more members from a ValkeyGlide sorted set.
      *
      * @param mixed $key           The sorted set in question.
      * @param mixed $member        The first member to remove.
      * @param mixed $other_members One or more members to remove passed in a variadic fashion.
      *
-     * @return Redis|int|false The number of members that were actually removed or false on failure.
+     * @return ValkeyGlide|int|false The number of members that were actually removed or false on failure.
      *
      * @see https://redis.io/commands/zrem
      *
      * @example $redis->zRem('zs', 'mem:0', 'mem:1', 'mem:2', 'mem:6', 'mem:7', 'mem:8', 'mem:9');
      */
-    public function zRem(mixed $key, mixed $member, mixed ...$other_members): Redis|int|false;
+    public function zRem(mixed $key, mixed $member, mixed ...$other_members): ValkeyGlide|int|false;
 
     /**
-     * Remove zero or more elements from a Redis sorted set by legographical range.
+     * Remove zero or more elements from a ValkeyGlide sorted set by legographical range.
      *
      * @param string $key The sorted set to remove elements from.
      * @param string $min The start of the lexographical range to remove.
      * @param string $max The end of the lexographical range to remove
      *
-     * @return Redis|int|false The number of elements removed from the set or false on failure.
+     * @return ValkeyGlide|int|false The number of elements removed from the set or false on failure.
      *
      * @see https://redis.io/commands/zremrangebylex
-     * @see Redis::zrangebylex()
+     * @see ValkeyGlide::zrangebylex()
      *
      * @example $redis->zRemRangeByLex('zs', '[a', '(b');
      * @example $redis->zRemRangeByLex('zs', '(banana', '(eggplant');
      */
-    public function zRemRangeByLex(string $key, string $min, string $max): Redis|int|false;
+    public function zRemRangeByLex(string $key, string $min, string $max): ValkeyGlide|int|false;
 
     /**
      * Remove one or more members of a sorted set by their rank.
@@ -4400,13 +4400,13 @@ class Redis {
      * @param int    $start  The rank when we want to start removing members
      * @param int    $end    The rank we want to stop removing membersk.
      *
-     * @return Redis|int|false The number of members removed from the set or false on failure.
+     * @return ValkeyGlide|int|false The number of members removed from the set or false on failure.
      *
      * @see https://redis.io/commands/zremrangebyrank
      *
      * @example $redis->zRemRangeByRank('zs', 0, 3);
      */
-    public function zRemRangeByRank(string $key, int $start, int $end): Redis|int|false;
+    public function zRemRangeByRank(string $key, int $start, int $end): ValkeyGlide|int|false;
 
     /**
      * Remove one or more members of a sorted set by their score.
@@ -4415,7 +4415,7 @@ class Redis {
      * @param int    $start  The lowest score to remove.
      * @param int    $end    The highest score to remove.
      *
-     * @return Redis|int|false The number of members removed from the set or false on failure.
+     * @return ValkeyGlide|int|false The number of members removed from the set or false on failure.
      *
      * @see https://redis.io/commands/zremrangebyrank
      *
@@ -4423,18 +4423,18 @@ class Redis {
      * $redis->zAdd('zs', 2, 'two', 4, 'four', 6, 'six');
      * $redis->zRemRangeByScore('zs', 2, 4);
      */
-    public function zRemRangeByScore(string $key, string $start, string $end): Redis|int|false;
+    public function zRemRangeByScore(string $key, string $start, string $end): ValkeyGlide|int|false;
 
     /**
-     * List the members of a Redis sorted set in reverse order
+     * List the members of a ValkeyGlide sorted set in reverse order
      *
      * @param string $key        The sorted set in question.
      * @param int    $start      The index to start listing elements
      * @param int    $end        The index to stop listing elements.
-     * @param mixed  $withscores Whether or not Redis should also return each members score.  See
+     * @param mixed  $withscores Whether or not ValkeyGlide should also return each members score.  See
      *                           the example below demonstrating how it may be used.
      *
-     * @return Redis|array|false The members (and possibly scores) of the matching elements or false
+     * @return ValkeyGlide|array|false The members (and possibly scores) of the matching elements or false
      *                           on failure.
      *
      * @see https://redis.io/commands/zrevrange
@@ -4444,10 +4444,10 @@ class Redis {
      * @example $redis->zRevRange('zs', 0, -1, true);
      * @example $redis->zRevRange('zs', 0, -1, ['withscores' => true]);
      */
-    public function zRevRange(string $key, int $start, int $end, mixed $scores = null): Redis|array|false;
+    public function zRevRange(string $key, int $start, int $end, mixed $scores = null): ValkeyGlide|array|false;
 
     /**
-     * List members of a Redis sorted set within a legographical range, in reverse order.
+     * List members of a ValkeyGlide sorted set within a legographical range, in reverse order.
      *
      * @param string $key    The sorted set to list
      * @param string $min    The maximum legographical element to include in the result.
@@ -4455,18 +4455,18 @@ class Redis {
      * @param string $offset An option offset within the matching elements to start at.
      * @param string $count  An optional count to limit the replies to.
      *
-     * @return Redis|array|false The matching members or false on failure.
+     * @return ValkeyGlide|array|false The matching members or false on failure.
      *
      * @see https://redis.io/commands/zrevrangebylex
-     * @see Redis::zrangebylex()
+     * @see ValkeyGlide::zrangebylex()
      *
      * @example $redis->zRevRangeByLex('captains', '[Q', '[J');
      * @example $redis->zRevRangeByLex('captains', '[Q', '[J', 1, 2);
      */
-    public function zRevRangeByLex(string $key, string $max, string $min, int $offset = -1, int $count = -1): Redis|array|false;
+    public function zRevRangeByLex(string $key, string $max, string $min, int $offset = -1, int $count = -1): ValkeyGlide|array|false;
 
     /**
-     * List elements from a Redis sorted set by score, highest to lowest
+     * List elements from a ValkeyGlide sorted set by score, highest to lowest
      *
      * @param string $key     The sorted set to query.
      * @param string $max     The highest score to include in the results.
@@ -4483,7 +4483,7 @@ class Redis {
      *                        NOTE:  For legacy reason, you may also simply pass `true` for the
      *                               options argument, to mean `WITHSCORES`.
      *
-     * @return Redis|array|false The matching members in reverse order of score or false on failure.
+     * @return ValkeyGlide|array|false The matching members in reverse order of score or false on failure.
      *
      * @see https://redis.io/commands/zrevrangebyscore
      *
@@ -4498,7 +4498,7 @@ class Redis {
      * $redis->zRevRangeByScore('oldest-people', 'inf', 118);
      * $redis->zRevRangeByScore('oldest-people', '117.5', '-inf', ['LIMIT' => [0, 1]]);
      */
-    public function zRevRangeByScore(string $key, string $max, string $min, array|bool $options = []): Redis|array|false;
+    public function zRevRangeByScore(string $key, string $max, string $min, array|bool $options = []): ValkeyGlide|array|false;
 
     /**
     * Retrieve a member of a sorted set by reverse rank.
@@ -4506,7 +4506,7 @@ class Redis {
     * @param string $key      The sorted set to query.
     * @param mixed  $member   The member to look up.
     *
-    * @return Redis|int|false The reverse rank (the rank if counted high to low) of the member or
+    * @return ValkeyGlide|int|false The reverse rank (the rank if counted high to low) of the member or
     *                         false on failure.
     * @see https://redis.io/commands/zrevrank
     *
@@ -4516,7 +4516,7 @@ class Redis {
     * $redis->zrevrank('ds9-characters', 'Sisko');
     * $redis->zrevrank('ds9-characters', 'Garak');
     */
-    public function zRevRank(string $key, mixed $member): Redis|int|false;
+    public function zRevRank(string $key, mixed $member): ValkeyGlide|int|false;
 
     /**
      * Get the score of a member of a sorted set.
@@ -4532,17 +4532,17 @@ class Redis {
      * $redis->zAdd('telescopes', 11.9, 'LBT', 10.4, 'GTC', 10, 'HET');
      * $redis->zScore('telescopes', 'LBT');
      */
-    public function zScore(string $key, mixed $member): Redis|float|false;
+    public function zScore(string $key, mixed $member): ValkeyGlide|float|false;
 
     /**
      * Given one or more sorted set key names, return every element that is in the first
      * set but not any of the others.
      *
      * @param array $keys    One or more sorted sets.
-     * @param array $options An array which can contain ['WITHSCORES' => true] if you want Redis to
+     * @param array $options An array which can contain ['WITHSCORES' => true] if you want ValkeyGlide to
      *                       return members and scores.
      *
-     * @return Redis|array|false An array of members or false on failure.
+     * @return ValkeyGlide|array|false An array of members or false on failure.
      *
      * @see https://redis.io/commands/zdiff
      *
@@ -4553,23 +4553,23 @@ class Redis {
      *
      * $redis->zDiff(['primes', 'evens', 'mod3']);
      */
-    public function zdiff(array $keys, ?array $options = null): Redis|array|false;
+    public function zdiff(array $keys, ?array $options = null): ValkeyGlide|array|false;
 
     /**
      * Store the difference of one or more sorted sets in a destination sorted set.
      *
-     * See {@link Redis::zdiff} for a more detailed description of how the diff operation works.
+     * See {@link ValkeyGlide::zdiff} for a more detailed description of how the diff operation works.
      *
      * @param string $key  The destination set name.
      * @param array  $keys One or more source key names
      *
-     * @return Redis|int|false The number of elements stored in the destination set or false on
+     * @return ValkeyGlide|int|false The number of elements stored in the destination set or false on
      *                         failure.
      *
      * @see https://redis.io/commands/zdiff
-     * @see Redis::zdiff()
+     * @see ValkeyGlide::zdiff()
      */
-    public function zdiffstore(string $dst, array $keys): Redis|int|false;
+    public function zdiffstore(string $dst, array $keys): ValkeyGlide|int|false;
 
     /**
      * Compute the intersection of one or more sorted sets and return the members
@@ -4577,10 +4577,10 @@ class Redis {
      * @param array $keys    One or more sorted sets.
      * @param array $weights An optional array of weights to be applied to each set when performing
      *                       the intersection.
-     * @param array $options Options for how Redis should combine duplicate elements when performing the
-     *                       intersection.  See Redis::zunion() for details.
+     * @param array $options Options for how ValkeyGlide should combine duplicate elements when performing the
+     *                       intersection.  See ValkeyGlide::zunion() for details.
      *
-     * @return Redis|array|false All of the members that exist in every set.
+     * @return ValkeyGlide|array|false All of the members that exist in every set.
      *
      * @see https://redis.io/commands/zinter
      *
@@ -4592,7 +4592,7 @@ class Redis {
      * $redis->zInter(['TNG', 'DS9'], NULL, ['withscores' => true]);
      * $redis->zInter(['TNG', 'DS9'], NULL, ['withscores' => true, 'aggregate' => 'max']);
      */
-    public function zinter(array $keys, ?array $weights = null, ?array $options = null): Redis|array|false;
+    public function zinter(array $keys, ?array $weights = null, ?array $options = null): ValkeyGlide|array|false;
 
     /**
      * Similar to ZINTER but instead of returning the intersected values, this command returns the
@@ -4600,14 +4600,14 @@ class Redis {
      *
      * @see https://redis.io/commands/zintercard
      * @see https://redis.io/commands/zinter
-     * @see Redis::zinter()
+     * @see ValkeyGlide::zinter()
      *
      * @param array $keys   One or more sorted set key names.
      * @param int   $limit  An optional upper bound on the returned cardinality.  If set to a value
-     *                      greater than zero, Redis will stop processing the intersection once the
+     *                      greater than zero, ValkeyGlide will stop processing the intersection once the
      *                      resulting cardinality reaches this limit.
      *
-     * @return Redis|int|false The cardinality of the intersection or false on failure.
+     * @return ValkeyGlide|int|false The cardinality of the intersection or false on failure.
      *
      * @example
      * $redis->zAdd('zs1', 1, 'one', 2, 'two', 3, 'three', 4, 'four');
@@ -4615,7 +4615,7 @@ class Redis {
      *
      * $redis->zInterCard(['zs1', 'zs2']);
      */
-    public function zintercard(array $keys, int $limit = -1): Redis|int|false;
+    public function zintercard(array $keys, int $limit = -1): ValkeyGlide|int|false;
 
     /**
      * Compute the intersection of one or more sorted sets storing the result in a new sorted set.
@@ -4629,7 +4629,7 @@ class Redis {
      *                          'MIN' - Store minimum value for each intersected member.
      *                          'MAX' - Store maximum value for each intersected member.
      *
-     * @return Redis|int|false  The total number of members writtern to the destination set or false on failure.
+     * @return ValkeyGlide|int|false  The total number of members writtern to the destination set or false on failure.
      *
      * @see https://redis.io/commands/zinterstore
      * @see https://redis.io/commands/zinter
@@ -4642,7 +4642,7 @@ class Redis {
      * $redis->zInterStore('fruit-sum', ['zs1', 'zs2', 'zs3']);
      * $redis->zInterStore('fruit-max', ['zs1', 'zs2', 'zs3'], NULL, 'MAX');
      */
-    public function zinterstore(string $dst, array $keys, ?array $weights = null, ?string $aggregate = null): Redis|int|false;
+    public function zinterstore(string $dst, array $keys, ?array $weights = null, ?string $aggregate = null): ValkeyGlide|int|false;
 
     /**
      * Scan the members of a sorted set incrementally, using a cursor
@@ -4653,20 +4653,20 @@ class Redis {
      *                           has returned to zero the scan is complete
      * @param string|null $pattern An optional glob-style pattern that limits which members are returned during
      *                           the scanning process.
-     * @param int    $count      A hint for Redis that tells it how many elements it should test before returning
-     *                           from the call.  The higher the more work Redis may do in any one given call to
+     * @param int    $count      A hint for ValkeyGlide that tells it how many elements it should test before returning
+     *                           from the call.  The higher the more work ValkeyGlide may do in any one given call to
      *                           ZSCAN potentially blocking for longer periods of time.
      *
-     * @return Redis|array|false An array of elements or false on failure.
+     * @return ValkeyGlide|array|false An array of elements or false on failure.
      *
      * @see https://redis.io/commands/zscan
      * @see https://redis.io/commands/scan
-     * @see Redis::scan()
+     * @see ValkeyGlide::scan()
      *
-     * NOTE:  See Redis::scan() for detailed example code on how to call SCAN like commands.
+     * NOTE:  See ValkeyGlide::scan() for detailed example code on how to call SCAN like commands.
      *
      */
-    public function zscan(string $key, null|int|string &$iterator, ?string $pattern = null, int $count = 0): Redis|array|false;
+    public function zscan(string $key, null|int|string &$iterator, ?string $pattern = null, int $count = 0): ValkeyGlide|array|false;
 
     /**
      * Retrieve the union of one or more sorted sets
@@ -4679,17 +4679,17 @@ class Redis {
      *
      *                        <code>
      *                        $options = [
-     *                            # By default when members exist in more than one set Redis will SUM
+     *                            # By default when members exist in more than one set ValkeyGlide will SUM
      *                            # total score for each match.  Instead, it can return the AVG, MIN,
      *                            # or MAX value based on this option.
      *                            'AGGREGATE' => 'sum' | 'min' | 'max'
      *
-     *                            # Whether Redis should also return each members aggregated score.
+     *                            # Whether ValkeyGlide should also return each members aggregated score.
      *                            'WITHSCORES' => true | false
      *                        ]
      *                        </code>
      *
-     * @return Redis|array|false The union of each sorted set or false on failure
+     * @return ValkeyGlide|array|false The union of each sorted set or false on failure
      *
      * @example
      * $redis->del('store1', 'store2', 'store3');
@@ -4701,21 +4701,21 @@ class Redis {
      * $redis->zUnion(['store1', 'store3'], [2, .5], ['withscores' => true]);
      * $redis->zUnion(['store1', 'store3'], [2, .5], ['withscores' => true, 'aggregate' => 'MIN']);
      */
-    public function zunion(array $keys, ?array $weights = null, ?array $options = null): Redis|array|false;
+    public function zunion(array $keys, ?array $weights = null, ?array $options = null): ValkeyGlide|array|false;
 
     /**
-     * Perform a union on one or more Redis sets and store the result in a destination sorted set.
+     * Perform a union on one or more ValkeyGlide sets and store the result in a destination sorted set.
      *
      * @param string $dst       The destination set to store the union.
      * @param array  $keys      One or more input keys on which to perform our union.
      * @param array  $weights   An optional weights array used to weight each input set.
-     * @param string $aggregate An optional modifier in how Redis will combine duplicate members.
+     * @param string $aggregate An optional modifier in how ValkeyGlide will combine duplicate members.
      *                          Valid:  'MIN', 'MAX', 'SUM'.
      *
-     * @return Redis|int|false The number of members stored in the destination set or false on failure.
+     * @return ValkeyGlide|int|false The number of members stored in the destination set or false on failure.
      *
      * @see https://redis.io/commands/zunionstore
-     * @see Redis::zunion()
+     * @see ValkeyGlide::zunion()
      *
      * @example
      * $redis->zAdd('zs1', 1, 'one', 3, 'three');
@@ -4724,7 +4724,7 @@ class Redis {
      *
      * $redis->zUnionStore('dst', ['zs1', 'zs2', 'zs3']);
      */
-    public function zunionstore(string $dst, array $keys, ?array $weights = null, ?string $aggregate = null): Redis|int|false;
+    public function zunionstore(string $dst, array $keys, ?array $weights = null, ?string $aggregate = null): ValkeyGlide|int|false;
 }
 
-class RedisException extends RuntimeException {}
+class ValkeyGlideException extends RuntimeException {}

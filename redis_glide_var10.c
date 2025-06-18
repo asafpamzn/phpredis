@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | Redis Glide FFI integration for phpredis                             |
+  | ValkeyGlide Glide FFI integration for phpredis                             |
   +----------------------------------------------------------------------+
   | Copyright (c) 2023-2025 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -39,7 +39,7 @@ int execute_wait_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -82,7 +82,7 @@ int execute_function_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -211,7 +211,7 @@ int execute_multi_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -244,7 +244,7 @@ int execute_discard_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -276,7 +276,7 @@ int execute_exec_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -313,7 +313,7 @@ int execute_fcall_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -428,7 +428,7 @@ int execute_fcall_ro_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -539,7 +539,7 @@ int execute_dump_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -597,7 +597,7 @@ int execute_restore_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -817,7 +817,7 @@ int execute_config_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -1111,7 +1111,7 @@ int execute_get_read_timeout_command(const void *glide_client, double *output_va
         return 0;
     }
 
-    /* Since this is a client configuration getter rather than a Redis command,
+    /* Since this is a client configuration getter rather than a ValkeyGlide command,
        we'll use a default value as this isn't directly supported by Glide */
     *output_value = 0.0; /* Default read timeout */
 
@@ -1135,7 +1135,7 @@ int execute_getreadtimeout_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1161,7 +1161,7 @@ int execute_get_persistent_id_command(const void *glide_client, char **result, s
         return 0;
     }
 
-    /* Since this is a client connection property rather than a Redis command,
+    /* Since this is a client connection property rather than a ValkeyGlide command,
        we return a NULL value since we don't have access to this information */
     *result = NULL;
     *result_len = 0;
@@ -1478,7 +1478,7 @@ int execute_client_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1509,7 +1509,7 @@ int execute_rawcommand_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {
@@ -1539,7 +1539,7 @@ int execute_dbsize_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
     if (!redis || !redis->glide_client)
     {

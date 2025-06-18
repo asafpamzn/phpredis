@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | Redis Glide FFI integration for phpredis                             |
+  | ValkeyGlide Glide FFI integration for phpredis                             |
   +----------------------------------------------------------------------+
   | Copyright (c) 2023-2025 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -44,7 +44,7 @@ int execute_type_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -82,7 +82,7 @@ int execute_append_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -126,7 +126,7 @@ int execute_getrange_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -378,7 +378,7 @@ int execute_sort_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -477,7 +477,7 @@ int execute_expiremember_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -545,7 +545,7 @@ int execute_expirememberat_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -614,7 +614,7 @@ int execute_sort_ro_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -695,7 +695,7 @@ int execute_sortasc_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -776,7 +776,7 @@ int execute_sortascalpha_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -857,7 +857,7 @@ int execute_sortdesc_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */
@@ -939,7 +939,7 @@ int execute_sortdescalpha_command(zval *object, int argc, zval *return_value)
         return 0;
     }
 
-    /* Get Redis object */
+    /* Get ValkeyGlide object */
     redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
 
     /* If we have a Glide client, use it */

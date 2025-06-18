@@ -199,7 +199,7 @@ typedef int (*x_simple_arg_preparation_func_t)(x_command_args_t *args, uintptr_t
  */
 typedef struct _x_command_def_t
 {
-    enum RequestType cmd_type;             /* Redis command type */
+    enum RequestType cmd_type;             /* ValkeyGlide command type */
     x_arg_preparation_func_t prepare_args; /* Function to prepare arguments */
 } x_command_def_t;
 

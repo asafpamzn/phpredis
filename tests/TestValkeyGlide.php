@@ -1,8 +1,8 @@
 <?php define('PHPREDIS_TESTRUN', true);
 
 require_once __DIR__ . "/TestSuite.php";
-require_once __DIR__ . "/RedisTest.php";
-require_once __DIR__ . "/RedisClusterTest.php";
+require_once __DIR__ . "/ValkeyGlideTest.php";
+require_once __DIR__ . "/ValkeyGlideClusterTest.php";
 
 function getClassArray($classes) {
     $result = [];
@@ -23,8 +23,8 @@ function getClassArray($classes) {
 
 function getTestClass($class) {
     $valid_classes = [
-        'redis'         => 'Redis_Test',                
-        'rediscluster'  => 'Redis_Cluster_Test'
+        'redis'         => 'ValkeyGlide_Test',                
+        'rediscluster'  => 'ValkeyGlide_Cluster_Test'
     ];
 
     /* Return early if the class is one of our built-in ones */
@@ -85,8 +85,8 @@ foreach ($classes as $class) {
 
     /* Depending on the classes being tested, run our tests on it */
     echo "Testing class ";
-    if ($class == 'Redis_Array_Test') {
-        echo TestSuite::make_bold("RedisArray") . "\n";
+    if ($class == 'ValkeyGlide_Array_Test') {
+        echo TestSuite::make_bold("ValkeyGlideArray") . "\n";
 
         $full_ring = raHosts($host, $port);
         $sub_ring  = array_slice($full_ring, 0, -1);
@@ -97,10 +97,10 @@ foreach ($classes as $class) {
         foreach([true, false] as $useIndex) {
             echo "\n". ($useIndex ? "WITH" : "WITHOUT") . " per-node index:\n";
 
-            /* The various RedisArray subtests we can run */
+            /* The various ValkeyGlideArray subtests we can run */
             $test_classes = [
-                'Redis_Array_Test', 'Redis_Rehashing_Test', 'Redis_Auto_Rehashing_Test',
-                'Redis_Multi_Exec_Test', 'Redis_Distributor_Test'
+                'ValkeyGlide_Array_Test', 'ValkeyGlide_Rehashing_Test', 'ValkeyGlide_Auto_Rehashing_Test',
+                'ValkeyGlide_Multi_Exec_Test', 'ValkeyGlide_Distributor_Test'
             ];
 
             foreach ($test_classes as $test_class) {

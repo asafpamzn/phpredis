@@ -40,7 +40,7 @@ zend_class_entry *redis_exception_ce;
 
 extern const zend_function_entry *redis_get_methods(void)
 {
-    return class_Redis_methods;
+    return class_ValkeyGlide_methods;
 }
 
 ZEND_DECLARE_MODULE_GLOBALS(redis)
@@ -109,12 +109,12 @@ zend_object *create_redis_object(zend_class_entry *ce)
  */
 PHP_MINIT_FUNCTION(redis)
 {
-    /* Redis class */
-    redis_ce = register_class_Redis();
+    /* ValkeyGlide class */
+    redis_ce = register_class_ValkeyGlide();
     redis_ce->create_object = create_redis_object;
 
-    /* RedisException class */
-    redis_exception_ce = register_class_RedisException(spl_ce_RuntimeException);
+    /* ValkeyGlideException class */
+    redis_exception_ce = register_class_ValkeyGlideException(spl_ce_RuntimeException);
 
     return SUCCESS;
 }
@@ -130,9 +130,9 @@ PHP_MINFO_FUNCTION(redis)
     php_info_print_table_end();
 }
 
-/* {{{ proto Redis Redis::__construct(array $options = null)
+/* {{{ proto ValkeyGlide ValkeyGlide::__construct(array $options = null)
     Public constructor */
-PHP_METHOD(Redis, __construct)
+PHP_METHOD(ValkeyGlide, __construct)
 {
     HashTable *opts = NULL;
     redis_object *redis;
@@ -147,10 +147,10 @@ PHP_METHOD(Redis, __construct)
 }
 /* }}} */
 
-/* {{{ proto Redis Redis::__destruct()
+/* {{{ proto ValkeyGlide ValkeyGlide::__destruct()
     Public Destructor
  */
-PHP_METHOD(Redis, __destruct)
+PHP_METHOD(ValkeyGlide, __destruct)
 {
     if (zend_parse_parameters_none() == FAILURE)
     {
@@ -159,27 +159,27 @@ PHP_METHOD(Redis, __destruct)
 }
 /* }}} */
 
-/* {{{ proto boolean Redis::connect(string host, int port [, double timeout [, long retry_interval]])
+/* {{{ proto boolean ValkeyGlide::connect(string host, int port [, double timeout [, long retry_interval]])
  */
-PHP_METHOD(Redis, connect)
+PHP_METHOD(ValkeyGlide, connect)
 {
     /* TODO: Implement ValkeyGlide connection */
     RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto boolean Redis::pconnect(string host, int port [, double timeout])
+/* {{{ proto boolean ValkeyGlide::pconnect(string host, int port [, double timeout])
  */
-PHP_METHOD(Redis, pconnect)
+PHP_METHOD(ValkeyGlide, pconnect)
 {
     /* TODO: Implement ValkeyGlide persistent connection */
     RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto boolean Redis::close()
+/* {{{ proto boolean ValkeyGlide::close()
  */
-PHP_METHOD(Redis, close)
+PHP_METHOD(ValkeyGlide, close)
 {
     /* TODO: Implement ValkeyGlide close */
     RETURN_TRUE;
@@ -193,81 +193,81 @@ PHP_REDIS_API int redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 }
 
 /* Basic method stubs - these need to be implemented with ValkeyGlide */
-PHP_METHOD(Redis, save) { /* TODO: Implement */ }
-PHP_METHOD(Redis, bgSave) { /* TODO: Implement */ }
-PHP_METHOD(Redis, lastSave) { /* TODO: Implement */ }
-PHP_METHOD(Redis, failover) { /* TODO: Implement */ }
-PHP_METHOD(Redis, pipeline) { /* TODO: Implement */ }
-PHP_METHOD(Redis, publish) { /* TODO: Implement */ }
-PHP_METHOD(Redis, psubscribe) { /* TODO: Implement */ }
-PHP_METHOD(Redis, ssubscribe) { /* TODO: Implement */ }
-PHP_METHOD(Redis, subscribe) { /* TODO: Implement */ }
-PHP_METHOD(Redis, unsubscribe) { /* TODO: Implement */ }
-PHP_METHOD(Redis, punsubscribe) { /* TODO: Implement */ }
-PHP_METHOD(Redis, sunsubscribe) { /* TODO: Implement */ }
-PHP_METHOD(Redis, waitaof) { /* TODO: Implement */ }
-PHP_METHOD(Redis, bgrewriteaof) { /* TODO: Implement */ }
-PHP_METHOD(Redis, slaveof) { /* TODO: Implement */ }
-PHP_METHOD(Redis, replicaof) { /* TODO: Implement */ }
-PHP_METHOD(Redis, getOption) { /* TODO: Implement */ }
-PHP_METHOD(Redis, slowlog) { /* TODO: Implement */ }
-PHP_METHOD(Redis, pubsub) { /* TODO: Implement */ }
-PHP_METHOD(Redis, eval) { /* TODO: Implement */ }
-PHP_METHOD(Redis, eval_ro) { /* TODO: Implement */ }
-PHP_METHOD(Redis, evalsha) { /* TODO: Implement */ }
-PHP_METHOD(Redis, evalsha_ro) { /* TODO: Implement */ }
-PHP_METHOD(Redis, script) { /* TODO: Implement */ }
-PHP_METHOD(Redis, debug) { /* TODO: Implement */ }
-PHP_METHOD(Redis, migrate) { /* TODO: Implement */ }
-PHP_METHOD(Redis, _prefix) { /* TODO: Implement */ }
-PHP_METHOD(Redis, _serialize) { /* TODO: Implement */ }
-PHP_METHOD(Redis, _unserialize) { /* TODO: Implement */ }
-PHP_METHOD(Redis, _compress) { /* TODO: Implement */ }
-PHP_METHOD(Redis, _uncompress) { /* TODO: Implement */ }
-PHP_METHOD(Redis, _pack) { /* TODO: Implement */ }
-PHP_METHOD(Redis, _unpack) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, save) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, bgSave) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, lastSave) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, failover) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, pipeline) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, publish) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, psubscribe) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, ssubscribe) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, subscribe) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, unsubscribe) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, punsubscribe) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, sunsubscribe) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, waitaof) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, bgrewriteaof) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, slaveof) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, replicaof) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, getOption) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, slowlog) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, pubsub) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, eval) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, eval_ro) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, evalsha) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, evalsha_ro) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, script) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, debug) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, migrate) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, _prefix) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, _serialize) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, _unserialize) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, _compress) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, _uncompress) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, _pack) { /* TODO: Implement */ }
+PHP_METHOD(ValkeyGlide, _unpack) { /* TODO: Implement */ }
 
-PHP_METHOD(Redis, getLastError)
+PHP_METHOD(ValkeyGlide, getLastError)
 {
     RETURN_NULL();
 }
 
-PHP_METHOD(Redis, clearLastError)
+PHP_METHOD(ValkeyGlide, clearLastError)
 {
     RETURN_TRUE;
 }
 
-PHP_METHOD(Redis, getMode)
+PHP_METHOD(ValkeyGlide, getMode)
 {
     RETURN_FALSE;
 }
 
-PHP_METHOD(Redis, isConnected)
+PHP_METHOD(ValkeyGlide, isConnected)
 {
     RETURN_FALSE;
 }
 
-PHP_METHOD(Redis, getHost)
+PHP_METHOD(ValkeyGlide, getHost)
 {
     RETURN_FALSE;
 }
 
-PHP_METHOD(Redis, getPort)
+PHP_METHOD(ValkeyGlide, getPort)
 {
     RETURN_FALSE;
 }
 
-PHP_METHOD(Redis, getDBNum)
+PHP_METHOD(ValkeyGlide, getDBNum)
 {
     RETURN_FALSE;
 }
 
-PHP_METHOD(Redis, getTransferredBytes)
+PHP_METHOD(ValkeyGlide, getTransferredBytes)
 {
     RETURN_FALSE;
 }
 
-PHP_METHOD(Redis, clearTransferredBytes)
+PHP_METHOD(ValkeyGlide, clearTransferredBytes)
 {
     RETURN_FALSE;
 }

@@ -17,7 +17,7 @@ $iterator = Finder::create()
 //    ->add('develop', 'develop');
 
 return new Doctum($iterator, [
-    'title' => 'PhpRedis API',
+    'title' => 'PhpValkeyGlide API',
     'language' => 'en',
     'source_dir' => $root,
     'build_dir' => "{$root}/docs",

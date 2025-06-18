@@ -25,7 +25,7 @@
 
 /**
  * Main command execution framework
- * This is the central function that handles all Redis/Valkey commands
+ * This is the central function that handles all ValkeyGlide/Valkey commands
  */
 int execute_core_command(core_command_args_t *args, void *result_ptr,
                          core_result_processor_t processor)
@@ -1182,7 +1182,7 @@ int process_core_string_result(CommandResult *result, void *output)
 
 /**
  * Process boolean result
- * Handles Bool, Int, and Ok response types from Redis/Valkey
+ * Handles Bool, Int, and Ok response types from ValkeyGlide/Valkey
  */
 int process_core_bool_result(CommandResult *result, void *output)
 {
@@ -1197,7 +1197,7 @@ int process_core_bool_result(CommandResult *result, void *output)
     }
     else if (result->response->response_type == Int)
     {
-        /* Handle Redis integer responses: 0 = false, non-zero = true */
+        /* Handle ValkeyGlide integer responses: 0 = false, non-zero = true */
         /* This handles EXPIRE commands with NX/XX modes correctly */
         return result->response->int_value ? 1 : 0;
     }
@@ -1283,7 +1283,7 @@ int process_core_null_or_value_result(CommandResult *result, void *output)
 }
 
 /**
- * Process TYPE command result (maps Redis type strings to PHP constants)
+ * Process TYPE command result (maps ValkeyGlide type strings to PHP constants)
  */
 int process_core_type_result(CommandResult *result, void *output)
 {
@@ -1298,7 +1298,7 @@ int process_core_type_result(CommandResult *result, void *output)
     {
         char *type_str = result->response->string_value;
 
-        /* Map Redis type strings to PHP constants */
+        /* Map ValkeyGlide type strings to PHP constants */
         if (strncmp(type_str, "string", 6) == 0)
         {
             *type_code = 1; /* REDIS_STRING */

@@ -1,11 +1,11 @@
-<?php defined('PHPREDIS_TESTRUN') or die('Use TestRedis.php to run tests!\n');
+<?php defined('PHPREDIS_TESTRUN') or die('Use TestValkeyGlide.php to run tests!\n');
 
 require_once __DIR__ . '/TestSuite.php';
 
 
-class Redis_Test extends TestSuite {
+class ValkeyGlide_Test extends TestSuite {
     /**
-     * @var Redis
+     * @var ValkeyGlide
      */
     public $redis;
 
@@ -26,11 +26,11 @@ class Redis_Test extends TestSuite {
     
     /* Overridable left/right constants */
     protected function getLeftConstant() {
-        return Redis::LEFT;
+        return ValkeyGlide::LEFT;
     }
 
     protected function getRightConstant() {
-        return Redis::RIGHT;
+        return ValkeyGlide::RIGHT;
     }
 
 
@@ -97,7 +97,7 @@ class Redis_Test extends TestSuite {
     }
 
     protected function newInstance() {
-        $r = new Redis([
+        $r = new ValkeyGlide([
             'host' => $this->getHost(),
             'port' => $this->getPort(),
         ]);
@@ -204,7 +204,7 @@ class Redis_Test extends TestSuite {
     }*/
 
     /* These test cases were generated randomly.  We're just trying to test
-       that PhpRedis handles all combination of arguments correctly. */
+       that PhpValkeyGlide handles all combination of arguments correctly. */
     public function testBitcount() {
         /* key */
         $this->redis->set('bitcountkey', hex2bin('bd906b854ca76cae'));
@@ -240,8 +240,8 @@ class Redis_Test extends TestSuite {
         // Regression test for GitHub issue #2210
         $this->assertEquals(6, $this->redis->bitop('AND', '{key}1', '{key}2'));
 
-        // Make sure RedisCluster doesn't even send the command.  We don't care
-        // about what Redis returns
+        // Make sure ValkeyGlideCluster doesn't even send the command.  We don't care
+        // about what ValkeyGlide returns
         @$this->redis->bitop('AND', 'key1', 'key2', 'key3');
         $this->assertNull($this->redis->getLastError());
 
@@ -381,9 +381,9 @@ class Redis_Test extends TestSuite {
         $this->assertFalse($this->redis->zmpop([$key1, $key2], 'MIN'));
 
         return; // Set the option to return NULL for empty MULTIBULK
-        $this->redis->setOption(Redis::OPT_NULL_MULTIBULK_AS_NULL, true);
+        $this->redis->setOption(ValkeyGlide::OPT_NULL_MULTIBULK_AS_NULL, true);
         $this->assertNull($this->redis->zmpop([$key1, $key2], 'MIN'));
-        $this->redis->setOption(Redis::OPT_NULL_MULTIBULK_AS_NULL, false);
+        $this->redis->setOption(ValkeyGlide::OPT_NULL_MULTIBULK_AS_NULL, false);
     }
 
     function testBZmpop() {
@@ -533,9 +533,9 @@ class Redis_Test extends TestSuite {
 
     }
 
-    /* Extended SET options for Redis >= 2.6.12 */
+    /* Extended SET options for ValkeyGlide >= 2.6.12 */
     public function testExtendedSet() {
-        // Skip the test if we don't have a new enough version of Redis
+        // Skip the test if we don't have a new enough version of ValkeyGlide
         if (version_compare($this->version, '2.6.12') < 0)
             $this->markTestSkipped();
 
@@ -937,12 +937,12 @@ class Redis_Test extends TestSuite {
         $this->assertKeyEquals('abc', 'key');
 
         // Test with prefixing
-       // $this->redis->setOption(Redis::OPT_PREFIX, 'someprefix:');
+       // $this->redis->setOption(ValkeyGlide::OPT_PREFIX, 'someprefix:');
         // TODO ADD this option to the test
         $this->redis->del('someprefix:key');
         $this->redis->incrbyfloat('someprefix:key',1.8);
         $this->assertKeyEqualsWeak(1.8, 'someprefix:key');
-        //$this->redis->setOption(Redis::OPT_PREFIX, '');
+        //$this->redis->setOption(ValkeyGlide::OPT_PREFIX, '');
         $this->assertKeyExists('someprefix:key');
         $this->redis->del('someprefix:key');
     }
@@ -1065,42 +1065,42 @@ class Redis_Test extends TestSuite {
     public function testType() {
         // string
         $this->redis->set('key', 'val');
-        $this->assertEquals(Redis::REDIS_STRING, $this->redis->type('key'));
+        $this->assertEquals(ValkeyGlide::REDIS_STRING, $this->redis->type('key'));
         
         // list
         $this->redis->lPush('keyList', 'val0');
         $this->redis->lPush('keyList', 'val1');
-        $this->assertEquals(Redis::REDIS_LIST, $this->redis->type('keyList'));
+        $this->assertEquals(ValkeyGlide::REDIS_LIST, $this->redis->type('keyList'));
 
         // set
         $this->redis->del('keySet');
         $this->redis->sAdd('keySet', 'val0');
         $this->redis->sAdd('keySet', 'val1');
-        $this->assertEquals(Redis::REDIS_SET, $this->redis->type('keySet'));
+        $this->assertEquals(ValkeyGlide::REDIS_SET, $this->redis->type('keySet'));
        
         // zset
         $this->redis->del('keyZSet');
         $this->redis->zAdd('keyZSet', 0, 'val0');
         $this->redis->zAdd('keyZSet', 1, 'val1');
-        $this->assertEquals(Redis::REDIS_ZSET, $this->redis->type('keyZSet'));
+        $this->assertEquals(ValkeyGlide::REDIS_ZSET, $this->redis->type('keyZSet'));
 
         // hash
         $this->redis->del('keyHash');
         $this->redis->hSet('keyHash', 'key0', 'val0');
         $this->redis->hSet('keyHash', 'key1', 'val1');
-        $this->assertEquals(Redis::REDIS_HASH, $this->redis->type('keyHash'));
+        $this->assertEquals(ValkeyGlide::REDIS_HASH, $this->redis->type('keyHash'));
 
         // stream
         if ($this->minVersionCheck('5.0')) {
             $this->redis->del('stream');
             $this->redis->xAdd('stream', '*', ['foo' => 'bar']);
            
-            $this->assertEquals(Redis::REDIS_STREAM, $this->redis->type('stream'));
+            $this->assertEquals(ValkeyGlide::REDIS_STREAM, $this->redis->type('stream'));
         }
 
         // None
         $this->redis->del('keyNotExists');
-        $this->assertEquals(Redis::REDIS_NOT_FOUND, $this->redis->type('keyNotExists'));
+        $this->assertEquals(ValkeyGlide::REDIS_NOT_FOUND, $this->redis->type('keyNotExists'));
 
     }
 
@@ -1187,7 +1187,7 @@ class Redis_Test extends TestSuite {
     
 
     public function testblockingPop() {
-        /* Test with a double timeout in Redis >= 6.0.0 */
+        /* Test with a double timeout in ValkeyGlide >= 6.0.0 */
         if (version_compare($this->version, '6.0.0') >= 0) {
             $this->redis->del('list');
             $this->redis->lpush('list', 'val1', 'val2');
@@ -1211,12 +1211,12 @@ class Redis_Test extends TestSuite {
         return; //TODO: fix this test
         /* Also test our option that we want *-1 to be returned as NULL */
         foreach ([false => [], true => NULL] as $opt => $val) {
-            $this->redis->setOption(Redis::OPT_NULL_MULTIBULK_AS_NULL, $opt);
+            $this->redis->setOption(ValkeyGlide::OPT_NULL_MULTIBULK_AS_NULL, $opt);
             $this->assertEquals($val, $this->redis->blPop(['list'], 1));
             $this->assertEquals($val, $this->redis->brPop(['list'], 1));
         }
 
-        $this->redis->setOption(Redis::OPT_NULL_MULTIBULK_AS_NULL, false);
+        $this->redis->setOption(ValkeyGlide::OPT_NULL_MULTIBULK_AS_NULL, false);
     }
 
     public function testLLen() {
@@ -1258,11 +1258,11 @@ class Redis_Test extends TestSuite {
         //test linsert
         $this->redis->del('key');
         $this->redis->lPush('key', 'val0');
-        $this->assertEquals(0, $this->redis->lInsert('keyNotExists', Redis::AFTER, 'val1', 'val2'));
-        $this->assertEquals(-1, $this->redis->lInsert('key', Redis::BEFORE, 'valX', 'val2'));
+        $this->assertEquals(0, $this->redis->lInsert('keyNotExists', ValkeyGlide::AFTER, 'val1', 'val2'));
+        $this->assertEquals(-1, $this->redis->lInsert('key', ValkeyGlide::BEFORE, 'valX', 'val2'));
 
-        $this->assertEquals(2, $this->redis->lInsert('key', Redis::AFTER, 'val0', 'val1'));
-        $this->assertEquals(3, $this->redis->lInsert('key', Redis::BEFORE, 'val0', 'val2'));
+        $this->assertEquals(2, $this->redis->lInsert('key', ValkeyGlide::AFTER, 'val0', 'val1'));
+        $this->assertEquals(3, $this->redis->lInsert('key', ValkeyGlide::BEFORE, 'val0', 'val2'));
         $this->assertEquals(['val2', 'val0', 'val1'], $this->redis->lrange('key', 0, -1));
     }
 
@@ -1279,7 +1279,7 @@ class Redis_Test extends TestSuite {
         return; //TODO: fix this test
         foreach ([[true, NULL], [false, false]] as $optpack) {
             list ($setting, $expected) = $optpack;
-            $this->redis->setOption(Redis::OPT_NULL_MULTIBULK_AS_NULL, $setting);
+            $this->redis->setOption(ValkeyGlide::OPT_NULL_MULTIBULK_AS_NULL, $setting);
             $this->assertEquals($expected, $this->redis->lPos('key', 'val2'));
         }
     }
@@ -2361,7 +2361,7 @@ class Redis_Test extends TestSuite {
         $this->assertTrue(is_array($res) && isset($res['redis_version']) && isset($res['used_memory']));
     }
 
-    public function testServerInfoOldRedis() {
+    public function testServerInfoOldValkeyGlide() {
         if ($this->minVersionCheck('6.0.0'))
             $this->markTestSkipped();
 
@@ -3236,7 +3236,7 @@ class Redis_Test extends TestSuite {
         $xx = ['a' => 0, 'b' => 1, 'c' => 'foo', 'd' => 'bar', 'e' => null];
         $this->assertEquals(array_intersect_key($result, $xx), $result);
         
-        /* Make sure PhpRedis sends COUNt (1) when `WITHVALUES` is set */
+        /* Make sure PhpValkeyGlide sends COUNt (1) when `WITHVALUES` is set */
         $result = $this->redis->hRandField('key', ['withvalues' => true]);
         $this->assertNull($this->redis->getLastError());
         
@@ -3290,7 +3290,7 @@ class Redis_Test extends TestSuite {
         $this->redis->del('key');
         $this->redis->lpush('key', 'value');
 
-        /* Redis has improved the encoding here throughout the various versions.  The value
+        /* ValkeyGlide has improved the encoding here throughout the various versions.  The value
            can either be 'ziplist', 'quicklist', or 'listpack' */
         $encoding = $this->redis->object('encoding', 'key');
         $this->assertInArray($encoding, ['ziplist', 'quicklist', 'listpack']);
@@ -3301,7 +3301,7 @@ class Redis_Test extends TestSuite {
         $this->redis->del('key');
         $this->redis->sadd('key', 'value');
 
-        /* Redis 7.2.0 switched to 'listpack' for small sets */
+        /* ValkeyGlide 7.2.0 switched to 'listpack' for small sets */
         $encoding = $this->redis->object('encoding', 'key');
         $this->assertInArray($encoding, ['hashtable', 'listpack']);
         $this->assertEquals(1, $this->redis->object('refcount', 'key'));
@@ -3327,14 +3327,14 @@ class Redis_Test extends TestSuite {
     public function testMultiExec() {
         
         $this->markTestSkipped();//TODO
-        $this->sequence(Redis::MULTI);
-        $this->differentType(Redis::MULTI);
+        $this->sequence(ValkeyGlide::MULTI);
+        $this->differentType(ValkeyGlide::MULTI);
 
         // with prefix as well
-        $this->redis->setOption(Redis::OPT_PREFIX, 'test:');
-        $this->sequence(Redis::MULTI);
-        $this->differentType(Redis::MULTI);
-        $this->redis->setOption(Redis::OPT_PREFIX, '');
+        $this->redis->setOption(ValkeyGlide::OPT_PREFIX, 'test:');
+        $this->sequence(ValkeyGlide::MULTI);
+        $this->differentType(ValkeyGlide::MULTI);
+        $this->redis->setOption(ValkeyGlide::OPT_PREFIX, '');
 
         $this->redis->set('x', '42');
 
@@ -3373,14 +3373,14 @@ class Redis_Test extends TestSuite {
         if ( ! $this->havePipeline())
             $this->markTestSkipped();
 
-        $this->sequence(Redis::PIPELINE);
-        $this->differentType(Redis::PIPELINE);
+        $this->sequence(ValkeyGlide::PIPELINE);
+        $this->differentType(ValkeyGlide::PIPELINE);
 
         // with prefix as well
-        $this->redis->setOption(Redis::OPT_PREFIX, 'test:');
-        $this->sequence(Redis::PIPELINE);
-        $this->differentType(Redis::PIPELINE);
-        $this->redis->setOption(Redis::OPT_PREFIX, '');
+        $this->redis->setOption(ValkeyGlide::OPT_PREFIX, 'test:');
+        $this->sequence(ValkeyGlide::PIPELINE);
+        $this->differentType(ValkeyGlide::PIPELINE);
+        $this->redis->setOption(ValkeyGlide::OPT_PREFIX, '');
     }
 
     public function testPipelineMultiExec() {
@@ -3447,7 +3447,7 @@ class Redis_Test extends TestSuite {
 
     public function testDiscard() {
          $this->markTestSkipped();//TODO
-        foreach ([Redis::PIPELINE, Redis::MULTI] as $mode) {
+        foreach ([ValkeyGlide::PIPELINE, ValkeyGlide::MULTI] as $mode) {
             /* start transaction */
             $this->redis->multi($mode);
 
@@ -3473,11 +3473,11 @@ class Redis_Test extends TestSuite {
         $this->assertIsArray($ret);
         $i = 0;
         $this->assertTrue($ret[$i++]);
-        $this->assertEquals(Redis::REDIS_STRING, $ret[$i++]);
+        $this->assertEquals(ValkeyGlide::REDIS_STRING, $ret[$i++]);
         $this->assertEqualsWeak('42', $ret[$i]);
 
-        $serializer = $this->redis->getOption(Redis::OPT_SERIALIZER);
-        $this->redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_NONE); // testing incr, which doesn't work with the serializer
+        $serializer = $this->redis->getOption(ValkeyGlide::OPT_SERIALIZER);
+        $this->redis->setOption(ValkeyGlide::OPT_SERIALIZER, ValkeyGlide::SERIALIZER_NONE); // testing incr, which doesn't work with the serializer
         $ret = $this->redis->multi($mode)
             ->del('{key}1')
             ->set('{key}1', 'value1')
@@ -3521,7 +3521,7 @@ class Redis_Test extends TestSuite {
         $this->assertEqualsWeak(4, $ret[$i++]);
         $this->assertEquals($i, count($ret));
 
-        $this->redis->setOption(Redis::OPT_SERIALIZER, $serializer);
+        $this->redis->setOption(ValkeyGlide::OPT_SERIALIZER, $serializer);
 
         $ret = $this->redis->multi($mode)
             ->del('{key}1')
@@ -3636,8 +3636,8 @@ class Redis_Test extends TestSuite {
         $this->assertEquals($i, count($ret));
 
 
-        $serializer = $this->redis->getOption(Redis::OPT_SERIALIZER);
-        $this->redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_NONE); // testing incr, which doesn't work with the serializer
+        $serializer = $this->redis->getOption(ValkeyGlide::OPT_SERIALIZER);
+        $this->redis->setOption(ValkeyGlide::OPT_SERIALIZER, ValkeyGlide::SERIALIZER_NONE); // testing incr, which doesn't work with the serializer
         $ret = $this->redis->multi($mode)
             ->del('{key}1')
             ->set('{key}1', 'value1')
@@ -3681,7 +3681,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(4, $ret[$i++]);          // decrby('{key}2', 5)
         $this->assertEqualsWeak(4, $ret[$i++]);      // get('{key}2')
         $this->assertTrue($ret[$i++]);
-        $this->redis->setOption(Redis::OPT_SERIALIZER, $serializer);
+        $this->redis->setOption(ValkeyGlide::OPT_SERIALIZER, $serializer);
 
         $ret = $this->redis->multi($mode)
             ->del('{key}1')
@@ -5104,8 +5104,8 @@ class Redis_Test extends TestSuite {
 
         $num_scripts = 10;
 
-        $modes = [Redis::MULTI];
-        if ($this->havePipeline()) $modes[] = Redis::PIPELINE;
+        $modes = [ValkeyGlide::MULTI];
+        if ($this->havePipeline()) $modes[] = ValkeyGlide::PIPELINE;
 
         foreach ($modes as $mode) {
             $this->redis->multi($mode);
@@ -5132,7 +5132,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals($args_args, $args_result);
 
         // turn on key prefixing
-        $this->redis->setOption(Redis::OPT_PREFIX, 'prefix:');
+        $this->redis->setOption(ValkeyGlide::OPT_PREFIX, 'prefix:');
         $args_result = $this->redis->eval($args_script, $args_args, 3);
 
         // Make sure our first three are prefixed
@@ -5199,7 +5199,7 @@ class Redis_Test extends TestSuite {
         $this->assertLT($c1, count($this->redis->info('commandstats')));
         
 
-        /* Ensure invalid calls are handled by PhpRedis */
+        /* Ensure invalid calls are handled by PhpValkeyGlide */
         foreach (['notacommand', 'get', 'set'] as $cmd) {
             $this->assertFalse(@$this->redis->config($cmd));
         }
@@ -5241,7 +5241,7 @@ class Redis_Test extends TestSuite {
             $this->assertEqualsWeak($vals, $update, true);
         }
   
-        /* Make sure PhpRedis catches malformed multiple get/set calls */
+        /* Make sure PhpValkeyGlide catches malformed multiple get/set calls */
         $this->assertFalse(@$this->redis->config('get', []));
         $this->assertFalse(@$this->redis->config('set', []));
         $this->assertFalse(@$this->redis->config('set', [0, 1, 2]));
@@ -5265,7 +5265,7 @@ class Redis_Test extends TestSuite {
         $this->redis->config('SET', 'timeout', '1');
 
         // Wait for the connection to time out.  On very old versions
-        // of Redis we need to wait much longer (TODO:  Investigate
+        // of ValkeyGlide we need to wait much longer (TODO:  Investigate
         // which version exactly)
         sleep(5 );
         $this->assertFalse($this->redis->get($key));
@@ -5320,7 +5320,7 @@ class Redis_Test extends TestSuite {
         var_dump($key_count);
         return;
         // Have scan retry
-        $this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
+        $this->redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_RETRY);
 
         // Scan them all
         $it = NULL;
@@ -5344,7 +5344,7 @@ class Redis_Test extends TestSuite {
         }
         $this->assertEquals(0, $i);
 
-        // SCAN with type is scheduled for release in Redis 6.
+        // SCAN with type is scheduled for release in ValkeyGlide 6.
         if (version_compare($this->version, '6.0.0') >= 0) {
             // Use a unique ID so we can find our type keys
             $id = uniqid();
@@ -5386,23 +5386,23 @@ class Redis_Test extends TestSuite {
         /* Set some keys with different prefixes */
         $prefixes = ['prefix-a:', 'prefix-b:'];
         foreach ($prefixes as $prefix) {
-            $this->redis->setOption(Redis::OPT_PREFIX, $prefix);
+            $this->redis->setOption(ValkeyGlide::OPT_PREFIX, $prefix);
             $this->redis->set("$keyid", 'LOLWUT');
             $all_keys["{$prefix}{$keyid}"] = true;
         }
 
-        $this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
-        $this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_PREFIX);
+        $this->redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_RETRY);
+        $this->redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_PREFIX);
 
         foreach ($prefixes as $prefix) {
-            $this->redis->setOption(Redis::OPT_PREFIX, $prefix);
+            $this->redis->setOption(ValkeyGlide::OPT_PREFIX, $prefix);
             $it = NULL;
             $keys = $this->redis->scan($it, "*$keyid*");
             $this->assertEquals($keys, ["{$prefix}{$keyid}"]);
         }
 
         /* Unset the prefix option */
-        $this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_NOPREFIX);
+        $this->redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_NOPREFIX);
 
         $it = NULL;
         while ($keys = $this->redis->scan($it, "*$keyid*")) {
@@ -5418,8 +5418,8 @@ class Redis_Test extends TestSuite {
     public function testMaxRetriesOption() {
          $this->markTestSkipped(); // TODO
         $maxRetriesExpected = 5;
-        $this->redis->setOption(Redis::OPT_MAX_RETRIES, $maxRetriesExpected);
-        $maxRetriesActual=$this->redis->getOption(Redis::OPT_MAX_RETRIES);
+        $this->redis->setOption(ValkeyGlide::OPT_MAX_RETRIES, $maxRetriesExpected);
+        $maxRetriesActual=$this->redis->getOption(ValkeyGlide::OPT_MAX_RETRIES);
         $this->assertEquals($maxRetriesActual, $maxRetriesExpected);
     }
 
@@ -5431,7 +5431,7 @@ class Redis_Test extends TestSuite {
             $this->markTestSkipped();
 
         // Never get empty sets
-        $this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
+        $this->redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_RETRY);
 
         $this->redis->del('hash');
         $foo_mems = 0;
@@ -5469,7 +5469,7 @@ class Redis_Test extends TestSuite {
         if (version_compare($this->version, '2.8.0') < 0)
             $this->markTestSkipped();
 
-        $this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
+        $this->redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_RETRY);
 
         $this->redis->del('set');
         for ($i = 0; $i < 100; $i++) {
@@ -5500,7 +5500,7 @@ class Redis_Test extends TestSuite {
         if (version_compare($this->version, '2.8.0') < 0)
             $this->markTestSkipped();
 
-        $this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
+        $this->redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_RETRY);
 
         $this->redis->del('zset');
 
@@ -5543,7 +5543,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(0, $p_count);
 
         // Turn off retrying and we should get some empty results
-        $this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_NORETRY);
+        $this->redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_NORETRY);
         [$skips, $p_score, $p_count] = [0, $p_score_old, $p_count_old];
 
         $it = NULL;
@@ -5582,7 +5582,7 @@ class Redis_Test extends TestSuite {
             $mems[] = uniqid('pfmem:');
         }
 
-        // Estimation by Redis
+        // Estimation by ValkeyGlide
         $this->redis->pfAdd($key, $count);
     }
 
@@ -5799,7 +5799,7 @@ class Redis_Test extends TestSuite {
             $id = $this->redis->xAdd('stream', '*', ['k1' => 'v1', 'k2' => 'v2']);
             $this->assertEquals($i+1, $this->redis->xLen('stream'));
 
-            /* Redis should return <timestamp>-<sequence> */
+            /* ValkeyGlide should return <timestamp>-<sequence> */
             $bits = explode('-', $id);
             $this->assertEquals(count($bits), 2);
             $this->assertTrue(is_numeric($bits[0]));
@@ -6064,9 +6064,9 @@ class Redis_Test extends TestSuite {
         $streams = ['{s}-1', '{s}-2'];
         $groups = ['group1' => 0, 'group2' => 0];
 
-        /* I'm not totally sure why Redis behaves this way, but we have to
+        /* I'm not totally sure why ValkeyGlide behaves this way, but we have to
          * send '>' first and then send ID '0' for subsequent xReadGroup calls
-         * or Redis will not return any messages.  This behavior changed from
+         * or ValkeyGlide will not return any messages.  This behavior changed from
          * redis 5.0.1 and 5.0.2 but doing it this way works for both versions. */
         $qcount = 0;
         $query1 = ['{s}-1' => '>', '{s}-2' => '>'];
@@ -6085,7 +6085,7 @@ class Redis_Test extends TestSuite {
                     /* They should match with our local control array */
                     $this->compareStreamIds($resp, $ids);
 
-                    /* Remove a message from our control *and* XACK it in Redis */
+                    /* Remove a message from our control *and* XACK it in ValkeyGlide */
                     $id = array_shift($ids[$stream]);
                     $this->redis->xAck($stream, $group, [$id]);
                 }
@@ -6187,7 +6187,7 @@ class Redis_Test extends TestSuite {
         $this->addStreamEntries('stream', 100);
         $this->assertEquals(0, $this->redis->xTrim('stream', 1, true));
       
-        /* We need Redis >= 6.2.0 for MINID and LIMIT options */
+        /* We need ValkeyGlide >= 6.2.0 for MINID and LIMIT options */
         if ( ! $this->minVersionCheck('6.2.0'))
             return;
 
@@ -6205,7 +6205,7 @@ class Redis_Test extends TestSuite {
         $this->assertEquals(['2-0', '2-1', '2-2'], array_keys($this->redis->xrange('stream', '0', '+')));
 
         /* TODO:  Figure oiut how to test LIMIT deterministically.  For now just
-                  send a LIMIT and verify we don't get a failure from Redis. */
+                  send a LIMIT and verify we don't get a failure from ValkeyGlide. */
         $this->assertIsInt(@$this->redis->xtrim('stream', 2, true, false, 3));
        
     }
@@ -6454,7 +6454,7 @@ class Redis_Test extends TestSuite {
         if (gethostbyname($host) === $host)
             $this->markTestSkipped('online test');
 
-        $redis = new Redis();
+        $redis = new ValkeyGlide();
         try {
             $redis->connect($host, 6379, 0.01);
         }  catch (Exception $e) {
@@ -6469,7 +6469,7 @@ class Redis_Test extends TestSuite {
         fclose($fp);
 
         foreach (['localhost' => true, '127.0.0.1' => false] as $host => $verify) {
-            $redis = new Redis();
+            $redis = new ValkeyGlide();
             $this->assertTrue($redis->connect('tls://' . $host, 6378, 0, null, 0, 0, [
                 'stream' => ['verify_peer_name' => $verify, 'verify_peer' => false]
             ]));

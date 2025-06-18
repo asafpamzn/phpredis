@@ -29,7 +29,7 @@
     } while (0)
 #endif
 
-/* Redis data types for compatibility */
+/* ValkeyGlide data types for compatibility */
 #define REDIS_NOT_FOUND 0
 #define REDIS_STRING 1
 #define REDIS_SET 2

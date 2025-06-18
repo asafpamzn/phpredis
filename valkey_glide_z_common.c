@@ -1296,7 +1296,7 @@ int prepare_z_complex_range_args(z_command_args_t *args, uintptr_t **args_out,
                                      arg_idx, *allocated_strings, allocated_count);
     }
 
-    /* Add WITHSCORES if required - add it last as per Redis command syntax */
+    /* Add WITHSCORES if required - add it last as per ValkeyGlide command syntax */
     if (range_opts.withscores)
     {
         const char *withscores_str = "WITHSCORES";

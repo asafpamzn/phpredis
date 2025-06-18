@@ -1,25 +1,25 @@
-<?php defined('PHPREDIS_TESTRUN') or die("Use TestRedis.php to run tests!\n");
+<?php defined('PHPREDIS_TESTRUN') or die("Use TestValkeyGlide.php to run tests!\n");
 
-require_once __DIR__ . "/RedisTest.php";
+require_once __DIR__ . "/ValkeyGlideTest.php";
 
 /**
- * Most RedisCluster tests should work the same as the standard Redis object
+ * Most ValkeyGlideCluster tests should work the same as the standard ValkeyGlide object
  * so we only override specific functions where the prototype is different or
  * where we're validating specific cluster mechanisms
  */
-class Redis_Cluster_Test extends Redis_Test {
+class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
     private $redis_types = [
-        Redis::REDIS_STRING,
-        Redis::REDIS_SET,
-        Redis::REDIS_LIST,
-        Redis::REDIS_ZSET,
-        Redis::REDIS_HASH
+        ValkeyGlide::REDIS_STRING,
+        ValkeyGlide::REDIS_SET,
+        ValkeyGlide::REDIS_LIST,
+        ValkeyGlide::REDIS_ZSET,
+        ValkeyGlide::REDIS_HASH
     ];
 
     private $failover_types = [
-        RedisCluster::FAILOVER_NONE,
-        RedisCluster::FAILOVER_ERROR,
-        RedisCluster::FAILOVER_DISTRIBUTE
+        ValkeyGlideCluster::FAILOVER_NONE,
+        ValkeyGlideCluster::FAILOVER_ERROR,
+        ValkeyGlideCluster::FAILOVER_DISTRIBUTE
     ];
 
     protected static array $seeds = [];
@@ -28,12 +28,12 @@ class Redis_Cluster_Test extends Redis_Test {
     private static string $seed_source = '';
 
     public function testServerInfo() { $this->markTestSkipped(); }
-    public function testServerInfoOldRedis() { $this->markTestSkipped(); }
+    public function testServerInfoOldValkeyGlide() { $this->markTestSkipped(); }
 
-    /* Tests we'll skip all together in the context of RedisCluster.  The
-     * RedisCluster class doesn't implement specialized (non-redis) commands
+    /* Tests we'll skip all together in the context of ValkeyGlideCluster.  The
+     * ValkeyGlideCluster class doesn't implement specialized (non-redis) commands
      * such as sortAsc, or sortDesc and other commands such as SELECT are
-     * simply invalid in Redis Cluster */
+     * simply invalid in ValkeyGlide Cluster */
     public function testPipelinePublish() { $this->markTestSkipped(); }
     public function testSortAsc()  { $this->markTestSkipped(); }
     public function testSortDesc() { $this->markTestSkipped(); }
@@ -50,13 +50,13 @@ class Redis_Cluster_Test extends Redis_Test {
     public function testScanErrors() { $this->markTestSkipped(); }
     public function testConnectDatabaseSelect() { $this->markTestSkipped(); }
 
-    /* These 'directed node' commands work differently in RedisCluster */
+    /* These 'directed node' commands work differently in ValkeyGlideCluster */
     public function testConfig() { $this->markTestSkipped(); }
     public function testFlushDB() { $this->markTestSkipped(); }
     public function testFunction() { $this->markTestSkipped(); }
 
-    /* Session locking feature is currently not supported in in context of Redis Cluster.
-       The biggest issue for this is the distribution nature of Redis cluster */
+    /* Session locking feature is currently not supported in in context of ValkeyGlide Cluster.
+       The biggest issue for this is the distribution nature of ValkeyGlide cluster */
     public function testSession_lockKeyCorrect() { $this->markTestSkipped(); }
     public function testSession_lockingDisabledByDefault() { $this->markTestSkipped(); }
     public function testSession_lockReleasedOnClose() { $this->markTestSkipped(); }
@@ -71,7 +71,7 @@ class Redis_Cluster_Test extends Redis_Test {
 
     private function loadSeedsFromHostPort($host, $port) {
         try {
-            $rc = new RedisCluster(NULL, ["$host:$port"], 1, 1, true, $this->getAuth());
+            $rc = new ValkeyGlideCluster(NULL, ["$host:$port"], 1, 1, true, $this->getAuth());
             self::$seed_source = "Host: $host, Port: $port";
             return array_map(function($master) {
                 return sprintf('%s:%s', $master[0], $master[1]);
@@ -115,7 +115,7 @@ class Redis_Cluster_Test extends Redis_Test {
         if (($seeds = $this->loadSeedsFromHostPort($host, $port)))
             return $seeds;
 
-        TestSuite::errorMessage("Error:  Unable to load seeds for RedisCluster tests");
+        TestSuite::errorMessage("Error:  Unable to load seeds for ValkeyGlideCluster tests");
         foreach (self::$seed_messages as $msg) {
             TestSuite::errorMessage("   Tried: %s", $msg);
         }
@@ -139,10 +139,10 @@ class Redis_Cluster_Test extends Redis_Test {
         $this->is_valkey = $this->detectValkey($info);
     }
 
-    /* Override newInstance as we want a RedisCluster object */
+    /* Override newInstance as we want a ValkeyGlideCluster object */
     protected function newInstance() {
         try {
-            return new RedisCluster(NULL, self::$seeds, 30, 30, true, $this->getAuth());
+            return new ValkeyGlideCluster(NULL, self::$seeds, 30, 30, true, $this->getAuth());
         } catch (Exception $ex) {
             TestSuite::errorMessage("Fatal error: %s\n", $ex->getMessage());
             TestSuite::errorMessage("Seeds: %s\n", implode(' ', self::$seeds));
@@ -151,7 +151,7 @@ class Redis_Cluster_Test extends Redis_Test {
         }
     }
 
-    /* Overrides for RedisTest where the function signature is different.  This
+    /* Overrides for ValkeyGlideTest where the function signature is different.  This
      * is only true for a few commands, which by definition have to be directed
      * at a specific node */
 
@@ -189,7 +189,7 @@ class Redis_Cluster_Test extends Redis_Test {
     }
 
     public function testSortPrefix() {
-        $this->redis->setOption(Redis::OPT_PREFIX, 'some-prefix:');
+        $this->redis->setOption(ValkeyGlide::OPT_PREFIX, 'some-prefix:');
         $this->redis->del('some-item');
         $this->redis->sadd('some-item', 1);
         $this->redis->sadd('some-item', 2);
@@ -199,7 +199,7 @@ class Redis_Cluster_Test extends Redis_Test {
 
         // Kill our set/prefix
         $this->redis->del('some-item');
-        $this->redis->setOption(Redis::OPT_PREFIX, '');
+        $this->redis->setOption(ValkeyGlide::OPT_PREFIX, '');
     }
 
     public function testDBSize() {
@@ -262,7 +262,7 @@ class Redis_Cluster_Test extends Redis_Test {
         $scan_count = 0;
 
         /* Have scan retry for us */
-        $this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
+        $this->redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_RETRY);
 
         /* Iterate over our masters, scanning each one */
         foreach ($this->redis->_masters() as $master) {
@@ -286,17 +286,17 @@ class Redis_Cluster_Test extends Redis_Test {
 
         $arr_keys = [];
         foreach ($prefixes as $prefix) {
-            $this->redis->setOption(Redis::OPT_PREFIX, $prefix);
+            $this->redis->setOption(ValkeyGlide::OPT_PREFIX, $prefix);
             $this->redis->set($id, "LOLWUT");
             $arr_keys[$prefix] = $id;
         }
 
-        $this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
-        $this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_PREFIX);
+        $this->redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_RETRY);
+        $this->redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_PREFIX);
 
         foreach ($prefixes as $prefix) {
             $prefix_keys = [];
-            $this->redis->setOption(Redis::OPT_PREFIX, $prefix);
+            $this->redis->setOption(ValkeyGlide::OPT_PREFIX, $prefix);
 
             foreach ($this->redis->_masters() as $master) {
                 $it = NULL;
@@ -311,7 +311,7 @@ class Redis_Cluster_Test extends Redis_Test {
             $this->assertArrayKey($prefix_keys, $prefix);
         }
 
-        $this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_NOPREFIX);
+        $this->redis->setOption(ValkeyGlide::OPT_SCAN, ValkeyGlide::SCAN_NOPREFIX);
 
         $scan_keys = [];
 
@@ -370,7 +370,7 @@ class Redis_Cluster_Test extends Redis_Test {
         $this->assertFalse($this->redis->pubsub("somekey", "notacommand"));
     }
 
-    /* Unlike Redis proper, MsetNX won't always totally fail if all keys can't
+    /* Unlike ValkeyGlide proper, MsetNX won't always totally fail if all keys can't
      * be set, but rather will only fail per-node when that is the case */
     public function testMSetNX() {
         /* All of these keys should get set */
@@ -411,7 +411,7 @@ class Redis_Cluster_Test extends Redis_Test {
         }
     }
 
-    /* RedisCluster will always respond with an array, even if transactions
+    /* ValkeyGlideCluster will always respond with an array, even if transactions
      * failed, because the commands could be coming from multiple nodes */
     public function testFailedTransactions() {
         $this->redis->set('x', 42);
@@ -443,7 +443,7 @@ class Redis_Cluster_Test extends Redis_Test {
         $this->assertTrue($this->redis->discard());
     }
 
-    /* RedisCluster::script() is a 'raw' command, which requires a key such that
+    /* ValkeyGlideCluster::script() is a 'raw' command, which requires a key such that
      * we can direct it to a given node */
     public function testScript() {
         $key = uniqid() . '-' . rand(1, 1000);
@@ -474,7 +474,7 @@ class Redis_Cluster_Test extends Redis_Test {
         $this->assertTrue(is_array($result) && count(array_filter($result)) == 3);
     }
 
-    /* RedisCluster::EVALSHA needs a 'key' to let us know which node we want to
+    /* ValkeyGlideCluster::EVALSHA needs a 'key' to let us know which node we want to
      * direct the command at */
     public function testEvalSHA() {
         $key = uniqid() . '-' . rand(1, 1000);
@@ -573,17 +573,17 @@ class Redis_Cluster_Test extends Redis_Test {
 
     protected function keyTypeToString($key_type) {
         switch ($key_type) {
-            case Redis::REDIS_STRING:
+            case ValkeyGlide::REDIS_STRING:
                 return "string";
-            case Redis::REDIS_SET:
+            case ValkeyGlide::REDIS_SET:
                 return "set";
-            case Redis::REDIS_LIST:
+            case ValkeyGlide::REDIS_LIST:
                 return "list";
-            case Redis::REDIS_ZSET:
+            case ValkeyGlide::REDIS_ZSET:
                 return "zset";
-            case Redis::REDIS_HASH:
+            case ValkeyGlide::REDIS_HASH:
                 return "hash";
-            case Redis::REDIS_STREAM:
+            case ValkeyGlide::REDIS_STREAM:
                 return "stream";
             default:
                 return "unknown($key_type)";
@@ -601,11 +601,11 @@ class Redis_Cluster_Test extends Redis_Test {
         $this->redis->del($key);
 
         switch ($key_type) {
-            case Redis::REDIS_STRING:
+            case ValkeyGlide::REDIS_STRING:
                 $value = "$key-value";
                 $this->redis->set($key, $value);
                 break;
-            case Redis::REDIS_SET:
+            case ValkeyGlide::REDIS_SET:
                 $value = [
                     "$key-mem1", "$key-mem2", "$key-mem3",
                     "$key-mem4", "$key-mem5", "$key-mem6"
@@ -614,7 +614,7 @@ class Redis_Cluster_Test extends Redis_Test {
                 array_unshift($args, $key);
                 call_user_func_array([$this->redis, 'sadd'], $args);
                 break;
-            case Redis::REDIS_HASH:
+            case ValkeyGlide::REDIS_HASH:
                 $value = [
                     "$key-mem1" => "$key-val1",
                     "$key-mem2" => "$key-val2",
@@ -622,7 +622,7 @@ class Redis_Cluster_Test extends Redis_Test {
                 ];
                 $this->redis->hmset($key, $value);
                 break;
-            case Redis::REDIS_LIST:
+            case ValkeyGlide::REDIS_LIST:
                 $value = [
                     "$key-ele1", "$key-ele2", "$key-ele3",
                     "$key-ele4", "$key-ele5", "$key-ele6"
@@ -631,7 +631,7 @@ class Redis_Cluster_Test extends Redis_Test {
                 array_unshift($args, $key);
                 call_user_func_array([$this->redis, 'rpush'], $args);
                 break;
-            case Redis::REDIS_ZSET:
+            case ValkeyGlide::REDIS_ZSET:
                 $score = 1;
                 $value = [
                     "$key-mem1" => 1, "$key-mem2" => 2,
@@ -665,23 +665,23 @@ class Redis_Cluster_Test extends Redis_Test {
 
     protected function checkKeyValue($key, $key_type, $value) {
         switch ($key_type) {
-            case Redis::REDIS_STRING:
+            case ValkeyGlide::REDIS_STRING:
                 $this->assertEquals($value, $this->redis->get($key));
                 break;
-            case Redis::REDIS_SET:
+            case ValkeyGlide::REDIS_SET:
                 $arr_r_values = $this->redis->sMembers($key);
                 $arr_l_values = $value;
                 sort($arr_r_values);
                 sort($arr_l_values);
                 $this->assertEquals($arr_r_values, $arr_l_values);
                 break;
-            case Redis::REDIS_LIST:
+            case ValkeyGlide::REDIS_LIST:
                 $this->assertEquals($value, $this->redis->lrange($key, 0, -1));
                 break;
-            case Redis::REDIS_HASH:
+            case ValkeyGlide::REDIS_HASH:
                 $this->assertEquals($value, $this->redis->hgetall($key));
                 break;
-            case Redis::REDIS_ZSET:
+            case ValkeyGlide::REDIS_ZSET:
                 $this->checkZSetEquality($value, $this->redis->zrange($key, 0, -1, true));
                 break;
             default:
@@ -704,7 +704,7 @@ class Redis_Cluster_Test extends Redis_Test {
 
         /* Iterate over failover options */
         foreach ($this->failover_types as $failover_type) {
-            $this->redis->setOption(RedisCluster::OPT_SLAVE_FAILOVER, $failover_type);
+            $this->redis->setOption(ValkeyGlideCluster::OPT_SLAVE_FAILOVER, $failover_type);
 
             foreach ($value_ref as $key => $value) {
                 $this->checkKeyValue($key, $type_ref[$key], $value);
@@ -731,14 +731,14 @@ class Redis_Cluster_Test extends Redis_Test {
 
     /* Test that rawCommand and EVAL can be configured to return simple string values */
     public function testReplyLiteral() {
-        $this->redis->setOption(Redis::OPT_REPLY_LITERAL, false);
+        $this->redis->setOption(ValkeyGlide::OPT_REPLY_LITERAL, false);
         $this->assertTrue($this->redis->rawCommand('foo', 'set', 'foo', 'bar'));
         $this->assertTrue($this->redis->eval("return redis.call('set', KEYS[1], 'bar')", ['foo'], 1));
 
         $rv = $this->redis->eval("return {redis.call('set', KEYS[1], 'bar'), redis.call('ping')}", ['foo'], 1);
         $this->assertEquals([true, true], $rv);
 
-        $this->redis->setOption(Redis::OPT_REPLY_LITERAL, true);
+        $this->redis->setOption(ValkeyGlide::OPT_REPLY_LITERAL, true);
         $this->assertEquals('OK', $this->redis->rawCommand('foo', 'set', 'foo', 'bar'));
         $this->assertEquals('OK', $this->redis->eval("return redis.call('set', KEYS[1], 'bar')", ['foo'], 1));
 
@@ -746,10 +746,10 @@ class Redis_Cluster_Test extends Redis_Test {
         $this->assertEquals(['OK', 'PONG'], $rv);
 
         // Reset
-        $this->redis->setOption(Redis::OPT_REPLY_LITERAL, false);
+        $this->redis->setOption(ValkeyGlide::OPT_REPLY_LITERAL, false);
     }
 
-    /* Redis and RedisCluster use the same handler for the ACL command but verify we can direct
+    /* ValkeyGlide and ValkeyGlideCluster use the same handler for the ACL command but verify we can direct
        the command to a specific node. */
     public function testAcl() {
         if ( ! $this->minVersionCheck("6.0"))
@@ -825,7 +825,7 @@ class Redis_Cluster_Test extends Redis_Test {
         $this->redis->del($key);
 
         foreach ([false => [], true => NULL] as $opt => $test) {
-            $this->redis->setOption(Redis::OPT_NULL_MULTIBULK_AS_NULL, $opt);
+            $this->redis->setOption(ValkeyGlide::OPT_NULL_MULTIBULK_AS_NULL, $opt);
 
             $r = $this->redis->rawCommand($key, "BLPOP", $key, .05);
             $this->assertEquals($test, $r);
@@ -836,7 +836,7 @@ class Redis_Cluster_Test extends Redis_Test {
             $this->assertEquals([$test], $r);
         }
 
-        $this->redis->setOption(Redis::OPT_NULL_MULTIBULK_AS_NULL, false);
+        $this->redis->setOption(ValkeyGlide::OPT_NULL_MULTIBULK_AS_NULL, false);
     }
 
     protected function execWaitAOF() {
