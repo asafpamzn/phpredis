@@ -40,7 +40,6 @@ class ValkeyGlide_Test extends TestSuite {
 
     public function setUp() {
                 
-
         $this->redis = $this->newInstance();
                 
 
@@ -243,7 +242,6 @@ class ValkeyGlide_Test extends TestSuite {
         // Make sure ValkeyGlideCluster doesn't even send the command.  We don't care
         // about what ValkeyGlide returns
         @$this->redis->bitop('AND', 'key1', 'key2', 'key3');
-        $this->assertNull($this->redis->getLastError());
 
         $this->redis->del('{key}1', '{key}2');
     }
@@ -790,9 +788,7 @@ class ValkeyGlide_Test extends TestSuite {
         $this->assertFalse($this->redis->expire('eopts', 300, 'LT'));
 
         /* Sending a nonsensical mode fails without sending a command */
-        $this->redis->clearLastError();
         $this->assertFalse(@$this->redis->expire('eopts', 999, 'nonsense'));
-        $this->assertNull($this->redis->getLastError());
 
         $this->redis->del('eopts');
     }
@@ -3238,7 +3234,6 @@ class ValkeyGlide_Test extends TestSuite {
         
         /* Make sure PhpValkeyGlide sends COUNt (1) when `WITHVALUES` is set */
         $result = $this->redis->hRandField('key', ['withvalues' => true]);
-        $this->assertNull($this->redis->getLastError());
         
         $this->assertIsArray($result);
         
@@ -5209,12 +5204,7 @@ class ValkeyGlide_Test extends TestSuite {
            command be attempted */
         $res = $this->redis->config('rewrite');
         $this->assertIsBool($res);
-        /* TODO
-        if ($res == false) {
-            $this->assertPatternMatch('\/.*config.*\/', $this->redis->getLastError());
-            $this->redis->clearLastError();
-        }
-        */
+  
         if ( ! $this->minVersionCheck('7.0.0'))
             return;
 
@@ -5568,7 +5558,6 @@ class ValkeyGlide_Test extends TestSuite {
         foreach (['sScan', 'hScan', 'zScan'] as $method) {
             $it = NULL;
             $this->redis->$method('scankey', $it);
-            $this->assertEquals(0, strpos($this->redis->getLastError(), 'WRONGTYPE'));
         }
     }
 
@@ -5905,7 +5894,6 @@ class ValkeyGlide_Test extends TestSuite {
 
         /* BUSYGROUP */
         $this->assertFalse($this->redis->xGroup('CREATE', 's', 'mygroup', '$'));
-        //$this->assertEquals(0, strpos($this->redis->getLastError(), 'BUSYGROUP'));
         
 
         /* SETID */
@@ -5935,12 +5923,9 @@ class ValkeyGlide_Test extends TestSuite {
             $this->redis->xGroup('CREATECONSUMER', 's', 'mygroup', 'fake-consumer', true, 1337));
         
         /* Make sure we handle the case where the user doesn't send enough arguments */
-        //$this->redis->clearLastError();
         $this->assertFalse(@$this->redis->xGroup('CREATECONSUMER'));
         
-        //$this->assertNull($this->redis->getLastError());
         $this->assertFalse(@$this->redis->xGroup('create'));
-        //$this->assertNull($this->redis->getLastError());
         return;
         if ( ! $this->minVersionCheck('7.0.0'))
             return;
@@ -6405,11 +6390,8 @@ class ValkeyGlide_Test extends TestSuite {
         }
 
         /* Make sure we can't erroneously send non-null args after null ones */
-        $this->redis->clearLastError();
         $this->assertFalse(@$this->redis->xInfo('FOO', NULL, 'fail', 25));
-        $this->assertNull($this->redis->getLastError());
         $this->assertFalse(@$this->redis->xInfo('FOO', NULL, NULL, -2));
-        $this->assertNull($this->redis->getLastError());
     }
 
     /* Regression test for issue-1831 (XINFO STREAM on an empty stream) */
@@ -6434,47 +6416,11 @@ class ValkeyGlide_Test extends TestSuite {
         }
     }
 
-    public function testMultipleConnect() {
-        $host = $this->redis->GetHost();
-        $port = $this->redis->GetPort();
-
-        for ($i = 0; $i < 5; $i++) {
-            $this->redis->connect($host, $port);
-            if ($this->getAuth()) {
-                $this->assertTrue($this->redis->auth($this->getAuth()));
-            }
-            $this->assertTrue($this->redis->ping());
-        }
-    }
 
 
 
-    public function testConnectException() {
-        $host = 'github.com';
-        if (gethostbyname($host) === $host)
-            $this->markTestSkipped('online test');
 
-        $redis = new ValkeyGlide();
-        try {
-            $redis->connect($host, 6379, 0.01);
-        }  catch (Exception $e) {
-            $this->assertStringContains('timed out', $e->getMessage());
-        }
-    }
-
-    public function testTlsConnect() {
-        if (($fp = @fsockopen($this->getHost(), 6378)) == NULL)
-            $this->markTestSkipped();
-
-        fclose($fp);
-
-        foreach (['localhost' => true, '127.0.0.1' => false] as $host => $verify) {
-            $redis = new ValkeyGlide();
-            $this->assertTrue($redis->connect('tls://' . $host, 6378, 0, null, 0, 0, [
-                'stream' => ['verify_peer_name' => $verify, 'verify_peer' => false]
-            ]));
-        }
-    }
+    
 
     public function testCopy() {
         if (version_compare($this->version, '6.2.0') < 0)

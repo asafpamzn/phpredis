@@ -159,24 +159,6 @@ PHP_METHOD(ValkeyGlide, __destruct)
 }
 /* }}} */
 
-/* {{{ proto boolean ValkeyGlide::connect(string host, int port [, double timeout [, long retry_interval]])
- */
-PHP_METHOD(ValkeyGlide, connect)
-{
-    /* TODO: Implement ValkeyGlide connection */
-    RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto boolean ValkeyGlide::pconnect(string host, int port [, double timeout])
- */
-PHP_METHOD(ValkeyGlide, pconnect)
-{
-    /* TODO: Implement ValkeyGlide persistent connection */
-    RETURN_TRUE;
-}
-/* }}} */
-
 /* {{{ proto boolean ValkeyGlide::close()
  */
 PHP_METHOD(ValkeyGlide, close)
@@ -207,11 +189,6 @@ PHP_METHOD(ValkeyGlide, _pack) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, _unpack) { /* TODO: Implement */ }
 
 PHP_METHOD(ValkeyGlide, getMode)
-{
-    RETURN_FALSE;
-}
-
-PHP_METHOD(ValkeyGlide, isConnected)
 {
     RETURN_FALSE;
 }

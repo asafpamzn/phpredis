@@ -3,7 +3,7 @@
 require_once __DIR__ . "/TestSuite.php";
 require_once __DIR__ . "/ValkeyGlideTest.php";
 require_once __DIR__ . "/ValkeyGlideClusterTest.php";
-
+echo "Loading ValkeyGlide tests...\n";
 function getClassArray($classes) {
     $result = [];
 
@@ -43,7 +43,7 @@ function raHosts($host, $ports) {
         return sprintf("%s:%d", $host, $port);
     }, $ports);
 }
-
+echo "Running ValkeyGlide tests...\n";
 /* Make sure errors go to stdout and are shown */
 error_reporting(E_ALL);
 ini_set( 'display_errors','1');

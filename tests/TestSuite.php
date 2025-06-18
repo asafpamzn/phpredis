@@ -575,6 +575,7 @@ class TestSuite
                                ?string $host = NULL, ?int $port = NULL,
                                $auth = NULL)
     {
+        echo "Running tests for class '$class_name'...\n";
         if ($limit)
             $limit = strtolower($limit);
 
