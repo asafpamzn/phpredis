@@ -848,6 +848,9 @@ int execute_ping_command(zval *object, int argc, zval *return_value)
 
     return 0;
 }
+
+#define _NL "\r\n"
+
 static void
 redis_parse_info_response(char *response, zval *z_ret)
 {

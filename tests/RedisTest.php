@@ -1681,7 +1681,7 @@ class Redis_Test extends TestSuite {
         //
 
         $this->redis->del('set0');
-        $this->redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_PHP);
+        
         for ($i = 0; $i < 5; $i++) {
             $member = "member:$i";
             $this->redis->sAdd('set0', $member);
@@ -1704,7 +1704,7 @@ class Redis_Test extends TestSuite {
             //$this->assertSameType($val, $this->redis->srandmember('set0'));  TODO
         }
 
-        $this->redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_NONE);
+        
     }
 
     public function testSRandMemberWithCount() {

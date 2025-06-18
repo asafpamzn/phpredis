@@ -1759,89 +1759,6 @@ static zend_class_entry *register_class_Redis(void)
 	zend_declare_class_constant_ex(class_entry, const_REDIS_STREAM_name, &const_REDIS_STREAM_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_REDIS_STREAM_name);
 
-	zval const_ATOMIC_value;
-	ZVAL_LONG(&const_ATOMIC_value, ATOMIC);
-	zend_string *const_ATOMIC_name = zend_string_init_interned("ATOMIC", sizeof("ATOMIC") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_ATOMIC_name, &const_ATOMIC_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_ATOMIC_name);
-
-	zval const_MULTI_value;
-	ZVAL_LONG(&const_MULTI_value, MULTI);
-	zend_string *const_MULTI_name = zend_string_init_interned("MULTI", sizeof("MULTI") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_MULTI_name, &const_MULTI_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_MULTI_name);
-
-	zval const_PIPELINE_value;
-	ZVAL_LONG(&const_PIPELINE_value, PIPELINE);
-	zend_string *const_PIPELINE_name = zend_string_init_interned("PIPELINE", sizeof("PIPELINE") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_PIPELINE_name, &const_PIPELINE_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_PIPELINE_name);
-
-	zval const_OPT_SERIALIZER_value;
-	ZVAL_LONG(&const_OPT_SERIALIZER_value, REDIS_OPT_SERIALIZER);
-	zend_string *const_OPT_SERIALIZER_name = zend_string_init_interned("OPT_SERIALIZER", sizeof("OPT_SERIALIZER") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_OPT_SERIALIZER_name, &const_OPT_SERIALIZER_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_OPT_SERIALIZER_name);
-
-	zval const_OPT_PREFIX_value;
-	ZVAL_LONG(&const_OPT_PREFIX_value, REDIS_OPT_PREFIX);
-	zend_string *const_OPT_PREFIX_name = zend_string_init_interned("OPT_PREFIX", sizeof("OPT_PREFIX") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_OPT_PREFIX_name, &const_OPT_PREFIX_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_OPT_PREFIX_name);
-
-	zval const_OPT_READ_TIMEOUT_value;
-	ZVAL_LONG(&const_OPT_READ_TIMEOUT_value, REDIS_OPT_READ_TIMEOUT);
-	zend_string *const_OPT_READ_TIMEOUT_name = zend_string_init_interned("OPT_READ_TIMEOUT", sizeof("OPT_READ_TIMEOUT") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_OPT_READ_TIMEOUT_name, &const_OPT_READ_TIMEOUT_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_OPT_READ_TIMEOUT_name);
-
-	zval const_OPT_TCP_KEEPALIVE_value;
-	ZVAL_LONG(&const_OPT_TCP_KEEPALIVE_value, REDIS_OPT_TCP_KEEPALIVE);
-	zend_string *const_OPT_TCP_KEEPALIVE_name = zend_string_init_interned("OPT_TCP_KEEPALIVE", sizeof("OPT_TCP_KEEPALIVE") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_OPT_TCP_KEEPALIVE_name, &const_OPT_TCP_KEEPALIVE_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_OPT_TCP_KEEPALIVE_name);
-
-	zval const_OPT_COMPRESSION_value;
-	ZVAL_LONG(&const_OPT_COMPRESSION_value, REDIS_OPT_COMPRESSION);
-	zend_string *const_OPT_COMPRESSION_name = zend_string_init_interned("OPT_COMPRESSION", sizeof("OPT_COMPRESSION") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_OPT_COMPRESSION_name, &const_OPT_COMPRESSION_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_OPT_COMPRESSION_name);
-
-	zval const_OPT_REPLY_LITERAL_value;
-	ZVAL_LONG(&const_OPT_REPLY_LITERAL_value, REDIS_OPT_REPLY_LITERAL);
-	zend_string *const_OPT_REPLY_LITERAL_name = zend_string_init_interned("OPT_REPLY_LITERAL", sizeof("OPT_REPLY_LITERAL") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_OPT_REPLY_LITERAL_name, &const_OPT_REPLY_LITERAL_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_OPT_REPLY_LITERAL_name);
-
-	zval const_OPT_COMPRESSION_LEVEL_value;
-	ZVAL_LONG(&const_OPT_COMPRESSION_LEVEL_value, REDIS_OPT_COMPRESSION_LEVEL);
-	zend_string *const_OPT_COMPRESSION_LEVEL_name = zend_string_init_interned("OPT_COMPRESSION_LEVEL", sizeof("OPT_COMPRESSION_LEVEL") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_OPT_COMPRESSION_LEVEL_name, &const_OPT_COMPRESSION_LEVEL_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_OPT_COMPRESSION_LEVEL_name);
-
-	zval const_OPT_NULL_MULTIBULK_AS_NULL_value;
-	ZVAL_LONG(&const_OPT_NULL_MULTIBULK_AS_NULL_value, REDIS_OPT_NULL_MBULK_AS_NULL);
-	zend_string *const_OPT_NULL_MULTIBULK_AS_NULL_name = zend_string_init_interned("OPT_NULL_MULTIBULK_AS_NULL", sizeof("OPT_NULL_MULTIBULK_AS_NULL") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_OPT_NULL_MULTIBULK_AS_NULL_name, &const_OPT_NULL_MULTIBULK_AS_NULL_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_OPT_NULL_MULTIBULK_AS_NULL_name);
-
-	zval const_OPT_PACK_IGNORE_NUMBERS_value;
-	ZVAL_LONG(&const_OPT_PACK_IGNORE_NUMBERS_value, REDIS_OPT_PACK_IGNORE_NUMBERS);
-	zend_string *const_OPT_PACK_IGNORE_NUMBERS_name = zend_string_init_interned("OPT_PACK_IGNORE_NUMBERS", sizeof("OPT_PACK_IGNORE_NUMBERS") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_OPT_PACK_IGNORE_NUMBERS_name, &const_OPT_PACK_IGNORE_NUMBERS_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_OPT_PACK_IGNORE_NUMBERS_name);
-
-	zval const_SERIALIZER_NONE_value;
-	ZVAL_LONG(&const_SERIALIZER_NONE_value, REDIS_SERIALIZER_NONE);
-	zend_string *const_SERIALIZER_NONE_name = zend_string_init_interned("SERIALIZER_NONE", sizeof("SERIALIZER_NONE") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_SERIALIZER_NONE_name, &const_SERIALIZER_NONE_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_SERIALIZER_NONE_name);
-
-	zval const_SERIALIZER_PHP_value;
-	ZVAL_LONG(&const_SERIALIZER_PHP_value, REDIS_SERIALIZER_PHP);
-	zend_string *const_SERIALIZER_PHP_name = zend_string_init_interned("SERIALIZER_PHP", sizeof("SERIALIZER_PHP") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_SERIALIZER_PHP_name, &const_SERIALIZER_PHP_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_SERIALIZER_PHP_name);
 #if defined(HAVE_REDIS_IGBINARY)
 
 	zval const_SERIALIZER_IGBINARY_value;
@@ -1858,83 +1775,7 @@ static zend_class_entry *register_class_Redis(void)
 	zend_declare_class_constant_ex(class_entry, const_SERIALIZER_MSGPACK_name, &const_SERIALIZER_MSGPACK_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_SERIALIZER_MSGPACK_name);
 #endif
-
-	zval const_SERIALIZER_JSON_value;
-	ZVAL_LONG(&const_SERIALIZER_JSON_value, REDIS_SERIALIZER_JSON);
-	zend_string *const_SERIALIZER_JSON_name = zend_string_init_interned("SERIALIZER_JSON", sizeof("SERIALIZER_JSON") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_SERIALIZER_JSON_name, &const_SERIALIZER_JSON_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_SERIALIZER_JSON_name);
-
-	zval const_COMPRESSION_NONE_value;
-	ZVAL_LONG(&const_COMPRESSION_NONE_value, REDIS_COMPRESSION_NONE);
-	zend_string *const_COMPRESSION_NONE_name = zend_string_init_interned("COMPRESSION_NONE", sizeof("COMPRESSION_NONE") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_COMPRESSION_NONE_name, &const_COMPRESSION_NONE_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_COMPRESSION_NONE_name);
-#if defined(HAVE_REDIS_LZF)
-
-	zval const_COMPRESSION_LZF_value;
-	ZVAL_LONG(&const_COMPRESSION_LZF_value, REDIS_COMPRESSION_LZF);
-	zend_string *const_COMPRESSION_LZF_name = zend_string_init_interned("COMPRESSION_LZF", sizeof("COMPRESSION_LZF") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_COMPRESSION_LZF_name, &const_COMPRESSION_LZF_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_COMPRESSION_LZF_name);
-#endif
-#if defined(HAVE_REDIS_ZSTD)
-
-	zval const_COMPRESSION_ZSTD_value;
-	ZVAL_LONG(&const_COMPRESSION_ZSTD_value, REDIS_COMPRESSION_ZSTD);
-	zend_string *const_COMPRESSION_ZSTD_name = zend_string_init_interned("COMPRESSION_ZSTD", sizeof("COMPRESSION_ZSTD") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_COMPRESSION_ZSTD_name, &const_COMPRESSION_ZSTD_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_COMPRESSION_ZSTD_name);
-#endif
-#if defined(HAVE_REDIS_ZSTD) && defined(ZSTD_CLEVEL_DEFAULT)
-
-	zval const_COMPRESSION_ZSTD_DEFAULT_value;
-	ZVAL_LONG(&const_COMPRESSION_ZSTD_DEFAULT_value, ZSTD_CLEVEL_DEFAULT);
-	zend_string *const_COMPRESSION_ZSTD_DEFAULT_name = zend_string_init_interned("COMPRESSION_ZSTD_DEFAULT", sizeof("COMPRESSION_ZSTD_DEFAULT") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_COMPRESSION_ZSTD_DEFAULT_name, &const_COMPRESSION_ZSTD_DEFAULT_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_COMPRESSION_ZSTD_DEFAULT_name);
-#endif
-#if defined(HAVE_REDIS_ZSTD) && !(defined(ZSTD_CLEVEL_DEFAULT))
-
-	zval const_COMPRESSION_ZSTD_DEFAULT_value;
-	ZVAL_LONG(&const_COMPRESSION_ZSTD_DEFAULT_value, 3);
-	zend_string *const_COMPRESSION_ZSTD_DEFAULT_name = zend_string_init_interned("COMPRESSION_ZSTD_DEFAULT", sizeof("COMPRESSION_ZSTD_DEFAULT") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_COMPRESSION_ZSTD_DEFAULT_name, &const_COMPRESSION_ZSTD_DEFAULT_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_COMPRESSION_ZSTD_DEFAULT_name);
-#endif
-#if defined(HAVE_REDIS_ZSTD) && ZSTD_VERSION_NUMBER >= 10400
-
-	zval const_COMPRESSION_ZSTD_MIN_value;
-	ZVAL_LONG(&const_COMPRESSION_ZSTD_MIN_value, ZSTD_minCLevel());
-	zend_string *const_COMPRESSION_ZSTD_MIN_name = zend_string_init_interned("COMPRESSION_ZSTD_MIN", sizeof("COMPRESSION_ZSTD_MIN") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_COMPRESSION_ZSTD_MIN_name, &const_COMPRESSION_ZSTD_MIN_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_COMPRESSION_ZSTD_MIN_name);
-#endif
-#if defined(HAVE_REDIS_ZSTD) && !(ZSTD_VERSION_NUMBER >= 10400)
-
-	zval const_COMPRESSION_ZSTD_MIN_value;
-	ZVAL_LONG(&const_COMPRESSION_ZSTD_MIN_value, 1);
-	zend_string *const_COMPRESSION_ZSTD_MIN_name = zend_string_init_interned("COMPRESSION_ZSTD_MIN", sizeof("COMPRESSION_ZSTD_MIN") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_COMPRESSION_ZSTD_MIN_name, &const_COMPRESSION_ZSTD_MIN_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_COMPRESSION_ZSTD_MIN_name);
-#endif
-#if defined(HAVE_REDIS_ZSTD)
-
-	zval const_COMPRESSION_ZSTD_MAX_value;
-	ZVAL_LONG(&const_COMPRESSION_ZSTD_MAX_value, ZSTD_maxCLevel());
-	zend_string *const_COMPRESSION_ZSTD_MAX_name = zend_string_init_interned("COMPRESSION_ZSTD_MAX", sizeof("COMPRESSION_ZSTD_MAX") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_COMPRESSION_ZSTD_MAX_name, &const_COMPRESSION_ZSTD_MAX_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_COMPRESSION_ZSTD_MAX_name);
-#endif
-#if defined(HAVE_REDIS_LZ4)
-
-	zval const_COMPRESSION_LZ4_value;
-	ZVAL_LONG(&const_COMPRESSION_LZ4_value, REDIS_COMPRESSION_LZ4);
-	zend_string *const_COMPRESSION_LZ4_name = zend_string_init_interned("COMPRESSION_LZ4", sizeof("COMPRESSION_LZ4") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_COMPRESSION_LZ4_name, &const_COMPRESSION_LZ4_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_COMPRESSION_LZ4_name);
-#endif
-
+#if 0
 	zval const_OPT_SCAN_value;
 	ZVAL_LONG(&const_OPT_SCAN_value, REDIS_OPT_SCAN);
 	zend_string *const_OPT_SCAN_name = zend_string_init_interned("OPT_SCAN", sizeof("OPT_SCAN") - 1, 1);
@@ -1964,7 +1805,7 @@ static zend_class_entry *register_class_Redis(void)
 	zend_string *const_SCAN_NOPREFIX_name = zend_string_init_interned("SCAN_NOPREFIX", sizeof("SCAN_NOPREFIX") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_SCAN_NOPREFIX_name, &const_SCAN_NOPREFIX_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_SCAN_NOPREFIX_name);
-
+#endif
 	zval const_BEFORE_value;
 	zend_string *const_BEFORE_value_str = zend_string_init("before", strlen("before"), 1);
 	ZVAL_STR(&const_BEFORE_value, const_BEFORE_value_str);
@@ -1992,12 +1833,6 @@ static zend_class_entry *register_class_Redis(void)
 	zend_string *const_RIGHT_name = zend_string_init_interned("RIGHT", sizeof("RIGHT") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_RIGHT_name, &const_RIGHT_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_RIGHT_name);
-
-	zval const_OPT_MAX_RETRIES_value;
-	ZVAL_LONG(&const_OPT_MAX_RETRIES_value, REDIS_OPT_MAX_RETRIES);
-	zend_string *const_OPT_MAX_RETRIES_name = zend_string_init_interned("OPT_MAX_RETRIES", sizeof("OPT_MAX_RETRIES") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_OPT_MAX_RETRIES_name, &const_OPT_MAX_RETRIES_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_OPT_MAX_RETRIES_name);
 
 #if (PHP_VERSION_ID >= 80000)
 

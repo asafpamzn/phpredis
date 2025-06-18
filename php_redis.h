@@ -45,10 +45,6 @@ PHP_MINIT_FUNCTION(redis);
 PHP_MSHUTDOWN_FUNCTION(redis);
 PHP_MINFO_FUNCTION(redis);
 
-PHP_REDIS_API int redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
-
-PHP_REDIS_API int redis_response_enqueued(RedisSock *redis_sock);
-
 extern zend_module_entry redis_module_entry;
 
 #define redis_module_ptr &redis_module_entry
