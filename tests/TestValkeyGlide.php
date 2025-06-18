@@ -23,8 +23,8 @@ function getClassArray($classes) {
 
 function getTestClass($class) {
     $valid_classes = [
-        'redis'         => 'ValkeyGlide_Test',                
-        'rediscluster'  => 'ValkeyGlide_Cluster_Test'
+        'valkeyglide'         => 'ValkeyGlide_Test',                
+        'valkeyglidecluster'  => 'ValkeyGlide_Cluster_Test'
     ];
 
     /* Return early if the class is one of our built-in ones */
@@ -52,7 +52,7 @@ ini_set( 'display_errors','1');
 $opt = getopt('', ['host:', 'port:', 'class:', 'test:', 'nocolors', 'user:', 'auth:']);
 
 /* The test class(es) we want to run */
-$classes = getClassArray($opt['class'] ?? 'redis');
+$classes = getClassArray($opt['class'] ?? 'valkeyglide');
 
 $colorize = !isset($opt['nocolors']);
 
