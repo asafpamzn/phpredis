@@ -510,10 +510,11 @@ int execute_acl_command(zval *object, int argc, zval *return_value)
     return 0;
 }
 
-int execute_object_command(const void *glide_client,
-                           const char *subcommand, size_t subcommand_len,
-                           const char *key, size_t key_len,
-                           zval *return_value)
+/* Implementation of the OBJECT command with the original signature */
+int execute_object_command_impl(const void *glide_client,
+                                const char *subcommand, size_t subcommand_len,
+                                const char *key, size_t key_len,
+                                zval *return_value)
 {
     CommandResult *result = NULL;
     int ret_val = -1; /* Default to error */
@@ -617,4 +618,35 @@ int execute_object_command(const void *glide_client,
     free_command_result(result);
 
     return ret_val;
+}
+
+/* New execute_object_command function with standardized signature that follows the pattern */
+int execute_object_command(zval *object, int argc, zval *return_value)
+{
+    redis_object *redis;
+    char *key = NULL, *subcommand = NULL;
+    size_t key_len, subcommand_len;
+
+    /* Parse parameters */
+    if (zend_parse_method_parameters(argc, object, "Oss",
+                                     &object, redis_ce, &subcommand, &subcommand_len,
+                                     &key, &key_len) == FAILURE)
+    {
+        return 0;
+    }
+
+    /* Get Redis object */
+    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+
+    /* If we have a Glide client, use it */
+    if (redis->glide_client)
+    {
+        /* Execute the OBJECT command using the Glide client via the implementation function */
+        if (execute_object_command_impl(redis->glide_client, subcommand, subcommand_len, key, key_len, return_value) >= 0)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
 }

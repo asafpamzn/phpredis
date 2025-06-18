@@ -63,35 +63,7 @@ extern zend_class_entry *redis_exception_ce;
 #endif
 
 /* {{{ proto mixed Redis::object(string subcommand, string key) */
-PHP_METHOD(Redis, object)
-{
-    zval *object;
-    redis_object *redis;
-    char *key = NULL, *subcommand = NULL;
-    size_t key_len, subcommand_len;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss",
-                                     &object, redis_ce, &subcommand, &subcommand_len,
-                                     &key, &key_len) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Get Redis object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
-
-    /* If we have a Glide client, use it */
-    if (redis->glide_client)
-    {
-        /* Execute the OBJECT command using the Glide client */
-        if (execute_object_command(redis->glide_client, subcommand, subcommand_len, key, key_len, return_value) >= 0)
-        {
-            return;
-        }
-        RETURN_FALSE;
-    }
-}
+OBJECT_METHOD_IMPL(Redis)
 /* }}} */
 
 /* {{{ proto array Redis::zRange(string key, mixed start, mixed end [, bool|array options]) */

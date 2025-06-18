@@ -141,10 +141,7 @@ extern int execute_pttl_command(zval *object, int argc, zval *return_value);
 int execute_brpoplpush_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len, zend_long timeout, char **result, size_t *result_len);
 
 /* Object operations */
-int execute_object_command(const void *glide_client,
-                           const char *subcommand, size_t subcommand_len,
-                           const char *key, size_t key_len,
-                           zval *return_value);
+int execute_object_command(zval *object, int argc, zval *return_value);
 
 /* Unified command functions */
 extern int execute_watch_command(zval *object, int argc, zval *return_value);

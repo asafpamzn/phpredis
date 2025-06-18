@@ -740,56 +740,13 @@ PHP_METHOD(Redis, _unpack)
 /* {{{ proto Redis::getLastError() */
 PHP_METHOD(Redis, getLastError)
 {
-#if 0
-    zval *object;
-    RedisSock *redis_sock;
 
-    // Grab our object
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-                                     &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    // Grab socket
-    if ((redis_sock = redis_sock_get_instance(object, 0)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Return our last error or NULL if we don't have one */
-    if (redis_sock->err)
-    {
-        RETURN_STRINGL(ZSTR_VAL(redis_sock->err), ZSTR_LEN(redis_sock->err));
-    }
-#endif
     RETURN_NULL();
 }
 
 /* {{{ proto Redis::clearLastError() */
 PHP_METHOD(Redis, clearLastError)
 {
-    zval *object;
-    RedisSock *redis_sock;
-
-    // Grab our object
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-                                     &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-    // Grab socket
-    if ((redis_sock = redis_sock_get_instance(object, 0)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-
-    // Clear error message
-    if (redis_sock->err)
-    {
-        zend_string_release(redis_sock->err);
-        redis_sock->err = NULL;
-    }
 
     RETURN_TRUE;
 }
@@ -799,33 +756,7 @@ PHP_METHOD(Redis, clearLastError)
  */
 PHP_METHOD(Redis, getMode)
 {
-    zval *object;
-    RedisSock *redis_sock;
-
-    /* Grab our object */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Grab socket */
-    if ((redis_sock = redis_sock_get_instance(object, 0)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-
-    if (IS_PIPELINE(redis_sock))
-    {
-        RETVAL_LONG(PIPELINE);
-    }
-    else if (IS_MULTI(redis_sock))
-    {
-        RETVAL_LONG(MULTI);
-    }
-    else
-    {
-        RETVAL_LONG(ATOMIC);
-    }
+    RETURN_FALSE;
 }
 
 /*
@@ -835,96 +766,37 @@ PHP_METHOD(Redis, getMode)
 /* {{{ proto Redis::IsConnected */
 PHP_METHOD(Redis, isConnected)
 {
-    zval *object;
-    RedisSock *redis_sock;
-
-    /* Grab our object */
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &object, redis_ce) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Grab socket */
-    if ((redis_sock = redis_sock_get_instance(object, 1)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-
-    RETURN_BOOL(redis_sock->status >= REDIS_SOCK_STATUS_CONNECTED);
+    RETURN_FALSE;
 }
 
 /* {{{ proto Redis::getHost() */
 PHP_METHOD(Redis, getHost)
 {
-    RedisSock *redis_sock;
 
-    if ((redis_sock = redis_sock_get_connected(INTERNAL_FUNCTION_PARAM_PASSTHRU)))
-    {
-        RETURN_STRINGL(ZSTR_VAL(redis_sock->host), ZSTR_LEN(redis_sock->host));
-    }
-    else
-    {
-        RETURN_FALSE;
-    }
+    RETURN_FALSE;
 }
 
 /* {{{ proto Redis::getPort() */
 PHP_METHOD(Redis, getPort)
 {
-    RedisSock *redis_sock;
 
-    if ((redis_sock = redis_sock_get_connected(INTERNAL_FUNCTION_PARAM_PASSTHRU)))
-    {
-        /* Return our port */
-        RETURN_LONG(redis_sock->port);
-    }
-    else
-    {
-        RETURN_FALSE;
-    }
+    RETURN_FALSE;
 }
 
 /* {{{ proto Redis::getDBNum */
 PHP_METHOD(Redis, getDBNum)
 {
-    RedisSock *redis_sock;
-
-    if ((redis_sock = redis_sock_get_connected(INTERNAL_FUNCTION_PARAM_PASSTHRU)))
-    {
-        /* Return our db number */
-        RETURN_LONG(redis_sock->dbNumber);
-    }
-    else
-    {
-        RETURN_FALSE;
-    }
+    RETURN_FALSE;
 }
 
 PHP_METHOD(Redis, getTransferredBytes)
 {
-    RedisSock *redis_sock;
-
-    if ((redis_sock = redis_sock_get_instance(getThis(), 0)) == NULL)
-    {
-        RETURN_THROWS();
-    }
-
-    array_init_size(return_value, 2);
-    add_next_index_long(return_value, redis_sock->txBytes);
-    add_next_index_long(return_value, redis_sock->rxBytes);
+    RETURN_FALSE;
 }
 
 PHP_METHOD(Redis, clearTransferredBytes)
 {
-    RedisSock *redis_sock;
-
-    if ((redis_sock = redis_sock_get_instance(getThis(), 0)) == NULL)
-    {
-        RETURN_THROWS();
-    }
-
-    redis_sock->txBytes = 0;
-    redis_sock->rxBytes = 0;
+    RETURN_FALSE;
 }
 
 /* Helper to format any combination of SCAN arguments */
