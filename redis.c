@@ -162,14 +162,7 @@ zend_object_handlers redis_object_handlers;
  */
 PHP_METHOD(Redis, close)
 {
-#if 0
-    RedisSock *redis_sock = redis_sock_get_connected(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
-    if (redis_sock_disconnect(redis_sock, 1, 1) == SUCCESS)
-    {
-        RETURN_TRUE;
-    }
-#endif
     RETURN_FALSE;
 }
 
@@ -215,92 +208,6 @@ create_redis_object(zend_class_entry *ce)
     redis->std.handlers = &redis_object_handlers;
 
     return &redis->std;
-}
-
-static zend_always_inline RedisSock *
-redis_sock_get_instance(zval *id, int no_throw)
-{
-
-    return NULL;
-}
-
-static zend_never_inline ZEND_COLD void redis_sock_throw_exception(RedisSock *redis_sock)
-{
-    char *errmsg = NULL;
-    if (redis_sock->status == REDIS_SOCK_STATUS_AUTHENTICATED)
-    {
-        if (redis_sock->err != NULL)
-        {
-            spprintf(&errmsg, 0, "Could not select database %ld '%s'", redis_sock->dbNumber, ZSTR_VAL(redis_sock->err));
-        }
-        else
-        {
-            spprintf(&errmsg, 0, "Could not select database %ld", redis_sock->dbNumber);
-        }
-    }
-    else if (redis_sock->status == REDIS_SOCK_STATUS_CONNECTED)
-    {
-        if (redis_sock->err != NULL)
-        {
-            spprintf(&errmsg, 0, "Could not authenticate '%s'", ZSTR_VAL(redis_sock->err));
-        }
-        else
-        {
-            spprintf(&errmsg, 0, "Could not authenticate");
-        }
-    }
-    else
-    {
-        if (redis_sock->port < 0)
-        {
-            spprintf(&errmsg, 0, "Redis server %s went away", ZSTR_VAL(redis_sock->host));
-        }
-        else
-        {
-            spprintf(&errmsg, 0, "Redis server %s:%d went away", ZSTR_VAL(redis_sock->host), redis_sock->port);
-        }
-    }
-
-    efree(errmsg);
-}
-
-/**
- * redis_sock_get
- */
-PHP_REDIS_API RedisSock *
-redis_sock_get(zval *id, int no_throw)
-{
-    RedisSock *redis_sock;
-
-    if ((redis_sock = redis_sock_get_instance(id, no_throw)) == NULL)
-    {
-        return NULL;
-    }
-
-    return redis_sock;
-}
-
-/**
- * redis_sock_get_direct
- * Returns our attached RedisSock pointer if we're connected
- */
-PHP_REDIS_API RedisSock *redis_sock_get_connected(INTERNAL_FUNCTION_PARAMETERS)
-{
-    zval *object;
-    RedisSock *redis_sock;
-
-    // If we can't grab our object, or get a socket, or we're not connected,
-    // return NULL
-    if ((zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-                                      &object, redis_ce) == FAILURE) ||
-        (redis_sock = redis_sock_get(object, 1)) == NULL ||
-        redis_sock->status < REDIS_SOCK_STATUS_CONNECTED)
-    {
-        return NULL;
-    }
-
-    /* Return our socket */
-    return redis_sock;
 }
 
 static ZEND_RSRC_DTOR_FUNC(redis_connections_pool_dtor)
@@ -524,59 +431,8 @@ PHP_METHOD(Redis, failover)
 }
 /* }}} */
 
-PHP_REDIS_API int redis_sock_read_multibulk_multi_reply(INTERNAL_FUNCTION_PARAMETERS,
-                                                        RedisSock *redis_sock, zval *z_tab)
-{
-
-    return 0; // redis_sock_read_multibulk_multi_reply_loop(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-              //                                        redis_sock, z_tab);
-}
-
-PHP_REDIS_API int
-redis_response_enqueued(RedisSock *redis_sock)
-{
-
-    return 0;
-}
-
-PHP_REDIS_API int
-redis_sock_read_multibulk_multi_reply_loop(INTERNAL_FUNCTION_PARAMETERS,
-                                           RedisSock *redis_sock, zval *z_tab)
-{
-
-    return SUCCESS;
-}
-
 PHP_METHOD(Redis, pipeline)
 {
-    RedisSock *redis_sock;
-    zval *object;
-
-    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-                                     "O", &object, redis_ce) == FAILURE ||
-        (redis_sock = redis_sock_get(object, 0)) == NULL)
-    {
-        RETURN_FALSE;
-    }
-
-    /* User cannot enter MULTI mode if already in a pipeline */
-    if (IS_MULTI(redis_sock))
-    {
-        php_error_docref(NULL, E_ERROR, "Can't activate pipeline in multi mode!");
-        RETURN_FALSE;
-    }
-
-    /* Enable pipeline mode unless we're already in that mode in which case this
-     * is just a NO OP */
-    if (IS_ATOMIC(redis_sock))
-    {
-        /* NB : we keep the function fold, to detect the last function.
-         * We need the response format of the n - 1 command. So, we can delete
-         * when n > 2, the { 1 .. n - 2} commands */
-        REDIS_ENABLE_MODE(redis_sock, PIPELINE);
-    }
-
-    RETURN_ZVAL(getThis(), 1, 0);
 }
 
 /* {{{ proto long Redis::publish(string channel, string msg) */
