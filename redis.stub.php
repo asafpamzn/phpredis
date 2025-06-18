@@ -514,85 +514,9 @@ class ValkeyGlide {
 
     public function __destruct();
 
-    /**
-     * Compress a value with the currently configured compressor as set with
-     * ValkeyGlide::setOption().
-     *
-     * @see ValkeyGlide::setOption()
-     *
-     * @param  string $value The value to be compressed
-     * @return string        The compressed result
-     *
-     */
-    public function _compress(string $value): string;
+  
 
-    /**
-     * Uncompress the provided argument that has been compressed with the
-     * currently configured compressor as set with ValkeyGlide::setOption().
-     *
-     * @see ValkeyGlide::setOption()
-     *
-     * @param  string $value  The compressed value to uncompress.
-     * @return string         The uncompressed result.
-     *
-     */
-    public function _uncompress(string $value): string;
-
-    /**
-     * Prefix the passed argument with the currently set key prefix as set
-     * with ValkeyGlide::setOption().
-     *
-     * @param string  $key The key/string to prefix
-     * @return string      The prefixed string
-     *
-     */
-    public function _prefix(string $key): string;
-
-    /**
-     * Serialize the provided value with the currently set serializer as set
-     * with ValkeyGlide::setOption().
-     *
-     * @see ValkeyGlide::setOption()
-     *
-     * @param mixed $value The value to serialize
-     * @return string      The serialized result
-     *
-     */
-    public function _serialize(mixed $value): string;
-
-    /**
-     * Unserialize the passed argument with the currently set serializer as set
-     * with ValkeyGlide::setOption().
-     *
-     * @see ValkeyGlide::setOption()
-     *
-     * @param string $value The value to unserialize
-     * @return mixed        The unserialized result
-     *
-     */
-    public function _unserialize(string $value): mixed;
-
-    /**
-     * Pack the provided value with the configured serializer and compressor
-     * as set with ValkeyGlide::setOption().
-     *
-     * @param  mixed $value  The value to pack
-     * @return string        The packed result having been serialized and
-     *                       compressed.
-     */
-    public function _pack(mixed $value): string;
-
-    /**
-     * Unpack the provided value with the configured compressor and serializer
-     * as set with ValkeyGlide::setOption().
-     *
-     * @param  string $value  The value which has been serialized and compressed.
-     * @return mixed          The uncompressed and eserialized value.
-     *
-     */
-    public function _unpack(string $value): mixed;
-
-    public function acl(string $subcmd, string ...$args): mixed;
+    
 
     /**
      * Append data to a ValkeyGlide STRING key.
@@ -625,30 +549,7 @@ class ValkeyGlide {
      */
     public function auth(#[\SensitiveParameter] mixed $credentials): ValkeyGlide|bool;
 
-    /**
-     * Execute a save of the ValkeyGlide database in the background.
-     *
-     * @see https://redis.io/commands/bgsave
-     *
-     * @return ValkeyGlide|bool Whether the command was successful.
-     */
-    public function bgSave(): ValkeyGlide|bool;
 
-    /**
-     * Asynchronously rewrite ValkeyGlide' append-only file
-     *
-     * @see https://redis.io/commands/bgrewriteaof
-     *
-     * @return ValkeyGlide|bool Whether the command was successful.
-     */
-    public function bgrewriteaof(): ValkeyGlide|bool;
-
-    /**
-     * @see https://redis.io/commands/waitaof
-     *
-     * @return ValkeyGlide|array
-     */
-    public function waitaof(int $numlocal, int $numreplicas, int $timeout): ValkeyGlide|array|false;
 
     /**
      * Count the number of set bits in a ValkeyGlide string.
@@ -3197,47 +3098,9 @@ class ValkeyGlide {
      */
     public function sismember(string $key, mixed $value): ValkeyGlide|bool;
 
-    /**
-     * Turn a redis instance into a replica of another or promote a replica
-     * to a primary.
-     *
-     * This method and the corresponding command in ValkeyGlide has been marked deprecated
-     * and users should instead use ValkeyGlide::replicaof() if connecting to redis-server
-     * >= 5.0.0.
-     *
-     * @deprecated
-     *
-     * @see https://redis.io/commands/slaveof
-     * @see https://redis.io/commands/replicaof
-     * @see ValkeyGlide::replicaof()
-     */
-    public function slaveof(?string $host = null, int $port = 6379): ValkeyGlide|bool;
+    
 
-    /**
-     * Used to turn a ValkeyGlide instance into a replica of another, or to remove
-     * replica status promoting the instance to a primary.
-     *
-     * @see https://redis.io/commands/replicaof
-     * @see https://redis.io/commands/slaveof
-     * @see ValkeyGlide::slaveof()
-     *
-     * @param string $host The host of the primary to start replicating.
-     * @param string $port The port of the primary to start replicating.
-     *
-     * @return ValkeyGlide|bool Success if we were successfully able to start replicating a primary or
-     *                    were able to promote the replicat to a primary.
-     *
-     * @example
-     * $redis = new ValkeyGlide(['host' => 'localhost']);
-     *
-     * // Attempt to become a replica of a ValkeyGlide instance at 127.0.0.1:9999
-     * $redis->replicaof('127.0.0.1', 9999);
-     *
-     * // When passed no arguments, PhpValkeyGlide will deliver the command `REPLICAOF NO ONE`
-     * // attempting to promote the instance to a primary.
-     * $redis->replicaof();
-     */
-    public function replicaof(?string $host = null, int $port = 6379): ValkeyGlide|bool;
+ 
 
     /**
      * Update one or more keys last modified metadata.
@@ -3253,33 +3116,7 @@ class ValkeyGlide {
      */
     public function touch(array|string $key_or_array, string ...$more_keys): ValkeyGlide|int|false;
 
-    /**
-     * Interact with ValkeyGlide' slowlog functionality in various ways, depending
-     * on the value of 'operation'.
-     *
-     * @category administration
-     *
-     * @param string $operation  The operation you wish to perform.  This can
-     *                           be one of the following values:
-     *                           'GET'   - Retrieve the ValkeyGlide slowlog as an array.
-     *                           'LEN'   - Retrieve the length of the slowlog.
-     *                           'RESET' - Remove all slowlog entries.
-     * @param int    $length     This optional argument can be passed when operation
-     *                           is 'get' and will specify how many elements to retrieve.
-     *                           If omitted ValkeyGlide will send up to a default number of
-     *                           entries, which is configurable.
-     *
-     *                           Note:  With ValkeyGlide >= 7.0.0 you can send -1 to mean "all".
-     *
-     * @return mixed
-     *
-     * @see https://redis.io/commands/slowlog/
-     *
-     * @example $redis->slowlog('get', -1);   // Retrieve all slowlog entries.
-     * @example $redis->slowlog('len');       // Retrieve slowlog length.
-     * @example $redis->slowlog('reset');     // Reset the slowlog.
-     */
-    public function slowlog(string $operation, int $length = 0): mixed;
+    
 
     /**
      * Sort the contents of a ValkeyGlide key in various ways.

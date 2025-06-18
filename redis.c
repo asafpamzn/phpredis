@@ -186,17 +186,7 @@ PHP_METHOD(ValkeyGlide, close)
 }
 /* }}} */
 
-PHP_REDIS_API int redis_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
-{
-    /* TODO: Implement ValkeyGlide connection logic */
-    return SUCCESS;
-}
-
 /* Basic method stubs - these need to be implemented with ValkeyGlide */
-PHP_METHOD(ValkeyGlide, save) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, bgSave) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, lastSave) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, failover) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, pipeline) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, publish) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, psubscribe) { /* TODO: Implement */ }
@@ -205,37 +195,16 @@ PHP_METHOD(ValkeyGlide, subscribe) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, unsubscribe) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, punsubscribe) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, sunsubscribe) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, waitaof) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, bgrewriteaof) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, slaveof) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, replicaof) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, getOption) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, slowlog) { /* TODO: Implement */ }
+
 PHP_METHOD(ValkeyGlide, pubsub) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, eval) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, eval_ro) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, evalsha) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, evalsha_ro) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, script) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, debug) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, migrate) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, _prefix) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, _serialize) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, _unserialize) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, _compress) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, _uncompress) { /* TODO: Implement */ }
+
 PHP_METHOD(ValkeyGlide, _pack) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, _unpack) { /* TODO: Implement */ }
-
-PHP_METHOD(ValkeyGlide, getLastError)
-{
-    RETURN_NULL();
-}
-
-PHP_METHOD(ValkeyGlide, clearLastError)
-{
-    RETURN_TRUE;
-}
 
 PHP_METHOD(ValkeyGlide, getMode)
 {
