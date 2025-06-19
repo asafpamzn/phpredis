@@ -45,11 +45,6 @@ PHP_MINIT_FUNCTION(redis);
 PHP_MSHUTDOWN_FUNCTION(redis);
 PHP_MINFO_FUNCTION(redis);
 
-extern zend_module_entry redis_module_entry;
-
-#define redis_module_ptr &redis_module_entry
-#define phpext_redis_ptr redis_module_ptr
-
 #endif
 
 /*

@@ -1,4 +1,4 @@
-<?php defined('PHPREDIS_TESTRUN') or die('Use TestValkeyGlide.php to run tests!\n');
+<?php defined('VALKEY_GLIDE_PHP_TESTRUN') or die('Use TestValkeyGlide.php to run tests!\n');
 
 require_once __DIR__ . '/TestSuite.php';
 

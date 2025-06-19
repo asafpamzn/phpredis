@@ -1,4 +1,4 @@
-<?php define('PHPREDIS_TESTRUN', true);
+<?php define('VALKEY_GLIDE_PHP_TESTRUN', true);
 
 require_once __DIR__ . "/TestSuite.php";
 require_once __DIR__ . "/ValkeyGlideTest.php";

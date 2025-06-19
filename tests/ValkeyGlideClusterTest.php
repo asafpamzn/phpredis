@@ -1,4 +1,4 @@
-<?php defined('PHPREDIS_TESTRUN') or die("Use TestValkeyGlide.php to run tests!\n");
+<?php defined('VALKEY_GLIDE_PHP_TESTRUN') or die("Use TestValkeyGlide.php to run tests!\n");
 
 require_once __DIR__ . "/ValkeyGlideTest.php";
 
@@ -803,7 +803,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
     }
 
     protected function sessionPrefix(): string {
-        return 'PHPREDIS_CLUSTER_SESSION:';
+        return 'VALKEY_GLIDE_PHP_CLUSTER_SESSION:';
     }
 
     protected function sessionSaveHandler(): string {

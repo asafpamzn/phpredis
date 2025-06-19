@@ -841,7 +841,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     * Use the portable `ZEND_LONG_FORMAT` family instead of C format specifiers
       [b9b383f4](Remi Collet)
     * PHP 8 compatibility [9ee94ca4, 7e4c7b3e] (Pavlo Yatsukhnenko)
-    * Refactor PHPREDIS_GET_OBJECT macro [d5dadaf6, 190c0d34]
+    * Refactor VALKEY_GLIDE_PHP_GET_OBJECT macro [d5dadaf6, 190c0d34]
       (Pavlo Yatsukhnenko)
     * Fix documentation showing lPush and rPush are variadic [6808cd6a]
       (Michael Grunder)

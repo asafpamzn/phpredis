@@ -1,4 +1,4 @@
-<?php defined('PHPREDIS_TESTRUN') or die("Use TestValkeyGlide.php to run tests!\n");
+<?php defined('VALKEY_GLIDE_PHP_TESTRUN') or die("Use TestValkeyGlide.php to run tests!\n");
 
 /* A specific exception for when we skip a test */
 class TestSkippedException extends Exception {}
@@ -547,7 +547,7 @@ class TestSuite
     public static function loadTestClass($class) {
         $filename = "{$class}.php";
 
-        if (($sp = getenv('PHPREDIS_TEST_SEARCH_PATH'))) {
+        if (($sp = getenv('VALKEY_GLIDE_PHP_TEST_SEARCH_PATH'))) {
             $fullname = self::findFile($sp, $filename);
         } else {
             $fullname = self::findFile(__DIR__, $filename);
