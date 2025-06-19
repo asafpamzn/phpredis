@@ -379,22 +379,6 @@ int execute_zmpop_command(zval *object, int argc, zval *return_value);
 int execute_bzpopmax_command(zval *object, int argc, zval *return_value);
 int execute_bzpopmin_command(zval *object, int argc, zval *return_value);
 
-/* ====================================================================
- * UTILITY MACROS
- * ==================================================================== */
-
-/**
- * Check if glide client is available and return FALSE if not
- */
-#define CHECK_GLIDE_CLIENT(redis)               \
-    do                                          \
-    {                                           \
-        if (!(redis) || !(redis)->glide_client) \
-        {                                       \
-            RETURN_FALSE;                       \
-        }                                       \
-    } while (0)
-
 /**
  * Initialize array return value and check for allocation success
  */
