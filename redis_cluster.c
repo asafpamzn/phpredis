@@ -18,7 +18,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#if 0
+#if 1
 #include "common.h"
 
 #include "ext/standard/info.h"
@@ -32,23 +32,16 @@
 #include <SAPI.h>
 #include "valkey_glide_commands_common.h"
 
-zend_class_entry *redis_cluster_ce;
+zend_class_entry *valkey_glide_cluster_ce;
 
 /* Exception handler */
-zend_class_entry *redis_cluster_exception_ce;
-
-#if PHP_VERSION_ID < 80000
-#include "redis_cluster_legacy_arginfo.h"
-#else
-#include "zend_attributes.h"
-#include "redis_cluster_arginfo.h"
-#endif
+zend_class_entry *valkey_glide_cluster_exception_ce;
 
 PHP_MINIT_FUNCTION(redis_cluster)
 {
-    redis_cluster_ce = register_class_ValkeyGlideCluster();
+    valkey_glide_cluster_ce = register_class_ValkeyGlideCluster();
 
-    redis_cluster_exception_ce = register_class_ValkeyGlideClusterException(spl_ce_RuntimeException);
+    valeky_glide_cluster_exception_ce = register_class_ValkeyGlideClusterException(spl_ce_RuntimeException);
 
     return SUCCESS;
 }
@@ -73,7 +66,7 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
 
     // Parse arguments
     if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-                                     "Os!|addbza!", &object, redis_cluster_ce, &name,
+                                     "Os!|addbza!", &object, valkey_glide_cluster_ce, &name,
                                      &name_len, &z_seeds, &timeout, &read_timeout,
                                      &persistent, &z_auth, &context) == FAILURE)
     {
@@ -90,7 +83,7 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
     config.request_timeout_ = 250;
     config.client_name_ = "stam";
     config.read_from_ = Primary;
-    config.is_cluster = false;
+    config.is_cluster = true;
 
     valkey_glide->glide_client = create_glide_client(&config);
 }
@@ -651,17 +644,11 @@ PHP_METHOD(ValkeyGlideCluster, getset)
 /* }}} */
 
 /* {{{ proto int ValkeyGlideCluster::exists(string $key, string ...$more_keys) */
-PHP_METHOD(ValkeyGlideCluster, exists)
-{
-    CLUSTER_PROCESS_KW_CMD("EXISTS", redis_varkey_cmd, cluster_long_resp, 1);
-}
+EXISTS_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
-/* {{{ proto int ValkeyGlideCluster::exists(string $key, string ...$more_keys) */
-PHP_METHOD(ValkeyGlideCluster, touch)
-{
-    CLUSTER_PROCESS_KW_CMD("TOUCH", redis_varkey_cmd, cluster_long_resp, 0);
-}
+/* {{{ proto int ValkeyGlideCluster::touch(string $key, string ...$more_keys) */
+TOUCH_METHOD_IMPL(ValkeyGlideCluster)
 
 /* }}} */
 /* {{{ proto array ValkeyGlide::keys(string pattern) */
@@ -734,10 +721,7 @@ PHP_METHOD(ValkeyGlideCluster, keys)
 /* }}} */
 
 /* {{{ proto int ValkeyGlideCluster::type(string key) */
-PHP_METHOD(ValkeyGlideCluster, type)
-{
-    CLUSTER_PROCESS_KW_CMD("TYPE", redis_key_cmd, cluster_type_resp, 1);
-}
+TYPE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::pop(string key, [int count = 0]) */
@@ -791,10 +775,7 @@ PHP_METHOD(ValkeyGlideCluster, srandmember)
 }
 
 /* {{{ proto string ValkeyGlideCluster::strlen(string key) */
-PHP_METHOD(ValkeyGlideCluster, strlen)
-{
-    CLUSTER_PROCESS_KW_CMD("STRLEN", redis_key_cmd, cluster_long_resp, 1);
-}
+STRLEN_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto long ValkeyGlideCluster::lpush(string key, string val1, ... valN) */
 PHP_METHOD(ValkeyGlideCluster, lpush)
@@ -1004,24 +985,15 @@ PHP_METHOD(ValkeyGlideCluster, persist)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::ttl(string key) */
-PHP_METHOD(ValkeyGlideCluster, ttl)
-{
-    CLUSTER_PROCESS_KW_CMD("TTL", redis_key_cmd, cluster_long_resp, 1);
-}
+TTL_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::pttl(string key) */
-PHP_METHOD(ValkeyGlideCluster, pttl)
-{
-    CLUSTER_PROCESS_KW_CMD("PTTL", redis_key_cmd, cluster_long_resp, 1);
-}
+PTTL_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::zcard(string key) */
-PHP_METHOD(ValkeyGlideCluster, zcard)
-{
-    CLUSTER_PROCESS_KW_CMD("ZCARD", redis_key_cmd, cluster_long_resp, 1);
-}
+ZCARD_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto double ValkeyGlideCluster::zscore(string key) */
@@ -1220,19 +1192,11 @@ PHP_METHOD(ValkeyGlideCluster, decrby)
 /* }}} */
 
 /* {{{ proto double ValkeyGlideCluster::incrbyfloat(string key, double val) */
-PHP_METHOD(ValkeyGlideCluster, incrbyfloat)
-{
-    CLUSTER_PROCESS_KW_CMD("INCRBYFLOAT", redis_key_dbl_cmd,
-                           cluster_dbl_resp, 0);
-}
+INCRBYFLOAT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto double ValkeyGlideCluster::decrbyfloat(string key, double val) */
-PHP_METHOD(ValkeyGlideCluster, decrbyfloat)
-{
-    CLUSTER_PROCESS_KW_CMD("DECRBYFLOAT", redis_key_dbl_cmd,
-                           cluster_dbl_resp, 0);
-}
+DECRBYFLOAT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::expire(string key, long sec) */
@@ -1275,17 +1239,11 @@ PHP_METHOD(ValkeyGlideCluster, pexpiretime)
 }
 
 /* {{{ proto long ValkeyGlideCluster::append(string key, string val) */
-PHP_METHOD(ValkeyGlideCluster, append)
-{
-    CLUSTER_PROCESS_KW_CMD("APPEND", redis_kv_cmd, cluster_long_resp, 0);
-}
+APPEND_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::getbit(string key, long val) */
-PHP_METHOD(ValkeyGlideCluster, getbit)
-{
-    CLUSTER_PROCESS_KW_CMD("GETBIT", redis_key_long_cmd, cluster_long_resp, 1);
-}
+GETBIT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 PHP_METHOD(ValkeyGlideCluster, expiremember)
@@ -1299,10 +1257,7 @@ PHP_METHOD(ValkeyGlideCluster, expirememberat)
 }
 
 /* {{{ proto long ValkeyGlideCluster::setbit(string key, long offset, bool onoff) */
-PHP_METHOD(ValkeyGlideCluster, setbit)
-{
-    CLUSTER_PROCESS_CMD(setbit, cluster_long_resp, 0);
-}
+SETBIT_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto long ValkeyGlideCluster::bitop(string op,string key,[string key2,...]) */
 PHP_METHOD(ValkeyGlideCluster, bitop)
@@ -1418,24 +1373,15 @@ PHP_METHOD(ValkeyGlideCluster, renamenx)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::pfcount(string key) */
-PHP_METHOD(ValkeyGlideCluster, pfcount)
-{
-    CLUSTER_PROCESS_CMD(pfcount, cluster_long_resp, 1);
-}
+PFCOUNT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::pfadd(string key, array vals) */
-PHP_METHOD(ValkeyGlideCluster, pfadd)
-{
-    CLUSTER_PROCESS_CMD(pfadd, cluster_1_resp, 0);
-}
+PFADD_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::pfmerge(string key, array keys) */
-PHP_METHOD(ValkeyGlideCluster, pfmerge)
-{
-    CLUSTER_PROCESS_CMD(pfmerge, cluster_bool_resp, 0);
-}
+PFMERGE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto boolean ValkeyGlideCluster::restore(string key, long ttl, string val) */
