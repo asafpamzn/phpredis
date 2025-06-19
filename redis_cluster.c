@@ -997,16 +997,11 @@ ZCARD_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto double ValkeyGlideCluster::zscore(string key) */
-PHP_METHOD(ValkeyGlideCluster, zscore)
-{
-    CLUSTER_PROCESS_KW_CMD("ZSCORE", redis_kv_cmd, cluster_dbl_resp, 1);
-}
+ZSCORE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
-PHP_METHOD(ValkeyGlideCluster, zmscore)
-{
-    CLUSTER_PROCESS_KW_CMD("ZMSCORE", redis_key_varval_cmd, cluster_mbulk_dbl_resp, 1);
-}
+PHP_METHOD(ValkeyGlideCluster, zmscore){
+    ZMSCORE_METHOD_IMPL(ValkeyGlideCluster)}
 
 /* {{{ proto long ValkeyGlideCluster::zadd(string key,double score,string mem, ...) */
 PHP_METHOD(ValkeyGlideCluster, zadd)
@@ -1052,17 +1047,11 @@ PHP_METHOD(ValkeyGlideCluster, zrevrank)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::hlen(string key) */
-PHP_METHOD(ValkeyGlideCluster, hlen)
-{
-    CLUSTER_PROCESS_KW_CMD("HLEN", redis_key_cmd, cluster_long_resp, 1);
-}
+HLEN_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::hkeys(string key) */
-PHP_METHOD(ValkeyGlideCluster, hkeys)
-{
-    CLUSTER_PROCESS_KW_CMD("HKEYS", redis_key_cmd, cluster_mbulk_raw_resp, 1);
-}
+HKEYS_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::hvals(string key) */
