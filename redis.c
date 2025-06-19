@@ -69,19 +69,19 @@ zend_object_handlers valkey_glide_object_handlers;
 
 void free_valkey_glide_object(zend_object *object)
 {
-    valkey_glide_object *redis = PHPREDIS_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide_object *valkey_glide = PHPREDIS_GET_OBJECT(valkey_glide_object, object);
 
     /* Free the Valkey Glide client if it exists */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
-        close_glide_client(redis->glide_client);
-        redis->glide_client = NULL;
+        close_glide_client(valkey_glide->glide_client);
+        valkey_glide->glide_client = NULL;
     }
 }
 
 zend_object *create_valkey_glide_object(zend_class_entry *ce)
 {
-    valkey_glide_object *redis = ecalloc(1, sizeof(valkey_glide_object) + zend_object_properties_size(ce));
+    valkey_glide_object *valkey_glide = ecalloc(1, sizeof(valkey_glide_object) + zend_object_properties_size(ce));
 
     /* Initialize Valkey Glide client */
     ClientConfig config;
@@ -91,17 +91,17 @@ zend_object *create_valkey_glide_object(zend_class_entry *ce)
     config.client_name_ = "valkey-glide-php";
     config.read_from_ = Primary;
     config.is_cluster = false;
-    redis->glide_client = create_glide_client(&config);
+    valkey_glide->glide_client = create_glide_client(&config);
 
-    zend_object_std_init(&redis->std, ce);
-    object_properties_init(&redis->std, ce);
+    zend_object_std_init(&valkey_glide->std, ce);
+    object_properties_init(&valkey_glide->std, ce);
 
     memcpy(&valkey_glide_object_handlers, zend_get_std_object_handlers(), sizeof(valkey_glide_object_handlers));
     valkey_glide_object_handlers.offset = XtOffsetOf(valkey_glide_object, std);
     valkey_glide_object_handlers.free_obj = free_valkey_glide_object;
-    redis->std.handlers = &valkey_glide_object_handlers;
+    valkey_glide->std.handlers = &valkey_glide_object_handlers;
 
-    return &redis->std;
+    return &valkey_glide->std;
 }
 
 /**
@@ -135,14 +135,14 @@ PHP_MINFO_FUNCTION(redis)
 PHP_METHOD(ValkeyGlide, __construct)
 {
     HashTable *opts = NULL;
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
 
     ZEND_PARSE_PARAMETERS_START(0, 1)
     Z_PARAM_OPTIONAL
     Z_PARAM_ARRAY_HT_OR_NULL(opts)
     ZEND_PARSE_PARAMETERS_END_EX(RETURN_THROWS());
 
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, getThis());
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, getThis());
     /* Options handling can be added here as needed */
 }
 /* }}} */

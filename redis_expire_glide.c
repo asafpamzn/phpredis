@@ -27,7 +27,7 @@ extern zend_class_entry *redis_ce;
 /* Execute an EXPIRE command using the Valkey Glide client */
 int execute_expire_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *mode = NULL;
     size_t key_len, mode_len = 0;
     zend_long seconds;
@@ -41,10 +41,10 @@ int execute_expire_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* If mode is specified but not one of the valid options, return FALSE */
         if (mode_len > 0)
@@ -59,7 +59,7 @@ int execute_expire_command(zval *object, int argc, zval *return_value)
         }
 
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = Expire;
         args.key = key;
         args.key_len = key_len;
@@ -91,7 +91,7 @@ int execute_expire_command(zval *object, int argc, zval *return_value)
 /* Execute an EXPIREAT command using the Valkey Glide client */
 int execute_expireat_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *mode = NULL;
     size_t key_len, mode_len = 0;
     zend_long timestamp;
@@ -105,10 +105,10 @@ int execute_expireat_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* If mode is specified but not one of the valid options, return FALSE */
         if (mode_len > 0)
@@ -123,7 +123,7 @@ int execute_expireat_command(zval *object, int argc, zval *return_value)
         }
 
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = ExpireAt;
         args.key = key;
         args.key_len = key_len;
@@ -155,7 +155,7 @@ int execute_expireat_command(zval *object, int argc, zval *return_value)
 /* Execute a PEXPIRE command using the Valkey Glide client */
 int execute_pexpire_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *mode = NULL;
     size_t key_len, mode_len = 0;
     zend_long milliseconds;
@@ -169,10 +169,10 @@ int execute_pexpire_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* If mode is specified but not one of the valid options, return FALSE */
         if (mode_len > 0)
@@ -187,7 +187,7 @@ int execute_pexpire_command(zval *object, int argc, zval *return_value)
         }
 
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = PExpire;
         args.key = key;
         args.key_len = key_len;
@@ -219,7 +219,7 @@ int execute_pexpire_command(zval *object, int argc, zval *return_value)
 /* Execute a PEXPIREAT command using the Valkey Glide client */
 int execute_pexpireat_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *mode = NULL;
     size_t key_len, mode_len = 0;
     zend_long timestamp_ms;
@@ -233,10 +233,10 @@ int execute_pexpireat_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* If mode is specified but not one of the valid options, return FALSE */
         if (mode_len > 0)
@@ -251,7 +251,7 @@ int execute_pexpireat_command(zval *object, int argc, zval *return_value)
         }
 
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = PExpireAt;
         args.key = key;
         args.key_len = key_len;
@@ -283,7 +283,7 @@ int execute_pexpireat_command(zval *object, int argc, zval *return_value)
 /* Execute a PERSIST command using the Valkey Glide client */
 int execute_persist_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len;
 
@@ -295,14 +295,14 @@ int execute_persist_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* PERSIST doesn't take any additional arguments besides the key */
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = Persist;
         args.key = key;
         args.key_len = key_len;
@@ -321,7 +321,7 @@ int execute_persist_command(zval *object, int argc, zval *return_value)
 /* Execute an EXPIRETIME command using the Valkey Glide client */
 int execute_expiretime_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len;
 
@@ -333,14 +333,14 @@ int execute_expiretime_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* EXPIRETIME returns an integer (timestamp) and takes no additional arguments */
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = ExpireTime;
         args.key = key;
         args.key_len = key_len;
@@ -360,7 +360,7 @@ int execute_expiretime_command(zval *object, int argc, zval *return_value)
 /* Execute a PEXPIRETIME command using the Valkey Glide client */
 int execute_pexpiretime_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len;
 
@@ -372,14 +372,14 @@ int execute_pexpiretime_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* PEXPIRETIME returns an integer (timestamp in milliseconds) and takes no additional arguments */
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = PExpireTime;
         args.key = key;
         args.key_len = key_len;

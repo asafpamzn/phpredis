@@ -35,7 +35,7 @@ extern zend_class_entry *redis_exception_ce;
  */
 int execute_xlen_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len = 0;
     long length = 0;
@@ -48,19 +48,19 @@ int execute_xlen_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Initialize the arguments structure */
         x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.key = key;
         args.key_len = key_len;
 
         /* Use the generic command execution framework */
-        int result = execute_x_generic_command(redis->glide_client, XLen, &args, &length, process_x_int_result);
+        int result = execute_x_generic_command(valkey_glide->glide_client, XLen, &args, &length, process_x_int_result);
 
         if (result)
         {
@@ -78,7 +78,7 @@ int execute_xlen_command(zval *object, int argc, zval *return_value)
  */
 int execute_xdel_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len = 0;
     zval *z_ids;
@@ -92,21 +92,21 @@ int execute_xdel_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Initialize the arguments structure */
         x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.key = key;
         args.key_len = key_len;
         args.ids = z_ids;
         args.id_count = zend_hash_num_elements(Z_ARRVAL_P(z_ids));
 
         /* Use the generic command execution framework */
-        int result = execute_x_generic_command(redis->glide_client, XDel, &args, &count, process_x_int_result);
+        int result = execute_x_generic_command(valkey_glide->glide_client, XDel, &args, &count, process_x_int_result);
 
         if (result)
         {
@@ -124,7 +124,7 @@ int execute_xdel_command(zval *object, int argc, zval *return_value)
  */
 int execute_xack_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *group = NULL;
     size_t key_len = 0, group_len = 0;
     zval *z_ids;
@@ -139,14 +139,14 @@ int execute_xack_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Initialize the arguments structure */
         x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.key = key;
         args.key_len = key_len;
         args.group = group;
@@ -158,7 +158,7 @@ int execute_xack_command(zval *object, int argc, zval *return_value)
         count = 0;
 
         /* Use the generic command execution framework */
-        int result = execute_x_generic_command(redis->glide_client, XAck, &args, &count, process_x_int_result);
+        int result = execute_x_generic_command(valkey_glide->glide_client, XAck, &args, &count, process_x_int_result);
 
         if (result)
         {
@@ -176,7 +176,7 @@ int execute_xack_command(zval *object, int argc, zval *return_value)
  */
 int execute_xadd_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *id = NULL;
     size_t key_len = 0, id_len = 0;
     zval *z_field_values, *z_options = NULL;
@@ -240,14 +240,14 @@ int execute_xadd_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Initialize the arguments structure */
         x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.key = key;
         args.key_len = key_len;
         args.id = id;
@@ -260,7 +260,7 @@ int execute_xadd_command(zval *object, int argc, zval *return_value)
         parse_x_add_options(z_options, &args.add_opts);
 
         /* Execute the command */
-        int result = execute_x_generic_command(redis->glide_client, XAdd, &args, return_value, process_x_add_result);
+        int result = execute_x_generic_command(valkey_glide->glide_client, XAdd, &args, return_value, process_x_add_result);
 
         /* Clean up if we created options array */
         if (options_created)
@@ -280,7 +280,7 @@ int execute_xadd_command(zval *object, int argc, zval *return_value)
  */
 int execute_xtrim_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *threshold = NULL;
     size_t key_len = 0, threshold_len = 0;
     zend_bool approx = 0, minid = 0;
@@ -297,10 +297,10 @@ int execute_xtrim_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Determine strategy based on minid flag */
         const char *strategy = minid ? "MINID" : "MAXLEN";
@@ -325,7 +325,7 @@ int execute_xtrim_command(zval *object, int argc, zval *return_value)
 
         /* Initialize the arguments structure */
         x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.key = key;
         args.key_len = key_len;
         args.strategy = strategy;
@@ -338,7 +338,7 @@ int execute_xtrim_command(zval *object, int argc, zval *return_value)
         parse_x_trim_options(z_options, &args.trim_opts);
 
         /* Execute the command */
-        int result = execute_x_generic_command(redis->glide_client, XTrim, &args, &count, process_x_int_result);
+        int result = execute_x_generic_command(valkey_glide->glide_client, XTrim, &args, &count, process_x_int_result);
 
         /* Clean up if we created options array */
         if (z_options)
@@ -363,7 +363,7 @@ int execute_xtrim_command(zval *object, int argc, zval *return_value)
  */
 int execute_xrange_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *start = NULL, *end = NULL;
     size_t key_len = 0, start_len = 0, end_len = 0;
     zval *z_options = NULL;
@@ -422,14 +422,14 @@ int execute_xrange_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Initialize the arguments structure */
         x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.key = key;
         args.key_len = key_len;
         args.start = start;
@@ -442,7 +442,7 @@ int execute_xrange_command(zval *object, int argc, zval *return_value)
         parse_x_count_options(z_options, &args.range_opts);
 
         /* Use the generic command execution framework */
-        int result = execute_x_generic_command(redis->glide_client, XRange, &args, return_value, process_x_stream_result);
+        int result = execute_x_generic_command(valkey_glide->glide_client, XRange, &args, return_value, process_x_stream_result);
 
         /* Clean up if we created options array */
         if (options_created)
@@ -462,7 +462,7 @@ int execute_xrange_command(zval *object, int argc, zval *return_value)
  */
 int execute_xrevrange_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *start = NULL, *end = NULL;
     size_t key_len = 0, start_len = 0, end_len = 0;
     zval *z_options = NULL;
@@ -521,14 +521,14 @@ int execute_xrevrange_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Initialize the arguments structure */
         x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.key = key;
         args.key_len = key_len;
         /* Note: For XREVRANGE, the function parameters are already swapped (end comes before start)
@@ -544,7 +544,7 @@ int execute_xrevrange_command(zval *object, int argc, zval *return_value)
         parse_x_count_options(z_options, &args.range_opts);
 
         /* Use the generic command execution framework */
-        int result = execute_x_generic_command(redis->glide_client, XRevRange, &args, return_value, process_x_stream_result);
+        int result = execute_x_generic_command(valkey_glide->glide_client, XRevRange, &args, return_value, process_x_stream_result);
 
         /* Clean up if we created options array */
         if (options_created)
@@ -561,7 +561,7 @@ int execute_xrevrange_command(zval *object, int argc, zval *return_value)
 /* Execute an XPENDING command using the Valkey Glide client */
 int execute_xpending_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     zval *z_options = NULL;
     char *key = NULL, *group = NULL;
     char *start = NULL, *end = NULL, *consumer = NULL;
@@ -610,10 +610,10 @@ int execute_xpending_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* If we got the extended format (start, end, count), convert to options array */
         if (z_options == NULL && start != NULL)
@@ -636,7 +636,7 @@ int execute_xpending_command(zval *object, int argc, zval *return_value)
 
         /* Initialize the arguments structure */
         x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.key = key;
         args.key_len = key_len;
         args.group = group;
@@ -647,7 +647,7 @@ int execute_xpending_command(zval *object, int argc, zval *return_value)
         parse_x_pending_options(z_options, &args.pending_opts);
 
         /* Execute the command */
-        int result = execute_x_generic_command(redis->glide_client, XPending, &args, return_value, process_x_pending_result);
+        int result = execute_x_generic_command(valkey_glide->glide_client, XPending, &args, return_value, process_x_pending_result);
 
         /* Clean up if we created options array */
         if (options_created && z_options)
@@ -665,7 +665,7 @@ int execute_xpending_command(zval *object, int argc, zval *return_value)
 /* Execute an XREAD command using the Valkey Glide client */
 int execute_xread_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     zval *z_streams_and_ids, *z_options = NULL;
     long count = -1, block = -1;
 
@@ -677,10 +677,10 @@ int execute_xread_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Convert associative array to separate streams and ids arrays */
         zval z_streams, z_ids;
@@ -721,7 +721,7 @@ int execute_xread_command(zval *object, int argc, zval *return_value)
 
         /* Initialize the arguments structure */
         x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.streams = &z_streams;
         args.ids = &z_ids;
         args.options = z_options;
@@ -730,7 +730,7 @@ int execute_xread_command(zval *object, int argc, zval *return_value)
         parse_x_read_options(z_options, &args.read_opts);
 
         /* Execute the command */
-        int result = execute_x_generic_command(redis->glide_client, XRead, &args, return_value, process_x_stream_result);
+        int result = execute_x_generic_command(valkey_glide->glide_client, XRead, &args, return_value, process_x_stream_result);
 
         /* Clean up */
         zval_dtor(&z_streams);
@@ -750,7 +750,7 @@ int execute_xread_command(zval *object, int argc, zval *return_value)
 /* Execute an XREADGROUP command using the Valkey Glide client */
 int execute_xreadgroup_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *group = NULL, *consumer = NULL;
     size_t group_len = 0, consumer_len = 0;
     zval *z_streams_and_ids, *z_options = NULL;
@@ -834,10 +834,10 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* For the combined format, we need to separate streams and IDs */
         zval z_streams, z_ids;
@@ -863,7 +863,7 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value)
 
         /* Initialize the arguments structure */
         x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.group = group;
         args.group_len = group_len;
         args.consumer = consumer;
@@ -877,7 +877,7 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command with the generic framework */
         int result = execute_x_generic_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             XReadGroup,
             &args,
             return_value,
@@ -903,7 +903,7 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value)
 /* Execute an XCLAIM command using the Valkey Glide client */
 int execute_xclaim_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *group = NULL, *consumer = NULL;
     size_t key_len = 0, group_len = 0, consumer_len = 0;
     long min_idle_time = 0;
@@ -919,14 +919,14 @@ int execute_xclaim_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Initialize the arguments structure */
         x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.key = key;
         args.key_len = key_len;
         args.group = group;
@@ -941,12 +941,12 @@ int execute_xclaim_command(zval *object, int argc, zval *return_value)
         /* Parse options for XCLAIM command */
         parse_x_claim_options(z_options, &args.claim_opts);
 
-              x_claim_result_context_t result_context = {0};
+        x_claim_result_context_t result_context = {0};
         result_context.return_value = return_value;
         result_context.claim_opts = &args.claim_opts;
 
         /* Use the generic command execution framework */
-        return execute_x_generic_command(redis->glide_client, XClaim, &args, &result_context, process_x_claim_result);
+        return execute_x_generic_command(valkey_glide->glide_client, XClaim, &args, &result_context, process_x_claim_result);
     }
 
     return 0;
@@ -955,7 +955,7 @@ int execute_xclaim_command(zval *object, int argc, zval *return_value)
 /* Execute an XAUTOCLAIM command using the Valkey Glide client */
 int execute_xautoclaim_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *group = NULL, *consumer = NULL, *start = NULL;
     size_t key_len = 0, group_len = 0, consumer_len = 0, start_len = 0;
     long min_idle_time = 0;
@@ -971,14 +971,14 @@ int execute_xautoclaim_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Initialize the arguments structure */
         x_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.key = key;
         args.key_len = key_len;
         args.group = group;
@@ -1011,7 +1011,7 @@ int execute_xautoclaim_command(zval *object, int argc, zval *return_value)
         }
 
         /* Use the generic command execution framework */
-        return execute_x_generic_command(redis->glide_client, XAutoClaim, &args, return_value, process_x_autoclaim_result);
+        return execute_x_generic_command(valkey_glide->glide_client, XAutoClaim, &args, return_value, process_x_autoclaim_result);
     }
 
     return 0;
@@ -1022,7 +1022,7 @@ int execute_xautoclaim_command(zval *object, int argc, zval *return_value)
  */
 int execute_xinfo_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *op = NULL;
     size_t op_len = 0;
     zval *z_args;
@@ -1036,14 +1036,14 @@ int execute_xinfo_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Initialize the arguments structure */
         x_command_args_t args_struct = {0};
-        args_struct.glide_client = redis->glide_client;
+        args_struct.glide_client = valkey_glide->glide_client;
         args_struct.subcommand = op;
         args_struct.subcommand_len = op_len;
         args_struct.args = z_args;
@@ -1070,7 +1070,7 @@ int execute_xinfo_command(zval *object, int argc, zval *return_value)
         }
 
         /* Execute the command */
-        return execute_x_generic_command(redis->glide_client, command_type, &args_struct, return_value, process_x_info_result);
+        return execute_x_generic_command(valkey_glide->glide_client, command_type, &args_struct, return_value, process_x_info_result);
     }
 
     return 0;
@@ -1081,7 +1081,7 @@ int execute_xinfo_command(zval *object, int argc, zval *return_value)
  */
 int execute_xgroup_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *op = NULL;
     size_t op_len = 0;
     zval *z_args = NULL;
@@ -1105,17 +1105,17 @@ int execute_xgroup_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Determine the command type based on the operation */
         enum RequestType command_type;
 
         /* Initialize the arguments structure */
         x_command_args_t args_struct = {0};
-        args_struct.glide_client = redis->glide_client;
+        args_struct.glide_client = valkey_glide->glide_client;
         args_struct.subcommand = op;
         args_struct.subcommand_len = op_len;
 
@@ -1301,7 +1301,7 @@ int execute_xgroup_command(zval *object, int argc, zval *return_value)
         args_struct.args_count = args_count;
 
         /* Execute the command */
-        result = execute_x_generic_command(redis->glide_client, command_type, &args_struct, return_value, process_x_group_result);
+        result = execute_x_generic_command(valkey_glide->glide_client, command_type, &args_struct, return_value, process_x_group_result);
 
         /* Clean up */
         for (int i = 0; i < args_count; i++)

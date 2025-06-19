@@ -32,7 +32,7 @@ extern char *double_to_string(double value, size_t *len);
 /* Execute a TYPE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_type_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len = 0;
     long type_value = 0;
@@ -45,13 +45,13 @@ int execute_type_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = Type;
         args.key = key;
         args.key_len = key_len;
@@ -69,7 +69,7 @@ int execute_type_command(zval *object, int argc, zval *return_value)
 /* Execute an APPEND command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_append_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *value = NULL;
     size_t key_len = 0, value_len = 0;
     long result_value = 0;
@@ -83,13 +83,13 @@ int execute_append_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = Append;
         args.key = key;
         args.key_len = key_len;
@@ -113,7 +113,7 @@ int execute_append_command(zval *object, int argc, zval *return_value)
 /* Execute a GETRANGE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_getrange_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *result = NULL;
     size_t key_len = 0, result_len = 0;
     long start = 0, end = 0;
@@ -127,13 +127,13 @@ int execute_getrange_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = GetRange;
         args.key = key;
         args.key_len = key_len;
@@ -364,7 +364,7 @@ static void free_sort_args(uintptr_t *args, unsigned long *args_len, unsigned lo
 /* Execute a SORT command using the Valkey Glide client */
 int execute_sort_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len = 0;
     zval *z_opts = NULL;
@@ -379,10 +379,10 @@ int execute_sort_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Build command arguments */
         uintptr_t *args = NULL;
@@ -401,7 +401,7 @@ int execute_sort_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *cmd_result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             Sort,      /* command type */
             arg_count, /* number of arguments */
             args,      /* arguments */
@@ -464,7 +464,7 @@ int execute_sort_command(zval *object, int argc, zval *return_value)
 /* Execute an EXPIREMEMBER command using the Valkey Glide client */
 int execute_expiremember_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *member = NULL;
     size_t key_len = 0, member_len = 0;
     long seconds = 0, result_value = 0;
@@ -478,10 +478,10 @@ int execute_expiremember_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Build command arguments */
         const char *args[] = {"EXPIREMEMBER", key, member, NULL};
@@ -500,7 +500,7 @@ int execute_expiremember_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *cmd_result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             CustomCommand,     /* command type */
             arg_count,         /* number of arguments */
             (uintptr_t *)args, /* arguments */
@@ -532,7 +532,7 @@ int execute_expiremember_command(zval *object, int argc, zval *return_value)
 /* Execute an EXPIREMEMBERAT command using the Valkey Glide client */
 int execute_expirememberat_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *member = NULL;
     size_t key_len = 0, member_len = 0;
     long timestamp = 0, result_value = 0;
@@ -546,10 +546,10 @@ int execute_expirememberat_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Build command arguments */
         const char *args[] = {"EXPIREMEMBERAT", key, member, NULL};
@@ -568,7 +568,7 @@ int execute_expirememberat_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *cmd_result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             CustomCommand,     /* command type */
             arg_count,         /* number of arguments */
             (uintptr_t *)args, /* arguments */
@@ -600,7 +600,7 @@ int execute_expirememberat_command(zval *object, int argc, zval *return_value)
 /* Execute a SORT_RO command using the Valkey Glide client */
 int execute_sort_ro_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len = 0;
     zval *z_opts = NULL;
@@ -615,10 +615,10 @@ int execute_sort_ro_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Build command arguments */
         uintptr_t *args = NULL;
@@ -637,7 +637,7 @@ int execute_sort_ro_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *cmd_result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             SortReadOnly, /* command type */
             arg_count,    /* number of arguments */
             args,         /* arguments */
@@ -681,7 +681,7 @@ int execute_sort_ro_command(zval *object, int argc, zval *return_value)
 /* Execute a SORT command in ascending order */
 int execute_sortasc_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len = 0;
     zval *z_opts = NULL;
@@ -696,10 +696,10 @@ int execute_sortasc_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Build command arguments */
         uintptr_t *args = NULL;
@@ -718,7 +718,7 @@ int execute_sortasc_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *cmd_result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             Sort,      /* command type */
             arg_count, /* number of arguments */
             args,      /* arguments */
@@ -762,7 +762,7 @@ int execute_sortasc_command(zval *object, int argc, zval *return_value)
 /* Execute a SORT command in ascending order with alpha flag */
 int execute_sortascalpha_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len = 0;
     zval *z_opts = NULL;
@@ -777,10 +777,10 @@ int execute_sortascalpha_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Build command arguments */
         uintptr_t *args = NULL;
@@ -799,7 +799,7 @@ int execute_sortascalpha_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *cmd_result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             Sort,      /* command type */
             arg_count, /* number of arguments */
             args,      /* arguments */
@@ -843,7 +843,7 @@ int execute_sortascalpha_command(zval *object, int argc, zval *return_value)
 /* Execute a SORT command in descending order */
 int execute_sortdesc_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len = 0;
     zval *z_opts = NULL;
@@ -858,10 +858,10 @@ int execute_sortdesc_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Build command arguments */
         uintptr_t *args = NULL;
@@ -880,7 +880,7 @@ int execute_sortdesc_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *cmd_result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             Sort,      /* command type */
             arg_count, /* number of arguments */
             args,      /* arguments */
@@ -925,7 +925,7 @@ int execute_sortdesc_command(zval *object, int argc, zval *return_value)
 int execute_sortdescalpha_command(zval *object, int argc, zval *return_value)
 {
 
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len = 0;
     zval *z_opts = NULL;
@@ -940,10 +940,10 @@ int execute_sortdescalpha_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Build command arguments */
         uintptr_t *args = NULL;
@@ -962,7 +962,7 @@ int execute_sortdescalpha_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *cmd_result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             Sort,      /* command type */
             arg_count, /* number of arguments */
             args,      /* arguments */

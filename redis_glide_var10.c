@@ -29,7 +29,7 @@ extern zend_class_entry *redis_exception_ce;
 /* Execute a WAIT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_wait_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     long numreplicas, timeout;
 
     /* Parse parameters */
@@ -40,13 +40,13 @@ int execute_wait_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = Wait;
 
         /* WAIT is a server-level command (not key-based) with 2 arguments: numreplicas, timeout */
@@ -71,7 +71,7 @@ int execute_wait_command(zval *object, int argc, zval *return_value)
 /* Execute a FUNCTION command using the Valkey Glide client */
 int execute_function_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     zval *z_args;
     int args_count;
 
@@ -83,10 +83,10 @@ int execute_function_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Check if args are valid */
         if (!z_args || args_count <= 0)
@@ -161,7 +161,7 @@ int execute_function_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             CustomCommand, /* FUNCTION commands use custom command type */
             arg_count + 1, /* FUNCTION command + args */
             final_args,    /* arguments */
@@ -202,7 +202,7 @@ int execute_function_command(zval *object, int argc, zval *return_value)
 /* Execute a MULTI command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_multi_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
@@ -212,13 +212,13 @@ int execute_multi_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = Multi;
 
         if (execute_core_command(&args, NULL, process_core_bool_result))
@@ -235,7 +235,7 @@ int execute_multi_command(zval *object, int argc, zval *return_value)
 /* Execute a DISCARD command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_discard_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
@@ -245,13 +245,13 @@ int execute_discard_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = Discard;
 
         if (execute_core_command(&args, NULL, process_core_bool_result))
@@ -267,7 +267,7 @@ int execute_discard_command(zval *object, int argc, zval *return_value)
 /* Execute an EXEC command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 int execute_exec_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
@@ -277,13 +277,13 @@ int execute_exec_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = Exec;
 
         if (execute_core_command(&args, return_value, process_core_array_result))
@@ -298,7 +298,7 @@ int execute_exec_command(zval *object, int argc, zval *return_value)
 /* Execute an FCALL command using the Valkey Glide client */
 int execute_fcall_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *name = NULL;
     size_t name_len;
     long numkeys = 0;
@@ -314,10 +314,10 @@ int execute_fcall_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Check if name is valid */
         if (!name || name_len <= 0)
@@ -374,7 +374,7 @@ int execute_fcall_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             FCall,     /* command type */
             arg_count, /* number of arguments */
             cmd_args,  /* arguments */
@@ -413,7 +413,7 @@ int execute_fcall_command(zval *object, int argc, zval *return_value)
 /* Execute an FCALL_RO command using the Valkey Glide client */
 int execute_fcall_ro_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *name = NULL;
     size_t name_len;
     long numkeys = 0;
@@ -429,10 +429,10 @@ int execute_fcall_ro_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Check if name is valid */
         if (!name || name_len <= 0)
@@ -489,7 +489,7 @@ int execute_fcall_ro_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             FCallReadOnly, /* command type */
             arg_count,     /* number of arguments */
             cmd_args,      /* arguments */
@@ -528,7 +528,7 @@ int execute_fcall_ro_command(zval *object, int argc, zval *return_value)
 /* Execute a DUMP command using the Valkey Glide client */
 int execute_dump_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL;
     size_t key_len;
 
@@ -540,13 +540,13 @@ int execute_dump_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         core_command_args_t args = {0};
-        args.glide_client = redis->glide_client;
+        args.glide_client = valkey_glide->glide_client;
         args.cmd_type = Dump;
         args.key = key;
         args.key_len = key_len;
@@ -583,7 +583,7 @@ int execute_dump_command(zval *object, int argc, zval *return_value)
 /* Execute a RESTORE command using the Valkey Glide client */
 int execute_restore_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *key = NULL, *serialized = NULL;
     size_t key_len, serialized_len;
     long ttl;
@@ -598,10 +598,10 @@ int execute_restore_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Check if key and serialized value are valid */
         if (!key || key_len <= 0 || !serialized || serialized_len <= 0)
@@ -745,7 +745,7 @@ int execute_restore_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             Restore,   /* command type */
             arg_count, /* number of arguments */
             args,      /* arguments */
@@ -804,7 +804,7 @@ int execute_restore_command(zval *object, int argc, zval *return_value)
 /* Execute a CONFIG command using the Valkey Glide client */
 int execute_config_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     char *operation = NULL;
     size_t operation_len;
     zval *key = NULL, *value = NULL;
@@ -818,10 +818,10 @@ int execute_config_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
-    if (redis->glide_client)
+    if (valkey_glide->glide_client)
     {
         /* Check if operation is valid */
         if (!operation)
@@ -1021,7 +1021,7 @@ int execute_config_command(zval *object, int argc, zval *return_value)
 
         /* Execute the command */
         CommandResult *result = execute_command(
-            redis->glide_client,
+            valkey_glide->glide_client,
             command_type,
             arg_count,
             args,
@@ -1125,7 +1125,7 @@ int execute_get_read_timeout_command(const void *glide_client, double *output_va
 /* Unified getReadTimeout command implementation */
 int execute_getreadtimeout_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     double timeout;
 
     /* Parse parameters */
@@ -1136,14 +1136,14 @@ int execute_getreadtimeout_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
-    if (!redis || !redis->glide_client)
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    if (!valkey_glide || !valkey_glide->glide_client)
     {
         return 0;
     }
 
     /* Execute the getReadTimeout command */
-    if (execute_get_read_timeout_command(redis->glide_client, &timeout))
+    if (execute_get_read_timeout_command(valkey_glide->glide_client, &timeout))
     {
         ZVAL_DOUBLE(return_value, timeout);
         return 1;
@@ -1467,7 +1467,7 @@ int execute_dbsize_command_internal(const void *glide_client, long *output_value
 /* Execute client command - UNIFIED IMPLEMENTATION */
 int execute_client_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
     int arg_count = 0;
 
@@ -1479,14 +1479,14 @@ int execute_client_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
-    if (!redis || !redis->glide_client)
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    if (!valkey_glide || !valkey_glide->glide_client)
     {
         return 0;
     }
 
     /* Execute the client command using the Glide client */
-    if (execute_client_command_internal(redis->glide_client, z_args, arg_count, return_value))
+    if (execute_client_command_internal(valkey_glide->glide_client, z_args, arg_count, return_value))
     {
         /* Return value already set in execute_client_command */
         return 1;
@@ -1498,7 +1498,7 @@ int execute_client_command(zval *object, int argc, zval *return_value)
 /* Execute rawcommand command - UNIFIED IMPLEMENTATION */
 int execute_rawcommand_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
     int arg_count = 0;
 
@@ -1510,14 +1510,14 @@ int execute_rawcommand_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
-    if (!redis || !redis->glide_client)
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    if (!valkey_glide || !valkey_glide->glide_client)
     {
         return 0;
     }
 
     /* Execute the raw command using the Glide client */
-    if (execute_rawcommand_command_internal(redis->glide_client, z_args, arg_count, return_value))
+    if (execute_rawcommand_command_internal(valkey_glide->glide_client, z_args, arg_count, return_value))
     {
         /* Return value already set in execute_rawcommand_command */
         return 1;
@@ -1529,7 +1529,7 @@ int execute_rawcommand_command(zval *object, int argc, zval *return_value)
 /* Execute dbSize command - UNIFIED IMPLEMENTATION */
 int execute_dbsize_command(zval *object, int argc, zval *return_value)
 {
-    valkey_glide_object *redis;
+    valkey_glide_object *valkey_glide;
     long dbsize;
 
     /* Parse parameters */
@@ -1540,14 +1540,14 @@ int execute_dbsize_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
-    if (!redis || !redis->glide_client)
+    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    if (!valkey_glide || !valkey_glide->glide_client)
     {
         return 0;
     }
 
     /* Execute the DBSIZE command using the Glide client */
-    if (execute_dbsize_command_internal(redis->glide_client, &dbsize))
+    if (execute_dbsize_command_internal(valkey_glide->glide_client, &dbsize))
     {
         ZVAL_LONG(return_value, dbsize);
         return 1;
