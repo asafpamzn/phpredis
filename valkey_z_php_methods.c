@@ -50,16 +50,6 @@
 extern char *long_to_string(long value, size_t *len);
 extern char *double_to_string(double value, size_t *len);
 
-extern zend_class_entry *get_valkey_glide_ce();
-extern zend_class_entry *get_valkey_glide_exception_ce();
-
-#if PHP_VERSION_ID < 80000
-#include "redis_legacy_arginfo.h"
-#else
-#include "zend_attributes.h"
-#include "redis_arginfo.h"
-#endif
-
 /* {{{ proto mixed ValkeyGlide::object(string subcommand, string key) */
 OBJECT_METHOD_IMPL(ValkeyGlide)
 /* }}} */
@@ -272,8 +262,6 @@ PHP_METHOD(ValkeyGlide, auth)
 /* {{{ proto array ValkeyGlide::georadiusbymember_ro(string key, string member, float radius, string unit [, array options]) */
 PHP_METHOD(ValkeyGlide, georadiusbymember_ro)
 {
-    /* For now, we'll leave this to the standard implementation since it's not
-       directly implemented in the redis_geo_glide.c file */
 
     RETURN_FALSE;
 }

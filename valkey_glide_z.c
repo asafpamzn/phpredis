@@ -1,6 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | ValkeyGlide Glide FFI integration for phpredis                             |
   +----------------------------------------------------------------------+
   | Copyright (c) 2023-2025 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -48,16 +47,6 @@
 /* Import the string conversion functions from command_response.c */
 extern char *long_to_string(long value, size_t *len);
 extern char *double_to_string(double value, size_t *len);
-
-extern zend_class_entry *get_valkey_glide_ce();
-extern zend_class_entry *get_valkey_glide_exception_ce();
-
-#if PHP_VERSION_ID < 80000
-#include "redis_legacy_arginfo.h"
-#else
-#include "zend_attributes.h"
-#include "redis_arginfo.h"
-#endif
 
 int execute_zrandmember_command(zval *object, int argc, zval *return_value)
 {

@@ -1,6 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | ValkeyGlide Glide FFI integration for phpredis - MIGRATED VERSION         |
   +----------------------------------------------------------------------+
   | Copyright (c) 2023-2025 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -15,8 +14,6 @@
 */
 
 #include "valkey_glide_core_common.h"
-
-extern zend_class_entry *get_valkey_glide_ce();
 
 /* ====================================================================
  * MIGRATED EXPIRE COMMANDS USING CORE FRAMEWORK
