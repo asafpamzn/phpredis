@@ -1317,11 +1317,11 @@ int process_core_type_result(CommandResult *result, void *output)
         }
         else if (strncmp(type_str, "hash", 4) == 0)
         {
-            *type_code = 5; /* REDIS_HASH */
+            *type_code = 5; /* VALKEY_GLIDE_HASH */
         }
         else if (strncmp(type_str, "stream", 6) == 0)
         {
-            *type_code = 6; /* REDIS_STREAM */
+            *type_code = 6; /* VALKEY_GLIDE_STREAM */
         }
         else if (strncmp(type_str, "none", 4) == 0)
         {

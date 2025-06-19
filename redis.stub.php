@@ -50,18 +50,18 @@ class ValkeyGlide {
     /**
      *
      * @var int
-     * @cvalue REDIS_HASH
+     * @cvalue VALKEY_GLIDE_HASH
      *
      */
-    public const REDIS_HASH = UNKNOWN;
+    public const VALKEY_GLIDE_HASH = UNKNOWN;
 
     /**
      *
      * @var int
-     * @cvalue REDIS_STREAM
+     * @cvalue VALKEY_GLIDE_STREAM
      *
      */
-    public const REDIS_STREAM = UNKNOWN;
+    public const VALKEY_GLIDE_STREAM = UNKNOWN;
 
 
     /**
@@ -2882,8 +2882,8 @@ class ValkeyGlide {
      *     ValkeyGlide::VALKEY_GLIDE_SET
      *     ValkeyGlide::VALKEY_GLIDE_LIST
      *     ValkeyGlide::VALKEY_GLIDE_ZSET
-     *     ValkeyGlide::REDIS_HASH
-     *     ValkeyGlide::REDIS_STREAM
+     *     ValkeyGlide::VALKEY_GLIDE_HASH
+     *     ValkeyGlide::VALKEY_GLIDE_STREAM
      *
      * @example
      * foreach ($redis->keys('*') as $key) {

@@ -221,7 +221,7 @@ Redis::VALKEY_GLIDE_STRING - String
 Redis::VALKEY_GLIDE_SET - Set
 Redis::VALKEY_GLIDE_LIST - List
 Redis::VALKEY_GLIDE_ZSET - Sorted set
-Redis::REDIS_HASH - Hash
+Redis::VALKEY_GLIDE_HASH - Hash
 Redis::VALKEY_GLIDE_NOT_FOUND - Not found / other
 ~~~
 
@@ -1282,7 +1282,7 @@ string: Redis::VALKEY_GLIDE_STRING
 set: Redis::VALKEY_GLIDE_SET  
 list: Redis::VALKEY_GLIDE_LIST  
 zset: Redis::VALKEY_GLIDE_ZSET  
-hash: Redis::REDIS_HASH  
+hash: Redis::VALKEY_GLIDE_HASH  
 other: Redis::VALKEY_GLIDE_NOT_FOUND
 
 ##### *Example*

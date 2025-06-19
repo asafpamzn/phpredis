@@ -1084,14 +1084,14 @@ class ValkeyGlide_Test extends TestSuite {
         $this->redis->del('keyHash');
         $this->redis->hSet('keyHash', 'key0', 'val0');
         $this->redis->hSet('keyHash', 'key1', 'val1');
-        $this->assertEquals(ValkeyGlide::REDIS_HASH, $this->redis->type('keyHash'));
+        $this->assertEquals(ValkeyGlide::VALKEY_GLIDE_HASH, $this->redis->type('keyHash'));
 
         // stream
         if ($this->minVersionCheck('5.0')) {
             $this->redis->del('stream');
             $this->redis->xAdd('stream', '*', ['foo' => 'bar']);
            
-            $this->assertEquals(ValkeyGlide::REDIS_STREAM, $this->redis->type('stream'));
+            $this->assertEquals(ValkeyGlide::VALKEY_GLIDE_STREAM, $this->redis->type('stream'));
         }
 
         // None

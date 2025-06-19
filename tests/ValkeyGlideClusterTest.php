@@ -13,7 +13,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
         ValkeyGlide::VALKEY_GLIDE_SET,
         ValkeyGlide::VALKEY_GLIDE_LIST,
         ValkeyGlide::VALKEY_GLIDE_ZSET,
-        ValkeyGlide::REDIS_HASH
+        ValkeyGlide::VALKEY_GLIDE_HASH
     ];
 
     private $failover_types = [
@@ -581,9 +581,9 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
                 return "list";
             case ValkeyGlide::VALKEY_GLIDE_ZSET:
                 return "zset";
-            case ValkeyGlide::REDIS_HASH:
+            case ValkeyGlide::VALKEY_GLIDE_HASH:
                 return "hash";
-            case ValkeyGlide::REDIS_STREAM:
+            case ValkeyGlide::VALKEY_GLIDE_STREAM:
                 return "stream";
             default:
                 return "unknown($key_type)";
@@ -614,7 +614,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
                 array_unshift($args, $key);
                 call_user_func_array([$this->redis, 'sadd'], $args);
                 break;
-            case ValkeyGlide::REDIS_HASH:
+            case ValkeyGlide::VALKEY_GLIDE_HASH:
                 $value = [
                     "$key-mem1" => "$key-val1",
                     "$key-mem2" => "$key-val2",
@@ -678,7 +678,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
             case ValkeyGlide::VALKEY_GLIDE_LIST:
                 $this->assertEquals($value, $this->redis->lrange($key, 0, -1));
                 break;
-            case ValkeyGlide::REDIS_HASH:
+            case ValkeyGlide::VALKEY_GLIDE_HASH:
                 $this->assertEquals($value, $this->redis->hgetall($key));
                 break;
             case ValkeyGlide::VALKEY_GLIDE_ZSET:
