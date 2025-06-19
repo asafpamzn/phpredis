@@ -14,8 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef REDIS_GLIDE_S_COMMON_H
-#define REDIS_GLIDE_S_COMMON_H
+#ifndef VALKEY_GLIDE_S_COMMON_H
+#define VALKEY_GLIDE_S_COMMON_H
 
 #include "valkey_glide_commands_common.h"
 #include "command_response.h"
@@ -430,4 +430,4 @@ int execute_sdiffstore_command(zval *object, int argc, zval *return_value);
         RETURN_FALSE;                                                              \
     }
 
-#endif /* REDIS_GLIDE_S_COMMON_H */
+#endif /* VALKEY_GLIDE_S_COMMON_H */

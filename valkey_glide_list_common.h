@@ -14,8 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef REDIS_GLIDE_LIST_COMMON_H
-#define REDIS_GLIDE_LIST_COMMON_H
+#ifndef VALKEY_GLIDE_LIST_COMMON_H
+#define VALKEY_GLIDE_LIST_COMMON_H
 
 #include "valkey_glide_commands_common.h"
 #include "common.h"
@@ -570,4 +570,4 @@ int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum R
         RETURN_FALSE;                                                             \
     }
 
-#endif /* REDIS_GLIDE_LIST_COMMON_H */
+#endif /* VALKEY_GLIDE_LIST_COMMON_H */
