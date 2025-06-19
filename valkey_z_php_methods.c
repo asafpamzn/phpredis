@@ -50,8 +50,8 @@
 extern char *long_to_string(long value, size_t *len);
 extern char *double_to_string(double value, size_t *len);
 
-extern zend_class_entry *redis_ce;
-extern zend_class_entry *redis_exception_ce;
+extern zend_class_entry *get_valkey_glide_ce();
+extern zend_class_entry *get_valkey_glide_exception_ce();
 
 #if PHP_VERSION_ID < 80000
 #include "redis_legacy_arginfo.h"

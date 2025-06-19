@@ -22,7 +22,7 @@
 #include <string.h>
 #include <stdio.h>
 
-extern zend_class_entry *redis_ce;
+extern zend_class_entry *get_valkey_glide_ce();
 
 /* Import the string conversion functions from command_response.c */
 extern char *long_to_string(long value, size_t *len);
@@ -38,7 +38,7 @@ int execute_type_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -75,7 +75,7 @@ int execute_append_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &value, &value_len) == FAILURE)
     {
         return 0;
@@ -119,7 +119,7 @@ int execute_getrange_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osll",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &start, &end) == FAILURE)
     {
         return 0;
@@ -371,7 +371,7 @@ int execute_sort_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;
@@ -470,7 +470,7 @@ int execute_expiremember_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Ossl",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &member, &member_len, &seconds) == FAILURE)
     {
         return 0;
@@ -538,7 +538,7 @@ int execute_expirememberat_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Ossl",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &member, &member_len, &timestamp) == FAILURE)
     {
         return 0;
@@ -607,7 +607,7 @@ int execute_sort_ro_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;
@@ -688,7 +688,7 @@ int execute_sortasc_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;
@@ -769,7 +769,7 @@ int execute_sortascalpha_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;
@@ -850,7 +850,7 @@ int execute_sortdesc_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;
@@ -932,7 +932,7 @@ int execute_sortdescalpha_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;

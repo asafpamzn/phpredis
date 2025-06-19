@@ -84,6 +84,9 @@ PHP_MINIT_FUNCTION(redis);
 PHP_MSHUTDOWN_FUNCTION(redis);
 PHP_MINFO_FUNCTION(redis);
 
+zend_class_entry *get_valkey_glide_ce(void);
+zend_class_entry *get_valkey_glide_exception_ce(void);
+
 #endif
 
 /*

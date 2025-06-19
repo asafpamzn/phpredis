@@ -27,8 +27,18 @@
 #include <zend_exceptions.h>
 #include <ext/standard/info.h>
 
-zend_class_entry *redis_ce;
-zend_class_entry *redis_exception_ce;
+zend_class_entry *valkey_glide_ce;
+zend_class_entry *valkey_glide_exception_ce;
+
+zend_class_entry *get_valkey_glide_ce(void)
+{
+    return valkey_glide_ce;
+}
+
+zend_class_entry *get_valkey_glide_exception_ce(void)
+{
+    return valkey_glide_exception_ce;
+}
 
 #if PHP_VERSION_ID < 80000
 #include "redis_legacy_arginfo.h"
@@ -104,11 +114,11 @@ zend_object *create_valkey_glide_object(zend_class_entry *ce)
 PHP_MINIT_FUNCTION(redis)
 {
     /* ValkeyGlide class */
-    redis_ce = register_class_ValkeyGlide();
-    redis_ce->create_object = create_valkey_glide_object;
+    valkey_glide_ce = register_class_ValkeyGlide();
+    valkey_glide_ce->create_object = create_valkey_glide_object;
 
     /* ValkeyGlideException class */
-    redis_exception_ce = register_class_ValkeyGlideException(spl_ce_RuntimeException);
+    valkey_glide_exception_ce = register_class_ValkeyGlideException(spl_ce_RuntimeException);
 
     return SUCCESS;
 }

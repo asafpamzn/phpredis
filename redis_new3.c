@@ -58,8 +58,8 @@ extern ps_module ps_mod_redis;
 extern ps_module ps_mod_redis_cluster;
 #endif
 
-extern zend_class_entry *redis_ce;
-extern zend_class_entry *redis_exception_ce;
+extern zend_class_entry *get_valkey_glide_ce();
+extern zend_class_entry *get_valkey_glide_exception_ce();
 
 #if PHP_VERSION_ID < 80000
 #include "redis_legacy_arginfo.h"
@@ -77,7 +77,7 @@ int execute_rename_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss",
-                                     &object, redis_ce, &src, &src_len,
+                                     &object, get_valkey_glide_ce(), &src, &src_len,
                                      &dst, &dst_len) == FAILURE)
     {
         return 0;
@@ -128,7 +128,7 @@ int execute_renamenx_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss",
-                                     &object, redis_ce, &src, &src_len,
+                                     &object, get_valkey_glide_ce(), &src, &src_len,
                                      &dst, &dst_len) == FAILURE)
     {
         return 0;
@@ -181,7 +181,7 @@ int execute_getwithmeta_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -241,7 +241,7 @@ int execute_getdel_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -302,7 +302,7 @@ int execute_getex_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, redis_ce, &key, &key_len, &opts) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len, &opts) == FAILURE)
     {
         return 0;
     }
@@ -372,7 +372,7 @@ int execute_incr_command(zval *object, int argc, zval *return_value)
     {
         /* Only key parameter provided */
         if (zend_parse_method_parameters(argc, object, "Os",
-                                         &object, redis_ce, &key, &key_len) == FAILURE)
+                                         &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
         {
             return 0;
         }
@@ -381,7 +381,7 @@ int execute_incr_command(zval *object, int argc, zval *return_value)
     {
         /* Both key and value parameters provided */
         if (zend_parse_method_parameters(argc, object, "Osl",
-                                         &object, redis_ce, &key, &key_len, &value) == FAILURE)
+                                         &object, get_valkey_glide_ce(), &key, &key_len, &value) == FAILURE)
         {
             return 0;
         }
@@ -451,7 +451,7 @@ int execute_incrby_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl",
-                                     &object, redis_ce, &key, &key_len, &value) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len, &value) == FAILURE)
     {
         return 0;
     }
@@ -498,7 +498,7 @@ int execute_incrbyfloat_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osd",
-                                     &object, redis_ce, &key, &key_len, &value) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len, &value) == FAILURE)
     {
         return 0;
     }
@@ -548,7 +548,7 @@ int execute_decr_command(zval *object, int argc, zval *return_value)
     {
         /* Only key parameter provided - standard DECR */
         if (zend_parse_method_parameters(argc, object, "Os",
-                                         &object, redis_ce, &key, &key_len) == FAILURE)
+                                         &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
         {
             return 0;
         }
@@ -557,7 +557,7 @@ int execute_decr_command(zval *object, int argc, zval *return_value)
     {
         /* Both key and value parameters provided - like DECRBY */
         if (zend_parse_method_parameters(argc, object, "Osl",
-                                         &object, redis_ce, &key, &key_len, &value) == FAILURE)
+                                         &object, get_valkey_glide_ce(), &key, &key_len, &value) == FAILURE)
         {
             return 0;
         }
@@ -623,7 +623,7 @@ int execute_decrby_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl",
-                                     &object, redis_ce, &key, &key_len, &value) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len, &value) == FAILURE)
     {
         return 0;
     }
@@ -667,7 +667,7 @@ int execute_mget_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oa/",
-                                     &object, redis_ce, &z_array) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &z_array) == FAILURE)
     {
         return 0;
     }
@@ -714,7 +714,7 @@ int execute_exists_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O+",
-                                     &object, redis_ce, &z_args, &argc) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &z_args, &argc) == FAILURE)
     {
         return 0;
     }
@@ -783,7 +783,7 @@ int execute_touch_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O+",
-                                     &object, redis_ce, &z_args, &argc) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &z_args, &argc) == FAILURE)
     {
         return 0;
     }
@@ -853,7 +853,7 @@ int execute_unlink_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O+",
-                                     &object, redis_ce, &z_args, &argc) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &z_args, &argc) == FAILURE)
     {
         return 0;
     }

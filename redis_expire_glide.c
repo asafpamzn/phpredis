@@ -16,7 +16,7 @@
 
 #include "valkey_glide_core_common.h"
 
-extern zend_class_entry *redis_ce;
+extern zend_class_entry *get_valkey_glide_ce();
 
 /* ====================================================================
  * MIGRATED EXPIRE COMMANDS USING CORE FRAMEWORK
@@ -33,7 +33,7 @@ int execute_expire_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl|s",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &seconds, &mode, &mode_len) == FAILURE)
     {
         return 0;
@@ -97,7 +97,7 @@ int execute_expireat_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl|s",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &timestamp, &mode, &mode_len) == FAILURE)
     {
         return 0;
@@ -161,7 +161,7 @@ int execute_pexpire_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl|s",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &milliseconds, &mode, &mode_len) == FAILURE)
     {
         return 0;
@@ -225,7 +225,7 @@ int execute_pexpireat_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl|s",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &timestamp_ms, &mode, &mode_len) == FAILURE)
     {
         return 0;
@@ -288,7 +288,7 @@ int execute_persist_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -326,7 +326,7 @@ int execute_expiretime_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -365,7 +365,7 @@ int execute_pexpiretime_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
     {
         return 0;
     }

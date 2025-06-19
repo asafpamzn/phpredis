@@ -17,8 +17,8 @@
 #include "valkey_glide_hash_common.h"
 #include "common.h"
 
-extern zend_class_entry *redis_ce;
-extern zend_class_entry *redis_exception_ce;
+extern zend_class_entry *get_valkey_glide_ce();
+extern zend_class_entry *get_valkey_glide_exception_ce();
 /* ====================================================================
  * CORE FRAMEWORK FUNCTIONS
  * ==================================================================== */
@@ -1373,7 +1373,7 @@ int execute_hget_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &field, &field_len) == FAILURE)
     {
         return 0;
@@ -1417,7 +1417,7 @@ int execute_hlen_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -1451,7 +1451,7 @@ int execute_hexists_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &field, &field_len) == FAILURE)
     {
         return 0;
@@ -1488,7 +1488,7 @@ int execute_hdel_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os*",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &fields, &fields_count) == FAILURE)
     {
         return 0;
@@ -1525,7 +1525,7 @@ int execute_hset_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os*",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_args, &arg_count) == FAILURE)
     {
         return 0;
@@ -1567,7 +1567,7 @@ int execute_hsetnx_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osss",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &field, &field_len, &val, &val_len) == FAILURE)
     {
         return 0;
@@ -1603,7 +1603,7 @@ int execute_hmset_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osa",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &arr_keyvals) == FAILURE)
     {
         return 0;
@@ -1645,7 +1645,7 @@ int execute_hincrby_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Ossl",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &field, &field_len, &increment) == FAILURE)
     {
         return 0;
@@ -1680,7 +1680,7 @@ int execute_hincrbyfloat_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Ossd",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &field, &field_len, &increment) == FAILURE)
     {
         return 0;
@@ -1716,7 +1716,7 @@ int execute_hmget_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osa",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &fields) == FAILURE)
     {
         return 0;
@@ -1816,7 +1816,7 @@ int execute_hkeys_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -1846,7 +1846,7 @@ int execute_hvals_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -1876,7 +1876,7 @@ int execute_hgetall_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -1907,7 +1907,7 @@ int execute_hstrlen_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &field, &field_len) == FAILURE)
     {
         return 0;
@@ -1944,7 +1944,7 @@ int execute_hrandfield_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;

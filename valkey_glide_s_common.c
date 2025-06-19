@@ -16,8 +16,8 @@
 #include "common.h"
 #include "valkey_glide_s_common.h"
 
-extern zend_class_entry *redis_ce;
-extern zend_class_entry *redis_exception_ce;
+extern zend_class_entry *get_valkey_glide_ce();
+extern zend_class_entry *get_valkey_glide_exception_ce();
 
 /* ====================================================================
  * UTILITY FUNCTIONS
@@ -805,7 +805,7 @@ int execute_sadd_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os+",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_args, &members_count) == FAILURE)
     {
         return 0;
@@ -848,7 +848,7 @@ int execute_sadd_array_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osa",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_arr) == FAILURE)
     {
         return 0;
@@ -919,7 +919,7 @@ int execute_scard_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -959,7 +959,7 @@ int execute_srandmember_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|l",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &count) == FAILURE)
     {
         return 0;
@@ -1003,7 +1003,7 @@ int execute_sismember_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &member, &member_len) == FAILURE)
     {
         return 0;
@@ -1044,7 +1044,7 @@ int execute_smembers_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, redis_ce, &key, &key_len) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -1084,7 +1084,7 @@ int execute_srem_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os+",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_args, &members_count) == FAILURE)
     {
         return 0;
@@ -1125,7 +1125,7 @@ int execute_smove_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osss",
-                                     &object, redis_ce, &src, &src_len,
+                                     &object, get_valkey_glide_ce(), &src, &src_len,
                                      &dst, &dst_len, &member, &member_len) == FAILURE)
     {
         return 0;
@@ -1170,7 +1170,7 @@ int execute_spop_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|l",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &count) == FAILURE)
     {
         return 0;
@@ -1216,7 +1216,7 @@ int execute_smismember_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os+",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_args, &members_count) == FAILURE)
     {
         return 0;
@@ -1263,7 +1263,7 @@ int execute_sinter_command(zval *object, int argc, zval *return_value)
     {
         /* Try to parse as a single array argument */
         if (zend_parse_method_parameters(argc, object, "Oa",
-                                         &object, redis_ce, &z_keys_arr) == SUCCESS)
+                                         &object, get_valkey_glide_ce(), &z_keys_arr) == SUCCESS)
         {
             /* We have an array of keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
@@ -1297,7 +1297,7 @@ int execute_sinter_command(zval *object, int argc, zval *return_value)
     if (!z_args)
     {
         if (zend_parse_method_parameters(argc, object, "O+",
-                                         &object, redis_ce, &z_args, &keys_count) == FAILURE)
+                                         &object, get_valkey_glide_ce(), &z_args, &keys_count) == FAILURE)
         {
             return 0;
         }
@@ -1359,7 +1359,7 @@ int execute_sintercard_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oa|l",
-                                     &object, redis_ce, &z_keys, &limit) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &z_keys, &limit) == FAILURE)
     {
         return 0;
     }
@@ -1453,7 +1453,7 @@ int execute_sinterstore_command(zval *object, int argc, zval *return_value)
     {
         /* Try to parse it as an array */
         if (zend_parse_method_parameters(argc, object, "Oa",
-                                         &object, redis_ce, &z_keys_arr) == SUCCESS)
+                                         &object, get_valkey_glide_ce(), &z_keys_arr) == SUCCESS)
         {
             /* We have an array which will contain both destination and source keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
@@ -1511,7 +1511,7 @@ int execute_sinterstore_command(zval *object, int argc, zval *return_value)
     {
         /* First argument is always the destination key */
         if (zend_parse_method_parameters(1, object, "Os",
-                                         &object, redis_ce, &dst, &dst_len) == FAILURE)
+                                         &object, get_valkey_glide_ce(), &dst, &dst_len) == FAILURE)
         {
             return 0;
         }
@@ -1555,7 +1555,7 @@ int execute_sinterstore_command(zval *object, int argc, zval *return_value)
         {
             /* Parse all parameters including destination key */
             if (zend_parse_method_parameters(argc, object, "Os+",
-                                             &object, redis_ce, &dst, &dst_len,
+                                             &object, get_valkey_glide_ce(), &dst, &dst_len,
                                              &z_args, &keys_count) == FAILURE)
             {
                 return 0;
@@ -1623,7 +1623,7 @@ int execute_sunion_command(zval *object, int argc, zval *return_value)
     {
         /* Try to parse as a single array argument */
         if (zend_parse_method_parameters(argc, object, "Oa",
-                                         &object, redis_ce, &z_keys_arr) == SUCCESS)
+                                         &object, get_valkey_glide_ce(), &z_keys_arr) == SUCCESS)
         {
             /* We have an array of keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
@@ -1657,7 +1657,7 @@ int execute_sunion_command(zval *object, int argc, zval *return_value)
     if (!z_args)
     {
         if (zend_parse_method_parameters(argc, object, "O+",
-                                         &object, redis_ce, &z_args, &keys_count) == FAILURE)
+                                         &object, get_valkey_glide_ce(), &z_args, &keys_count) == FAILURE)
         {
             return 0;
         }
@@ -1726,7 +1726,7 @@ int execute_sunionstore_command(zval *object, int argc, zval *return_value)
     {
         /* Try to parse it as an array */
         if (zend_parse_method_parameters(argc, object, "Oa",
-                                         &object, redis_ce, &z_keys_arr) == SUCCESS)
+                                         &object, get_valkey_glide_ce(), &z_keys_arr) == SUCCESS)
         {
             /* We have an array which will contain both destination and source keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
@@ -1784,7 +1784,7 @@ int execute_sunionstore_command(zval *object, int argc, zval *return_value)
     {
         /* First argument is always the destination key */
         if (zend_parse_method_parameters(1, object, "Os",
-                                         &object, redis_ce, &dst, &dst_len) == FAILURE)
+                                         &object, get_valkey_glide_ce(), &dst, &dst_len) == FAILURE)
         {
             return 0;
         }
@@ -1828,7 +1828,7 @@ int execute_sunionstore_command(zval *object, int argc, zval *return_value)
         {
             /* Parse all parameters including destination key */
             if (zend_parse_method_parameters(argc, object, "Os+",
-                                             &object, redis_ce, &dst, &dst_len,
+                                             &object, get_valkey_glide_ce(), &dst, &dst_len,
                                              &z_args, &keys_count) == FAILURE)
             {
                 return 0;
@@ -1896,7 +1896,7 @@ int execute_sdiff_command(zval *object, int argc, zval *return_value)
     {
         /* Try to parse as a single array argument */
         if (zend_parse_method_parameters(argc, object, "Oa",
-                                         &object, redis_ce, &z_keys_arr) == SUCCESS)
+                                         &object, get_valkey_glide_ce(), &z_keys_arr) == SUCCESS)
         {
             /* We have an array of keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
@@ -1930,7 +1930,7 @@ int execute_sdiff_command(zval *object, int argc, zval *return_value)
     if (!z_args)
     {
         if (zend_parse_method_parameters(argc, object, "O+",
-                                         &object, redis_ce, &z_args, &keys_count) == FAILURE)
+                                         &object, get_valkey_glide_ce(), &z_args, &keys_count) == FAILURE)
         {
             return 0;
         }
@@ -1999,7 +1999,7 @@ int execute_sdiffstore_command(zval *object, int argc, zval *return_value)
     {
         /* Try to parse it as an array */
         if (zend_parse_method_parameters(argc, object, "Oa",
-                                         &object, redis_ce, &z_keys_arr) == SUCCESS)
+                                         &object, get_valkey_glide_ce(), &z_keys_arr) == SUCCESS)
         {
             /* We have an array which will contain both destination and source keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
@@ -2057,7 +2057,7 @@ int execute_sdiffstore_command(zval *object, int argc, zval *return_value)
     {
         /* First argument is always the destination key */
         if (zend_parse_method_parameters(1, object, "Os",
-                                         &object, redis_ce, &dst, &dst_len) == FAILURE)
+                                         &object, get_valkey_glide_ce(), &dst, &dst_len) == FAILURE)
         {
             return 0;
         }
@@ -2101,7 +2101,7 @@ int execute_sdiffstore_command(zval *object, int argc, zval *return_value)
         {
             /* Parse all parameters including destination key */
             if (zend_parse_method_parameters(argc, object, "Os+",
-                                             &object, redis_ce, &dst, &dst_len,
+                                             &object, get_valkey_glide_ce(), &dst, &dst_len,
                                              &z_args, &keys_count) == FAILURE)
             {
                 return 0;
@@ -2186,7 +2186,7 @@ int execute_scan_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oz|sl",
-                                     &object, redis_ce, &z_iter, &pattern, &pattern_len,
+                                     &object, get_valkey_glide_ce(), &z_iter, &pattern, &pattern_len,
                                      &count) == FAILURE)
     {
         return 0;
@@ -2270,7 +2270,7 @@ int execute_sscan_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osz|sl",
-                                     &object, redis_ce, &key, &key_len, &z_iter,
+                                     &object, get_valkey_glide_ce(), &key, &key_len, &z_iter,
                                      &pattern, &pattern_len, &count) == FAILURE)
     {
         return 0;
@@ -2387,7 +2387,7 @@ int execute_servername_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, redis_ce) == FAILURE)
+                                     &object, get_valkey_glide_ce()) == FAILURE)
     {
         return 0;
     }
@@ -2491,7 +2491,7 @@ int execute_serverversion_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, redis_ce) == FAILURE)
+                                     &object, get_valkey_glide_ce()) == FAILURE)
     {
         return 0;
     }
@@ -2537,7 +2537,7 @@ int execute_hscan_command(zval *object, int argc, zval *return_value)
 
     /* Parse arguments */
     if (zend_parse_method_parameters(argc, object, "Osz|sl",
-                                     &object, redis_ce, &key, &key_len, &z_iter,
+                                     &object, get_valkey_glide_ce(), &key, &key_len, &z_iter,
                                      &pattern, &pattern_len, &count) == FAILURE)
     {
         return 0;

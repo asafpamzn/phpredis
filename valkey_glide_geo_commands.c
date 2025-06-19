@@ -22,7 +22,7 @@
 #include <stdio.h>
 
 #include "valkey_glide_geo_common.h"
-extern zend_class_entry *redis_ce;
+extern zend_class_entry *get_valkey_glide_ce();
 
 /* Execute a GEOADD command using the Valkey Glide client */
 int execute_geoadd_command(zval *object, int argc, zval *return_value)
@@ -36,7 +36,7 @@ int execute_geoadd_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os*",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_args, &variadic_argc) == FAILURE)
     {
         return 0;
@@ -93,7 +93,7 @@ int execute_geodist_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osss|s",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &src, &src_len, &dst, &dst_len,
                                      &unit, &unit_len) == FAILURE)
     {
@@ -154,7 +154,7 @@ int execute_geohash_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os*",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_args, &variadic_argc) == FAILURE)
     {
         return 0;
@@ -207,7 +207,7 @@ int execute_geopos_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os*",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_args, &variadic_argc) == FAILURE)
     {
         return 0;
@@ -260,7 +260,7 @@ int execute_georadius_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osddds|a",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &lng, &lat, &radius,
                                      &unit, &unit_len, &z_opts) == FAILURE)
     {
@@ -368,7 +368,7 @@ int execute_georadius_ro_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osddds|a",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &lng, &lat, &radius,
                                      &unit, &unit_len, &z_opts) == FAILURE)
     {
@@ -477,7 +477,7 @@ int execute_geosearch_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters for simple case: geosearch(key, member, radius, unit [, options]) */
     if (zend_parse_method_parameters(argc, object, "Oszds|a",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &from, &radius, &unit, &unit_len, &options) == FAILURE)
     {
         return 0;
@@ -568,7 +568,7 @@ int execute_geosearchstore_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osszds|a",
-                                     &object, redis_ce, &dest, &dest_len,
+                                     &object, get_valkey_glide_ce(), &dest, &dest_len,
                                      &src, &src_len, &from, &radius,
                                      &unit, &unit_len, &options) == FAILURE)
     {

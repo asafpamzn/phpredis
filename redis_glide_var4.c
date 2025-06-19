@@ -22,8 +22,8 @@
 #include <string.h>
 #include <stdio.h>
 
-extern zend_class_entry *redis_ce;
-extern zend_class_entry *redis_exception_ce;
+extern zend_class_entry *get_valkey_glide_ce();
+extern zend_class_entry *get_valkey_glide_exception_ce();
 
 /* Execute a PFADD command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
 
@@ -58,7 +58,7 @@ int execute_copy_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss|a",
-                                     &object, redis_ce, &src, &src_len,
+                                     &object, get_valkey_glide_ce(), &src, &src_len,
                                      &dst, &dst_len, &z_opts) == FAILURE)
     {
         return 0;
@@ -130,7 +130,7 @@ int execute_pfadd_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osa",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &z_elements) == FAILURE)
     {
         return 0;
@@ -183,7 +183,7 @@ int execute_pfcount_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O+",
-                                     &object, redis_ce, &z_args, &arg_count) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &z_args, &arg_count) == FAILURE)
     {
         return 0;
     }
@@ -216,7 +216,7 @@ int execute_pfmerge_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osa",
-                                     &object, redis_ce, &dst, &dst_len,
+                                     &object, get_valkey_glide_ce(), &dst, &dst_len,
                                      &z_keys) == FAILURE)
     {
         return 0;
@@ -262,7 +262,7 @@ int execute_gettimeout_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, redis_ce) == FAILURE)
+                                     &object, get_valkey_glide_ce()) == FAILURE)
     {
         return 0;
     }
@@ -307,7 +307,7 @@ int execute_select_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Ol",
-                                     &object, redis_ce, &dbindex) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &dbindex) == FAILURE)
     {
         return 0;
     }
@@ -356,7 +356,7 @@ int execute_swapdb_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oll",
-                                     &object, redis_ce, &db1, &db2) == FAILURE)
+                                     &object, get_valkey_glide_ce(), &db1, &db2) == FAILURE)
     {
         return 0;
     }
@@ -406,7 +406,7 @@ int execute_move_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl",
-                                     &object, redis_ce, &key, &key_len,
+                                     &object, get_valkey_glide_ce(), &key, &key_len,
                                      &dbindex) == FAILURE)
     {
         return 0;
