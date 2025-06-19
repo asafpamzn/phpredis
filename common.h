@@ -1,14 +1,14 @@
 #include "php.h"
 #include "php_ini.h"
 
-#ifndef REDIS_COMMON_H
-#define REDIS_COMMON_H
+#ifndef VALKEY_GLIDE_COMMON_H
+#define VALKEY_GLIDE_COMMON_H
 
 #include <stdio.h>
 #include <zend_smart_str.h>
 #include <ext/standard/php_smart_string.h>
 
-/* phpredis version */
+/* ValkeyGlidePHP version */
 #define VALKEY_GLIDE_PHP_VERSION "0.1"
 
 #define VALKEY_GLIDE_PHP_GET_OBJECT(class_entry, o) (class_entry *)((char *)o - XtOffsetOf(class_entry, std))
@@ -23,21 +23,13 @@
 #ifndef __has_attribute
 #define __has_attribute(x) 0
 #endif
-#if __has_attribute(__fallthrough__)
-#define REDIS_FALLTHROUGH __attribute__((__fallthrough__))
-#else
-#define REDIS_FALLTHROUGH \
-    do                    \
-    {                     \
-    } while (0)
-#endif
 
 /* ValkeyGlide data types for compatibility */
-#define REDIS_NOT_FOUND 0
-#define REDIS_STRING 1
-#define REDIS_SET 2
-#define REDIS_LIST 3
-#define REDIS_ZSET 4
+#define VALKEY_GLIDE_NOT_FOUND 0
+#define VALKEY_GLIDE_STRING 1
+#define VALKEY_GLIDE_SET 2
+#define VALKEY_GLIDE_LIST 3
+#define VALKEY_GLIDE_ZSET 4
 #define REDIS_HASH 5
 #define REDIS_STREAM 6
 
@@ -87,13 +79,4 @@ PHP_MINFO_FUNCTION(redis);
 zend_class_entry *get_valkey_glide_ce(void);
 zend_class_entry *get_valkey_glide_exception_ce(void);
 
-#endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
+#endif // VALKEY_GLIDE

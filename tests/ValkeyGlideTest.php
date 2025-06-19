@@ -1061,24 +1061,24 @@ class ValkeyGlide_Test extends TestSuite {
     public function testType() {
         // string
         $this->redis->set('key', 'val');
-        $this->assertEquals(ValkeyGlide::REDIS_STRING, $this->redis->type('key'));
+        $this->assertEquals(ValkeyGlide::VALKEY_GLIDE_STRING, $this->redis->type('key'));
         
         // list
         $this->redis->lPush('keyList', 'val0');
         $this->redis->lPush('keyList', 'val1');
-        $this->assertEquals(ValkeyGlide::REDIS_LIST, $this->redis->type('keyList'));
+        $this->assertEquals(ValkeyGlide::VALKEY_GLIDE_LIST, $this->redis->type('keyList'));
 
         // set
         $this->redis->del('keySet');
         $this->redis->sAdd('keySet', 'val0');
         $this->redis->sAdd('keySet', 'val1');
-        $this->assertEquals(ValkeyGlide::REDIS_SET, $this->redis->type('keySet'));
+        $this->assertEquals(ValkeyGlide::VALKEY_GLIDE_SET, $this->redis->type('keySet'));
        
         // zset
         $this->redis->del('keyZSet');
         $this->redis->zAdd('keyZSet', 0, 'val0');
         $this->redis->zAdd('keyZSet', 1, 'val1');
-        $this->assertEquals(ValkeyGlide::REDIS_ZSET, $this->redis->type('keyZSet'));
+        $this->assertEquals(ValkeyGlide::VALKEY_GLIDE_ZSET, $this->redis->type('keyZSet'));
 
         // hash
         $this->redis->del('keyHash');
@@ -1096,7 +1096,7 @@ class ValkeyGlide_Test extends TestSuite {
 
         // None
         $this->redis->del('keyNotExists');
-        $this->assertEquals(ValkeyGlide::REDIS_NOT_FOUND, $this->redis->type('keyNotExists'));
+        $this->assertEquals(ValkeyGlide::VALKEY_GLIDE_NOT_FOUND, $this->redis->type('keyNotExists'));
 
     }
 
@@ -3468,7 +3468,7 @@ class ValkeyGlide_Test extends TestSuite {
         $this->assertIsArray($ret);
         $i = 0;
         $this->assertTrue($ret[$i++]);
-        $this->assertEquals(ValkeyGlide::REDIS_STRING, $ret[$i++]);
+        $this->assertEquals(ValkeyGlide::VALKEY_GLIDE_STRING, $ret[$i++]);
         $this->assertEqualsWeak('42', $ret[$i]);
 
         $serializer = $this->redis->getOption(ValkeyGlide::OPT_SERIALIZER);

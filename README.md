@@ -217,12 +217,12 @@ _**Description**_: Available Redis Constants
 
 Redis data types, as returned by [type](#type)
 ~~~
-Redis::REDIS_STRING - String
-Redis::REDIS_SET - Set
-Redis::REDIS_LIST - List
-Redis::REDIS_ZSET - Sorted set
+Redis::VALKEY_GLIDE_STRING - String
+Redis::VALKEY_GLIDE_SET - Set
+Redis::VALKEY_GLIDE_LIST - List
+Redis::VALKEY_GLIDE_ZSET - Sorted set
 Redis::REDIS_HASH - Hash
-Redis::REDIS_NOT_FOUND - Not found / other
+Redis::VALKEY_GLIDE_NOT_FOUND - Not found / other
 ~~~
 
 @TODO: OPT_SERIALIZER, AFTER, BEFORE,...
@@ -1278,12 +1278,12 @@ _**Description**_: Returns the type of data pointed by a given key.
 ##### *Return value*
 
 Depending on the type of the data pointed by the key, this method will return the following value:  
-string: Redis::REDIS_STRING  
-set: Redis::REDIS_SET  
-list: Redis::REDIS_LIST  
-zset: Redis::REDIS_ZSET  
+string: Redis::VALKEY_GLIDE_STRING  
+set: Redis::VALKEY_GLIDE_SET  
+list: Redis::VALKEY_GLIDE_LIST  
+zset: Redis::VALKEY_GLIDE_ZSET  
 hash: Redis::REDIS_HASH  
-other: Redis::REDIS_NOT_FOUND
+other: Redis::VALKEY_GLIDE_NOT_FOUND
 
 ##### *Example*
 ~~~php

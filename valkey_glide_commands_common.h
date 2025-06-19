@@ -137,8 +137,6 @@ int execute_pttl_command(zval *object, int argc, zval *return_value);
 
 /* Hash operations */
 
-/* New commands added in redis_glide_commands.c */
-
 int execute_brpoplpush_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len, zend_long timeout, char **result, size_t *result_len);
 
 /* Object operations */
@@ -169,15 +167,6 @@ int execute_dbsize_command(zval *object, int argc, zval *return_value);
 int execute_select_command(zval *object, int argc, zval *return_value);
 int execute_swapdb_command(zval *object, int argc, zval *return_value);
 int execute_move_command(zval *object, int argc, zval *return_value);
-
-/* ====================================================================
- * UNIFIED COMMAND FUNCTION DECLARATIONS (Now in redis_glide.c)
- * ==================================================================== */
-
-/* These functions are now implemented directly in redis_glide.c with unified signatures */
-/* No separate unified wrapper functions needed - cleaner architecture! */
-
-/* Function declarations from redis_glide.h - included here for reference */
 int execute_echo_command(zval *object, int argc, zval *return_value);
 int execute_bitop_command(zval *object, int argc, zval *return_value);
 int execute_getbit_command(zval *object, int argc, zval *return_value);

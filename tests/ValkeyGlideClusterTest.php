@@ -9,10 +9,10 @@ require_once __DIR__ . "/ValkeyGlideTest.php";
  */
 class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
     private $redis_types = [
-        ValkeyGlide::REDIS_STRING,
-        ValkeyGlide::REDIS_SET,
-        ValkeyGlide::REDIS_LIST,
-        ValkeyGlide::REDIS_ZSET,
+        ValkeyGlide::VALKEY_GLIDE_STRING,
+        ValkeyGlide::VALKEY_GLIDE_SET,
+        ValkeyGlide::VALKEY_GLIDE_LIST,
+        ValkeyGlide::VALKEY_GLIDE_ZSET,
         ValkeyGlide::REDIS_HASH
     ];
 
@@ -573,13 +573,13 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
 
     protected function keyTypeToString($key_type) {
         switch ($key_type) {
-            case ValkeyGlide::REDIS_STRING:
+            case ValkeyGlide::VALKEY_GLIDE_STRING:
                 return "string";
-            case ValkeyGlide::REDIS_SET:
+            case ValkeyGlide::VALKEY_GLIDE_SET:
                 return "set";
-            case ValkeyGlide::REDIS_LIST:
+            case ValkeyGlide::VALKEY_GLIDE_LIST:
                 return "list";
-            case ValkeyGlide::REDIS_ZSET:
+            case ValkeyGlide::VALKEY_GLIDE_ZSET:
                 return "zset";
             case ValkeyGlide::REDIS_HASH:
                 return "hash";
@@ -601,11 +601,11 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
         $this->redis->del($key);
 
         switch ($key_type) {
-            case ValkeyGlide::REDIS_STRING:
+            case ValkeyGlide::VALKEY_GLIDE_STRING:
                 $value = "$key-value";
                 $this->redis->set($key, $value);
                 break;
-            case ValkeyGlide::REDIS_SET:
+            case ValkeyGlide::VALKEY_GLIDE_SET:
                 $value = [
                     "$key-mem1", "$key-mem2", "$key-mem3",
                     "$key-mem4", "$key-mem5", "$key-mem6"
@@ -622,7 +622,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
                 ];
                 $this->redis->hmset($key, $value);
                 break;
-            case ValkeyGlide::REDIS_LIST:
+            case ValkeyGlide::VALKEY_GLIDE_LIST:
                 $value = [
                     "$key-ele1", "$key-ele2", "$key-ele3",
                     "$key-ele4", "$key-ele5", "$key-ele6"
@@ -631,7 +631,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
                 array_unshift($args, $key);
                 call_user_func_array([$this->redis, 'rpush'], $args);
                 break;
-            case ValkeyGlide::REDIS_ZSET:
+            case ValkeyGlide::VALKEY_GLIDE_ZSET:
                 $score = 1;
                 $value = [
                     "$key-mem1" => 1, "$key-mem2" => 2,
@@ -665,23 +665,23 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
 
     protected function checkKeyValue($key, $key_type, $value) {
         switch ($key_type) {
-            case ValkeyGlide::REDIS_STRING:
+            case ValkeyGlide::VALKEY_GLIDE_STRING:
                 $this->assertEquals($value, $this->redis->get($key));
                 break;
-            case ValkeyGlide::REDIS_SET:
+            case ValkeyGlide::VALKEY_GLIDE_SET:
                 $arr_r_values = $this->redis->sMembers($key);
                 $arr_l_values = $value;
                 sort($arr_r_values);
                 sort($arr_l_values);
                 $this->assertEquals($arr_r_values, $arr_l_values);
                 break;
-            case ValkeyGlide::REDIS_LIST:
+            case ValkeyGlide::VALKEY_GLIDE_LIST:
                 $this->assertEquals($value, $this->redis->lrange($key, 0, -1));
                 break;
             case ValkeyGlide::REDIS_HASH:
                 $this->assertEquals($value, $this->redis->hgetall($key));
                 break;
-            case ValkeyGlide::REDIS_ZSET:
+            case ValkeyGlide::VALKEY_GLIDE_ZSET:
                 $this->checkZSetEquality($value, $this->redis->zrange($key, 0, -1, true));
                 break;
             default:

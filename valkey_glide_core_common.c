@@ -1301,19 +1301,19 @@ int process_core_type_result(CommandResult *result, void *output)
         /* Map ValkeyGlide type strings to PHP constants */
         if (strncmp(type_str, "string", 6) == 0)
         {
-            *type_code = 1; /* REDIS_STRING */
+            *type_code = 1; /* VALKEY_GLIDE_STRING */
         }
         else if (strncmp(type_str, "list", 4) == 0)
         {
-            *type_code = 3; /* REDIS_LIST */
+            *type_code = 3; /* VALKEY_GLIDE_LIST */
         }
         else if (strncmp(type_str, "set", 3) == 0)
         {
-            *type_code = 2; /* REDIS_SET */
+            *type_code = 2; /* VALKEY_GLIDE_SET */
         }
         else if (strncmp(type_str, "zset", 4) == 0)
         {
-            *type_code = 4; /* REDIS_ZSET */
+            *type_code = 4; /* VALKEY_GLIDE_ZSET */
         }
         else if (strncmp(type_str, "hash", 4) == 0)
         {
@@ -1325,7 +1325,7 @@ int process_core_type_result(CommandResult *result, void *output)
         }
         else if (strncmp(type_str, "none", 4) == 0)
         {
-            *type_code = 0; /* REDIS_NOT_FOUND */
+            *type_code = 0; /* VALKEY_GLIDE_NOT_FOUND */
         }
         else
         {
@@ -1338,7 +1338,7 @@ int process_core_type_result(CommandResult *result, void *output)
     else if (result->response->response_type == Null)
     {
         /* Key doesn't exist */
-        *type_code = 0; /* REDIS_NOT_FOUND */
+        *type_code = 0; /* VALKEY_GLIDE_NOT_FOUND */
         return 1;
     }
 

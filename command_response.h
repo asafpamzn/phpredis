@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | ValkeyGlide Glide FFI integration for phpredis                             |
-  +----------------------------------------------------------------------+
   | Copyright (c) 2023-2025 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -28,8 +26,6 @@ enum CommandResponseToZvalFlags
   COMMAND_RESPONSE_ASSOSIATIVE_ARRAY = 1,        // Use associative array format for Map elements
   COMMAND_RESPONSE_STREAM_ARRAY_ASSOCIATIVE = 2, // Use associative array format for stream entries
 };
-/* No need to forward declare zval or ClientConfig as they are already defined in php.h and redis_glide.h */
-
 /*
  * Execute a command and handle common error checking
  * Returns NULL if there was an error, otherwise returns the CommandResult

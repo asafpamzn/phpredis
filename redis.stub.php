@@ -10,42 +10,42 @@ class ValkeyGlide {
     /**
      *
      * @var int
-     * @cvalue REDIS_NOT_FOUND
+     * @cvalue VALKEY_GLIDE_NOT_FOUND
      *
      */
-    public const REDIS_NOT_FOUND = UNKNOWN;
+    public const VALKEY_GLIDE_NOT_FOUND = UNKNOWN;
 
     /**
      *
      * @var int
-     * @cvalue REDIS_STRING
+     * @cvalue VALKEY_GLIDE_STRING
      *
      */
-    public const REDIS_STRING = UNKNOWN;
+    public const VALKEY_GLIDE_STRING = UNKNOWN;
 
     /**
      *
      * @var int
-     * @cvalue REDIS_SET
+     * @cvalue VALKEY_GLIDE_SET
      *
      */
-    public const REDIS_SET = UNKNOWN;
+    public const VALKEY_GLIDE_SET = UNKNOWN;
 
     /**
      *
      * @var int
-     * @cvalue REDIS_LIST
+     * @cvalue VALKEY_GLIDE_LIST
      *
      */
-    public const REDIS_LIST = UNKNOWN;
+    public const VALKEY_GLIDE_LIST = UNKNOWN;
 
     /**
      *
      * @var int
-     * @cvalue REDIS_ZSET
+     * @cvalue VALKEY_GLIDE_ZSET
      *
      */
-    public const REDIS_ZSET = UNKNOWN;
+    public const VALKEY_GLIDE_ZSET = UNKNOWN;
 
     /**
      *
@@ -2877,11 +2877,11 @@ class ValkeyGlide {
      *
      * The ValkeyGlide class defines several type constants that correspond with ValkeyGlide key types.
      *
-     *     ValkeyGlide::REDIS_NOT_FOUND
-     *     ValkeyGlide::REDIS_STRING
-     *     ValkeyGlide::REDIS_SET
-     *     ValkeyGlide::REDIS_LIST
-     *     ValkeyGlide::REDIS_ZSET
+     *     ValkeyGlide::VALKEY_GLIDE_NOT_FOUND
+     *     ValkeyGlide::VALKEY_GLIDE_STRING
+     *     ValkeyGlide::VALKEY_GLIDE_SET
+     *     ValkeyGlide::VALKEY_GLIDE_LIST
+     *     ValkeyGlide::VALKEY_GLIDE_ZSET
      *     ValkeyGlide::REDIS_HASH
      *     ValkeyGlide::REDIS_STREAM
      *
