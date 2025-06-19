@@ -18,6 +18,7 @@
 #define REDIS_GLIDE_LIST_COMMON_H
 
 #include "redis_glide.h"
+#include "common.h"
 #include "command_response.h"
 #include "include/glide_bindings.h"
 #include <stdlib.h>

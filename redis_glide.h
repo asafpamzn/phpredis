@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include "common.h"
 #include "include/glide_bindings.h"
 #include "include/glide/connection_request.pb-c.h"
 

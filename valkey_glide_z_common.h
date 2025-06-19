@@ -17,6 +17,7 @@
 #ifndef VALKEY_GLIDE_Z_COMMON_H
 #define VALKEY_GLIDE_Z_COMMON_H
 
+#include "common.h"
 #include "include/glide_bindings.h"
 
 /* ====================================================================
