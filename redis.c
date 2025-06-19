@@ -184,33 +184,3 @@ PHP_METHOD(ValkeyGlide, eval_ro) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, evalsha) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, evalsha_ro) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, script) { /* TODO: Implement */ }
-
-PHP_METHOD(ValkeyGlide, getMode)
-{
-    RETURN_FALSE;
-}
-
-PHP_METHOD(ValkeyGlide, getHost)
-{
-    RETURN_FALSE;
-}
-
-PHP_METHOD(ValkeyGlide, getPort)
-{
-    RETURN_FALSE;
-}
-
-PHP_METHOD(ValkeyGlide, getDBNum)
-{
-    RETURN_FALSE;
-}
-
-PHP_METHOD(ValkeyGlide, getTransferredBytes)
-{
-    RETURN_FALSE;
-}
-
-PHP_METHOD(ValkeyGlide, clearTransferredBytes)
-{
-    RETURN_FALSE;
-}
