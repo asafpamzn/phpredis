@@ -772,7 +772,7 @@ int prepare_list_blocking_args(list_command_args_t *args, uintptr_t **args_out,
  */
 int execute_list_move_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *src = NULL, *dst = NULL, *wherefrom = NULL, *whereto = NULL;
     size_t src_len, dst_len, wherefrom_len, whereto_len;
     double timeout = -1.0;
@@ -809,7 +809,7 @@ int execute_list_move_command(zval *object, int argc, zval *return_value, enum R
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -869,7 +869,7 @@ int execute_list_move_command(zval *object, int argc, zval *return_value, enum R
  */
 int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *keys = NULL;
     char *from = NULL;
     size_t from_len;
@@ -899,7 +899,7 @@ int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum R
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1561,7 +1561,7 @@ int prepare_list_mpop_args(list_command_args_t *args, uintptr_t **args_out,
  */
 int execute_list_push_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zval *z_args;
@@ -1582,7 +1582,7 @@ int execute_list_push_command(zval *object, int argc, zval *return_value, enum R
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1619,7 +1619,7 @@ int execute_list_push_command(zval *object, int argc, zval *return_value, enum R
  */
 int execute_list_pop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zend_long count = 0;
@@ -1636,7 +1636,7 @@ int execute_list_pop_command(zval *object, int argc, zval *return_value, enum Re
     has_count = (argc > 1);
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1677,7 +1677,7 @@ int execute_list_pop_command(zval *object, int argc, zval *return_value, enum Re
  */
 int execute_list_blocking_pop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *keys;
     double timeout = 0;
 
@@ -1689,7 +1689,7 @@ int execute_list_blocking_pop_command(zval *object, int argc, zval *return_value
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1721,7 +1721,7 @@ int execute_list_blocking_pop_command(zval *object, int argc, zval *return_value
  */
 int execute_list_len_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     long output_value;
@@ -1734,7 +1734,7 @@ int execute_list_len_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1766,7 +1766,7 @@ int execute_list_len_command(zval *object, int argc, zval *return_value)
 /* Execute an LRANGE command using the Valkey Glide client - New pattern */
 int execute_list_range_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zend_long start, end;
@@ -1779,7 +1779,7 @@ int execute_list_range_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1813,7 +1813,7 @@ int execute_list_range_command(zval *object, int argc, zval *return_value)
  */
 int execute_list_index_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zend_long index;
@@ -1830,7 +1830,7 @@ int execute_list_index_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1883,7 +1883,7 @@ int execute_list_index_command(zval *object, int argc, zval *return_value)
  */
 int execute_list_set_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL, *val = NULL;
     size_t key_len, val_len;
     zend_long index;
@@ -1899,7 +1899,7 @@ int execute_list_set_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1937,7 +1937,7 @@ int execute_list_set_command(zval *object, int argc, zval *return_value)
  */
 int execute_list_insert_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL, *pos = NULL, *pivot = NULL, *val = NULL;
     size_t key_len, pos_len, pivot_len, val_len;
     long output_value;
@@ -1953,7 +1953,7 @@ int execute_list_insert_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -2018,7 +2018,7 @@ int execute_list_insert_command(zval *object, int argc, zval *return_value)
  */
 int execute_list_position_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *z_value, *z_opts = NULL;
     char *key = NULL, *val = NULL;
     size_t key_len, val_len;
@@ -2033,7 +2033,7 @@ int execute_list_position_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -2093,7 +2093,7 @@ int execute_list_position_command(zval *object, int argc, zval *return_value)
  */
 int execute_list_rem_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL, *value = NULL;
     size_t key_len, value_len;
     zend_long count = 0;
@@ -2110,7 +2110,7 @@ int execute_list_rem_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -2147,7 +2147,7 @@ int execute_list_rem_command(zval *object, int argc, zval *return_value)
  */
 int execute_list_trim_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zend_long start, end;
@@ -2162,7 +2162,7 @@ int execute_list_trim_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)

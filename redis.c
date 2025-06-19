@@ -65,11 +65,11 @@ zend_module_entry redis_module_entry = {
 ZEND_GET_MODULE(redis)
 #endif
 
-zend_object_handlers redis_object_handlers;
+zend_object_handlers valkey_glide_object_handlers;
 
-void free_redis_object(zend_object *object)
+void free_valkey_glide_object(zend_object *object)
 {
-    redis_object *redis = PHPREDIS_GET_OBJECT(redis_object, object);
+    valkey_glide_object *redis = PHPREDIS_GET_OBJECT(valkey_glide_object, object);
 
     /* Free the Valkey Glide client if it exists */
     if (redis->glide_client)
@@ -79,9 +79,9 @@ void free_redis_object(zend_object *object)
     }
 }
 
-zend_object *create_redis_object(zend_class_entry *ce)
+zend_object *create_valkey_glide_object(zend_class_entry *ce)
 {
-    redis_object *redis = ecalloc(1, sizeof(redis_object) + zend_object_properties_size(ce));
+    valkey_glide_object *redis = ecalloc(1, sizeof(valkey_glide_object) + zend_object_properties_size(ce));
 
     /* Initialize Valkey Glide client */
     ClientConfig config;
@@ -96,10 +96,10 @@ zend_object *create_redis_object(zend_class_entry *ce)
     zend_object_std_init(&redis->std, ce);
     object_properties_init(&redis->std, ce);
 
-    memcpy(&redis_object_handlers, zend_get_std_object_handlers(), sizeof(redis_object_handlers));
-    redis_object_handlers.offset = XtOffsetOf(redis_object, std);
-    redis_object_handlers.free_obj = free_redis_object;
-    redis->std.handlers = &redis_object_handlers;
+    memcpy(&valkey_glide_object_handlers, zend_get_std_object_handlers(), sizeof(valkey_glide_object_handlers));
+    valkey_glide_object_handlers.offset = XtOffsetOf(valkey_glide_object, std);
+    valkey_glide_object_handlers.free_obj = free_valkey_glide_object;
+    redis->std.handlers = &valkey_glide_object_handlers;
 
     return &redis->std;
 }
@@ -111,7 +111,7 @@ PHP_MINIT_FUNCTION(redis)
 {
     /* ValkeyGlide class */
     redis_ce = register_class_ValkeyGlide();
-    redis_ce->create_object = create_redis_object;
+    redis_ce->create_object = create_valkey_glide_object;
 
     /* ValkeyGlideException class */
     redis_exception_ce = register_class_ValkeyGlideException(spl_ce_RuntimeException);
@@ -135,14 +135,14 @@ PHP_MINFO_FUNCTION(redis)
 PHP_METHOD(ValkeyGlide, __construct)
 {
     HashTable *opts = NULL;
-    redis_object *redis;
+    valkey_glide_object *redis;
 
     ZEND_PARSE_PARAMETERS_START(0, 1)
     Z_PARAM_OPTIONAL
     Z_PARAM_ARRAY_HT_OR_NULL(opts)
     ZEND_PARSE_PARAMETERS_END_EX(RETURN_THROWS());
 
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, getThis());
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, getThis());
     /* Options handling can be added here as needed */
 }
 /* }}} */

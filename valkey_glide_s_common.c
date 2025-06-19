@@ -797,7 +797,7 @@ cleanup:
  */
 int execute_sadd_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zval *z_args;
@@ -812,7 +812,7 @@ int execute_sadd_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -840,7 +840,7 @@ int execute_sadd_command(zval *object, int argc, zval *return_value)
  */
 int execute_sadd_array_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zval *z_arr;
@@ -855,7 +855,7 @@ int execute_sadd_array_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* Get HashTable from array */
     ht_arr = Z_ARRVAL_P(z_arr);
@@ -913,7 +913,7 @@ int execute_sadd_array_command(zval *object, int argc, zval *return_value)
  */
 int execute_scard_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
 
@@ -925,7 +925,7 @@ int execute_scard_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -951,7 +951,7 @@ int execute_scard_command(zval *object, int argc, zval *return_value)
  */
 int execute_srandmember_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zend_long count = 0;
@@ -969,7 +969,7 @@ int execute_srandmember_command(zval *object, int argc, zval *return_value)
     has_count = (argc > 1);
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -997,7 +997,7 @@ int execute_srandmember_command(zval *object, int argc, zval *return_value)
  */
 int execute_sismember_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL, *member = NULL;
     size_t key_len, member_len;
 
@@ -1010,7 +1010,7 @@ int execute_sismember_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1038,7 +1038,7 @@ int execute_sismember_command(zval *object, int argc, zval *return_value)
  */
 int execute_smembers_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
 
@@ -1050,7 +1050,7 @@ int execute_smembers_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1076,7 +1076,7 @@ int execute_smembers_command(zval *object, int argc, zval *return_value)
  */
 int execute_srem_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zval *z_args;
@@ -1091,7 +1091,7 @@ int execute_srem_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1119,7 +1119,7 @@ int execute_srem_command(zval *object, int argc, zval *return_value)
  */
 int execute_smove_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *src = NULL, *dst = NULL, *member = NULL;
     size_t src_len, dst_len, member_len;
 
@@ -1132,7 +1132,7 @@ int execute_smove_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1162,7 +1162,7 @@ int execute_smove_command(zval *object, int argc, zval *return_value)
  */
 int execute_spop_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zend_long count = 0;
@@ -1180,7 +1180,7 @@ int execute_spop_command(zval *object, int argc, zval *return_value)
     has_count = (argc > 1);
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1208,7 +1208,7 @@ int execute_spop_command(zval *object, int argc, zval *return_value)
  */
 int execute_smismember_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zval *z_args;
@@ -1223,7 +1223,7 @@ int execute_smismember_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1251,7 +1251,7 @@ int execute_smismember_command(zval *object, int argc, zval *return_value)
  */
 int execute_sinter_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *z_args = NULL;
     int keys_count = 0;
     zval *z_keys_arr = NULL;
@@ -1304,7 +1304,7 @@ int execute_sinter_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1349,7 +1349,7 @@ int execute_sinter_command(zval *object, int argc, zval *return_value)
  */
 int execute_sintercard_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *z_keys;
     zend_long limit = 0;
     int has_limit = 0;
@@ -1372,7 +1372,7 @@ int execute_sintercard_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* Get keys count and convert HashTable to zval array */
     ht_keys = Z_ARRVAL_P(z_keys);
@@ -1436,7 +1436,7 @@ int execute_sintercard_command(zval *object, int argc, zval *return_value)
  */
 int execute_sinterstore_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *dst = NULL;
     size_t dst_len;
     zval *z_args = NULL;
@@ -1564,7 +1564,7 @@ int execute_sinterstore_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1611,7 +1611,7 @@ int execute_sinterstore_command(zval *object, int argc, zval *return_value)
  */
 int execute_sunion_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *z_args = NULL;
     int keys_count = 0;
     zval *z_keys_arr = NULL;
@@ -1664,7 +1664,7 @@ int execute_sunion_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1709,7 +1709,7 @@ int execute_sunion_command(zval *object, int argc, zval *return_value)
  */
 int execute_sunionstore_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *dst = NULL;
     size_t dst_len;
     zval *z_args = NULL;
@@ -1837,7 +1837,7 @@ int execute_sunionstore_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1884,7 +1884,7 @@ int execute_sunionstore_command(zval *object, int argc, zval *return_value)
  */
 int execute_sdiff_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *z_args = NULL;
     int keys_count = 0;
     zval *z_keys_arr = NULL;
@@ -1937,7 +1937,7 @@ int execute_sdiff_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -1982,7 +1982,7 @@ int execute_sdiff_command(zval *object, int argc, zval *return_value)
  */
 int execute_sdiffstore_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *dst = NULL;
     size_t dst_len;
     zval *z_args = NULL;
@@ -2110,7 +2110,7 @@ int execute_sdiffstore_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (redis->glide_client)
@@ -2176,7 +2176,7 @@ int execute_scan_command_internal(const void *glide_client, long *it, const char
  */
 int execute_scan_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *z_iter;
     char *pattern = NULL;
     size_t pattern_len = 0;
@@ -2197,7 +2197,7 @@ int execute_scan_command(zval *object, int argc, zval *return_value)
     has_count = (argc > 2);
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -2258,7 +2258,7 @@ int execute_sscan_command_internal(const void *glide_client, const char *key, si
  */
 int execute_sscan_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zval *z_iter;
@@ -2281,7 +2281,7 @@ int execute_sscan_command(zval *object, int argc, zval *return_value)
     has_count = (argc > 3);
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -2381,7 +2381,7 @@ int execute_servername_command_internal(const void *glide_client, char **output,
  */
 int execute_servername_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *result = NULL;
     size_t result_len = 0;
 
@@ -2393,7 +2393,7 @@ int execute_servername_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -2485,7 +2485,7 @@ int execute_serverversion_command_internal(const void *glide_client, char **outp
  */
 int execute_serverversion_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *result = NULL;
     size_t result_len = 0;
 
@@ -2497,7 +2497,7 @@ int execute_serverversion_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -2529,7 +2529,7 @@ int execute_serverversion_command(zval *object, int argc, zval *return_value)
  */
 int execute_hscan_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL, *pattern = NULL;
     size_t key_len, pattern_len = 0;
     zval *z_iter;
@@ -2544,7 +2544,7 @@ int execute_hscan_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;

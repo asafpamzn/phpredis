@@ -82,7 +82,7 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
 
     /* The normal case, loading from arguments */
 
-    redis_object *redis = PHPREDIS_GET_OBJECT(redis_object, object);
+    valkey_glide_object *redis = PHPREDIS_GET_OBJECT(valkey_glide_object, object);
     ClientConfig config;
 
     config.tls_mode_ = false;

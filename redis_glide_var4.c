@@ -51,7 +51,7 @@ int execute_get_timeout_command(const void *glide_client, double *output_value)
 /* Unified COPY command implementation */
 int execute_copy_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *src = NULL, *dst = NULL;
     size_t src_len, dst_len;
     zend_bool replace = 0;
@@ -66,7 +66,7 @@ int execute_copy_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -124,7 +124,7 @@ int execute_copy_command(zval *object, int argc, zval *return_value)
 /* Unified PFADD command implementation */
 int execute_pfadd_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zval *z_elements;
@@ -138,7 +138,7 @@ int execute_pfadd_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -177,7 +177,7 @@ int execute_pfadd_command(zval *object, int argc, zval *return_value)
 /* Unified PFCOUNT command implementation */
 int execute_pfcount_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *z_args = NULL;
     int arg_count = 0;
     long result_value = 0;
@@ -190,7 +190,7 @@ int execute_pfcount_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -210,7 +210,7 @@ int execute_pfcount_command(zval *object, int argc, zval *return_value)
 /* Unified PFMERGE command implementation */
 int execute_pfmerge_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *dst = NULL;
     size_t dst_len;
     zval *z_keys;
@@ -224,7 +224,7 @@ int execute_pfmerge_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -258,7 +258,7 @@ int execute_pfmerge_command(zval *object, int argc, zval *return_value)
 /* Unified getTimeout command implementation */
 int execute_gettimeout_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     double timeout;
 
     /* Parse parameters */
@@ -269,7 +269,7 @@ int execute_gettimeout_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -303,7 +303,7 @@ int execute_select_command_internal(const void *glide_client, long dbindex)
 /* Execute a SELECT command - UNIFIED IMPLEMENTATION */
 int execute_select_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     long dbindex;
 
     /* Parse parameters */
@@ -314,7 +314,7 @@ int execute_select_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -352,7 +352,7 @@ int execute_swapdb_command_internal(const void *glide_client, long db1, long db2
 /* Execute a SWAPDB command - UNIFIED IMPLEMENTATION */
 int execute_swapdb_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     long db1, db2;
 
     /* Parse parameters */
@@ -363,7 +363,7 @@ int execute_swapdb_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -399,7 +399,7 @@ int execute_move_command_internal(const void *glide_client, const char *key, siz
 /* Execute a MOVE command - UNIFIED IMPLEMENTATION */
 int execute_move_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     long dbindex;
@@ -414,7 +414,7 @@ int execute_move_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;

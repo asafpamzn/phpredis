@@ -73,7 +73,7 @@ extern zend_class_entry *redis_exception_ce;
 /* Execute a RENAME command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_rename_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *src = NULL, *dst = NULL;
     size_t src_len, dst_len;
 
@@ -86,7 +86,7 @@ int execute_rename_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -124,7 +124,7 @@ int execute_rename_command(zval *object, int argc, zval *return_value)
 /* Execute a RENAMENX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_renamenx_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *src = NULL, *dst = NULL;
     size_t src_len, dst_len;
 
@@ -137,7 +137,7 @@ int execute_renamenx_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -175,7 +175,7 @@ int execute_renamenx_command(zval *object, int argc, zval *return_value)
 /* Execute a GETWITHMETA command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_getwithmeta_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     char *response = NULL;
@@ -189,7 +189,7 @@ int execute_getwithmeta_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -235,7 +235,7 @@ int execute_getwithmeta_command(zval *object, int argc, zval *return_value)
 /* Execute a GETDEL command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_getdel_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     char *response = NULL;
@@ -249,7 +249,7 @@ int execute_getdel_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -295,7 +295,7 @@ int execute_getdel_command(zval *object, int argc, zval *return_value)
 /* Execute a GETEX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_getex_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zval *opts = NULL;
@@ -310,7 +310,7 @@ int execute_getex_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -363,7 +363,7 @@ int execute_getex_command(zval *object, int argc, zval *return_value)
 /* Execute an INCR command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_incr_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zend_long value = 1;
@@ -390,7 +390,7 @@ int execute_incr_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -445,7 +445,7 @@ int execute_incr_command(zval *object, int argc, zval *return_value)
 /* Execute an INCRBY command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_incrby_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zend_long value;
@@ -459,7 +459,7 @@ int execute_incrby_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -493,7 +493,7 @@ int execute_incrby_command(zval *object, int argc, zval *return_value)
 /* Execute an INCRBYFLOAT command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_incrbyfloat_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     double value, result;
@@ -506,7 +506,7 @@ int execute_incrbyfloat_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -539,7 +539,7 @@ int execute_incrbyfloat_command(zval *object, int argc, zval *return_value)
 /* Execute a DECR command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_decr_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zend_long value = 1;
@@ -566,7 +566,7 @@ int execute_decr_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -617,7 +617,7 @@ int execute_decr_command(zval *object, int argc, zval *return_value)
 /* Execute a DECRBY command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_decrby_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     char *key = NULL;
     size_t key_len;
     zend_long value;
@@ -631,7 +631,7 @@ int execute_decrby_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -664,7 +664,7 @@ int execute_decrby_command(zval *object, int argc, zval *return_value)
 /* Execute an MGET command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_mget_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *z_array;
 
     /* Parse parameters */
@@ -675,7 +675,7 @@ int execute_mget_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -710,7 +710,7 @@ int execute_mget_command(zval *object, int argc, zval *return_value)
 /* Execute an EXISTS command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_exists_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *z_args;
     long result_value;
 
@@ -722,7 +722,7 @@ int execute_exists_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -779,7 +779,7 @@ int execute_exists_command(zval *object, int argc, zval *return_value)
 /* Execute a TOUCH command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_touch_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *z_args;
     long result_value;
 
@@ -791,7 +791,7 @@ int execute_touch_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;
@@ -849,7 +849,7 @@ int execute_touch_command(zval *object, int argc, zval *return_value)
 /* Execute an UNLINK command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_unlink_command(zval *object, int argc, zval *return_value)
 {
-    redis_object *redis;
+    valkey_glide_object *redis;
     zval *z_args;
     long result_value;
 
@@ -861,7 +861,7 @@ int execute_unlink_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    redis = PHPREDIS_ZVAL_GET_OBJECT(redis_object, object);
+    redis = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!redis || !redis->glide_client)
     {
         return 0;

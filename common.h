@@ -59,7 +59,7 @@ typedef struct
 {
     const void *glide_client; /* Valkey Glide client pointer */
     zend_object std;
-} redis_object;
+} valkey_glide_object;
 
 extern const zend_function_entry *redis_get_methods(void);
 
