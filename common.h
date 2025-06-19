@@ -32,11 +32,7 @@
 #define VALKEY_GLIDE_ZSET 4
 #define VALKEY_GLIDE_HASH 5
 #define VALKEY_GLIDE_STREAM 6
-#ifdef PHP_WIN32
-#define PHP_REDIS_API __declspec(dllexport)
-#else
-#define PHP_REDIS_API
-#endif
+
 #if PHP_VERSION_ID < 80000
 #define Z_PARAM_ARRAY_HT_OR_NULL(dest) \
     Z_PARAM_ARRAY_HT_EX(dest, 1, 0)
