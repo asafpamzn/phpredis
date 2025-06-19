@@ -1004,36 +1004,23 @@ PHP_METHOD(ValkeyGlideCluster, zmscore){
     ZMSCORE_METHOD_IMPL(ValkeyGlideCluster)}
 
 /* {{{ proto long ValkeyGlideCluster::zadd(string key,double score,string mem, ...) */
-PHP_METHOD(ValkeyGlideCluster, zadd)
-{
-    CLUSTER_PROCESS_CMD(zadd, cluster_zadd_resp, 0);
-}
-/* }}} */
+ZADD_METHOD_IMPL(ValkeyGlideCluster)
+    /* }}} */
 
-/* {{{ proto double ValkeyGlideCluster::zincrby(string key, double by, string mem) */
-PHP_METHOD(ValkeyGlideCluster, zincrby)
-{
-    CLUSTER_PROCESS_CMD(zincrby, cluster_dbl_resp, 0);
-}
-/* }}} */
+    /* {{{ proto double ValkeyGlideCluster::zincrby(string key, double by, string mem) */
+    ZINCRBY_METHOD_IMPL(ValkeyGlideCluster)
+    /* }}} */
 
-/* {{{ proto ValkeyGlideCluster::zremrangebyscore(string k, string s, string e) */
-PHP_METHOD(ValkeyGlideCluster, zremrangebyscore)
-{
-    CLUSTER_PROCESS_KW_CMD("ZREMRANGEBYSCORE", redis_key_str_str_cmd,
-                           cluster_long_resp, 0);
-}
-/* }}} */
+    /* {{{ proto ValkeyGlideCluster::zremrangebyscore(string k, string s, string e) */
+    ZREMRANGEBYSCORE_METHOD_IMPL(ValkeyGlideCluster)
+    /* }}} */
 
-/* {{{ proto ValkeyGlideCluster::zcount(string key, string s, string e) */
-PHP_METHOD(ValkeyGlideCluster, zcount)
-{
-    CLUSTER_PROCESS_KW_CMD("ZCOUNT", redis_key_str_str_cmd, cluster_long_resp, 1);
-}
-/* }}} */
+    /* {{{ proto ValkeyGlideCluster::zcount(string key, string s, string e) */
+    ZCOUNT_METHOD_IMPL(ValkeyGlideCluster)
+    /* }}} */
 
-/* {{{ proto long ValkeyGlideCluster::zrank(string key, mixed member) */
-PHP_METHOD(ValkeyGlideCluster, zrank)
+    /* {{{ proto long ValkeyGlideCluster::zrank(string key, mixed member) */
+    PHP_METHOD(ValkeyGlideCluster, zrank)
 {
     CLUSTER_PROCESS_KW_CMD("ZRANK", redis_kv_cmd, cluster_long_resp, 1);
 }
@@ -1055,31 +1042,19 @@ HKEYS_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::hvals(string key) */
-PHP_METHOD(ValkeyGlideCluster, hvals)
-{
-    CLUSTER_PROCESS_KW_CMD("HVALS", redis_key_cmd, cluster_mbulk_resp, 1);
-}
+HVALS_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::hget(string key, string mem) */
-PHP_METHOD(ValkeyGlideCluster, hget)
-{
-    CLUSTER_PROCESS_KW_CMD("HGET", redis_key_str_cmd, cluster_bulk_resp, 1);
-}
+HGET_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::hset(string key, string mem, string val) */
-PHP_METHOD(ValkeyGlideCluster, hset)
-{
-    CLUSTER_PROCESS_CMD(hset, cluster_long_resp, 0);
-}
+HSET_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::hsetnx(string key, string mem, string val) */
-PHP_METHOD(ValkeyGlideCluster, hsetnx)
-{
-    CLUSTER_PROCESS_CMD(hsetnx, cluster_1_resp, 0);
-}
+HSETNX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::hgetall(string key) */
@@ -1091,10 +1066,7 @@ PHP_METHOD(ValkeyGlideCluster, hgetall)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::hexists(string key, string member) */
-PHP_METHOD(ValkeyGlideCluster, hexists)
-{
-    CLUSTER_PROCESS_KW_CMD("HEXISTS", redis_key_str_cmd, cluster_1_resp, 1);
-}
+HEXISTS_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::hincr(string key, string mem, long val) */
@@ -1783,72 +1755,6 @@ PHP_METHOD(ValkeyGlideCluster, cleartransferredbytes)
     ZEND_HASH_FOREACH_END();
 }
 
-/* {{{ proto long ValkeyGlideCluster::getOption(long option */
-PHP_METHOD(ValkeyGlideCluster, getoption)
-{
-    redisCluster *c = GET_CONTEXT();
-    redis_getoption_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags, c);
-}
-/* }}} */
-
-/* {{{ proto bool ValkeyGlideCluster::setOption(long option, mixed value) */
-PHP_METHOD(ValkeyGlideCluster, setoption)
-{
-    redisCluster *c = GET_CONTEXT();
-    redis_setoption_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags, c);
-}
-/* }}} */
-
-/* {{{ proto string ValkeyGlideCluster::_prefix(string key) */
-PHP_METHOD(ValkeyGlideCluster, _prefix)
-{
-    redisCluster *c = GET_CONTEXT();
-    redis_prefix_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags);
-}
-/* }}} */
-
-/* {{{ proto string ValkeyGlideCluster::_serialize(mixed val) */
-PHP_METHOD(ValkeyGlideCluster, _serialize)
-{
-    redisCluster *c = GET_CONTEXT();
-    redis_serialize_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags);
-}
-/* }}} */
-
-/* {{{ proto mixed ValkeyGlideCluster::_unserialize(string val) */
-PHP_METHOD(ValkeyGlideCluster, _unserialize)
-{
-    redisCluster *c = GET_CONTEXT();
-    redis_unserialize_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-                              c->flags, redis_cluster_exception_ce);
-}
-/* }}} */
-
-PHP_METHOD(ValkeyGlideCluster, _compress)
-{
-    redisCluster *c = GET_CONTEXT();
-    redis_compress_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags);
-}
-
-PHP_METHOD(ValkeyGlideCluster, _uncompress)
-{
-    redisCluster *c = GET_CONTEXT();
-    redis_uncompress_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags,
-                             redis_cluster_exception_ce);
-}
-
-PHP_METHOD(ValkeyGlideCluster, _pack)
-{
-    redisCluster *c = GET_CONTEXT();
-    redis_pack_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags);
-}
-
-PHP_METHOD(ValkeyGlideCluster, _unpack)
-{
-    redisCluster *c = GET_CONTEXT();
-    redis_unpack_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, c->flags);
-}
-
 /* {{{ proto array ValkeyGlideCluster::_masters() */
 PHP_METHOD(ValkeyGlideCluster, _masters)
 {
@@ -1871,23 +1777,6 @@ PHP_METHOD(ValkeyGlideCluster, _masters)
         add_next_index_zval(return_value, &z_sub);
     }
     ZEND_HASH_FOREACH_END();
-}
-
-PHP_METHOD(ValkeyGlideCluster, _redir)
-{
-    redisCluster *c = GET_CONTEXT();
-    char buf[255];
-    size_t len;
-
-    len = snprintf(buf, sizeof(buf), "%s:%d", c->redir_host, c->redir_port);
-    if (*c->redir_host && c->redir_host_len)
-    {
-        RETURN_STRINGL(buf, len);
-    }
-    else
-    {
-        RETURN_NULL();
-    }
 }
 
 /*
@@ -2172,369 +2061,6 @@ cluster_cmd_get_slot(redisCluster *c, zval *z_arg)
     return slot;
 }
 
-/* Generic handler for things we want directed at a given node, like SAVE,
- * BGSAVE, FLUSHDB, FLUSHALL, etc */
-static void
-cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAMETERS, char *kw,
-                       REDIS_REPLY_TYPE reply_type, cluster_cb cb)
-{
-    redisCluster *c = GET_CONTEXT();
-    char *cmd;
-    int cmd_len;
-    zval *z_arg;
-    short slot;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &z_arg) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    // One argument means find the node (treated like a key), and two means
-    // send the command to a specific host and port
-    slot = cluster_cmd_get_slot(c, z_arg);
-    if (slot < 0)
-    {
-        RETURN_FALSE;
-    }
-
-    // Construct our command
-    cmd_len = redis_spprintf(NULL, NULL, &cmd, kw, "");
-
-    // Kick off our command
-    if (cluster_send_slot(c, slot, cmd, cmd_len, reply_type) < 0)
-    {
-        CLUSTER_THROW_EXCEPTION("Unable to send command at a specific node", 0);
-        efree(cmd);
-        RETURN_FALSE;
-    }
-
-    // Our response callback
-    cb(INTERNAL_FUNCTION_PARAM_PASSTHRU, c, NULL);
-
-    // Free our command
-    efree(cmd);
-}
-
-static void
-cluster_flush_cmd(INTERNAL_FUNCTION_PARAMETERS, char *kw, REDIS_REPLY_TYPE reply_type, cluster_cb cb)
-{
-    redisCluster *c = GET_CONTEXT();
-    char *cmd;
-    int cmd_len;
-    zval *z_arg;
-    zend_bool async = 0;
-    short slot;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &z_arg, &async) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    // One argument means find the node (treated like a key), and two means
-    // send the command to a specific host and port
-    slot = cluster_cmd_get_slot(c, z_arg);
-    if (slot < 0)
-    {
-        RETURN_FALSE;
-    }
-
-    // Construct our command
-    if (async)
-    {
-        cmd_len = redis_spprintf(NULL, NULL, &cmd, kw, "s", "ASYNC", sizeof("ASYNC") - 1);
-    }
-    else
-    {
-        cmd_len = redis_spprintf(NULL, NULL, &cmd, kw, "");
-    }
-
-    // Kick off our command
-    if (cluster_send_slot(c, slot, cmd, cmd_len, reply_type) < 0)
-    {
-        CLUSTER_THROW_EXCEPTION("Unable to send command at a specific node", 0);
-        efree(cmd);
-        RETURN_FALSE;
-    }
-
-    // Our response callback
-    cb(INTERNAL_FUNCTION_PARAM_PASSTHRU, c, NULL);
-
-    // Free our command
-    efree(cmd);
-}
-
-/* Generic routine for handling various commands which need to be directed at
- * a node, but have complex syntax.  We simply parse out the arguments and send
- * the command as constructed by the caller */
-static void cluster_raw_cmd(INTERNAL_FUNCTION_PARAMETERS, char *kw, int kw_len)
-{
-    redisCluster *c = GET_CONTEXT();
-    smart_string cmd = {0};
-    zval *z_args;
-    short slot;
-    int i, argc = ZEND_NUM_ARGS();
-
-    /* Commands using this pass-through don't need to be enabled in MULTI mode */
-    if (!CLUSTER_IS_ATOMIC(c))
-    {
-        php_error_docref(0, E_WARNING,
-                         "Command can't be issued in MULTI mode");
-        RETURN_FALSE;
-    }
-
-    /* We at least need the key or [host,port] argument */
-    if (argc < 1)
-    {
-        php_error_docref(0, E_WARNING,
-                         "Command requires at least an argument to direct to a node");
-        RETURN_FALSE;
-    }
-
-    /* Allocate an array to process arguments */
-    z_args = emalloc(argc * sizeof(zval));
-
-    /* Grab args */
-    if (zend_get_parameters_array(ht, argc, z_args) == FAILURE)
-    {
-        efree(z_args);
-        RETURN_FALSE;
-    }
-
-    /* First argument needs to be the "where" */
-    if ((slot = cluster_cmd_get_slot(c, &z_args[0])) < 0)
-    {
-        efree(z_args);
-        RETURN_FALSE;
-    }
-
-    /* Initialize our command */
-    redis_cmd_init_sstr(&cmd, argc - 1, kw, kw_len);
-
-    /* Iterate, appending args */
-    for (i = 1; i < argc; i++)
-    {
-        zend_string *zstr = zval_get_string(&z_args[i]);
-        redis_cmd_append_sstr(&cmd, ZSTR_VAL(zstr), ZSTR_LEN(zstr));
-        zend_string_release(zstr);
-    }
-
-    /* Send it off */
-    if (cluster_send_slot(c, slot, cmd.c, cmd.len, TYPE_EOF) < 0)
-    {
-        CLUSTER_THROW_EXCEPTION("Couldn't send command to node", 0);
-        efree(cmd.c);
-        efree(z_args);
-        RETURN_FALSE;
-    }
-
-    /* Read the response variant */
-    cluster_variant_resp(INTERNAL_FUNCTION_PARAM_PASSTHRU, c, NULL);
-
-    efree(cmd.c);
-    efree(z_args);
-}
-
-/* Generic method for HSCAN, SSCAN, and ZSCAN */
-static void cluster_kscan_cmd(INTERNAL_FUNCTION_PARAMETERS,
-                              REDIS_SCAN_TYPE type)
-{
-    redisCluster *c = GET_CONTEXT();
-    char *cmd, *pat = NULL, *key = NULL;
-    size_t key_len = 0, pat_len = 0, pat_free = 0;
-    int cmd_len, key_free = 0;
-    short slot;
-    zval *z_it;
-    HashTable *hash;
-    long num_ele;
-    zend_long count = 0;
-    zend_bool completed;
-    uint64_t cursor;
-
-    // Can't be in MULTI mode
-    if (!CLUSTER_IS_ATOMIC(c))
-    {
-        CLUSTER_THROW_EXCEPTION("SCAN type commands can't be called in MULTI mode!", 0);
-        RETURN_FALSE;
-    }
-
-    /* Parse arguments */
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/|s!l", &key,
-                              &key_len, &z_it, &pat, &pat_len, &count) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Treat as readonly */
-    c->readonly = 1;
-
-    /* Get our scan cursor and return early if we're done */
-    cursor = redisGetScanCursor(z_it, &completed);
-    if (completed)
-        RETURN_FALSE;
-
-    // Apply any key prefix we have, get the slot
-    key_free = redis_key_prefix(c->flags, &key, &key_len);
-    slot = cluster_hash_key(key, key_len);
-
-    if (c->flags->scan & REDIS_SCAN_PREFIX)
-    {
-        pat_free = redis_key_prefix(c->flags, &pat, &pat_len);
-    }
-
-    // If SCAN_RETRY is set, loop until we get a zero iterator or until
-    // we get non-zero elements.  Otherwise we just send the command once.
-    do
-    {
-        /* Free our return value if we're back in the loop */
-        if (Z_TYPE_P(return_value) == IS_ARRAY)
-        {
-            zval_dtor(return_value);
-            ZVAL_NULL(return_value);
-        }
-
-        // Create command
-        cmd_len = redis_fmt_scan_cmd(&cmd, type, key, key_len, cursor, pat, pat_len,
-                                     count);
-
-        // Send it off
-        if (cluster_send_command(c, slot, cmd, cmd_len) == FAILURE)
-        {
-            CLUSTER_THROW_EXCEPTION("Couldn't send SCAN command", 0);
-            if (key_free)
-                efree(key);
-            efree(cmd);
-            RETURN_FALSE;
-        }
-
-        // Read response
-        if (cluster_scan_resp(INTERNAL_FUNCTION_PARAM_PASSTHRU, c, type,
-                              &cursor) == FAILURE)
-        {
-            CLUSTER_THROW_EXCEPTION("Couldn't read SCAN response", 0);
-            if (key_free)
-                efree(key);
-            efree(cmd);
-            RETURN_FALSE;
-        }
-
-        // Count the elements we got back
-        hash = Z_ARRVAL_P(return_value);
-        num_ele = zend_hash_num_elements(hash);
-
-        // Free our command
-        efree(cmd);
-    } while (c->flags->scan & REDIS_SCAN_RETRY && cursor != 0 && num_ele == 0);
-
-    // Free our pattern
-    if (pat_free)
-        efree(pat);
-
-    // Free our key
-    if (key_free)
-        efree(key);
-
-    // Update iterator reference
-    redisSetScanCursor(z_it, cursor);
-}
-
-static int redis_acl_op_readonly(zend_string *op)
-{
-    /* Only return read-only for operations we know to be */
-    if (ZSTR_STRICMP_STATIC(op, "LIST") ||
-        ZSTR_STRICMP_STATIC(op, "USERS") ||
-        ZSTR_STRICMP_STATIC(op, "GETUSER") ||
-        ZSTR_STRICMP_STATIC(op, "CAT") ||
-        ZSTR_STRICMP_STATIC(op, "GENPASS") ||
-        ZSTR_STRICMP_STATIC(op, "WHOAMI") ||
-        ZSTR_STRICMP_STATIC(op, "LOG"))
-        return 1;
-
-    return 0;
-}
-
-PHP_METHOD(ValkeyGlideCluster, acl)
-{
-    redisCluster *c = GET_CONTEXT();
-    smart_string cmdstr = {0};
-    int argc = ZEND_NUM_ARGS(), i, readonly;
-    cluster_cb cb;
-    zend_string *zs;
-    zval *zargs;
-    void *ctx = NULL;
-    short slot;
-
-    /* ACL in cluster needs a slot argument, and then at least the op */
-    if (argc < 2)
-    {
-        WRONG_PARAM_COUNT;
-        RETURN_FALSE;
-    }
-
-    /* Grab all our arguments and determine the command slot */
-    zargs = emalloc(argc * sizeof(*zargs));
-    if (zend_get_parameters_array(ht, argc, zargs) == FAILURE ||
-        (slot = cluster_cmd_get_slot(c, &zargs[0]) < 0))
-    {
-        efree(zargs);
-        RETURN_FALSE;
-    }
-
-    REDIS_CMD_INIT_SSTR_STATIC(&cmdstr, argc - 1, "ACL");
-
-    /* Read the op, determine if it's readonly, and add it */
-    zs = zval_get_string(&zargs[1]);
-    readonly = redis_acl_op_readonly(zs);
-    redis_cmd_append_sstr_zstr(&cmdstr, zs);
-
-    /* We have specialized handlers for GETUSER and LOG, whereas every
-     * other ACL command can be handled generically */
-    if (zend_string_equals_literal_ci(zs, "GETUSER"))
-    {
-        cb = cluster_acl_getuser_resp;
-    }
-    else if (zend_string_equals_literal_ci(zs, "LOG"))
-    {
-        cb = cluster_acl_log_resp;
-    }
-    else
-    {
-        cb = cluster_variant_resp;
-    }
-
-    zend_string_release(zs);
-
-    /* Process remaining args */
-    for (i = 2; i < argc; i++)
-    {
-        zs = zval_get_string(&zargs[i]);
-        redis_cmd_append_sstr_zstr(&cmdstr, zs);
-        zend_string_release(zs);
-    }
-
-    /* Can we use replicas? */
-    c->readonly = readonly && CLUSTER_IS_ATOMIC(c);
-
-    /* Kick off our command */
-    if (cluster_send_slot(c, slot, cmdstr.c, cmdstr.len, TYPE_EOF) < 0)
-    {
-        CLUSTER_THROW_EXCEPTION("Unabler to send ACL command", 0);
-        efree(zargs);
-        RETURN_FALSE;
-    }
-
-    if (CLUSTER_IS_ATOMIC(c))
-    {
-        cb(INTERNAL_FUNCTION_PARAM_PASSTHRU, c, NULL);
-    }
-    else
-    {
-        CLUSTER_ENQUEUE_RESPONSE(c, slot, cb, ctx);
-    }
-
-    efree(cmdstr.c);
-    efree(zargs);
-}
-
 /* {{{ proto ValkeyGlideCluster::scan(string master, long it [, string pat, long cnt]) */
 PHP_METHOD(ValkeyGlideCluster, scan)
 {
@@ -2626,87 +2152,35 @@ PHP_METHOD(ValkeyGlideCluster, scan)
 /* }}} */
 
 /* {{{ proto ValkeyGlideCluster::sscan(string key, long it [string pat, long cnt]) */
-PHP_METHOD(ValkeyGlideCluster, sscan)
-{
-    cluster_kscan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_SSCAN);
-}
+SSCAN_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlideCluster::zscan(string key, long it [string pat, long cnt]) */
-PHP_METHOD(ValkeyGlideCluster, zscan)
-{
-    cluster_kscan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_ZSCAN);
-}
+ZSCAN_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlideCluster::hscan(string key, long it [string pat, long cnt]) */
-PHP_METHOD(ValkeyGlideCluster, hscan)
-{
-    cluster_kscan_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, TYPE_HSCAN);
-}
-/* }}} */
-
-/* {{{ proto ValkeyGlideCluster::save(string key)
- *     proto ValkeyGlideCluster::save(array host_port) */
-PHP_METHOD(ValkeyGlideCluster, save)
-{
-    cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "SAVE", TYPE_LINE,
-                           cluster_bool_resp);
-}
-/* }}} */
-
-/* {{{ proto ValkeyGlideCluster::bgsave(string key)
- *     proto ValkeyGlideCluster::bgsave(array host_port) */
-PHP_METHOD(ValkeyGlideCluster, bgsave)
-{
-    cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "BGSAVE",
-                           TYPE_LINE, cluster_bool_resp);
-}
+HSCAN_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlideCluster::flushdb(string key, [bool async])
  *     proto ValkeyGlideCluster::flushdb(array host_port, [bool async]) */
-PHP_METHOD(ValkeyGlideCluster, flushdb)
-{
-    cluster_flush_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "FLUSHDB",
-                      TYPE_LINE, cluster_bool_resp);
-}
+FLUSHDB_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlideCluster::flushall(string key, [bool async])
  *     proto ValkeyGlideCluster::flushall(array host_port, [bool async]) */
-PHP_METHOD(ValkeyGlideCluster, flushall)
-{
-    cluster_flush_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "FLUSHALL",
-                      TYPE_LINE, cluster_bool_resp);
-}
+FLUSHALL_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlideCluster::dbsize(string key)
  *     proto ValkeyGlideCluster::dbsize(array host_port) */
-PHP_METHOD(ValkeyGlideCluster, dbsize)
-{
-    cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "DBSIZE",
-                           TYPE_INT, cluster_long_resp);
-}
+DBSIZE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlideCluster::bgrewriteaof(string key)
  *     proto ValkeyGlideCluster::bgrewriteaof(array host_port) */
-PHP_METHOD(ValkeyGlideCluster, bgrewriteaof)
-{
-    cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "BGREWRITEAOF",
-                           TYPE_LINE, cluster_bool_resp);
-}
-/* }}} */
-
-/* {{{ proto ValkeyGlideCluster::lastsave(string key)
- *     proto ValkeyGlideCluster::lastsave(array $host_port) */
-PHP_METHOD(ValkeyGlideCluster, lastsave)
-{
-    cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "LASTSAVE",
-                           TYPE_INT, cluster_long_resp);
-}
+BGREWRITEAOF_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::info(string key, [string $arg])
@@ -3030,60 +2504,6 @@ PHP_METHOD(ValkeyGlideCluster, randomkey)
                            TYPE_BULK, cluster_bulk_resp);
 }
 /* }}} */
-
-PHP_METHOD(ValkeyGlideCluster, waitaof)
-{
-    zend_long numlocal, numreplicas, timeout;
-    redisCluster *c = GET_CONTEXT();
-    smart_string cmdstr = {0};
-    void *ctx = NULL;
-    short slot;
-    zval *node;
-
-    ZEND_PARSE_PARAMETERS_START(4, 4)
-    Z_PARAM_ZVAL(node)
-    Z_PARAM_LONG(numlocal)
-    Z_PARAM_LONG(numreplicas)
-    Z_PARAM_LONG(timeout)
-    ZEND_PARSE_PARAMETERS_END();
-
-    if (numlocal < 0 || numreplicas < 0 || timeout < 0)
-    {
-        php_error_docref(NULL, E_WARNING, "No arguments can be negative");
-        RETURN_FALSE;
-    }
-
-    slot = cluster_cmd_get_slot(c, node);
-    if (slot < 0)
-    {
-        RETURN_FALSE;
-    }
-
-    REDIS_CMD_INIT_SSTR_STATIC(&cmdstr, 3, "WAITAOF");
-    redis_cmd_append_sstr_long(&cmdstr, numlocal);
-    redis_cmd_append_sstr_long(&cmdstr, numreplicas);
-    redis_cmd_append_sstr_long(&cmdstr, timeout);
-
-    c->readonly = 0;
-
-    if (cluster_send_slot(c, slot, cmdstr.c, cmdstr.len, TYPE_MULTIBULK) < 0)
-    {
-        CLUSTER_THROW_EXCEPTION("Unable to send command at the specified node", 0);
-        smart_string_free(&cmdstr);
-        RETURN_FALSE;
-    }
-
-    if (CLUSTER_IS_ATOMIC(c))
-    {
-        cluster_variant_resp(INTERNAL_FUNCTION_PARAM_PASSTHRU, c, NULL);
-    }
-    else
-    {
-        CLUSTER_ENQUEUE_RESPONSE(c, slot, cluster_variant_resp, ctx);
-    }
-
-    smart_string_free(&cmdstr);
-}
 
 /* {{{ proto bool ValkeyGlideCluster::ping(string key| string msg)
  *     proto bool ValkeyGlideCluster::ping(array host_port| string msg) */
