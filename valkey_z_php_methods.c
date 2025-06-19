@@ -21,8 +21,6 @@
 #include "config.h"
 #endif
 
-#include "php_redis.h"
-
 #include "redis_glide.h"
 #include "valkey_glide_commands_common.h"
 #include "valkey_glide_z_common.h"

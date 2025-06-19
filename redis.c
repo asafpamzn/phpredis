@@ -22,7 +22,6 @@
 #include "config.h"
 #endif
 
-#include "php_redis.h"
 #include "redis_glide.h"
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>

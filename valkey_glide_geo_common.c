@@ -14,7 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-#include "php_redis.h"
 #include "redis_glide.h"
 #include "valkey_glide_geo_common.h"
 #include "command_response.h"

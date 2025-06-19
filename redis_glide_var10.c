@@ -14,7 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-#include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
 #include "valkey_glide_core_common.h"
@@ -40,7 +39,7 @@ int execute_wait_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -83,7 +82,7 @@ int execute_function_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -212,7 +211,7 @@ int execute_multi_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -245,7 +244,7 @@ int execute_discard_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -277,7 +276,7 @@ int execute_exec_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -314,7 +313,7 @@ int execute_fcall_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -429,7 +428,7 @@ int execute_fcall_ro_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -540,7 +539,7 @@ int execute_dump_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -598,7 +597,7 @@ int execute_restore_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -818,7 +817,7 @@ int execute_config_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -1136,7 +1135,7 @@ int execute_getreadtimeout_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!valkey_glide || !valkey_glide->glide_client)
     {
         return 0;
@@ -1479,7 +1478,7 @@ int execute_client_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!valkey_glide || !valkey_glide->glide_client)
     {
         return 0;
@@ -1510,7 +1509,7 @@ int execute_rawcommand_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!valkey_glide || !valkey_glide->glide_client)
     {
         return 0;
@@ -1540,7 +1539,7 @@ int execute_dbsize_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!valkey_glide || !valkey_glide->glide_client)
     {
         return 0;

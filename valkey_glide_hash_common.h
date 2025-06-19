@@ -17,7 +17,6 @@
 #ifndef VALKEY_GLIDE_HASH_COMMON_H
 #define VALKEY_GLIDE_HASH_COMMON_H
 
-#include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
 #include "include/glide_bindings.h"

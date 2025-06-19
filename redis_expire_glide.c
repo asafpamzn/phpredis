@@ -14,7 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-#include "php_redis.h"
 #include "valkey_glide_core_common.h"
 
 extern zend_class_entry *redis_ce;
@@ -41,7 +40,7 @@ int execute_expire_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -105,7 +104,7 @@ int execute_expireat_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -169,7 +168,7 @@ int execute_pexpire_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -233,7 +232,7 @@ int execute_pexpireat_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -295,7 +294,7 @@ int execute_persist_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -333,7 +332,7 @@ int execute_expiretime_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)
@@ -372,7 +371,7 @@ int execute_pexpiretime_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
 
     /* If we have a Glide client, use it */
     if (valkey_glide->glide_client)

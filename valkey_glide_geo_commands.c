@@ -14,7 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-#include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
 #include "include/glide_bindings.h"
@@ -52,7 +51,7 @@ int execute_geoadd_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide_object *valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     glide_client = valkey_glide->glide_client;
 
     /* Check if we have a valid glide client */
@@ -102,7 +101,7 @@ int execute_geodist_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide_object *valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     glide_client = valkey_glide->glide_client;
 
     /* Check if we have a valid glide client */
@@ -169,7 +168,7 @@ int execute_geohash_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide_object *valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     glide_client = valkey_glide->glide_client;
 
     /* Check if we have a valid glide client */
@@ -222,7 +221,7 @@ int execute_geopos_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide_object *valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     glide_client = valkey_glide->glide_client;
 
     /* Check if we have a valid glide client */
@@ -269,7 +268,7 @@ int execute_georadius_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide_object *valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     glide_client = valkey_glide->glide_client;
 
     /* Check if we have a valid glide client */
@@ -377,7 +376,7 @@ int execute_georadius_ro_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide_object *valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     glide_client = valkey_glide->glide_client;
 
     /* Check if we have a valid glide client */
@@ -485,7 +484,7 @@ int execute_geosearch_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide_object *valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     glide_client = valkey_glide->glide_client;
 
     /* Check if we have a valid glide client */
@@ -577,7 +576,7 @@ int execute_geosearchstore_command(zval *object, int argc, zval *return_value)
     }
 
     /* Get ValkeyGlide object */
-    valkey_glide_object *valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     glide_client = valkey_glide->glide_client;
 
     /* Check if we have a valid glide client */

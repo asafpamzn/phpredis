@@ -20,7 +20,7 @@
 #endif
 #if 0
 #include "common.h"
-#include "php_redis.h"
+
 #include "ext/standard/info.h"
 #include "crc16.h"
 #include "redis_cluster.h"
@@ -82,7 +82,7 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
 
     /* The normal case, loading from arguments */
 
-    valkey_glide_object *valkey_glide = PHPREDIS_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_GET_OBJECT(valkey_glide_object, object);
     ClientConfig config;
 
     config.tls_mode_ = false;

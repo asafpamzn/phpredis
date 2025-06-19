@@ -17,8 +17,6 @@
 #ifndef VALKEY_GLIDE_COMMANDS_COMMON_H
 #define VALKEY_GLIDE_COMMANDS_COMMON_H
 
-#include "php_redis.h"
-
 /* ====================================================================
  * UNIFIED COMMAND FUNCTION DECLARATIONS (Now in redis_glide.c)
  * ==================================================================== */

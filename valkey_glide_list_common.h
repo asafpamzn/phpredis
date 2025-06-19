@@ -17,7 +17,6 @@
 #ifndef REDIS_GLIDE_LIST_COMMON_H
 #define REDIS_GLIDE_LIST_COMMON_H
 
-#include "php_redis.h"
 #include "redis_glide.h"
 #include "command_response.h"
 #include "include/glide_bindings.h"
