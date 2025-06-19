@@ -61,8 +61,6 @@ typedef struct
     zend_object std;
 } valkey_glide_object;
 
-extern const zend_function_entry *redis_get_methods(void);
-
 #endif
 
 /*

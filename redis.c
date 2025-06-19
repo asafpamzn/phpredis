@@ -38,11 +38,6 @@ zend_class_entry *redis_exception_ce;
 #include "redis_arginfo.h"
 #endif
 
-extern const zend_function_entry *redis_get_methods(void)
-{
-    return class_ValkeyGlide_methods;
-}
-
 ZEND_DECLARE_MODULE_GLOBALS(redis)
 
 zend_module_entry redis_module_entry = {
