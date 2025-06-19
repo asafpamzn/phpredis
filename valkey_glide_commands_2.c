@@ -37,36 +37,9 @@
 #include <ext/random/php_random.h>
 #endif
 
-#ifdef PHP_SESSION
-#include <ext/session/php_session.h>
-#endif
-
 /* Import the string conversion functions from command_response.c */
 extern char *long_to_string(long value, size_t *len);
 extern char *double_to_string(double value, size_t *len);
-
-#ifdef HAVE_REDIS_ZSTD
-#include <zstd.h>
-#endif
-
-#ifdef HAVE_REDIS_LZ4
-#include <lz4.h>
-#endif
-
-#ifdef PHP_SESSION
-extern ps_module ps_mod_redis;
-extern ps_module ps_mod_redis_cluster;
-#endif
-
-extern zend_class_entry *get_valkey_glide_ce();
-extern zend_class_entry *get_valkey_glide_exception_ce();
-
-#if PHP_VERSION_ID < 80000
-#include "redis_legacy_arginfo.h"
-#else
-#include "zend_attributes.h"
-#include "redis_arginfo.h"
-#endif
 
 /* Execute a RENAME command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_rename_command(zval *object, int argc, zval *return_value)

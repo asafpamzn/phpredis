@@ -1,6 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | ValkeyGlide Glide FFI integration for phpredis                             |
   +----------------------------------------------------------------------+
   | Copyright (c) 2023-2025 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -69,7 +68,7 @@ static uint8_t *create_connection_request(const char *host, int port, const char
     conn_req.protocol = CONNECTION_REQUEST__PROTOCOL_VERSION__RESP3;
 
     /* Set client name if needed */
-    conn_req.client_name = "phpredis-glide";
+    conn_req.client_name = "valkey-glide-php";
 
     /* Calculate the size of the serialized message */
     *len = connection_request__connection_request__get_packed_size(&conn_req);
@@ -851,7 +850,7 @@ int execute_ping_command(zval *object, int argc, zval *return_value)
 #define _NL "\r\n"
 
 static void
-redis_parse_info_response(char *response, zval *z_ret)
+valkey_glide_parse_info_response(char *response, zval *z_ret)
 {
     char *p1, *s1 = NULL;
 
@@ -999,7 +998,7 @@ int execute_info_command(zval *object, int argc, zval *return_value)
         ZVAL_UNDEF(&z_ret);
 
         /* Parse the INFO response into a zval array */
-        redis_parse_info_response(response, &z_ret);
+        valkey_glide_parse_info_response(response, &z_ret);
 
         /* Free the response string */
         efree(response);
