@@ -185,9 +185,6 @@ PHP_METHOD(ValkeyGlide, evalsha) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, evalsha_ro) { /* TODO: Implement */ }
 PHP_METHOD(ValkeyGlide, script) { /* TODO: Implement */ }
 
-PHP_METHOD(ValkeyGlide, _pack) { /* TODO: Implement */ }
-PHP_METHOD(ValkeyGlide, _unpack) { /* TODO: Implement */ }
-
 PHP_METHOD(ValkeyGlide, getMode)
 {
     RETURN_FALSE;
