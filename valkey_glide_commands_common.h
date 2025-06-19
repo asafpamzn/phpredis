@@ -17,6 +17,159 @@
 #ifndef VALKEY_GLIDE_COMMANDS_COMMON_H
 #define VALKEY_GLIDE_COMMANDS_COMMON_H
 
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include "common.h"
+#include "include/glide_bindings.h"
+#include "include/glide/connection_request.pb-c.h"
+
+/* Forward declarations for types defined in glide_bindings.h */
+typedef struct CommandResponse CommandResponse;
+typedef struct CommandResult CommandResult;
+typedef struct CommandError CommandError;
+typedef struct ConnectionResponse ConnectionResponse;
+
+enum ReadFrom
+{
+    /**
+     * Primary: Read data from the primary node in the cluster.
+     */
+    Primary = 0,
+
+    /**
+     * PreferReplica: Prefer reading data from a replica node in the cluster, if
+     * available.
+     */
+    PreferReplica = 1,
+
+    /**
+     * LowestLatency: Read data from the node with the lowest latency in the
+     * cluster.
+     */
+    LowestLatency = 2,
+
+    /**
+     * AZAffinity: Read data from a node in the same availability zone as the
+     * client, if possible.
+     */
+    AZAffinity = 3,
+};
+
+enum TLSMode
+{
+    /**
+     * No TLS encryption is used for the connection.
+     */
+    NoTLS = 0,
+
+    /**
+     * TLS encryption is used for the connection with certificate verification.
+     */
+    SecureTLS = 1,
+
+    /**
+     * TLS encryption is used for the connection without certificate verification.
+     */
+    InsecureTLS = 2,
+};
+
+typedef struct
+{
+    // Credential credential_;
+    enum TLSMode tls_mode_;
+    uint32_t database_;
+    uint32_t request_timeout_;
+    char *client_name_;
+    enum ReadFrom read_from_;
+    bool is_cluster;
+} ClientConfig;
+/* Forward declaration for ClientAdapter */
+typedef struct ClientAdapter ClientAdapter;
+
+/* Function to close a Valkey Glide client */
+void close_glide_client(const void *glide_client);
+void free_command_response(CommandResponse *command_response_ptr);
+void free_command_result(CommandResult *command_result_ptr);
+
+/* Helper functions for Valkey Glide integration */
+const void *create_glide_client(ClientConfig *config);
+
+/* Bit operations - UNIFIED SIGNATURES */
+int execute_bitcount_command(zval *object, int argc, zval *return_value);
+int execute_bitop_command(zval *object, int argc, zval *return_value);
+int execute_bitpos_command(zval *object, int argc, zval *return_value);
+
+/* String operations */
+int execute_set_command_internal(const void *glide_client, const char *key, size_t key_len, const char *val, size_t val_len, long expire, zval *opts, char **old_val, size_t *old_val_len);
+int execute_set_command(zval *object, int argc, zval *return_value);
+int execute_setex_command(zval *object, int argc, zval *return_value);
+int execute_psetex_command(zval *object, int argc, zval *return_value);
+int execute_setnx_command(zval *object, int argc, zval *return_value);
+int execute_get_command(zval *object, int argc, zval *return_value);
+
+/* Key operations */
+int execute_randomkey_command(zval *object, int argc, zval *return_value);
+
+/* Server operations */
+int execute_echo_command(zval *object, int argc, zval *return_value);
+int execute_ping_command(zval *object, int argc, zval *return_value);
+int execute_reset_command(const void *glide_client);
+int execute_info_command(zval *object, int argc, zval *return_value);
+int execute_info_sections_command(const void *glide_client, zval *sections, int sections_count, char **result, size_t *result_len);
+
+/* Additional operations */
+int execute_getbit_command(zval *object, int argc, zval *return_value);
+int execute_setbit_command(zval *object, int argc, zval *return_value);
+int execute_del_command(zval *object, int argc, zval *return_value);
+int execute_del_array(const void *glide_client, HashTable *keys_hash, long *output_value);
+int execute_unlink_array(const void *glide_client, HashTable *keys_hash, long *output_value);
+int execute_strlen_command(zval *object, int argc, zval *return_value);
+int execute_setrange_command(zval *object, int argc, zval *return_value);
+int execute_getset_command(zval *object, int argc, zval *return_value);
+int execute_lcs_command(zval *object, int argc, zval *return_value);
+
+/* Time to live operations */
+int execute_ttl_command(zval *object, int argc, zval *return_value);
+int execute_pttl_command(zval *object, int argc, zval *return_value);
+
+/* Sorted set operations */
+
+/* Hash operations */
+
+/* New commands added in redis_glide_commands.c */
+
+int execute_brpoplpush_command(const void *glide_client, const char *src, size_t src_len, const char *dst, size_t dst_len, zend_long timeout, char **result, size_t *result_len);
+
+/* Object operations */
+int execute_object_command(zval *object, int argc, zval *return_value);
+
+/* Unified command functions */
+int execute_watch_command(zval *object, int argc, zval *return_value);
+int execute_unwatch_command(zval *object, int argc, zval *return_value);
+int execute_acl_command(zval *object, int argc, zval *return_value);
+int execute_flushdb_command(zval *object, int argc, zval *return_value);
+int execute_flushall_command(zval *object, int argc, zval *return_value);
+int execute_time_command(zval *object, int argc, zval *return_value);
+int execute_role_command(zval *object, int argc, zval *return_value);
+int execute_servername_command(zval *object, int argc, zval *return_value);
+int execute_serverversion_command(zval *object, int argc, zval *return_value);
+int execute_scan_command(zval *object, int argc, zval *return_value);
+int execute_sscan_command(zval *object, int argc, zval *return_value);
+int execute_copy_command(zval *object, int argc, zval *return_value);
+int execute_hscan_command(zval *object, int argc, zval *return_value);
+int execute_pfadd_command(zval *object, int argc, zval *return_value);
+int execute_pfcount_command(zval *object, int argc, zval *return_value);
+int execute_pfmerge_command(zval *object, int argc, zval *return_value);
+int execute_gettimeout_command(zval *object, int argc, zval *return_value);
+int execute_getreadtimeout_command(zval *object, int argc, zval *return_value);
+int execute_client_command(zval *object, int argc, zval *return_value);
+int execute_rawcommand_command(zval *object, int argc, zval *return_value);
+int execute_dbsize_command(zval *object, int argc, zval *return_value);
+int execute_select_command(zval *object, int argc, zval *return_value);
+int execute_swapdb_command(zval *object, int argc, zval *return_value);
+int execute_move_command(zval *object, int argc, zval *return_value);
+
 /* ====================================================================
  * UNIFIED COMMAND FUNCTION DECLARATIONS (Now in redis_glide.c)
  * ==================================================================== */
@@ -25,44 +178,44 @@
 /* No separate unified wrapper functions needed - cleaner architecture! */
 
 /* Function declarations from redis_glide.h - included here for reference */
-extern int execute_echo_command(zval *object, int argc, zval *return_value);
-extern int execute_bitop_command(zval *object, int argc, zval *return_value);
-extern int execute_getbit_command(zval *object, int argc, zval *return_value);
-extern int execute_setbit_command(zval *object, int argc, zval *return_value);
-extern int execute_bitcount_command(zval *object, int argc, zval *return_value);
-extern int execute_bitpos_command(zval *object, int argc, zval *return_value);
+int execute_echo_command(zval *object, int argc, zval *return_value);
+int execute_bitop_command(zval *object, int argc, zval *return_value);
+int execute_getbit_command(zval *object, int argc, zval *return_value);
+int execute_setbit_command(zval *object, int argc, zval *return_value);
+int execute_bitcount_command(zval *object, int argc, zval *return_value);
+int execute_bitpos_command(zval *object, int argc, zval *return_value);
 int execute_touch_command(zval *object, int argc, zval *return_value);
-extern int execute_wait_command(zval *object, int argc, zval *return_value);
-extern int execute_config_command(zval *object, int argc, zval *return_value);
-extern int execute_function_command(zval *object, int argc, zval *return_value);
-extern int execute_multi_command(zval *object, int argc, zval *return_value);
-extern int execute_discard_command(zval *object, int argc, zval *return_value);
-extern int execute_exec_command(zval *object, int argc, zval *return_value);
-extern int execute_fcall_command(zval *object, int argc, zval *return_value);
-extern int execute_fcall_ro_command(zval *object, int argc, zval *return_value);
-extern int execute_dump_command(zval *object, int argc, zval *return_value);
-extern int execute_restore_command(zval *object, int argc, zval *return_value);
-extern int execute_expire_command(zval *object, int argc, zval *return_value);
-extern int execute_expireat_command(zval *object, int argc, zval *return_value);
-extern int execute_pexpire_command(zval *object, int argc, zval *return_value);
-extern int execute_pexpireat_command(zval *object, int argc, zval *return_value);
-extern int execute_persist_command(zval *object, int argc, zval *return_value);
-extern int execute_expiretime_command(zval *object, int argc, zval *return_value);
-extern int execute_pexpiretime_command(zval *object, int argc, zval *return_value);
-extern int execute_keys_command(zval *object, int argc, zval *return_value);
-extern int execute_mset_command(zval *object, int argc, zval *return_value);
-extern int execute_msetnx_command(zval *object, int argc, zval *return_value);
-extern int execute_type_command(zval *object, int argc, zval *return_value);
-extern int execute_append_command(zval *object, int argc, zval *return_value);
-extern int execute_getrange_command(zval *object, int argc, zval *return_value);
-extern int execute_sort_command(zval *object, int argc, zval *return_value);
-extern int execute_sort_ro_command(zval *object, int argc, zval *return_value);
-extern int execute_sortasc_command(zval *object, int argc, zval *return_value);
-extern int execute_sortascalpha_command(zval *object, int argc, zval *return_value);
-extern int execute_sortdesc_command(zval *object, int argc, zval *return_value);
-extern int execute_sortdescalpha_command(zval *object, int argc, zval *return_value);
-extern int execute_expiremember_command(zval *object, int argc, zval *return_value);
-extern int execute_expirememberat_command(zval *object, int argc, zval *return_value);
+int execute_wait_command(zval *object, int argc, zval *return_value);
+int execute_config_command(zval *object, int argc, zval *return_value);
+int execute_function_command(zval *object, int argc, zval *return_value);
+int execute_multi_command(zval *object, int argc, zval *return_value);
+int execute_discard_command(zval *object, int argc, zval *return_value);
+int execute_exec_command(zval *object, int argc, zval *return_value);
+int execute_fcall_command(zval *object, int argc, zval *return_value);
+int execute_fcall_ro_command(zval *object, int argc, zval *return_value);
+int execute_dump_command(zval *object, int argc, zval *return_value);
+int execute_restore_command(zval *object, int argc, zval *return_value);
+int execute_expire_command(zval *object, int argc, zval *return_value);
+int execute_expireat_command(zval *object, int argc, zval *return_value);
+int execute_pexpire_command(zval *object, int argc, zval *return_value);
+int execute_pexpireat_command(zval *object, int argc, zval *return_value);
+int execute_persist_command(zval *object, int argc, zval *return_value);
+int execute_expiretime_command(zval *object, int argc, zval *return_value);
+int execute_pexpiretime_command(zval *object, int argc, zval *return_value);
+int execute_keys_command(zval *object, int argc, zval *return_value);
+int execute_mset_command(zval *object, int argc, zval *return_value);
+int execute_msetnx_command(zval *object, int argc, zval *return_value);
+int execute_type_command(zval *object, int argc, zval *return_value);
+int execute_append_command(zval *object, int argc, zval *return_value);
+int execute_getrange_command(zval *object, int argc, zval *return_value);
+int execute_sort_command(zval *object, int argc, zval *return_value);
+int execute_sort_ro_command(zval *object, int argc, zval *return_value);
+int execute_sortasc_command(zval *object, int argc, zval *return_value);
+int execute_sortascalpha_command(zval *object, int argc, zval *return_value);
+int execute_sortdesc_command(zval *object, int argc, zval *return_value);
+int execute_sortdescalpha_command(zval *object, int argc, zval *return_value);
+int execute_expiremember_command(zval *object, int argc, zval *return_value);
+int execute_expirememberat_command(zval *object, int argc, zval *return_value);
 int execute_mget_command(zval *object, int argc, zval *return_value);
 int execute_rename_command(zval *object, int argc, zval *return_value);
 int execute_renamenx_command(zval *object, int argc, zval *return_value);
@@ -81,7 +234,7 @@ int execute_unlink_command(zval *object, int argc, zval *return_value);
 
 /* DEL command uses different signature - handled separately */
 
-extern int execute_del_array(const void *glide_client, HashTable *keys_hash, long *output_value);
+int execute_del_array(const void *glide_client, HashTable *keys_hash, long *output_value);
 
 /* ====================================================================
  * METHOD IMPLEMENTATION MACROS
