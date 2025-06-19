@@ -49,7 +49,7 @@ zend_module_entry redis_module_entry = {
     NULL,
     NULL,
     PHP_MINFO(redis),
-    PHP_REDIS_VERSION,
+    VALKEY_GLIDE_PHP_VERSION,
     PHP_MODULE_GLOBALS(redis),
     NULL,
     NULL,
@@ -64,7 +64,7 @@ zend_object_handlers valkey_glide_object_handlers;
 
 void free_valkey_glide_object(zend_object *object)
 {
-    valkey_glide_object *valkey_glide = PHPREDIS_GET_OBJECT(valkey_glide_object, object);
+    valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_GET_OBJECT(valkey_glide_object, object);
 
     /* Free the Valkey Glide client if it exists */
     if (valkey_glide->glide_client)
@@ -121,7 +121,7 @@ PHP_MINFO_FUNCTION(redis)
 {
     php_info_print_table_start();
     php_info_print_table_header(2, "Valkey Glide Support", "enabled");
-    php_info_print_table_row(2, "Valkey Glide Version", PHP_REDIS_VERSION);
+    php_info_print_table_row(2, "Valkey Glide Version", VALKEY_GLIDE_PHP_VERSION);
     php_info_print_table_end();
 }
 
@@ -137,7 +137,7 @@ PHP_METHOD(ValkeyGlide, __construct)
     Z_PARAM_ARRAY_HT_OR_NULL(opts)
     ZEND_PARSE_PARAMETERS_END_EX(RETURN_THROWS());
 
-    valkey_glide = PHPREDIS_ZVAL_GET_OBJECT(valkey_glide_object, getThis());
+    valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, getThis());
     /* Options handling can be added here as needed */
 }
 /* }}} */

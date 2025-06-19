@@ -22,29 +22,6 @@
 #ifndef PHP_REDIS_H
 #define PHP_REDIS_H
 
-/* phpredis version */
-#define PHP_REDIS_VERSION "6.2.0"
-
-/* For convenience we store the salt as a printable hex string which requires 2
- * characters per byte + 1 for the NULL terminator */
-#define REDIS_SALT_BYTES 32
-#define REDIS_SALT_SIZE ((2 * REDIS_SALT_BYTES) + 1)
-
-ZEND_BEGIN_MODULE_GLOBALS(redis)
-char salt[REDIS_SALT_SIZE];
-ZEND_END_MODULE_GLOBALS(redis)
-
-ZEND_EXTERN_MODULE_GLOBALS(redis)
-#define REDIS_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(redis, v)
-
-#ifdef ZTS
-#include "TSRM.h"
-#endif
-
-PHP_MINIT_FUNCTION(redis);
-PHP_MSHUTDOWN_FUNCTION(redis);
-PHP_MINFO_FUNCTION(redis);
-
 #endif
 
 /*

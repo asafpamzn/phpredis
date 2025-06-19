@@ -8,8 +8,11 @@
 #include <zend_smart_str.h>
 #include <ext/standard/php_smart_string.h>
 
-#define PHPREDIS_GET_OBJECT(class_entry, o) (class_entry *)((char *)o - XtOffsetOf(class_entry, std))
-#define PHPREDIS_ZVAL_GET_OBJECT(class_entry, z) PHPREDIS_GET_OBJECT(class_entry, Z_OBJ_P(z))
+/* phpredis version */
+#define VALKEY_GLIDE_PHP_VERSION "0.1"
+
+#define VALKEY_GLIDE_PHP_GET_OBJECT(class_entry, o) (class_entry *)((char *)o - XtOffsetOf(class_entry, std))
+#define VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(class_entry, z) VALKEY_GLIDE_PHP_GET_OBJECT(class_entry, Z_OBJ_P(z))
 
 /* NULL check so Eclipse doesn't go crazy */
 #ifndef NULL
@@ -60,6 +63,26 @@ typedef struct
     const void *glide_client; /* Valkey Glide client pointer */
     zend_object std;
 } valkey_glide_object;
+
+/* For convenience we store the salt as a printable hex string which requires 2
+ * characters per byte + 1 for the NULL terminator */
+#define REDIS_SALT_BYTES 32
+#define REDIS_SALT_SIZE ((2 * REDIS_SALT_BYTES) + 1)
+
+ZEND_BEGIN_MODULE_GLOBALS(redis)
+char salt[REDIS_SALT_SIZE];
+ZEND_END_MODULE_GLOBALS(redis)
+
+ZEND_EXTERN_MODULE_GLOBALS(redis)
+#define REDIS_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(redis, v)
+
+#ifdef ZTS
+#include "TSRM.h"
+#endif
+
+PHP_MINIT_FUNCTION(redis);
+PHP_MSHUTDOWN_FUNCTION(redis);
+PHP_MINFO_FUNCTION(redis);
 
 #endif
 
