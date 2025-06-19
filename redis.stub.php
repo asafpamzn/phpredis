@@ -63,281 +63,6 @@ class ValkeyGlide {
      */
     public const REDIS_STREAM = UNKNOWN;
 
-    /**
-     *
-     * @var int
-     * @cvalue ATOMIC
-     *
-     */
-    public const ATOMIC = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue MULTI
-     *
-     */
-    public const MULTI = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue PIPELINE
-     *
-     */
-    public const PIPELINE = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_SERIALIZER
-     *
-     */
-    public const OPT_SERIALIZER = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_PREFIX
-     *
-     */
-    public const OPT_PREFIX = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_READ_TIMEOUT
-     *
-     */
-    public const OPT_READ_TIMEOUT = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_TCP_KEEPALIVE
-     *
-     */
-    public const OPT_TCP_KEEPALIVE = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_COMPRESSION
-     *
-     */
-    public const OPT_COMPRESSION = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_REPLY_LITERAL
-     *
-     */
-    public const OPT_REPLY_LITERAL = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_COMPRESSION_LEVEL
-     *
-     */
-    public const OPT_COMPRESSION_LEVEL = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_NULL_MBULK_AS_NULL
-     *
-     */
-    public const OPT_NULL_MULTIBULK_AS_NULL = UNKNOWN;
-
-    /**
-     * @var int
-     * @cvalue REDIS_OPT_PACK_IGNORE_NUMBERS
-     *
-     * When enabled, this option tells PhpValkeyGlide to ignore purely numeric values
-     * when packing and unpacking data. This does not include numeric strings.
-     * If you want numeric strings to be ignored, typecast them to an int or float.
-     *
-     * The primary purpose of this option is to make it more ergonomic when
-     * setting keys that will later be incremented or decremented.
-     *
-     * Note: This option incurs a small performance penalty when reading data
-     * because we have to see if the data is a string representation of an int
-     * or float.
-     *
-     * @example
-     * $redis->setOption(ValkeyGlide::OPT_SERIALIZER, ValkeyGlide::SERIALIZER_IGBINARY);
-     * $redis->setOption(ValkeyGlide::OPT_PACK_IGNORE_NUMBERS, true);
-     *
-     * $redis->set('answer', 32);
-     *
-     * var_dump($redis->incrBy('answer', 10));  // int(42)
-     * var_dump($redis->get('answer'));         // int(42)
-     */
-    public const OPT_PACK_IGNORE_NUMBERS = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_SERIALIZER_NONE
-     *
-     */
-    public const SERIALIZER_NONE = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_SERIALIZER_PHP
-     *
-     */
-    public const SERIALIZER_PHP = UNKNOWN;
-
-#ifdef HAVE_REDIS_IGBINARY
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_SERIALIZER_IGBINARY
-     *
-     */
-    public const SERIALIZER_IGBINARY = UNKNOWN;
-#endif
-
-#ifdef HAVE_REDIS_MSGPACK
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_SERIALIZER_MSGPACK
-     *
-     */
-    public const SERIALIZER_MSGPACK = UNKNOWN;
-#endif
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_SERIALIZER_JSON
-     *
-     */
-    public const SERIALIZER_JSON = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_COMPRESSION_NONE
-     *
-     */
-    public const COMPRESSION_NONE = UNKNOWN;
-
-#ifdef HAVE_REDIS_LZF
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_COMPRESSION_LZF
-     *
-     */
-    public const COMPRESSION_LZF = UNKNOWN;
-#endif
-
-#ifdef HAVE_REDIS_ZSTD
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_COMPRESSION_ZSTD
-     *
-     */
-    public const COMPRESSION_ZSTD = UNKNOWN;
-
-#ifdef ZSTD_CLEVEL_DEFAULT
-    /**
-     *
-     * @var int
-     * @cvalue ZSTD_CLEVEL_DEFAULT
-     *
-     */
-    public const COMPRESSION_ZSTD_DEFAULT = UNKNOWN;
-#else
-    /**
-     *
-     * @var int
-     *
-     */
-    public const COMPRESSION_ZSTD_DEFAULT = 3;
-#endif
-
-#if ZSTD_VERSION_NUMBER >= 10400
-    /**
-     *
-     * @var int
-     * @cvalue ZSTD_minCLevel()
-     *
-     */
-    public const COMPRESSION_ZSTD_MIN = UNKNOWN;
-#else
-    /**
-    *
-    * @var int
-    *
-    */
-    public const COMPRESSION_ZSTD_MIN = 1;
-#endif
-
-    /**
-     * @var int
-     * @cvalue ZSTD_maxCLevel()
-     */
-    public const COMPRESSION_ZSTD_MAX = UNKNOWN;
-#endif
-
-#ifdef HAVE_REDIS_LZ4
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_COMPRESSION_LZ4
-     *
-     */
-    public const COMPRESSION_LZ4 = UNKNOWN;
-#endif
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_SCAN
-     *
-     */
-    public const OPT_SCAN = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_SCAN_RETRY
-     *
-     */
-    public const SCAN_RETRY = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_SCAN_NORETRY
-     *
-     */
-    public const SCAN_NORETRY = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_SCAN_PREFIX
-     *
-     */
-    public const SCAN_PREFIX = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_SCAN_NOPREFIX
-     *
-     */
-    public const SCAN_NOPREFIX = UNKNOWN;
 
     /**
      *
@@ -367,94 +92,9 @@ class ValkeyGlide {
      */
     public const RIGHT = "right";
 
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_MAX_RETRIES
-     *
-     */
-    public const OPT_MAX_RETRIES = UNKNOWN;
 
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_BACKOFF_ALGORITHM
-     *
-     */
-    public const OPT_BACKOFF_ALGORITHM = UNKNOWN;
 
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_BACKOFF_ALGORITHM_DEFAULT
-     *
-     */
-    public const BACKOFF_ALGORITHM_DEFAULT = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_BACKOFF_ALGORITHM_CONSTANT
-     *
-     */
-    public const BACKOFF_ALGORITHM_CONSTANT = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_BACKOFF_ALGORITHM_UNIFORM
-     *
-     */
-    public const BACKOFF_ALGORITHM_UNIFORM = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_BACKOFF_ALGORITHM_EXPONENTIAL
-     *
-     */
-    public const BACKOFF_ALGORITHM_EXPONENTIAL = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_BACKOFF_ALGORITHM_FULL_JITTER
-     *
-     */
-    public const BACKOFF_ALGORITHM_FULL_JITTER = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_BACKOFF_ALGORITHM_EQUAL_JITTER
-     *
-     */
-    public const BACKOFF_ALGORITHM_EQUAL_JITTER = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_BACKOFF_ALGORITHM_DECORRELATED_JITTER
-     *
-     */
-    public const BACKOFF_ALGORITHM_DECORRELATED_JITTER = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_BACKOFF_BASE
-     *
-     */
-    public const OPT_BACKOFF_BASE = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_BACKOFF_CAP
-     *
-     */
-    public const OPT_BACKOFF_CAP = UNKNOWN;
-
+   
     /**
      * Create a new ValkeyGlide instance.  If passed sufficient information in the
      * options array it is also possible to connect to an instance at the same
@@ -514,9 +154,7 @@ class ValkeyGlide {
 
     public function __destruct();
 
-  
-
-    
+     
 
     /**
      * Append data to a ValkeyGlide STRING key.
@@ -736,28 +374,13 @@ class ValkeyGlide {
      */
     public function lmpop(array $keys, string $from, int $count = 1): ValkeyGlide|array|null|false;
 
-    /**
-     * Reset any last error on the connection to NULL
-     *
-     * @see ValkeyGlide::getLastError()
-     * @return bool This should always return true or throw an exception if we're not connected.
-     *
-     * @example
-     * $redis = new ValkeyGlide(['host' => 'localhost']);
-     * $redis->set('string', 'this_is_a_string');
-     * $redis->smembers('string');
-     * var_dump($redis->getLastError());
-     * $redis->clearLastError();
-     * var_dump($redis->getLastError());
-     */
-    public function clearLastError(): bool;
+  
 
     public function client(string $opt, mixed ...$args): mixed;
 
     public function close(): bool;
 
-    public function command(?string $opt = null, mixed ...$args): mixed;
-
+  
     /**
      *  Execute the ValkeyGlide CONFIG command in a variety of ways.
      *
@@ -777,8 +400,6 @@ class ValkeyGlide {
      */
     public function config(string $operation, array|string|null $key_or_settings = null, ?string $value = null): mixed;
 
-    public function connect(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = null,
-                            int $retry_interval = 0, float $read_timeout = 0, ?array $context = null): bool;
 
     /**
      * Make a copy of a key.
@@ -831,8 +452,6 @@ class ValkeyGlide {
      * var_dump($redis->dbsize());
      */
     public function dbSize(): ValkeyGlide|int|false;
-
-    public function debug(string $key): ValkeyGlide|string;
 
     /**
      * Decrement a ValkeyGlide integer by 1 or a provided value.
@@ -1075,8 +694,7 @@ class ValkeyGlide {
      */
     public function expireAt(string $key, int $timestamp, ?string $mode = null): ValkeyGlide|bool;
 
-    public function failover(?array $to = null, bool $abort = false, int $timeout = 0): ValkeyGlide|bool;
-
+   
     /**
      * Get the expiration of a given key as a unix timestamp
      *
@@ -1422,18 +1040,7 @@ class ValkeyGlide {
      */
     public function getEx(string $key, array $options = []): ValkeyGlide|string|bool;
 
-    /**
-     * Get the database number PhpValkeyGlide thinks we're connected to.
-     *
-     * This value is updated internally in PhpValkeyGlide each time {@link ValkeyGlide::select} is called.
-     *
-     * @return The database we're connected to.
-     *
-     * @see ValkeyGlide::select()
-     * @see https://redis.io/commands/select
-     */
-    public function getDBNum(): int;
-
+    
     /**
      * Get a key from ValkeyGlide and delete it in an atomic operation.
      *
@@ -1446,50 +1053,13 @@ class ValkeyGlide {
      */
     public function getDel(string $key): ValkeyGlide|string|bool;
 
-    /**
-     * Return the host or Unix socket we are connected to.
-     *
-     * @return string The host or Unix socket.
-     */
-    public function getHost(): string;
-
-    /**
-     * Get the last error returned to us from ValkeyGlide, if any.
-     *
-     * @return string The error string or NULL if there is none.
-     */
-    public function getLastError(): ?string;
-
-    /**
-     * Returns whether the connection is in ATOMIC, MULTI, or PIPELINE mode
-     *
-     * @return int The mode we're in.
-     *
-     */
-    public function getMode(): int;
-
-    /**
-     * Retrieve the value of a configuration setting as set by ValkeyGlide::setOption()
-     *
-     * @see ValkeyGlide::setOption() for a detailed list of options and their values.
-     *
-     * @return mixed The setting itself or false on failure
-     */
-    public function getOption(int $option): mixed;
-
+  
     /**
      * Get the persistent connection ID, if there is one.
      *
      * @return string The ID or NULL if we don't have one.
      */
     public function getPersistentID(): ?string;
-
-    /**
-     * Get the port we are connected to.  This number will be zero if we are connected to a unix socket.
-     *
-     * @return int The port.
-     */
-    public function getPort(): int;
 
     /**
      * Get the server name as reported by the `HELLO` response.
@@ -1555,13 +1125,7 @@ class ValkeyGlide {
      */
     public function lcs(string $key1, string $key2, ?array $options = null): ValkeyGlide|string|array|int|false;
 
-    /**
-     * Get the currently set read timeout on the connection.
-     *
-     * @return float The timeout.
-     */
-    public function getReadTimeout(): float;
-
+   
     /**
      * Sets a key and returns any previously set value, if the key already existed.
      *
@@ -1578,27 +1142,7 @@ class ValkeyGlide {
      */
     public function getset(string $key, mixed $value): ValkeyGlide|string|false;
 
-    /**
-     * Retrieve any set connection timeout
-     *
-     * @return float The currently set timeout or false on failure (e.g. we aren't connected).
-     */
-    public function getTimeout(): float|false;
-
-    /**
-     * Get the number of bytes sent and received on the socket.
-     *
-     * @return array An array in the form [$sent_bytes, $received_bytes]
-     */
-    public function getTransferredBytes(): array;
-
-    /**
-     * Reset the number of bytes sent and received on the socket.
-     *
-     * @return void
-     */
-    public function clearTransferredBytes(): void;
-
+   
     /**
      * Remove one or more fields from a hash.
      *
@@ -1939,14 +1483,7 @@ class ValkeyGlide {
      */
     public function info(string ...$sections): ValkeyGlide|array|false;
 
-    /**
-     * Check if we are currently connected to a ValkeyGlide instance.
-     *
-     * @return bool True if we are, false if not
-     */
-    public function isConnected(): bool;
-
-    /**
+      /**
      * @param string $pattern
      * @return ValkeyGlide|list<string>|false
      */
@@ -2111,16 +1648,7 @@ class ValkeyGlide {
      */
     public function lSet(string $key, int $index, mixed $value): ValkeyGlide|bool;
 
-    /**
-     * Retrieve the last time ValkeyGlide' database was persisted to disk.
-     *
-     * @return int The unix timestamp of the last save time
-     *
-     * @see https://redis.io/commands/lastsave
-     */
-    public function lastSave(): int;
-
-    /**
+        /**
      * Get the element of a list by its index.
      *
      * @param string $key   The key to query
@@ -2181,9 +1709,7 @@ class ValkeyGlide {
      */
     public function mget(array $keys): ValkeyGlide|array|false;
 
-    public function migrate(string $host, int $port, string|array $key, int $dstdb, int $timeout,
-                            bool $copy = false, bool $replace = false,
-                            #[\SensitiveParameter] mixed $credentials = null): ValkeyGlide|bool;
+   
 
     /**
      * Move a key to a different database on the same redis instance.
@@ -2238,15 +1764,7 @@ class ValkeyGlide {
 
     public function object(string $subcommand, string $key): ValkeyGlide|int|string|false;
 
-    /**
-     * @deprecated
-     * @alias ValkeyGlide::connect
-     */
-    public function open(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = null, int $retry_interval = 0, float $read_timeout = 0, ?array $context = null): bool;
-
-    public function pconnect(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = null, int $retry_interval = 0, float $read_timeout = 0, ?array $context = null): bool;
-
-    /**
+      /**
      * Remove the expiration from a key.
      *
      * @param string $key The key to operate against.
@@ -2356,12 +1874,7 @@ class ValkeyGlide {
      */
     public function pipeline(): bool|ValkeyGlide;
 
-    /**
-     * @deprecated
-     * @alias ValkeyGlide::pconnect
-     */
-    public function popen(string $host, int $port = 6379, float $timeout = 0, ?string $persistent_id = null, int $retry_interval = 0, float $read_timeout = 0, ?array $context = null): bool;
-
+    
     /**
      * Set a key with an expiration time in milliseconds
      *
@@ -2847,18 +2360,7 @@ class ValkeyGlide {
      */
     public function sUnionStore(string $dst, string $key, string ...$other_keys): ValkeyGlide|int|false;
 
-    /**
-     * Persist the ValkeyGlide database to disk.  This command will block the server until the save is
-     * completed.  For a nonblocking alternative, see ValkeyGlide::bgsave().
-     *
-     * @see https://redis.io/commands/save
-     * @see ValkeyGlide::bgsave()
-     *
-     * @return ValkeyGlide|bool Returns true unless an error occurs.
-     */
-    public function save(): ValkeyGlide|bool;
-
-    /**
+       /**
      * Incrementally scan the ValkeyGlide keyspace, with optional pattern and type matching.
      *
      * A note about ValkeyGlide::SCAN_NORETRY and ValkeyGlide::SCAN_RETRY.
@@ -3026,37 +2528,7 @@ class ValkeyGlide {
      */
     public function setRange(string $key, int $index, string $value): ValkeyGlide|int|false;
 
-    /**
-     * Set a configurable option on the ValkeyGlide object.
-     *
-     * Following are a list of options you can set:
-     *
-     * | OPTION          | TYPE | DESCRIPTION |
-     * | --------------- | ---- | ----------- |
-     * | OPT_MAX_RETRIES | int  | The maximum number of times ValkeyGlide will attempt to reconnect if it gets disconnected, before throwing an exception. |
-     * | OPT_SCAN        | enum | ValkeyGlide::OPT_SCAN_RETRY, or ValkeyGlide::OPT_SCAN_NORETRY.  Whether PhpValkeyGlide should automatically SCAN again when zero keys but a nonzero iterator are returned. |
-     * | OPT_SERIALIZER  | enum | Set the automatic data serializer.<br>`ValkeyGlide::SERIALIZER_NONE`<br>`ValkeyGlide::SERIALIZER_PHP`<br>`ValkeyGlide::SERIALIZER_IGBINARY`<br>`ValkeyGlide::SERIALIZER_MSGPACK`, `ValkeyGlide::SERIALIZER_JSON`|
-     * | OPT_PREFIX | string | A string PhpValkeyGlide will use to prefix every key we read or write. |
-     * | OPT_READ_TIMEOUT | float | How long PhpValkeyGlide will block for a response from ValkeyGlide before throwing a 'read error on connection' exception. |
-     * | OPT_TCP_KEEPALIVE | bool |   Set or disable TCP_KEEPALIVE on the connection. |
-     * | OPT_COMPRESSION | enum | Set the compression algorithm<br>`ValkeyGlide::COMPRESSION_NONE`<br>`ValkeyGlide::COMPRESSION_LZF`<br>`ValkeyGlide::COMPRESSION_LZ4`<br> `ValkeyGlide::COMPRESSION_ZSTD` |
-     * | OPT_REPLY_LITERAL | bool | If set to true, PhpValkeyGlide will return the literal string ValkeyGlide returns for LINE replies (e.g. '+OK'), rather than `true`. |
-     * | OPT_COMPRESSION_LEVEL | int | Set a specific compression level if ValkeyGlide is compressing data. |
-     * | OPT_NULL_MULTIBULK_AS_NULL | bool | Causes PhpValkeyGlide to return `NULL` rather than `false` for NULL MULTIBULK replies |
-     * | OPT_BACKOFF_ALGORITHM | enum | The exponential backoff strategy to use. |
-     * | OPT_BACKOFF_BASE | int | The minimum delay between retries when backing off. |
-     * | OPT_BACKOFF_CAP  | int | The maximum delay between replies when backing off. |
-     *
-     * @see ValkeyGlide::getOption()
-     * @see ValkeyGlide::__construct() for details about backoff strategies.
-     *
-     * @param int    $option The option constant.
-     * @param mixed  $value  The option value.
-     *
-     * @return bool  true if the setting was updated, false if not.
-     *
-     */
-    public function setOption(int $option, mixed $value): bool;
+    
 
     /**
      * Set a ValkeyGlide STRING key with a specific expiration in seconds.

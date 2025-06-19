@@ -89,28 +89,11 @@ class ValkeyGlideCluster {
     public function _redir(): string|null;
 
     /**
-     * @see ValkeyGlide::acl
-     */
-    public function acl(string|array $key_or_address, string $subcmd, string ...$args): mixed;
-
-    /**
      * @see ValkeyGlide::append()
      */
     public function append(string $key, mixed $value): ValkeyGlideCluster|bool|int;
 
-    /**
-     * @see ValkeyGlide::bgrewriteaof
-     */
-    public function bgrewriteaof(string|array $key_or_address): ValkeyGlideCluster|bool;
-
-    public function waitaof(string|array $key_or_address, int $numlocal,
-                            int $numreplicas, int $timeout): ValkeyGlideCluster|array|false;
-
-    /**
-     * @see ValkeyGlide::bgsave
-     */
-    public function bgsave(string|array $key_or_address): ValkeyGlideCluster|bool;
-
+    
     /**
      * @see ValkeyGlide::bitcount
      */
@@ -215,10 +198,7 @@ class ValkeyGlideCluster {
      */
     public function cluster(string|array $key_or_address, string $command, mixed ...$extra_args): mixed;
 
-    /**
-     * @see ValkeyGlide::command
-     */
-    public function command(mixed ...$extra_args): mixed;
+
 
     /**
      * @see ValkeyGlide::config()
