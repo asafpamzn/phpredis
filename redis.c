@@ -22,7 +22,7 @@
 #include "config.h"
 #endif
 
-#include "redis_glide.h"
+#include "valkey_glide_commands_common.h"
 #include <ext/spl/spl_exceptions.h>
 #include <zend_exceptions.h>
 #include <ext/standard/info.h>

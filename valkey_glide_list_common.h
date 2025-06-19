@@ -17,7 +17,7 @@
 #ifndef REDIS_GLIDE_LIST_COMMON_H
 #define REDIS_GLIDE_LIST_COMMON_H
 
-#include "redis_glide.h"
+#include "valkey_glide_commands_common.h"
 #include "common.h"
 #include "command_response.h"
 #include "include/glide_bindings.h"

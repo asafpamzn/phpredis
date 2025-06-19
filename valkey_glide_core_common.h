@@ -17,7 +17,7 @@
 #ifndef VALKEY_GLIDE_CORE_COMMON_H
 #define VALKEY_GLIDE_CORE_COMMON_H
 
-#include "redis_glide.h"
+#include "valkey_glide_commands_common.h"
 #include "command_response.h"
 
 /* ====================================================================

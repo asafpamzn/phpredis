@@ -14,7 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
-#include "redis_glide.h"
+#include "valkey_glide_commands_common.h"
 #include "command_response.h"
 
 /* Execute a command and handle common error checking */

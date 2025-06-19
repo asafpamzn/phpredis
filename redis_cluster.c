@@ -30,7 +30,7 @@
 
 #include <php_variables.h>
 #include <SAPI.h>
-#include "redis_glide.h"
+#include "valkey_glide_commands_common.h"
 
 zend_class_entry *redis_cluster_ce;
 

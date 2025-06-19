@@ -22,7 +22,7 @@
 #include "config.h"
 #endif
 
-#include "redis_glide.h"
+#include "valkey_glide_commands_common.h"
 #include "command_response.h" /* Include command_response.h for string conversion functions */
 #include "valkey_glide_core_common.h"
 #include "valkey_glide_commands_common.h"
