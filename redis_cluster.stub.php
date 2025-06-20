@@ -7,86 +7,10 @@
  */
 
 class ValkeyGlideCluster {
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_OPT_FAILOVER
-     *
-     */
-    public const OPT_SLAVE_FAILOVER = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_FAILOVER_NONE
-     *
-     */
-    public const FAILOVER_NONE = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_FAILOVER_ERROR
-     *
-     */
-    public const FAILOVER_ERROR = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_FAILOVER_DISTRIBUTE
-     *
-     */
-    public const FAILOVER_DISTRIBUTE = UNKNOWN;
-
-    /**
-     *
-     * @var int
-     * @cvalue REDIS_FAILOVER_DISTRIBUTE_SLAVES
-     *
-     */
-    public const FAILOVER_DISTRIBUTE_SLAVES = UNKNOWN;
-
+    
     public function __construct(string|null $name, ?array $seeds = null, int|float $timeout = 0, int|float $read_timeout = 0, bool $persistent = false, #[\SensitiveParameter] mixed $auth = null, ?array $context = null);
 
-    /**
-     * @see ValkeyGlide::_compress()
-     */
-    public function _compress(string $value): string;
-
-    /**
-     * @see ValkeyGlide::_uncompress()
-     */
-    public function _uncompress(string $value): string;
-
-    /**
-     * @see ValkeyGlide::_serialize()
-     */
-    public function _serialize(mixed $value): bool|string;
-
-    /**
-     * @see ValkeyGlide::_unserialize()
-     */
-    public function _unserialize(string $value): mixed;
-
-    /**
-     * @see ValkeyGlide::_pack()
-     */
-    public function _pack(mixed $value): string;
-
-    /**
-     * @see ValkeyGlide::_unpack()
-     */
-    public function _unpack(string $value): mixed;
-
-    /**
-     * @see ValkeyGlide::_prefix()
-     */
-    public function _prefix(string $key): bool|string;
-
-    public function _masters(): array;
-
-    public function _redir(): string|null;
+    
 
     /**
      * @see ValkeyGlide::append()
@@ -186,29 +110,23 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::client
      */
-    public function client(string|array $key_or_address, string $subcommand, ?string $arg = null): array|string|bool;
+    //TODO public function client(string|array $key_or_address, string $subcommand, ?string $arg = null): array|string|bool;
 
     /**
      * @see ValkeyGlide::close
      */
     public function close(): bool;
 
-    /**
-     * @see ValkeyGlide::cluster
-     */
-    public function cluster(string|array $key_or_address, string $command, mixed ...$extra_args): mixed;
-
-
 
     /**
      * @see ValkeyGlide::config()
      */
-    public function config(string|array $key_or_address, string $subcommand, mixed ...$extra_args): mixed;
+   //TODO public function config(string|array $key_or_address, string $subcommand, mixed ...$extra_args): mixed;
 
     /**
      * @see ValkeyGlide::dbsize()
      */
-    public function dbsize(string|array $key_or_address): ValkeyGlideCluster|int;
+  //TODO  public function dbsize(string|array $key_or_address): ValkeyGlideCluster|int;
 
     /**
      * @see https://redis.io/commands/copy
@@ -225,10 +143,6 @@ class ValkeyGlideCluster {
      */
     public function decrby(string $key, int $value): ValkeyGlideCluster|int|false;
 
-    /**
-     * @see ValkeyGlide::decrbyfloat
-     */
-    public function decrbyfloat(string $key, float $value): float;
 
     /**
      * @see ValkeyGlide::del()
@@ -248,7 +162,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::echo()
      */
-    public function echo(string|array $key_or_address, string $msg): ValkeyGlideCluster|string|false;
+  //TODO  public function echo(string|array $key_or_address, string $msg): ValkeyGlideCluster|string|false;
 
     /**
      * @see ValkeyGlide::eval
@@ -308,12 +222,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::flushall
      */
-    public function flushall(string|array $key_or_address, bool $async = false): ValkeyGlideCluster|bool;
+    //TODO public function flushall(string|array $key_or_address, bool $async = false): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::flushdb
      */
-    public function flushdb(string|array $key_or_address, bool $async = false): ValkeyGlideCluster|bool;
+    //TODO public function flushdb(string|array $key_or_address, bool $async = false): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::geoadd
@@ -388,7 +302,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::getbit
      */
-    public function getbit(string $key, int $value): ValkeyGlideCluster|int|false;
+    public function getbit(string $key, int $idx): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::getlasterror
@@ -420,15 +334,7 @@ class ValkeyGlideCluster {
      */
     public function getset(string $key, mixed $value): ValkeyGlideCluster|string|bool;
 
-    /**
-     * @see ValkeyGlide::gettransferredbytes
-     */
-    public function gettransferredbytes(): array|false;
 
-    /**
-     * @see ValkeyGlide::cleartransferredbytes
-     */
-    public function cleartransferredbytes(): void;
 
     /**
      * @see ValkeyGlide::hdel
@@ -551,17 +457,13 @@ class ValkeyGlideCluster {
      *
      * @return ValkeyGlideCluster|array|false
      */
-    public function info(string|array $key_or_address, string ...$sections): ValkeyGlideCluster|array|false;
+    //TODO public function info(string|array $key_or_address, string ...$sections): ValkeyGlideCluster|array|false;
 
     /**
      * @see ValkeyGlide::keys
      */
     public function keys(string $pattern): ValkeyGlideCluster|array|false;
 
-    /**
-     * @see ValkeyGlide::lastsave
-     */
-    public function lastsave(string|array $key_or_address): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::lget
@@ -692,7 +594,7 @@ class ValkeyGlideCluster {
      * @return mixed This method always returns `true` if no message was sent, and the message itself
      *               if one was.
      */
-    public function ping(string|array $key_or_address, ?string $message = null): mixed;
+  //TODO  public function ping(string|array $key_or_address, ?string $message = null): mixed;
 
     /**
      * @see ValkeyGlide::psetex
@@ -727,12 +629,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::randomkey
      */
-    public function randomkey(string|array $key_or_address): ValkeyGlideCluster|bool|string;
+   //TODO public function randomkey(string|array $key_or_address): ValkeyGlideCluster|bool|string;
 
     /**
      * @see ValkeyGlide::rawcommand
      */
-    public function rawcommand(string|array $key_or_address, string $command, mixed ...$args): mixed;
+ //TODO   public function rawcommand(string|array $key_or_address, string $command, mixed ...$args): mixed;
 
     /**
      * @see ValkeyGlide::rename
@@ -752,7 +654,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::role
      */
-    public function role(string|array $key_or_address): mixed;
+    //TODO public function role(string|array $key_or_address): mixed;
 
     /**
      * @see ValkeyGlide::rpop()
@@ -783,11 +685,6 @@ class ValkeyGlideCluster {
      * @see ValkeyGlide::saddarray()
      */
     public function saddarray(string $key, array $values): ValkeyGlideCluster|bool|int;
-
-    /**
-     * @see ValkeyGlide::save
-     */
-    public function save(string|array $key_or_address): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::scan
@@ -869,10 +766,6 @@ class ValkeyGlideCluster {
      */
     public function smismember(string $key, string $member, string ...$other_members): ValkeyGlideCluster|array|false;
 
-    /**
-     * @see ValkeyGlide::slowlog
-     */
-    public function slowlog(string|array $key_or_address, mixed ...$args): mixed;
 
     /**
      * @see ValkeyGlide::smembers()
@@ -937,7 +830,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::time
      */
-    public function time(string|array $key_or_address): ValkeyGlideCluster|bool|array;
+   //TODO public function time(string|array $key_or_address): ValkeyGlideCluster|bool|array;
 
     /**
      * @see ValkeyGlide::ttl
