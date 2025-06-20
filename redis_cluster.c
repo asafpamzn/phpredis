@@ -100,31 +100,19 @@ PHP_METHOD(ValkeyGlideCluster, close)
 }
 
 /* {{{ proto string ValkeyGlideCluster::get(string key) */
-PHP_METHOD(ValkeyGlideCluster, get)
-{
-    redis_get_implementation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
+GET_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::getdel(string key) */
-PHP_METHOD(ValkeyGlideCluster, getdel)
-{
-    redis_get_implementation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
+GETDEL_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array|false ValkeyGlideCluster::getWithMeta(string key) */
-PHP_METHOD(ValkeyGlideCluster, getWithMeta)
-{
-    redis_get_implementation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
+GETWITHMETA_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::set(string key, string value) */
-PHP_METHOD(ValkeyGlideCluster, set)
-{
-    redis_get_implementation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
+SET_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* Generic handler for MGET/MSET/MSETNX */
@@ -616,24 +604,15 @@ PHP_METHOD(ValkeyGlideCluster, getex)
 }
 
 /* {{{ proto bool ValkeyGlideCluster::setex(string key, string value, int expiry) */
-PHP_METHOD(ValkeyGlideCluster, setex)
-{
-    CLUSTER_PROCESS_KW_CMD("SETEX", redis_key_long_val_cmd, cluster_bool_resp, 0);
-}
+SETEX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::psetex(string key, string value, int expiry) */
-PHP_METHOD(ValkeyGlideCluster, psetex)
-{
-    CLUSTER_PROCESS_KW_CMD("PSETEX", redis_key_long_val_cmd, cluster_bool_resp, 0);
-}
+PSETEX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::setnx(string key, string value) */
-PHP_METHOD(ValkeyGlideCluster, setnx)
-{
-    CLUSTER_PROCESS_KW_CMD("SETNX", redis_kv_cmd, cluster_1_resp, 0);
-}
+SETNX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::getSet(string key, string value) */
@@ -1000,27 +979,26 @@ ZCARD_METHOD_IMPL(ValkeyGlideCluster)
 ZSCORE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
-PHP_METHOD(ValkeyGlideCluster, zmscore){
-    ZMSCORE_METHOD_IMPL(ValkeyGlideCluster)}
+ZMSCORE_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto long ValkeyGlideCluster::zadd(string key,double score,string mem, ...) */
 ZADD_METHOD_IMPL(ValkeyGlideCluster)
-    /* }}} */
+/* }}} */
 
-    /* {{{ proto double ValkeyGlideCluster::zincrby(string key, double by, string mem) */
-    ZINCRBY_METHOD_IMPL(ValkeyGlideCluster)
-    /* }}} */
+/* {{{ proto double ValkeyGlideCluster::zincrby(string key, double by, string mem) */
+ZINCRBY_METHOD_IMPL(ValkeyGlideCluster)
+/* }}} */
 
-    /* {{{ proto ValkeyGlideCluster::zremrangebyscore(string k, string s, string e) */
-    ZREMRANGEBYSCORE_METHOD_IMPL(ValkeyGlideCluster)
-    /* }}} */
+/* {{{ proto ValkeyGlideCluster::zremrangebyscore(string k, string s, string e) */
+ZREMRANGEBYSCORE_METHOD_IMPL(ValkeyGlideCluster)
+/* }}} */
 
-    /* {{{ proto ValkeyGlideCluster::zcount(string key, string s, string e) */
-    ZCOUNT_METHOD_IMPL(ValkeyGlideCluster)
-    /* }}} */
+/* {{{ proto ValkeyGlideCluster::zcount(string key, string s, string e) */
+ZCOUNT_METHOD_IMPL(ValkeyGlideCluster)
+/* }}} */
 
-    /* {{{ proto long ValkeyGlideCluster::zrank(string key, mixed member) */
-    PHP_METHOD(ValkeyGlideCluster, zrank)
+/* {{{ proto long ValkeyGlideCluster::zrank(string key, mixed member) */
+PHP_METHOD(ValkeyGlideCluster, zrank)
 {
     CLUSTER_PROCESS_KW_CMD("ZRANK", redis_kv_cmd, cluster_long_resp, 1);
 }
@@ -1248,7 +1226,8 @@ PHP_METHOD(ValkeyGlideCluster, lget)
 }
 /* }}} */
 
-/* {{{ proto string ValkeyGlideCluster::getrange(string key, long start, long end) */ PHP_METHOD(ValkeyGlideCluster, getrange)
+/* {{{ proto string ValkeyGlideCluster::getrange(string key, long start, long end) */
+PHP_METHOD(ValkeyGlideCluster, getrange)
 {
     CLUSTER_PROCESS_KW_CMD("GETRANGE", redis_key_long_long_cmd,
                            cluster_bulk_resp, 1);
@@ -2481,109 +2460,21 @@ PHP_METHOD(ValkeyGlideCluster, geosearchstore)
 
 /* {{{ proto array ValkeyGlideCluster::role(string key)
  *     proto array ValkeyGlideCluster::role(array host_port) */
-PHP_METHOD(ValkeyGlideCluster, role)
-{
-    cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "ROLE",
-                           TYPE_MULTIBULK, cluster_variant_resp);
-}
+ROLE_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::time(string key)
  *     proto array ValkeyGlideCluster::time(array host_port) */
-PHP_METHOD(ValkeyGlideCluster, time)
-{
-    cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "TIME",
-                           TYPE_MULTIBULK, cluster_variant_resp);
-}
+TIME_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::randomkey(string key)
  *     proto string ValkeyGlideCluster::randomkey(array host_port) */
-PHP_METHOD(ValkeyGlideCluster, randomkey)
-{
-    cluster_empty_node_cmd(INTERNAL_FUNCTION_PARAM_PASSTHRU, "RANDOMKEY",
-                           TYPE_BULK, cluster_bulk_resp);
-}
+RANDOMKEY_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::ping(string key| string msg)
  *     proto bool ValkeyGlideCluster::ping(array host_port| string msg) */
-PHP_METHOD(ValkeyGlideCluster, ping)
-{
-    redisCluster *c = GET_CONTEXT();
-    REDIS_REPLY_TYPE rtype;
-    void *ctx = NULL;
-    zval *z_node;
-    char *cmd, *arg = NULL;
-    int cmdlen;
-    size_t arglen;
-    short slot;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|s!", &z_node, &arg,
-                              &arglen) == FAILURE)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Treat this as a readonly command */
-    c->readonly = CLUSTER_IS_ATOMIC(c);
-
-    /* Grab slot either by key or host/port */
-    slot = cluster_cmd_get_slot(c, z_node);
-    if (slot < 0)
-    {
-        RETURN_FALSE;
-    }
-
-    /* Construct our command */
-    if (arg != NULL)
-    {
-        cmdlen = redis_spprintf(NULL, NULL, &cmd, "PING", "s", arg, arglen);
-    }
-    else
-    {
-        cmdlen = redis_spprintf(NULL, NULL, &cmd, "PING", "");
-    }
-
-    /* Send it off */
-    rtype = CLUSTER_IS_ATOMIC(c) && arg != NULL ? TYPE_BULK : TYPE_LINE;
-    if (cluster_send_slot(c, slot, cmd, cmdlen, rtype) < 0)
-    {
-        CLUSTER_THROW_EXCEPTION("Unable to send command at the specified node", 0);
-        efree(cmd);
-        RETURN_FALSE;
-    }
-
-    /* We're done with our command */
-    efree(cmd);
-
-    /* Process response */
-    if (CLUSTER_IS_ATOMIC(c))
-    {
-        if (arg != NULL)
-        {
-            cluster_bulk_resp(INTERNAL_FUNCTION_PARAM_PASSTHRU, c, NULL);
-        }
-        else
-        {
-            /* If we're atomic and didn't send an argument then we have already
-             * processed the reply (which must have been successful. */
-            RETURN_TRUE;
-        }
-    }
-    else
-    {
-        if (arg != NULL)
-        {
-            CLUSTER_ENQUEUE_RESPONSE(c, slot, cluster_bulk_resp, ctx);
-        }
-        else
-        {
-            CLUSTER_ENQUEUE_RESPONSE(c, slot, cluster_variant_resp, ctx);
-        }
-
-        RETURN_ZVAL(getThis(), 1, 0);
-    }
-}
+PING_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::xack(string key, string group, array ids) }}} */
