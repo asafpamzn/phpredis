@@ -466,9 +466,7 @@ HSETNX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::hgetall(string key) */
-PHP_METHOD(ValkeyGlideCluster, hgetall)
-{
-}
+HGETALL_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::hexists(string key, string member) */

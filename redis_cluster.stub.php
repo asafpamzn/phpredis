@@ -285,9 +285,9 @@ class ValkeyGlideCluster {
     public function get(string $key): mixed;
 
     /**
-     * @see ValkeyGlide::getdel
+     * @see ValkeyGlide::getDel
      */
-    public function getdel(string $key): mixed;
+    public function getDel(string $key): mixed;
 
     /**
      * @see ValkeyGlide::getWithMeta
@@ -302,7 +302,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::getbit
      */
-    public function getbit(string $key, int $idx): ValkeyGlideCluster|int|false;
+    public function getBit(string $key, int $idx): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::getlasterror
@@ -313,11 +313,6 @@ class ValkeyGlideCluster {
      * @see ValkeyGlide::getmode
      */
     public function getmode(): int;
-
-    /**
-     * @see ValkeyGlide::getoption
-     */
-    public function getoption(int $option): mixed;
 
     /**
      * @see ValkeyGlide::getrange
@@ -344,17 +339,17 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::hexists
      */
-    public function hexists(string $key, string $member): ValkeyGlideCluster|bool;
+    public function hExists(string $key, string $member): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::hget
      */
-    public function hget(string $key, string $member): mixed;
+    public function hGet(string $key, string $member): mixed;
 
     /**
      * @see ValkeyGlide::hgetall
      */
-    public function hgetall(string $key): ValkeyGlideCluster|array|false;
+    public function hGetAll(string $key): ValkeyGlideCluster|array|false;
 
     /**
      * @see ValkeyGlide::hincrby
@@ -369,12 +364,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::hkeys
      */
-    public function hkeys(string $key): ValkeyGlideCluster|array|false;
+    public function hKeys(string $key): ValkeyGlideCluster|array|false;
 
     /**
      * @see ValkeyGlide::hlen
      */
-    public function hlen(string $key): ValkeyGlideCluster|int|false;
+    public function hLen(string $key): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::hmget
@@ -409,12 +404,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::hset
      */
-    public function hset(string $key, string $member, mixed $value): ValkeyGlideCluster|int|false;
+    public function hSet(string $key, string $member, mixed $value): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::hsetnx
      */
-    public function hsetnx(string $key, string $member, mixed $value): ValkeyGlideCluster|bool;
+    public function hSetNx(string $key, string $member, mixed $value): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::hstrlen
@@ -424,7 +419,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::hvals
      */
-    public function hvals(string $key): ValkeyGlideCluster|array|false;
+    public function hVals(string $key): ValkeyGlideCluster|array|false;
 
     /**
      * @see ValkeyGlide::incr
@@ -439,7 +434,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::incrbyfloat
      */
-    public function incrbyfloat(string $key, float $value): ValkeyGlideCluster|float|false;
+    public function incrByFloat(string $key, float $value): ValkeyGlideCluster|float|false;
 
     /**
      * Retrieve information about the connected redis-server.  If no arguments are passed to
@@ -719,7 +714,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::setbit
      */
-    public function setbit(string $key, int $offset, bool $onoff): ValkeyGlideCluster|int|false;
+    public function setBit(string $key, int $offset, bool $onoff): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::setex
@@ -730,11 +725,6 @@ class ValkeyGlideCluster {
      * @see ValkeyGlide::setnx
      */
     public function setnx(string $key, mixed $value): ValkeyGlideCluster|bool;
-
-    /**
-     * @see ValkeyGlide::setoption
-     */
-    public function setoption(int $option, mixed $value): bool;
 
     /**
      * @see ValkeyGlide::setrange
@@ -936,22 +926,22 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::zadd
      */
-    public function zadd(string $key, array|float $score_or_options, mixed ...$more_scores_and_mems): ValkeyGlideCluster|int|float|false;
+    public function zAdd(string $key, array|float $score_or_options, mixed ...$more_scores_and_mems): ValkeyGlideCluster|int|float|false;
 
     /**
      * @see ValkeyGlide::zcard
      */
-    public function zcard(string $key): ValkeyGlideCluster|int|false;
+    public function zCard(string $key): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::zcount
      */
-    public function zcount(string $key, string $start, string $end): ValkeyGlideCluster|int|false;
+    public function zCount(string $key, string $start, string $end): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::zincrby
      */
-    public function zincrby(string $key, float $value, string $member): ValkeyGlideCluster|float|false;
+    public function zIncrBy(string $key, float $value, string $member): ValkeyGlideCluster|float|false;
 
     /**
      * @see ValkeyGlide::zinterstore
@@ -1025,9 +1015,9 @@ class ValkeyGlideCluster {
     public function zremrangebyrank(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
 
     /**
-     * @see ValkeyGlide::zremrangebyscore
+     * @see ValkeyGlide::zRemRangeByScore
      */
-    public function zremrangebyscore(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
+    public function zRemRangeByScore(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::zrevrange
@@ -1055,14 +1045,14 @@ class ValkeyGlideCluster {
     public function zscan(string $key, null|int|string &$iterator, ?string $pattern = null, int $count = 0): ValkeyGlideCluster|bool|array;
 
     /**
-     * @see ValkeyGlide::zscore
+     * @see ValkeyGlide::zScore
      */
-    public function zscore(string $key, mixed $member): ValkeyGlideCluster|float|false;
+    public function zScore(string $key, mixed $member): ValkeyGlideCluster|float|false;
 
     /**
      * @see https://redis.io/commands/zmscore
      */
-    public function zmscore(string $key, mixed $member, mixed ...$other_members): ValkeyGlide|array|false;
+    public function zMscore(string $key, mixed $member, mixed ...$other_members): ValkeyGlide|array|false;
 
     /**
      * @see ValkeyGlide::zunionstore
