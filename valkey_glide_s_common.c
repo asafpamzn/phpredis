@@ -795,7 +795,7 @@ cleanup:
 /**
  * Execute SADD command using the new signature pattern
  */
-int execute_sadd_command(zval *object, int argc, zval *return_value)
+int execute_sadd_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -838,7 +838,7 @@ int execute_sadd_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SADD array command using the new signature pattern
  */
-int execute_sadd_array_command(zval *object, int argc, zval *return_value)
+int execute_sadd_array_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -911,7 +911,7 @@ int execute_sadd_array_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SCARD command using the new signature pattern
  */
-int execute_scard_command(zval *object, int argc, zval *return_value)
+int execute_scard_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -949,7 +949,7 @@ int execute_scard_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SRANDMEMBER command using the new signature pattern
  */
-int execute_srandmember_command(zval *object, int argc, zval *return_value)
+int execute_srandmember_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -995,7 +995,7 @@ int execute_srandmember_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SISMEMBER command using the new signature pattern
  */
-int execute_sismember_command(zval *object, int argc, zval *return_value)
+int execute_sismember_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *member = NULL;
@@ -1036,7 +1036,7 @@ int execute_sismember_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SMEMBERS command using the new signature pattern
  */
-int execute_smembers_command(zval *object, int argc, zval *return_value)
+int execute_smembers_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1074,7 +1074,7 @@ int execute_smembers_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SREM command using the new signature pattern
  */
-int execute_srem_command(zval *object, int argc, zval *return_value)
+int execute_srem_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1117,7 +1117,7 @@ int execute_srem_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SMOVE command using the new signature pattern
  */
-int execute_smove_command(zval *object, int argc, zval *return_value)
+int execute_smove_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *src = NULL, *dst = NULL, *member = NULL;
@@ -1160,7 +1160,7 @@ int execute_smove_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SPOP command using the new signature pattern
  */
-int execute_spop_command(zval *object, int argc, zval *return_value)
+int execute_spop_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1206,7 +1206,7 @@ int execute_spop_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SMISMEMBER command using the new signature pattern
  */
-int execute_smismember_command(zval *object, int argc, zval *return_value)
+int execute_smismember_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1249,7 +1249,7 @@ int execute_smismember_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SINTER command using the new signature pattern
  */
-int execute_sinter_command(zval *object, int argc, zval *return_value)
+int execute_sinter_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
@@ -1347,7 +1347,7 @@ int execute_sinter_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SINTERCARD command using the new signature pattern
  */
-int execute_sintercard_command(zval *object, int argc, zval *return_value)
+int execute_sintercard_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_keys;
@@ -1434,7 +1434,7 @@ int execute_sintercard_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SINTERSTORE command using the new signature pattern
  */
-int execute_sinterstore_command(zval *object, int argc, zval *return_value)
+int execute_sinterstore_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *dst = NULL;
@@ -1609,7 +1609,7 @@ int execute_sinterstore_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SUNION command using the new signature pattern
  */
-int execute_sunion_command(zval *object, int argc, zval *return_value)
+int execute_sunion_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
@@ -1707,7 +1707,7 @@ int execute_sunion_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SUNIONSTORE command using the new signature pattern
  */
-int execute_sunionstore_command(zval *object, int argc, zval *return_value)
+int execute_sunionstore_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *dst = NULL;
@@ -1882,7 +1882,7 @@ int execute_sunionstore_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SDIFF command using the new signature pattern
  */
-int execute_sdiff_command(zval *object, int argc, zval *return_value)
+int execute_sdiff_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
@@ -1980,7 +1980,7 @@ int execute_sdiff_command(zval *object, int argc, zval *return_value)
 /**
  * Execute SDIFFSTORE command using the new signature pattern
  */
-int execute_sdiffstore_command(zval *object, int argc, zval *return_value)
+int execute_sdiffstore_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *dst = NULL;
@@ -2174,7 +2174,7 @@ int execute_scan_command_internal(const void *glide_client, long *it, const char
 /**
  * Execute SCAN command with unified signature
  */
-int execute_scan_command(zval *object, int argc, zval *return_value)
+int execute_scan_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_iter;
@@ -2256,7 +2256,7 @@ int execute_sscan_command_internal(const void *glide_client, const char *key, si
 /**
  * Execute SSCAN command with unified signature
  */
-int execute_sscan_command(zval *object, int argc, zval *return_value)
+int execute_sscan_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -2379,7 +2379,7 @@ int execute_servername_command_internal(const void *glide_client, char **output,
 /**
  * Execute server name command with unified signature
  */
-int execute_servername_command(zval *object, int argc, zval *return_value)
+int execute_servername_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *result = NULL;
@@ -2483,7 +2483,7 @@ int execute_serverversion_command_internal(const void *glide_client, char **outp
 /**
  * Execute server version command with unified signature
  */
-int execute_serverversion_command(zval *object, int argc, zval *return_value)
+int execute_serverversion_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *result = NULL;
@@ -2527,7 +2527,7 @@ int execute_serverversion_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HSCAN command with unified signature
  */
-int execute_hscan_command(zval *object, int argc, zval *return_value)
+int execute_hscan_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *pattern = NULL;

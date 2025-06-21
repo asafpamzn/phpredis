@@ -144,15 +144,15 @@ int process_geo_pos_result(CommandResult *result, void *output);
 int process_geo_radius_result(CommandResult *result, void *output);
 int process_geo_search_result(CommandResult *result, void *output);
 
-int execute_geoadd_command(zval *object, int argc, zval *return_value);
-int execute_georadius_ro_command(zval *object, int argc, zval *return_value);
-int execute_georadius_command(zval *object, int argc, zval *return_value);
-int execute_geohash_command(zval *object, int argc, zval *return_value);
+int execute_geoadd_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_georadius_ro_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_georadius_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_geohash_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
 
-int execute_geodist_command(zval *object, int argc, zval *return_value);
-int execute_geopos_command(zval *object, int argc, zval *return_value);
-int execute_geosearch_command(zval *object, int argc, zval *return_value);
-int execute_geosearchstore_command(zval *object, int argc, zval *return_value);
+int execute_geodist_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_geopos_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_geosearch_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_geosearchstore_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
 
 /* Execution framework */
 int execute_geo_generic_command(
@@ -170,7 +170,7 @@ int execute_geo_generic_command(
 #define GEOADD_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, geoadd)                                            \
     {                                                                         \
-        if (execute_geoadd_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        if (execute_geoadd_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                     \
             return;                                                           \
         }                                                                     \
@@ -181,7 +181,7 @@ int execute_geo_generic_command(
 #define GEODIST_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, geodist)                                            \
     {                                                                          \
-        if (execute_geodist_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        if (execute_geodist_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                      \
             return;                                                            \
         }                                                                      \
@@ -192,7 +192,7 @@ int execute_geo_generic_command(
 #define GEOHASH_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, geohash)                                            \
     {                                                                          \
-        if (execute_geohash_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        if (execute_geohash_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                      \
             return;                                                            \
         }                                                                      \
@@ -204,7 +204,7 @@ int execute_geo_generic_command(
 #define GEOPOS_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, geopos)                                            \
     {                                                                         \
-        if (execute_geopos_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        if (execute_geopos_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                     \
             return;                                                           \
         }                                                                     \
@@ -216,7 +216,7 @@ int execute_geo_generic_command(
 #define GEORADIUS_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, georadius)                                            \
     {                                                                            \
-        if (execute_georadius_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        if (execute_georadius_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                        \
             return;                                                              \
         }                                                                        \
@@ -228,7 +228,7 @@ int execute_geo_generic_command(
 #define GEORADIUS_RO_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, georadius_ro)                                            \
     {                                                                               \
-        if (execute_georadius_ro_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        if (execute_georadius_ro_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                           \
             return;                                                                 \
         }                                                                           \
@@ -240,7 +240,7 @@ int execute_geo_generic_command(
 #define GEORADIUSBYMEMBER_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, georadiusbymember)                                            \
     {                                                                                    \
-        if (execute_georadiusbymember_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        if (execute_georadiusbymember_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                                \
             return;                                                                      \
         }                                                                                \
@@ -252,7 +252,7 @@ int execute_geo_generic_command(
 #define GEORADIUSBYMEMBER_RO_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, georadiusbymember_ro)                                            \
     {                                                                                       \
-        if (execute_georadiusbymember_ro_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        if (execute_georadiusbymember_ro_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                                   \
             return;                                                                         \
         }                                                                                   \
@@ -264,7 +264,7 @@ int execute_geo_generic_command(
 #define GEOSEARCH_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, geosearch)                                            \
     {                                                                            \
-        if (execute_geosearch_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        if (execute_geosearch_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                        \
             return;                                                              \
         }                                                                        \
@@ -276,7 +276,7 @@ int execute_geo_generic_command(
 #define GEOSEARCHSTORE_METHOD_IMPL(class_name)                                        \
     PHP_METHOD(class_name, geosearchstore)                                            \
     {                                                                                 \
-        if (execute_geosearchstore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
+        if (execute_geosearchstore_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                             \
             return;                                                                   \
         }                                                                             \

@@ -25,7 +25,7 @@ extern zend_class_entry *get_valkey_glide_ce();
 extern zend_class_entry *get_valkey_glide_exception_ce();
 
 /* Execute a WAIT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_wait_command(zval *object, int argc, zval *return_value)
+int execute_wait_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     long numreplicas, timeout;
@@ -67,7 +67,7 @@ int execute_wait_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a FUNCTION command using the Valkey Glide client */
-int execute_function_command(zval *object, int argc, zval *return_value)
+int execute_function_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args;
@@ -198,7 +198,7 @@ int execute_function_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a MULTI command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_multi_command(zval *object, int argc, zval *return_value)
+int execute_multi_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
 
@@ -231,7 +231,7 @@ int execute_multi_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a DISCARD command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_discard_command(zval *object, int argc, zval *return_value)
+int execute_discard_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
 
@@ -263,7 +263,7 @@ int execute_discard_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an EXEC command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_exec_command(zval *object, int argc, zval *return_value)
+int execute_exec_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
 
@@ -294,7 +294,7 @@ int execute_exec_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an FCALL command using the Valkey Glide client */
-int execute_fcall_command(zval *object, int argc, zval *return_value)
+int execute_fcall_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *name = NULL;
@@ -409,7 +409,7 @@ int execute_fcall_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an FCALL_RO command using the Valkey Glide client */
-int execute_fcall_ro_command(zval *object, int argc, zval *return_value)
+int execute_fcall_ro_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *name = NULL;
@@ -524,7 +524,7 @@ int execute_fcall_ro_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a DUMP command using the Valkey Glide client */
-int execute_dump_command(zval *object, int argc, zval *return_value)
+int execute_dump_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -579,7 +579,7 @@ int execute_dump_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a RESTORE command using the Valkey Glide client */
-int execute_restore_command(zval *object, int argc, zval *return_value)
+int execute_restore_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *serialized = NULL;
@@ -800,7 +800,7 @@ int execute_restore_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a CONFIG command using the Valkey Glide client */
-int execute_config_command(zval *object, int argc, zval *return_value)
+int execute_config_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *operation = NULL;
@@ -1121,7 +1121,7 @@ int execute_get_read_timeout_command(const void *glide_client, double *output_va
 }
 
 /* Unified getReadTimeout command implementation */
-int execute_getreadtimeout_command(zval *object, int argc, zval *return_value)
+int execute_getreadtimeout_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     double timeout;
@@ -1463,7 +1463,7 @@ int execute_dbsize_command_internal(const void *glide_client, long *output_value
 }
 
 /* Execute client command - UNIFIED IMPLEMENTATION */
-int execute_client_command(zval *object, int argc, zval *return_value)
+int execute_client_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
@@ -1494,7 +1494,7 @@ int execute_client_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute rawcommand command - UNIFIED IMPLEMENTATION */
-int execute_rawcommand_command(zval *object, int argc, zval *return_value)
+int execute_rawcommand_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
@@ -1525,7 +1525,7 @@ int execute_rawcommand_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute dbSize command - UNIFIED IMPLEMENTATION */
-int execute_dbsize_command(zval *object, int argc, zval *return_value)
+int execute_dbsize_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     long dbsize;

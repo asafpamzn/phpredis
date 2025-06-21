@@ -337,47 +337,47 @@ int prepare_mpop_arguments(
  * ==================================================================== */
 
 /* Traditional function signatures (original) */
-int execute_zrandmember_command(zval *object, int argc, zval *return_value);
-int execute_zscore_command(zval *object, int argc, zval *return_value);
-int execute_zmscore_command(zval *object, int argc, zval *return_value);
-int execute_zrank_command(zval *object, int argc, zval *return_value);
-int execute_zrevrank_command(zval *object, int argc, zval *return_value);
-int execute_zincrby_command(zval *object, int argc, zval *return_value);
-int execute_zcount_command(zval *object, int argc, zval *return_value);
-int execute_zlexcount_command(zval *object, int argc, zval *return_value);
-int execute_zrem_command(zval *object, int argc, zval *return_value);
-int execute_zremrangebylex_command(zval *object, int argc, zval *return_value);
-int execute_zremrangebyrank_command(zval *object, int argc, zval *return_value);
-int execute_zrange_command(zval *object, int argc, zval *return_value);
-int execute_zcard_command(zval *object, int argc, zval *return_value);
+int execute_zrandmember_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zscore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zmscore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zrank_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zrevrank_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zincrby_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zcount_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zlexcount_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zrem_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zremrangebylex_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zremrangebyrank_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zrange_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zcard_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 /* ZADD command with options */
-int execute_zadd_command(zval *object, int argc, zval *return_value);
+int execute_zadd_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
 /* ZRANGE command family */
-int execute_zrangestore_command(zval *object, int argc, zval *return_value);
+int execute_zrangestore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
-int execute_zdiffstore_command(zval *object, int argc, zval *return_value);
-int execute_zinterstore_command(zval *object, int argc, zval *return_value);
+int execute_zdiffstore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zinterstore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 int execute_zmpop_command1(const void *glide_client, const char *cmd, double timeout, zval *keys, const char *from, size_t from_len, long count, zval *result);
-int execute_zintercard_command(zval *object, int argc, zval *return_value);
-int execute_zunion_command(zval *object, int argc, zval *return_value);
-int execute_zunionstore_command(zval *object, int argc, zval *return_value);
-int execute_zpopmax_command(zval *object, int argc, zval *return_value);
-int execute_zpopmin_command(zval *object, int argc, zval *return_value);
-int execute_zscan_command(zval *object, int argc, zval *return_value);
+int execute_zintercard_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zunion_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zunionstore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zpopmax_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zpopmin_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zscan_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
-int execute_zrevrange_command(zval *object, int argc, zval *return_value);
-int execute_zrangebyscore_command(zval *object, int argc, zval *return_value);
-int execute_zrevrangebyscore_command(zval *object, int argc, zval *return_value);
-int execute_zrangebylex_command(zval *object, int argc, zval *return_value);
-int execute_zrevrangebylex_command(zval *object, int argc, zval *return_value);
-int execute_zdiff_command(zval *object, int argc, zval *return_value);
-int execute_zinter_command(zval *object, int argc, zval *return_value);
-int execute_zremrangebyscore_command(zval *object, int argc, zval *return_value);
-int execute_bzmpop_command(zval *object, int argc, zval *return_value);
-int execute_zmpop_command(zval *object, int argc, zval *return_value);
-int execute_bzpopmax_command(zval *object, int argc, zval *return_value);
-int execute_bzpopmin_command(zval *object, int argc, zval *return_value);
+int execute_zrevrange_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zrangebyscore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zrevrangebyscore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zrangebylex_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zrevrangebylex_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zdiff_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zinter_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zremrangebyscore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_bzmpop_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_zmpop_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_bzpopmax_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_bzpopmin_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
 /**
  * Initialize array return value and check for allocation success
@@ -402,401 +402,401 @@ int execute_bzpopmin_command(zval *object, int argc, zval *return_value);
     } while (0)
 
 /* Ultra-simple macro for ZRANDMEMBER method implementation */
-#define ZRANDMEMBER_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRandMember)                                            \
-    {                                                                              \
-        if (execute_zrandmember_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                          \
-            return;                                                                \
-        }                                                                          \
-        zval_dtor(return_value);                                                   \
-        RETURN_FALSE;                                                              \
+#define ZRANDMEMBER_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRandMember)                                                                                                                                              \
+    {                                                                                                                                                                                \
+        if (execute_zrandmember_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                            \
+            return;                                                                                                                                                                  \
+        }                                                                                                                                                                            \
+        zval_dtor(return_value);                                                                                                                                                     \
+        RETURN_FALSE;                                                                                                                                                                \
     }
 
 /* Ultra-simple macro for ZRANGE method implementation */
-#define ZRANGE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRange)                                            \
-    {                                                                         \
-        if (execute_zrange_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                     \
-            return;                                                           \
-        }                                                                     \
-        zval_dtor(return_value);                                              \
-        RETURN_FALSE;                                                         \
+#define ZRANGE_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRange)                                                                                                                                              \
+    {                                                                                                                                                                           \
+        if (execute_zrange_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                       \
+            return;                                                                                                                                                             \
+        }                                                                                                                                                                       \
+        zval_dtor(return_value);                                                                                                                                                \
+        RETURN_FALSE;                                                                                                                                                           \
     }
 
 /* Ultra-simple macro for ZRANGESTORE method implementation */
-#define ZRANGESTORE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zrangestore)                                            \
-    {                                                                              \
-        if (execute_zrangestore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                          \
-            return;                                                                \
-        }                                                                          \
-        RETURN_FALSE;                                                              \
+#define ZRANGESTORE_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zrangestore)                                                                                                                                              \
+    {                                                                                                                                                                                \
+        if (execute_zrangestore_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                            \
+            return;                                                                                                                                                                  \
+        }                                                                                                                                                                            \
+        RETURN_FALSE;                                                                                                                                                                \
     }
 
 /* Ultra-simple macro for ZREVRANGE method implementation */
-#define ZREVRANGE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRevRange)                                            \
-    {                                                                            \
-        if (execute_zrevrange_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                        \
-            return;                                                              \
-        }                                                                        \
-        zval_dtor(return_value);                                                 \
-        RETURN_FALSE;                                                            \
+#define ZREVRANGE_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRevRange)                                                                                                                                              \
+    {                                                                                                                                                                              \
+        if (execute_zrevrange_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                          \
+            return;                                                                                                                                                                \
+        }                                                                                                                                                                          \
+        zval_dtor(return_value);                                                                                                                                                   \
+        RETURN_FALSE;                                                                                                                                                              \
     }
 
 /* Ultra-simple macro for ZRANGEBYSCORE method implementation */
-#define ZRANGEBYSCORE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRangeByScore)                                            \
-    {                                                                                \
-        if (execute_zrangebyscore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                            \
-            return;                                                                  \
-        }                                                                            \
-        zval_dtor(return_value);                                                     \
-        RETURN_FALSE;                                                                \
+#define ZRANGEBYSCORE_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRangeByScore)                                                                                                                                              \
+    {                                                                                                                                                                                  \
+        if (execute_zrangebyscore_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                              \
+            return;                                                                                                                                                                    \
+        }                                                                                                                                                                              \
+        zval_dtor(return_value);                                                                                                                                                       \
+        RETURN_FALSE;                                                                                                                                                                  \
     }
 
 /* Ultra-simple macro for ZREVRANGEBYSCORE method implementation */
-#define ZREVRANGEBYSCORE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRevRangeByScore)                                            \
-    {                                                                                   \
-        if (execute_zrevrangebyscore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                               \
-            return;                                                                     \
-        }                                                                               \
-        zval_dtor(return_value);                                                        \
-        RETURN_FALSE;                                                                   \
+#define ZREVRANGEBYSCORE_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRevRangeByScore)                                                                                                                                              \
+    {                                                                                                                                                                                     \
+        if (execute_zrevrangebyscore_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                 \
+            return;                                                                                                                                                                       \
+        }                                                                                                                                                                                 \
+        zval_dtor(return_value);                                                                                                                                                          \
+        RETURN_FALSE;                                                                                                                                                                     \
     }
 
 /* Ultra-simple macro for ZRANGEBYLEX method implementation */
-#define ZRANGEBYLEX_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRangeByLex)                                            \
-    {                                                                              \
-        if (execute_zrangebylex_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                          \
-            return;                                                                \
-        }                                                                          \
-        zval_dtor(return_value);                                                   \
-        RETURN_FALSE;                                                              \
+#define ZRANGEBYLEX_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRangeByLex)                                                                                                                                              \
+    {                                                                                                                                                                                \
+        if (execute_zrangebylex_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                            \
+            return;                                                                                                                                                                  \
+        }                                                                                                                                                                            \
+        zval_dtor(return_value);                                                                                                                                                     \
+        RETURN_FALSE;                                                                                                                                                                \
     }
 
 /* Ultra-simple macro for ZREVRANGEBYLEX method implementation */
-#define ZREVRANGEBYLEX_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRevRangeByLex)                                            \
-    {                                                                                 \
-        if (execute_zrevrangebylex_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                             \
-            return;                                                                   \
-        }                                                                             \
-        zval_dtor(return_value);                                                      \
-        RETURN_FALSE;                                                                 \
+#define ZREVRANGEBYLEX_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRevRangeByLex)                                                                                                                                              \
+    {                                                                                                                                                                                   \
+        if (execute_zrevrangebylex_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                               \
+            return;                                                                                                                                                                     \
+        }                                                                                                                                                                               \
+        zval_dtor(return_value);                                                                                                                                                        \
+        RETURN_FALSE;                                                                                                                                                                   \
     }
 
 /* Ultra-simple macro for ZREMRANGEBYLEX method implementation */
-#define ZREMRANGEBYLEX_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRemRangeByLex)                                            \
-    {                                                                                 \
-        if (execute_zremrangebylex_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                             \
-            return;                                                                   \
-        }                                                                             \
-        RETURN_FALSE;                                                                 \
+#define ZREMRANGEBYLEX_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRemRangeByLex)                                                                                                                                              \
+    {                                                                                                                                                                                   \
+        if (execute_zremrangebylex_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                               \
+            return;                                                                                                                                                                     \
+        }                                                                                                                                                                               \
+        RETURN_FALSE;                                                                                                                                                                   \
     }
 
 /* Ultra-simple macro for ZREM method implementation */
-#define ZREM_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRem)                                            \
-    {                                                                       \
-        if (execute_zrem_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                   \
-            return;                                                         \
-        }                                                                   \
-        RETURN_FALSE;                                                       \
+#define ZREM_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRem)                                                                                                                                              \
+    {                                                                                                                                                                         \
+        if (execute_zrem_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                     \
+            return;                                                                                                                                                           \
+        }                                                                                                                                                                     \
+        RETURN_FALSE;                                                                                                                                                         \
     }
 
 /* Ultra-simple macro for ZREMRANGEBYSCORE method implementation */
-#define ZREMRANGEBYSCORE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRemRangeByScore)                                            \
-    {                                                                                   \
-        if (execute_zremrangebyscore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                               \
-            return;                                                                     \
-        }                                                                               \
-        RETURN_FALSE;                                                                   \
+#define ZREMRANGEBYSCORE_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRemRangeByScore)                                                                                                                                              \
+    {                                                                                                                                                                                     \
+        if (execute_zremrangebyscore_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                 \
+            return;                                                                                                                                                                       \
+        }                                                                                                                                                                                 \
+        RETURN_FALSE;                                                                                                                                                                     \
     }
 
 /* Ultra-simple macro for ZREVRANK method implementation */
-#define ZREVRANK_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRevRank)                                            \
-    {                                                                           \
-        if (execute_zrevrank_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                       \
-            return;                                                             \
-        }                                                                       \
-        RETURN_FALSE;                                                           \
+#define ZREVRANK_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRevRank)                                                                                                                                              \
+    {                                                                                                                                                                             \
+        if (execute_zrevrank_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                         \
+            return;                                                                                                                                                               \
+        }                                                                                                                                                                         \
+        RETURN_FALSE;                                                                                                                                                             \
     }
 
 /* Ultra-simple macro for ZREMRANGEBYRANK method implementation */
-#define ZREMRANGEBYRANK_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRemRangeByRank)                                            \
-    {                                                                                  \
-        if (execute_zremrangebyrank_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                              \
-            return;                                                                    \
-        }                                                                              \
-        RETURN_FALSE;                                                                  \
+#define ZREMRANGEBYRANK_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRemRangeByRank)                                                                                                                                              \
+    {                                                                                                                                                                                    \
+        if (execute_zremrangebyrank_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                \
+            return;                                                                                                                                                                      \
+        }                                                                                                                                                                                \
+        RETURN_FALSE;                                                                                                                                                                    \
     }
 
 /* Ultra-simple macro for ZCOUNT method implementation */
-#define ZCOUNT_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zCount)                                            \
-    {                                                                         \
-        if (execute_zcount_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                     \
-            return;                                                           \
-        }                                                                     \
-        RETURN_FALSE;                                                         \
+#define ZCOUNT_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zCount)                                                                                                                                              \
+    {                                                                                                                                                                           \
+        if (execute_zcount_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                       \
+            return;                                                                                                                                                             \
+        }                                                                                                                                                                       \
+        RETURN_FALSE;                                                                                                                                                           \
     }
 
 /* Ultra-simple macro for ZCARD method implementation */
-#define ZCARD_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zCard)                                            \
-    {                                                                        \
-        if (execute_zcard_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                    \
-            return;                                                          \
-        }                                                                    \
-        RETURN_FALSE;                                                        \
+#define ZCARD_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zCard)                                                                                                                                              \
+    {                                                                                                                                                                          \
+        if (execute_zcard_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                      \
+            return;                                                                                                                                                            \
+        }                                                                                                                                                                      \
+        RETURN_FALSE;                                                                                                                                                          \
     }
 
 /* Ultra-simple macro for ZSCORE method implementation */
-#define ZSCORE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zScore)                                            \
-    {                                                                         \
-        if (execute_zscore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                     \
-            return;                                                           \
-        }                                                                     \
-        RETURN_FALSE;                                                         \
+#define ZSCORE_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zScore)                                                                                                                                              \
+    {                                                                                                                                                                           \
+        if (execute_zscore_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                       \
+            return;                                                                                                                                                             \
+        }                                                                                                                                                                       \
+        RETURN_FALSE;                                                                                                                                                           \
     }
 
 /* Ultra-simple macro for ZMSCORE method implementation */
-#define ZMSCORE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zMscore)                                            \
-    {                                                                          \
-        if (execute_zmscore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                      \
-            return;                                                            \
-        }                                                                      \
-        zval_dtor(return_value);                                               \
-        RETURN_FALSE;                                                          \
+#define ZMSCORE_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zMscore)                                                                                                                                              \
+    {                                                                                                                                                                            \
+        if (execute_zmscore_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                        \
+            return;                                                                                                                                                              \
+        }                                                                                                                                                                        \
+        zval_dtor(return_value);                                                                                                                                                 \
+        RETURN_FALSE;                                                                                                                                                            \
     }
 
 /* Ultra-simple macro for ZRANK method implementation */
-#define ZRANK_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zRank)                                            \
-    {                                                                        \
-        if (execute_zrank_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                    \
-            return;                                                          \
-        }                                                                    \
-        RETURN_FALSE;                                                        \
+#define ZRANK_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zRank)                                                                                                                                              \
+    {                                                                                                                                                                          \
+        if (execute_zrank_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                      \
+            return;                                                                                                                                                            \
+        }                                                                                                                                                                      \
+        RETURN_FALSE;                                                                                                                                                          \
     }
 
 /* Ultra-simple macro for ZINCRBY method implementation */
-#define ZINCRBY_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zIncrBy)                                            \
-    {                                                                          \
-        if (execute_zincrby_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                      \
-            return;                                                            \
-        }                                                                      \
-        RETURN_FALSE;                                                          \
+#define ZINCRBY_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zIncrBy)                                                                                                                                              \
+    {                                                                                                                                                                            \
+        if (execute_zincrby_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                        \
+            return;                                                                                                                                                              \
+        }                                                                                                                                                                        \
+        RETURN_FALSE;                                                                                                                                                            \
     }
 
 /* Ultra-simple macro for ZINTER method implementation */
-#define ZINTER_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zinter)                                            \
-    {                                                                         \
-        if (execute_zinter_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                     \
-            return;                                                           \
-        }                                                                     \
-        zval_dtor(return_value);                                              \
-        RETURN_FALSE;                                                         \
+#define ZINTER_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zinter)                                                                                                                                              \
+    {                                                                                                                                                                           \
+        if (execute_zinter_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                       \
+            return;                                                                                                                                                             \
+        }                                                                                                                                                                       \
+        zval_dtor(return_value);                                                                                                                                                \
+        RETURN_FALSE;                                                                                                                                                           \
     }
 
 /* Ultra-simple macro for ZINTERCARD method implementation */
-#define ZINTERCARD_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zintercard)                                            \
-    {                                                                             \
-        if (execute_zintercard_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                         \
-            return;                                                               \
-        }                                                                         \
-        RETURN_FALSE;                                                             \
+#define ZINTERCARD_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zintercard)                                                                                                                                              \
+    {                                                                                                                                                                               \
+        if (execute_zintercard_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                           \
+            return;                                                                                                                                                                 \
+        }                                                                                                                                                                           \
+        RETURN_FALSE;                                                                                                                                                               \
     }
 
 /* Ultra-simple macro for ZUNION method implementation */
-#define ZUNION_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zunion)                                            \
-    {                                                                         \
-        if (execute_zunion_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                     \
-            return;                                                           \
-        }                                                                     \
-        zval_dtor(return_value);                                              \
-        RETURN_FALSE;                                                         \
+#define ZUNION_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zunion)                                                                                                                                              \
+    {                                                                                                                                                                           \
+        if (execute_zunion_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                       \
+            return;                                                                                                                                                             \
+        }                                                                                                                                                                       \
+        zval_dtor(return_value);                                                                                                                                                \
+        RETURN_FALSE;                                                                                                                                                           \
     }
 
 /* Ultra-simple macro for ZDIFFSTORE method implementation */
-#define ZDIFFSTORE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zdiffstore)                                            \
-    {                                                                             \
-        if (execute_zdiffstore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                         \
-            return;                                                               \
-        }                                                                         \
-        RETURN_FALSE;                                                             \
+#define ZDIFFSTORE_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zdiffstore)                                                                                                                                              \
+    {                                                                                                                                                                               \
+        if (execute_zdiffstore_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                           \
+            return;                                                                                                                                                                 \
+        }                                                                                                                                                                           \
+        RETURN_FALSE;                                                                                                                                                               \
     }
 
 /* Ultra-simple macro for ZINTERSTORE method implementation */
-#define ZINTERSTORE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zinterstore)                                            \
-    {                                                                              \
-        if (execute_zinterstore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                          \
-            return;                                                                \
-        }                                                                          \
-        RETURN_FALSE;                                                              \
+#define ZINTERSTORE_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zinterstore)                                                                                                                                              \
+    {                                                                                                                                                                                \
+        if (execute_zinterstore_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                            \
+            return;                                                                                                                                                                  \
+        }                                                                                                                                                                            \
+        RETURN_FALSE;                                                                                                                                                                \
     }
 
 /* Ultra-simple macro for ZUNIONSTORE method implementation */
-#define ZUNIONSTORE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zunionstore)                                            \
-    {                                                                              \
-        if (execute_zunionstore_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                          \
-            return;                                                                \
-        }                                                                          \
-        RETURN_FALSE;                                                              \
+#define ZUNIONSTORE_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zunionstore)                                                                                                                                              \
+    {                                                                                                                                                                                \
+        if (execute_zunionstore_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                            \
+            return;                                                                                                                                                                  \
+        }                                                                                                                                                                            \
+        RETURN_FALSE;                                                                                                                                                                \
     }
 
 /* Ultra-simple macro for ZPOPMAX method implementation */
-#define ZPOPMAX_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zPopMax)                                            \
-    {                                                                          \
-        if (execute_zpopmax_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                      \
-            return;                                                            \
-        }                                                                      \
-        zval_dtor(return_value);                                               \
-        RETURN_FALSE;                                                          \
+#define ZPOPMAX_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zPopMax)                                                                                                                                              \
+    {                                                                                                                                                                            \
+        if (execute_zpopmax_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                        \
+            return;                                                                                                                                                              \
+        }                                                                                                                                                                        \
+        zval_dtor(return_value);                                                                                                                                                 \
+        RETURN_FALSE;                                                                                                                                                            \
     }
 
 /* Ultra-simple macro for ZPOPMIN method implementation */
-#define ZPOPMIN_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zPopMin)                                            \
-    {                                                                          \
-        if (execute_zpopmin_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                      \
-            return;                                                            \
-        }                                                                      \
-        zval_dtor(return_value);                                               \
-        RETURN_FALSE;                                                          \
+#define ZPOPMIN_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zPopMin)                                                                                                                                              \
+    {                                                                                                                                                                            \
+        if (execute_zpopmin_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                        \
+            return;                                                                                                                                                              \
+        }                                                                                                                                                                        \
+        zval_dtor(return_value);                                                                                                                                                 \
+        RETURN_FALSE;                                                                                                                                                            \
     }
 
 /* Ultra-simple macro for ZSCAN method implementation */
-#define ZSCAN_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zscan)                                            \
-    {                                                                        \
-        if (execute_zscan_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                    \
-            return;                                                          \
-        }                                                                    \
-        RETURN_FALSE;                                                        \
+#define ZSCAN_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zscan)                                                                                                                                              \
+    {                                                                                                                                                                          \
+        if (execute_zscan_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                      \
+            return;                                                                                                                                                            \
+        }                                                                                                                                                                      \
+        RETURN_FALSE;                                                                                                                                                          \
     }
 
 /* Ultra-simple macro for BZMPOP method implementation */
-#define BZMPOP_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, bzmpop)                                            \
-    {                                                                         \
-        if (execute_bzmpop_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                     \
-            return;                                                           \
-        }                                                                     \
-        RETURN_FALSE;                                                         \
+#define BZMPOP_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, bzmpop)                                                                                                                                              \
+    {                                                                                                                                                                           \
+        if (execute_bzmpop_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                       \
+            return;                                                                                                                                                             \
+        }                                                                                                                                                                       \
+        RETURN_FALSE;                                                                                                                                                           \
     }
 
 /* Ultra-simple macro for ZMPOP method implementation */
-#define ZMPOP_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zmpop)                                            \
-    {                                                                        \
-        if (execute_zmpop_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                    \
-            return;                                                          \
-        }                                                                    \
-        RETURN_FALSE;                                                        \
+#define ZMPOP_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zmpop)                                                                                                                                              \
+    {                                                                                                                                                                          \
+        if (execute_zmpop_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                      \
+            return;                                                                                                                                                            \
+        }                                                                                                                                                                      \
+        RETURN_FALSE;                                                                                                                                                          \
     }
 
 /* Ultra-simple macro for ZADD method implementation */
-#define ZADD_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zAdd)                                            \
-    {                                                                       \
-        if (execute_zadd_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                   \
-            return;                                                         \
-        }                                                                   \
-        RETURN_FALSE;                                                       \
+#define ZADD_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zAdd)                                                                                                                                              \
+    {                                                                                                                                                                         \
+        if (execute_zadd_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                     \
+            return;                                                                                                                                                           \
+        }                                                                                                                                                                     \
+        RETURN_FALSE;                                                                                                                                                         \
     }
 
 /* Ultra-simple macro for ZLEXCOUNT method implementation */
-#define ZLEXCOUNT_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zLexCount)                                            \
-    {                                                                            \
-        if (execute_zlexcount_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                        \
-            return;                                                              \
-        }                                                                        \
-        RETURN_FALSE;                                                            \
+#define ZLEXCOUNT_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zLexCount)                                                                                                                                              \
+    {                                                                                                                                                                              \
+        if (execute_zlexcount_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                          \
+            return;                                                                                                                                                                \
+        }                                                                                                                                                                          \
+        RETURN_FALSE;                                                                                                                                                              \
     }
 
 /* Ultra-simple macro for ZDIFF method implementation */
-#define ZDIFF_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, zdiff)                                            \
-    {                                                                        \
-        if (execute_zdiff_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                    \
-            return;                                                          \
-        }                                                                    \
-        zval_dtor(return_value);                                             \
-        RETURN_FALSE;                                                        \
+#define ZDIFF_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, zdiff)                                                                                                                                              \
+    {                                                                                                                                                                          \
+        if (execute_zdiff_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                      \
+            return;                                                                                                                                                            \
+        }                                                                                                                                                                      \
+        zval_dtor(return_value);                                                                                                                                               \
+        RETURN_FALSE;                                                                                                                                                          \
     }
 
 /* Ultra-simple macro for BZPOPMAX method implementation */
-#define BZPOPMAX_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, bzPopMax)                                            \
-    {                                                                           \
-        if (execute_bzpopmax_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                       \
-            return;                                                             \
-        }                                                                       \
-        RETURN_FALSE;                                                           \
+#define BZPOPMAX_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, bzPopMax)                                                                                                                                              \
+    {                                                                                                                                                                             \
+        if (execute_bzpopmax_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                         \
+            return;                                                                                                                                                               \
+        }                                                                                                                                                                         \
+        RETURN_FALSE;                                                                                                                                                             \
     }
 
 /* Ultra-simple macro for BZPOPMIN method implementation */
-#define BZPOPMIN_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, bzPopMin)                                            \
-    {                                                                           \
-        if (execute_bzpopmin_command(getThis(), ZEND_NUM_ARGS(), return_value)) \
-        {                                                                       \
-            return;                                                             \
-        }                                                                       \
-        RETURN_FALSE;                                                           \
+#define BZPOPMIN_METHOD_IMPL(class_name)                                                                                                                                          \
+    PHP_METHOD(class_name, bzPopMin)                                                                                                                                              \
+    {                                                                                                                                                                             \
+        if (execute_bzpopmin_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                         \
+            return;                                                                                                                                                               \
+        }                                                                                                                                                                         \
+        RETURN_FALSE;                                                                                                                                                             \
     }
 
 #endif /* VALKEY_GLIDE_Z_COMMON_H */

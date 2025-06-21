@@ -21,7 +21,7 @@
  * ==================================================================== */
 
 /* Execute an EXPIRE command using the Valkey Glide client */
-int execute_expire_command(zval *object, int argc, zval *return_value)
+int execute_expire_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *mode = NULL;
@@ -85,7 +85,7 @@ int execute_expire_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an EXPIREAT command using the Valkey Glide client */
-int execute_expireat_command(zval *object, int argc, zval *return_value)
+int execute_expireat_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *mode = NULL;
@@ -149,7 +149,7 @@ int execute_expireat_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a PEXPIRE command using the Valkey Glide client */
-int execute_pexpire_command(zval *object, int argc, zval *return_value)
+int execute_pexpire_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *mode = NULL;
@@ -213,7 +213,7 @@ int execute_pexpire_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a PEXPIREAT command using the Valkey Glide client */
-int execute_pexpireat_command(zval *object, int argc, zval *return_value)
+int execute_pexpireat_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *mode = NULL;
@@ -277,7 +277,7 @@ int execute_pexpireat_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a PERSIST command using the Valkey Glide client */
-int execute_persist_command(zval *object, int argc, zval *return_value)
+int execute_persist_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -315,7 +315,7 @@ int execute_persist_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an EXPIRETIME command using the Valkey Glide client */
-int execute_expiretime_command(zval *object, int argc, zval *return_value)
+int execute_expiretime_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -354,7 +354,7 @@ int execute_expiretime_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a PEXPIRETIME command using the Valkey Glide client */
-int execute_pexpiretime_command(zval *object, int argc, zval *return_value)
+int execute_pexpiretime_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;

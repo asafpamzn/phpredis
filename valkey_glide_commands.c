@@ -25,7 +25,7 @@ extern zend_class_entry *get_valkey_glide_ce();
 extern zend_class_entry *get_valkey_glide_exception_ce();
 
 /* Execute an MSET command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_mset_command(zval *object, int argc, zval *return_value)
+int execute_mset_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_arr;
@@ -64,7 +64,7 @@ int execute_mset_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an MSETNX command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_msetnx_command(zval *object, int argc, zval *return_value)
+int execute_msetnx_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_arr;
@@ -103,7 +103,7 @@ int execute_msetnx_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a FLUSHDB command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_flushdb_command(zval *object, int argc, zval *return_value)
+int execute_flushdb_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zend_bool async = 0;
@@ -149,7 +149,7 @@ int execute_flushdb_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a FLUSHALL command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_flushall_command(zval *object, int argc, zval *return_value)
+int execute_flushall_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zend_bool async = 0;
@@ -195,7 +195,7 @@ int execute_flushall_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a TIME command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_time_command(zval *object, int argc, zval *return_value)
+int execute_time_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
 
@@ -230,7 +230,7 @@ int execute_time_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a ROLE command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_role_command(zval *object, int argc, zval *return_value)
+int execute_role_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
 
@@ -265,7 +265,7 @@ int execute_role_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a KEYS command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_keys_command(zval *object, int argc, zval *return_value)
+int execute_keys_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *pattern = NULL;
@@ -304,7 +304,7 @@ int execute_keys_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a WATCH command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_watch_command(zval *object, int argc, zval *return_value)
+int execute_watch_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args;
@@ -348,7 +348,7 @@ int execute_watch_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an UNWATCH command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_unwatch_command(zval *object, int argc, zval *return_value)
+int execute_unwatch_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
 
@@ -384,7 +384,7 @@ int execute_unwatch_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an ACL command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_acl_command(zval *object, int argc, zval *return_value)
+int execute_acl_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args;
@@ -619,7 +619,7 @@ int execute_object_command_impl(const void *glide_client,
 }
 
 /* New execute_object_command function with standardized signature that follows the pattern */
-int execute_object_command(zval *object, int argc, zval *return_value)
+int execute_object_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *subcommand = NULL;
@@ -670,7 +670,7 @@ int execute_get_timeout_command(const void *glide_client, double *output_value)
 }
 
 /* Unified COPY command implementation */
-int execute_copy_command(zval *object, int argc, zval *return_value)
+int execute_copy_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *src = NULL, *dst = NULL;
@@ -743,7 +743,7 @@ int execute_copy_command(zval *object, int argc, zval *return_value)
 }
 
 /* Unified PFADD command implementation */
-int execute_pfadd_command(zval *object, int argc, zval *return_value)
+int execute_pfadd_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -796,7 +796,7 @@ int execute_pfadd_command(zval *object, int argc, zval *return_value)
 }
 
 /* Unified PFCOUNT command implementation */
-int execute_pfcount_command(zval *object, int argc, zval *return_value)
+int execute_pfcount_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
@@ -829,7 +829,7 @@ int execute_pfcount_command(zval *object, int argc, zval *return_value)
 }
 
 /* Unified PFMERGE command implementation */
-int execute_pfmerge_command(zval *object, int argc, zval *return_value)
+int execute_pfmerge_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *dst = NULL;
@@ -877,7 +877,7 @@ int execute_pfmerge_command(zval *object, int argc, zval *return_value)
 }
 
 /* Unified getTimeout command implementation */
-int execute_gettimeout_command(zval *object, int argc, zval *return_value)
+int execute_gettimeout_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     double timeout;
@@ -922,7 +922,7 @@ int execute_select_command_internal(const void *glide_client, long dbindex)
 }
 
 /* Execute a SELECT command - UNIFIED IMPLEMENTATION */
-int execute_select_command(zval *object, int argc, zval *return_value)
+int execute_select_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     long dbindex;
@@ -971,7 +971,7 @@ int execute_swapdb_command_internal(const void *glide_client, long db1, long db2
 }
 
 /* Execute a SWAPDB command - UNIFIED IMPLEMENTATION */
-int execute_swapdb_command(zval *object, int argc, zval *return_value)
+int execute_swapdb_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     long db1, db2;
@@ -1018,7 +1018,7 @@ int execute_move_command_internal(const void *glide_client, const char *key, siz
 }
 
 /* Execute a MOVE command - UNIFIED IMPLEMENTATION */
-int execute_move_command(zval *object, int argc, zval *return_value)
+int execute_move_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;

@@ -32,7 +32,7 @@ extern zend_class_entry *get_valkey_glide_exception_ce();
 /**
  * Execute an XLEN command
  */
-int execute_xlen_command(zval *object, int argc, zval *return_value)
+int execute_xlen_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -75,7 +75,7 @@ int execute_xlen_command(zval *object, int argc, zval *return_value)
 /**
  * Execute an XDEL command
  */
-int execute_xdel_command(zval *object, int argc, zval *return_value)
+int execute_xdel_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -121,7 +121,7 @@ int execute_xdel_command(zval *object, int argc, zval *return_value)
 /**
  * Execute an XACK command
  */
-int execute_xack_command(zval *object, int argc, zval *return_value)
+int execute_xack_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *group = NULL;
@@ -173,7 +173,7 @@ int execute_xack_command(zval *object, int argc, zval *return_value)
 /**
  * Execute an XADD command
  */
-int execute_xadd_command(zval *object, int argc, zval *return_value)
+int execute_xadd_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *id = NULL;
@@ -277,7 +277,7 @@ int execute_xadd_command(zval *object, int argc, zval *return_value)
 /**
  * Execute an XTRIM command
  */
-int execute_xtrim_command(zval *object, int argc, zval *return_value)
+int execute_xtrim_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *threshold = NULL;
@@ -360,7 +360,7 @@ int execute_xtrim_command(zval *object, int argc, zval *return_value)
 /**
  * Execute an XRANGE command
  */
-int execute_xrange_command(zval *object, int argc, zval *return_value)
+int execute_xrange_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *start = NULL, *end = NULL;
@@ -459,7 +459,7 @@ int execute_xrange_command(zval *object, int argc, zval *return_value)
 /**
  * Execute an XREVRANGE command
  */
-int execute_xrevrange_command(zval *object, int argc, zval *return_value)
+int execute_xrevrange_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *start = NULL, *end = NULL;
@@ -558,7 +558,7 @@ int execute_xrevrange_command(zval *object, int argc, zval *return_value)
     return 0;
 }
 /* Execute an XPENDING command using the Valkey Glide client */
-int execute_xpending_command(zval *object, int argc, zval *return_value)
+int execute_xpending_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_options = NULL;
@@ -662,7 +662,7 @@ int execute_xpending_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an XREAD command using the Valkey Glide client */
-int execute_xread_command(zval *object, int argc, zval *return_value)
+int execute_xread_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_streams_and_ids, *z_options = NULL;
@@ -747,7 +747,7 @@ int execute_xread_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an XREADGROUP command using the Valkey Glide client */
-int execute_xreadgroup_command(zval *object, int argc, zval *return_value)
+int execute_xreadgroup_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *group = NULL, *consumer = NULL;
@@ -900,7 +900,7 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an XCLAIM command using the Valkey Glide client */
-int execute_xclaim_command(zval *object, int argc, zval *return_value)
+int execute_xclaim_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *group = NULL, *consumer = NULL;
@@ -952,7 +952,7 @@ int execute_xclaim_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an XAUTOCLAIM command using the Valkey Glide client */
-int execute_xautoclaim_command(zval *object, int argc, zval *return_value)
+int execute_xautoclaim_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *group = NULL, *consumer = NULL, *start = NULL;
@@ -1019,7 +1019,7 @@ int execute_xautoclaim_command(zval *object, int argc, zval *return_value)
 /**
  * Execute an XINFO command
  */
-int execute_xinfo_command(zval *object, int argc, zval *return_value)
+int execute_xinfo_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *op = NULL;
@@ -1078,7 +1078,7 @@ int execute_xinfo_command(zval *object, int argc, zval *return_value)
 /**
  * Execute an XGROUP command
  */
-int execute_xgroup_command(zval *object, int argc, zval *return_value)
+int execute_xgroup_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *op = NULL;

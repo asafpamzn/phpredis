@@ -43,7 +43,7 @@
 #include "redis_cluster_arginfo.h"
 #endif
 
-/*
+/*f
  * PHP Methods
  */
 
@@ -968,9 +968,7 @@ DBSIZE_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::info(string key, [string $arg])
  *     proto array ValkeyGlideCluster::info(array host_port, [string $arg]) */
-PHP_METHOD(ValkeyGlideCluster, info)
-{
-}
+INFO_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::client('list')

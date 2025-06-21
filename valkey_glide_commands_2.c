@@ -42,7 +42,7 @@ extern char *long_to_string(long value, size_t *len);
 extern char *double_to_string(double value, size_t *len);
 
 /* Execute a RENAME command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_rename_command(zval *object, int argc, zval *return_value)
+int execute_rename_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *src = NULL, *dst = NULL;
@@ -93,7 +93,7 @@ int execute_rename_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a RENAMENX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_renamenx_command(zval *object, int argc, zval *return_value)
+int execute_renamenx_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *src = NULL, *dst = NULL;
@@ -144,7 +144,7 @@ int execute_renamenx_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a GETWITHMETA command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_getwithmeta_command(zval *object, int argc, zval *return_value)
+int execute_getwithmeta_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -204,7 +204,7 @@ int execute_getwithmeta_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a GETDEL command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_getdel_command(zval *object, int argc, zval *return_value)
+int execute_getdel_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -264,7 +264,7 @@ int execute_getdel_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a GETEX command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_getex_command(zval *object, int argc, zval *return_value)
+int execute_getex_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -332,7 +332,7 @@ int execute_getex_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an INCR command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_incr_command(zval *object, int argc, zval *return_value)
+int execute_incr_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -414,7 +414,7 @@ int execute_incr_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an INCRBY command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_incrby_command(zval *object, int argc, zval *return_value)
+int execute_incrby_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -462,7 +462,7 @@ int execute_incrby_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an INCRBYFLOAT command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_incrbyfloat_command(zval *object, int argc, zval *return_value)
+int execute_incrbyfloat_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -508,7 +508,7 @@ int execute_incrbyfloat_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a DECR command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_decr_command(zval *object, int argc, zval *return_value)
+int execute_decr_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -586,7 +586,7 @@ int execute_decr_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a DECRBY command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_decrby_command(zval *object, int argc, zval *return_value)
+int execute_decrby_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -633,7 +633,7 @@ int execute_decrby_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an MGET command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_mget_command(zval *object, int argc, zval *return_value)
+int execute_mget_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_array;
@@ -679,7 +679,7 @@ int execute_mget_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an EXISTS command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_exists_command(zval *object, int argc, zval *return_value)
+int execute_exists_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args;
@@ -748,7 +748,7 @@ int execute_exists_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a TOUCH command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_touch_command(zval *object, int argc, zval *return_value)
+int execute_touch_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args;
@@ -818,7 +818,7 @@ int execute_touch_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an UNLINK command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
-int execute_unlink_command(zval *object, int argc, zval *return_value)
+int execute_unlink_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args;

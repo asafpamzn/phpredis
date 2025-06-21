@@ -452,7 +452,7 @@ class ValkeyGlideCluster {
      *
      * @return ValkeyGlideCluster|array|false
      */
-    //TODO public function info(string|array $key_or_address, string ...$sections): ValkeyGlideCluster|array|false;
+    public function info(string|array $key_or_address, string ...$sections): ValkeyGlideCluster|array|false;
 
     /**
      * @see ValkeyGlide::keys

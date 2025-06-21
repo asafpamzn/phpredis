@@ -24,7 +24,7 @@
 extern zend_class_entry *get_valkey_glide_ce();
 
 /* Execute a GEOADD command using the Valkey Glide client */
-int execute_geoadd_command(zval *object, int argc, zval *return_value)
+int execute_geoadd_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     char *key = NULL;
     size_t key_len;
@@ -83,7 +83,7 @@ int execute_geoadd_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a GEODIST command using the Valkey Glide client */
-int execute_geodist_command(zval *object, int argc, zval *return_value)
+int execute_geodist_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     char *key = NULL, *src = NULL, *dst = NULL, *unit = NULL;
     size_t key_len, src_len, dst_len, unit_len = 0;
@@ -143,7 +143,7 @@ int execute_geodist_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a GEOHASH command using the Valkey Glide client */
-int execute_geohash_command(zval *object, int argc, zval *return_value)
+int execute_geohash_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     char *key = NULL;
     size_t key_len;
@@ -196,7 +196,7 @@ int execute_geohash_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a GEOPOS command using the Valkey Glide client */
-int execute_geopos_command(zval *object, int argc, zval *return_value)
+int execute_geopos_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     char *key = NULL;
     size_t key_len;
@@ -249,7 +249,7 @@ int execute_geopos_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a GEORADIUS command using the Valkey Glide client */
-int execute_georadius_command(zval *object, int argc, zval *return_value)
+int execute_georadius_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     char *key = NULL, *unit = NULL;
     size_t key_len, unit_len;
@@ -357,7 +357,7 @@ int execute_georadius_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute a GEORADIUS_RO command using the Valkey Glide client */
-int execute_georadius_ro_command(zval *object, int argc, zval *return_value)
+int execute_georadius_ro_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     char *key = NULL, *unit = NULL;
     size_t key_len, unit_len;
@@ -465,7 +465,7 @@ int execute_georadius_ro_command(zval *object, int argc, zval *return_value)
 }
 
 /* GEOSEARCH implementation */
-int execute_geosearch_command(zval *object, int argc, zval *return_value)
+int execute_geosearch_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     char *key = NULL, *unit = NULL;
     size_t key_len, unit_len;
@@ -555,7 +555,7 @@ int execute_geosearch_command(zval *object, int argc, zval *return_value)
 }
 
 /* GEOSEARCHSTORE implementation */
-int execute_geosearchstore_command(zval *object, int argc, zval *return_value)
+int execute_geosearchstore_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
 {
     char *dest = NULL, *src = NULL, *unit = NULL;
     size_t dest_len, src_len, unit_len;

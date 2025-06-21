@@ -17,7 +17,7 @@
 #include "valkey_glide_hash_common.h"
 #include "common.h"
 
-extern zend_class_entry *get_valkey_glide_ce();
+extern zend_class_entry *ce;
 extern zend_class_entry *get_valkey_glide_exception_ce();
 /* ====================================================================
  * CORE FRAMEWORK FUNCTIONS
@@ -1365,7 +1365,7 @@ int execute_h_randfield_command(const void *glide_client, const char *key, size_
 /**
  * Execute HGET command with unified signature
  */
-int execute_hget_command(zval *object, int argc, zval *return_value)
+int execute_hget_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *field = NULL, *response = NULL;
@@ -1373,7 +1373,7 @@ int execute_hget_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &field, &field_len) == FAILURE)
     {
         return 0;
@@ -1408,7 +1408,7 @@ int execute_hget_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HLEN command with unified signature
  */
-int execute_hlen_command(zval *object, int argc, zval *return_value)
+int execute_hlen_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1417,7 +1417,7 @@ int execute_hlen_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -1442,7 +1442,7 @@ int execute_hlen_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HEXISTS command with unified signature
  */
-int execute_hexists_command(zval *object, int argc, zval *return_value)
+int execute_hexists_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *field = NULL;
@@ -1451,7 +1451,7 @@ int execute_hexists_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &field, &field_len) == FAILURE)
     {
         return 0;
@@ -1477,7 +1477,7 @@ int execute_hexists_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HDEL command with unified signature
  */
-int execute_hdel_command(zval *object, int argc, zval *return_value)
+int execute_hdel_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1488,7 +1488,7 @@ int execute_hdel_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os*",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &fields, &fields_count) == FAILURE)
     {
         return 0;
@@ -1514,7 +1514,7 @@ int execute_hdel_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HSET command with unified signature
  */
-int execute_hset_command(zval *object, int argc, zval *return_value)
+int execute_hset_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1525,7 +1525,7 @@ int execute_hset_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os*",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_args, &arg_count) == FAILURE)
     {
         return 0;
@@ -1558,7 +1558,7 @@ int execute_hset_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HSETNX command with unified signature
  */
-int execute_hsetnx_command(zval *object, int argc, zval *return_value)
+int execute_hsetnx_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *field = NULL, *val = NULL;
@@ -1567,7 +1567,7 @@ int execute_hsetnx_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osss",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &field, &field_len, &val, &val_len) == FAILURE)
     {
         return 0;
@@ -1593,7 +1593,7 @@ int execute_hsetnx_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HMSET command with unified signature
  */
-int execute_hmset_command(zval *object, int argc, zval *return_value)
+int execute_hmset_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1603,7 +1603,7 @@ int execute_hmset_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osa",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &arr_keyvals) == FAILURE)
     {
         return 0;
@@ -1635,7 +1635,7 @@ int execute_hmset_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HINCRBY command with unified signature
  */
-int execute_hincrby_command(zval *object, int argc, zval *return_value)
+int execute_hincrby_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *field = NULL;
@@ -1645,7 +1645,7 @@ int execute_hincrby_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Ossl",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &field, &field_len, &increment) == FAILURE)
     {
         return 0;
@@ -1671,7 +1671,7 @@ int execute_hincrby_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HINCRBYFLOAT command with unified signature
  */
-int execute_hincrbyfloat_command(zval *object, int argc, zval *return_value)
+int execute_hincrbyfloat_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *field = NULL;
@@ -1680,7 +1680,7 @@ int execute_hincrbyfloat_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Ossd",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &field, &field_len, &increment) == FAILURE)
     {
         return 0;
@@ -1706,7 +1706,7 @@ int execute_hincrbyfloat_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HMGET command with unified signature
  */
-int execute_hmget_command(zval *object, int argc, zval *return_value)
+int execute_hmget_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1716,7 +1716,7 @@ int execute_hmget_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osa",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &fields) == FAILURE)
     {
         return 0;
@@ -1808,7 +1808,7 @@ int execute_hmget_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HKEYS command with unified signature
  */
-int execute_hkeys_command(zval *object, int argc, zval *return_value)
+int execute_hkeys_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1816,7 +1816,7 @@ int execute_hkeys_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -1838,7 +1838,7 @@ int execute_hkeys_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HVALS command with unified signature
  */
-int execute_hvals_command(zval *object, int argc, zval *return_value)
+int execute_hvals_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1846,7 +1846,7 @@ int execute_hvals_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -1868,7 +1868,7 @@ int execute_hvals_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HGETALL command with unified signature
  */
-int execute_hgetall_command(zval *object, int argc, zval *return_value)
+int execute_hgetall_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1876,7 +1876,7 @@ int execute_hgetall_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -1898,7 +1898,7 @@ int execute_hgetall_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HSTRLEN command with unified signature
  */
-int execute_hstrlen_command(zval *object, int argc, zval *return_value)
+int execute_hstrlen_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *field = NULL;
@@ -1907,7 +1907,7 @@ int execute_hstrlen_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &field, &field_len) == FAILURE)
     {
         return 0;
@@ -1933,7 +1933,7 @@ int execute_hstrlen_command(zval *object, int argc, zval *return_value)
 /**
  * Execute HRANDFIELD command with unified signature
  */
-int execute_hrandfield_command(zval *object, int argc, zval *return_value)
+int execute_hrandfield_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1944,7 +1944,7 @@ int execute_hrandfield_command(zval *object, int argc, zval *return_value)
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;

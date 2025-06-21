@@ -770,7 +770,7 @@ int prepare_list_blocking_args(list_command_args_t *args, uintptr_t **args_out,
 /**
  * Execute list move command (LMOVE, BLMOVE)
  */
-int execute_list_move_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
+int execute_list_move_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *src = NULL, *dst = NULL, *wherefrom = NULL, *whereto = NULL;
@@ -867,7 +867,7 @@ int execute_list_move_command(zval *object, int argc, zval *return_value, enum R
 /**
  * Execute list MPOP command (LMPOP, BLMPOP)
  */
-int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
+int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *keys = NULL;
@@ -1559,7 +1559,7 @@ int prepare_list_mpop_args(list_command_args_t *args, uintptr_t **args_out,
 /**
  * Execute list push command (LPUSH, RPUSH, LPUSHX, RPUSHX)
  */
-int execute_list_push_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
+int execute_list_push_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1617,7 +1617,7 @@ int execute_list_push_command(zval *object, int argc, zval *return_value, enum R
 /**
  * Execute list pop command (LPOP, RPOP)
  */
-int execute_list_pop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
+int execute_list_pop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1675,7 +1675,7 @@ int execute_list_pop_command(zval *object, int argc, zval *return_value, enum Re
 /**
  * Execute list blocking pop command (BLPOP, BRPOP)
  */
-int execute_list_blocking_pop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type)
+int execute_list_blocking_pop_command(zval *object, int argc, zval *return_value, enum RequestType cmd_type, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *keys;
@@ -1719,7 +1719,7 @@ int execute_list_blocking_pop_command(zval *object, int argc, zval *return_value
 /**
  * Execute list length command (LLEN)
  */
-int execute_list_len_command(zval *object, int argc, zval *return_value)
+int execute_list_len_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1764,7 +1764,7 @@ int execute_list_len_command(zval *object, int argc, zval *return_value)
 }
 
 /* Execute an LRANGE command using the Valkey Glide client - New pattern */
-int execute_list_range_command(zval *object, int argc, zval *return_value)
+int execute_list_range_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1811,7 +1811,7 @@ int execute_list_range_command(zval *object, int argc, zval *return_value)
 /**
  * Execute list index command (LINDEX)
  */
-int execute_list_index_command(zval *object, int argc, zval *return_value)
+int execute_list_index_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1881,7 +1881,7 @@ int execute_list_index_command(zval *object, int argc, zval *return_value)
 /**
  * Execute list set command (LSET)
  */
-int execute_list_set_command(zval *object, int argc, zval *return_value)
+int execute_list_set_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *val = NULL;
@@ -1935,7 +1935,7 @@ int execute_list_set_command(zval *object, int argc, zval *return_value)
 /**
  * Execute list insert command (LINSERT)
  */
-int execute_list_insert_command(zval *object, int argc, zval *return_value)
+int execute_list_insert_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *pos = NULL, *pivot = NULL, *val = NULL;
@@ -2016,7 +2016,7 @@ int execute_list_insert_command(zval *object, int argc, zval *return_value)
 /**
  * Execute list position command (LPOS)
  */
-int execute_list_position_command(zval *object, int argc, zval *return_value)
+int execute_list_position_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_value, *z_opts = NULL;
@@ -2091,7 +2091,7 @@ int execute_list_position_command(zval *object, int argc, zval *return_value)
 /**
  * Execute list remove command (LREM)
  */
-int execute_list_rem_command(zval *object, int argc, zval *return_value)
+int execute_list_rem_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *value = NULL;
@@ -2145,7 +2145,7 @@ int execute_list_rem_command(zval *object, int argc, zval *return_value)
 /**
  * Execute list trim command (LTRIM)
  */
-int execute_list_trim_command(zval *object, int argc, zval *return_value)
+int execute_list_trim_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;

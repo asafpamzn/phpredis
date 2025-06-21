@@ -48,6 +48,16 @@ zend_class_entry *get_valkey_glide_exception_ce(void)
     return valkey_glide_exception_ce;
 }
 
+zend_class_entry *get_valkey_glide_cluster_ce(void)
+{
+    return valkey_glide_cluster_ce;
+}
+
+zend_class_entry *get_valkey_glide_cluster_exception_ce(void)
+{
+    return valkey_glide_cluster_exception_ce;
+}
+
 #if PHP_VERSION_ID < 80000
 #include "redis_legacy_arginfo.h"
 #include "redis_cluster_legacy_arginfo.h"
@@ -106,6 +116,7 @@ zend_object *create_valkey_glide_object(zend_class_entry *ce)
     config.client_name_ = "valkey-glide-php";
     config.read_from_ = Primary;
     config.is_cluster = false;
+    config.port_ = 6379; // Default port for Valkey Glide
     printf("Creating Glide client with default settings...\n");
     valkey_glide->glide_client = create_glide_client(&config);
 
@@ -165,7 +176,7 @@ PHP_MINIT_FUNCTION(redis)
 
     valkey_glide_cluster_exception_ce = register_class_ValkeyGlideClusterException(spl_ce_RuntimeException);
 
-    valkey_glide_cluster_ce->create_object = create_valkey_glide_object;
+    valkey_glide_cluster_ce->create_object = create_valkey_glide_cluster_object;
 
     return SUCCESS;
 }
