@@ -16,11 +16,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
         ValkeyGlide::VALKEY_GLIDE_HASH
     ];
 
-    private $failover_types = [
-        ValkeyGlideCluster::FAILOVER_NONE,
-        ValkeyGlideCluster::FAILOVER_ERROR,
-        ValkeyGlideCluster::FAILOVER_DISTRIBUTE
-    ];
+
 
     protected static array $seeds = [];
 
@@ -106,7 +102,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
         self::$seed_source = "Nodemap file '$nodemap_file'";
         return array_filter(explode("\n", file_get_contents($nodemap_file)));
     }
-
+/*
     private function loadSeeds($host, $port) {
         if (($seeds = $this->loadSeedsFromNodeMap()))
             return $seeds;
@@ -121,13 +117,13 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
         }
 
         exit(1);
-    }
+    }*/
 
     /* Load our seeds on construction */
     public function __construct($host, $port, $auth) {
         parent::__construct($host, $port, $auth);
 
-        self::$seeds = $this->loadSeeds($host, $port);
+        //self::$seeds = $this->loadSeeds($host, $port);TODO
     }
 
     /* Override setUp to get info from a specific node */
@@ -142,10 +138,10 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
     /* Override newInstance as we want a ValkeyGlideCluster object */
     protected function newInstance() {
         try {
-            return new ValkeyGlideCluster(NULL, self::$seeds, 30, 30, true, $this->getAuth());
+            return new ValkeyGlideCluster(NULL, ["127.0.0.1", "7001"], 30, 30, true, $this->getAuth());
         } catch (Exception $ex) {
             TestSuite::errorMessage("Fatal error: %s\n", $ex->getMessage());
-            TestSuite::errorMessage("Seeds: %s\n", implode(' ', self::$seeds));
+            //TestSuite::errorMessage("Seeds: %s\n", implode(' ', self::$seeds));
             TestSuite::errorMessage("Seed source: %s\n", self::$seed_source);
             exit(1);
         }

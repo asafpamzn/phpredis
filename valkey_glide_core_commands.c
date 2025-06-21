@@ -93,10 +93,10 @@ const void *create_glide_client(ClientConfig *config)
     /* Create a connection request */
     size_t len;
     uint8_t *request_bytes = create_connection_request(
-        "localhost", /* Default host */
-        6379,        /* Default port */
-        NULL,        /* No username by default */
-        NULL,        /* No password by default */
+        "localhost",   /* Default host */
+        config->port_, /* Default port */
+        NULL,          /* No username by default */
+        NULL,          /* No password by default */
         &len,
         config);
 

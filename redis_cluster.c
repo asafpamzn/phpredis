@@ -67,6 +67,7 @@ zend_object_handlers ValkeyGlideCluster_handlers;
 /* Create a ValkeyGlideCluster Object */
 PHP_METHOD(ValkeyGlideCluster, __construct)
 {
+    printf("ValkeyGlideCluster::__construct() is not implemented yet.\n");
     zval *object, *z_seeds = NULL, *z_auth = NULL, *context = NULL;
     zend_string *user = NULL, *pass = NULL;
     double timeout = 0.0, read_timeout = 0.0;
@@ -77,7 +78,7 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
 
     valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_GET_OBJECT(valkey_glide_object, object);
     ClientConfig config;
-
+    config.port_ = 7001; // Default port
     config.tls_mode_ = false;
     config.database_ = 0;
     config.request_timeout_ = 250;

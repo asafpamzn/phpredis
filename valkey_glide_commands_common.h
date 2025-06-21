@@ -78,6 +78,7 @@ typedef struct
 {
     // Credential credential_;
     enum TLSMode tls_mode_;
+    int port_;
     uint32_t database_;
     uint32_t request_timeout_;
     char *client_name_;
