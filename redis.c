@@ -106,6 +106,7 @@ zend_object *create_valkey_glide_object(zend_class_entry *ce)
     config.client_name_ = "valkey-glide-php";
     config.read_from_ = Primary;
     config.is_cluster = false;
+    printf("Creating Glide client with default settings...\n");
     valkey_glide->glide_client = create_glide_client(&config);
 
     zend_object_std_init(&valkey_glide->std, ce);
@@ -132,6 +133,7 @@ zend_object *create_valkey_glide_cluster_object(zend_class_entry *ce)
     config.read_from_ = Primary;
     config.is_cluster = true;
     config.port_ = 7001;
+    printf("Creating Glide Cluster client for cluster with default settings...\n");
     valkey_glide->glide_client = create_glide_client(&config);
 
     zend_object_std_init(&valkey_glide->std, ce);
