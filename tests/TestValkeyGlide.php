@@ -85,37 +85,12 @@ foreach ($classes as $class) {
 
     /* Depending on the classes being tested, run our tests on it */
     echo "Testing class ";
-    if ($class == 'ValkeyGlide_Array_Test') {
-        echo TestSuite::make_bold("ValkeyGlideArray") . "\n";
-
-        $full_ring = raHosts($host, $port);
-        $sub_ring  = array_slice($full_ring, 0, -1);
-
-        echo TestSuite::make_bold("Full Ring: ") . implode(' ', $full_ring) . "\n";
-        echo TestSuite::make_bold(" New Ring: ") . implode(' ',  $sub_ring) . "\n";
-
-        foreach([true, false] as $useIndex) {
-            echo "\n". ($useIndex ? "WITH" : "WITHOUT") . " per-node index:\n";
-
-            /* The various ValkeyGlideArray subtests we can run */
-            $test_classes = [
-                'ValkeyGlide_Array_Test', 'ValkeyGlide_Rehashing_Test', 'ValkeyGlide_Auto_Rehashing_Test',
-                'ValkeyGlide_Multi_Exec_Test', 'ValkeyGlide_Distributor_Test'
-            ];
-
-            foreach ($test_classes as $test_class) {
-                /* Run until we encounter a failure */
-                if (run_ra_tests($test_class, $filter, $host, $full_ring, $sub_ring, $auth) != 0) {
-                    exit(1);
-                }
-            }
-        }
-    } else {
-        echo TestSuite::make_bold($class) . "\n";
+    
+    echo TestSuite::make_bold($class) . "\n";
         
-        if (TestSuite::run("$class", $filter, $host, $port, $auth))
-            exit(1);
-    }
+    if (TestSuite::run("$class", $filter, $host, $port, $auth))
+        exit(1);
+    
 }
 
 /* Success */

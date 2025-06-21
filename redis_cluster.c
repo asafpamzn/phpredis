@@ -43,23 +43,6 @@
 #include "redis_cluster_arginfo.h"
 #endif
 
-zend_class_entry *valkey_glide_cluster_ce;
-
-/* Exception handler */
-zend_class_entry *valkey_glide_cluster_exception_ce;
-
-PHP_MINIT_FUNCTION(redis_cluster)
-{
-    valkey_glide_cluster_ce = register_class_ValkeyGlideCluster();
-
-    valkey_glide_cluster_exception_ce = register_class_ValkeyGlideClusterException(spl_ce_RuntimeException);
-
-    return SUCCESS;
-}
-
-/* Handlers for ValkeyGlideCluster */
-zend_object_handlers ValkeyGlideCluster_handlers;
-
 /*
  * PHP Methods
  */
@@ -71,22 +54,9 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
     zval *object, *z_seeds = NULL, *z_auth = NULL, *context = NULL;
     zend_string *user = NULL, *pass = NULL;
     double timeout = 0.0, read_timeout = 0.0;
-    size_t name_len;
     zend_bool persistent = 0;
 
-    char *name;
-
     valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_GET_OBJECT(valkey_glide_object, object);
-    ClientConfig config;
-    config.port_ = 7001; // Default port
-    config.tls_mode_ = false;
-    config.database_ = 0;
-    config.request_timeout_ = 250;
-    config.client_name_ = "stam";
-    config.read_from_ = Primary;
-    config.is_cluster = true;
-
-    valkey_glide->glide_client = create_glide_client(&config);
 }
 
 /*

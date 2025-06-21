@@ -99,7 +99,9 @@ const void *create_glide_client(ClientConfig *config)
         NULL,          /* No password by default */
         &len,
         config);
-
+    printf("Creating Glide client with request size: %zu bytes\n", len);
+    printf("Host: %s, Port: %d, TLS Mode: %d, Cluster Mode: %d\n",
+           "localhost", config->port_, config->tls_mode_, config->is_cluster);
     if (!request_bytes)
     {
         return NULL;

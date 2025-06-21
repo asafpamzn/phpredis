@@ -30,6 +30,14 @@
 zend_class_entry *valkey_glide_ce;
 zend_class_entry *valkey_glide_exception_ce;
 
+zend_class_entry *valkey_glide_cluster_ce;
+
+/* Exception handler */
+zend_class_entry *valkey_glide_cluster_exception_ce;
+
+/* Handlers for ValkeyGlideCluster */
+zend_object_handlers valkey_glide_cluster_object_handlers;
+
 zend_class_entry *get_valkey_glide_ce(void)
 {
     return valkey_glide_ce;
@@ -42,11 +50,14 @@ zend_class_entry *get_valkey_glide_exception_ce(void)
 
 #if PHP_VERSION_ID < 80000
 #include "redis_legacy_arginfo.h"
+#include "redis_cluster_legacy_arginfo.h"
 #else
 #include "zend_attributes.h"
 #include "redis_arginfo.h"
+#include "redis_cluster_arginfo.h"
 #endif
 
+PHP_MINIT_FUNCTION(redis_cluster);
 ZEND_DECLARE_MODULE_GLOBALS(redis)
 
 zend_module_entry redis_module_entry = {
@@ -108,17 +119,51 @@ zend_object *create_valkey_glide_object(zend_class_entry *ce)
     return &valkey_glide->std;
 }
 
+zend_object *create_valkey_glide_cluster_object(zend_class_entry *ce)
+{
+    valkey_glide_object *valkey_glide = ecalloc(1, sizeof(valkey_glide_object) + zend_object_properties_size(ce));
+
+    /* Initialize Valkey Glide client */
+    ClientConfig config;
+    config.tls_mode_ = false;
+    config.database_ = 0;
+    config.request_timeout_ = 250;
+    config.client_name_ = "valkey-glide-php";
+    config.read_from_ = Primary;
+    config.is_cluster = true;
+    config.port_ = 7001;
+    valkey_glide->glide_client = create_glide_client(&config);
+
+    zend_object_std_init(&valkey_glide->std, ce);
+    object_properties_init(&valkey_glide->std, ce);
+
+    memcpy(&valkey_glide_cluster_object_handlers, zend_get_std_object_handlers(), sizeof(valkey_glide_cluster_object_handlers));
+    valkey_glide_cluster_object_handlers.offset = XtOffsetOf(valkey_glide_object, std);
+    valkey_glide_cluster_object_handlers.free_obj = free_valkey_glide_object;
+    valkey_glide->std.handlers = &valkey_glide_cluster_object_handlers;
+
+    return &valkey_glide->std;
+}
+
 /**
  * PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(redis)
 {
+    printf("Initializing Valkey Glide...                PHP_MINIT_FUNCTION\n");
     /* ValkeyGlide class */
     valkey_glide_ce = register_class_ValkeyGlide();
     valkey_glide_ce->create_object = create_valkey_glide_object;
 
     /* ValkeyGlideException class */
     valkey_glide_exception_ce = register_class_ValkeyGlideException(spl_ce_RuntimeException);
+
+    printf("Initializing Valkey Glide Cluster...\n");
+    valkey_glide_cluster_ce = register_class_ValkeyGlideCluster();
+
+    valkey_glide_cluster_exception_ce = register_class_ValkeyGlideClusterException(spl_ce_RuntimeException);
+
+    valkey_glide_cluster_ce->create_object = create_valkey_glide_object;
 
     return SUCCESS;
 }
@@ -138,6 +183,7 @@ PHP_MINFO_FUNCTION(redis)
     Public constructor */
 PHP_METHOD(ValkeyGlide, __construct)
 {
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     HashTable *opts = NULL;
     valkey_glide_object *valkey_glide;
 
