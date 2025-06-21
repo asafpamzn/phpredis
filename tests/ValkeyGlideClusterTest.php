@@ -131,7 +131,8 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
     /* Override setUp to get info from a specific node */
     public function setUp() {
         $this->redis    = $this->newInstance();
-        $info           = $this->redis->info(uniqid());
+        var_dump(uniqid());
+        $info           = $this->redis->info("randomNode");
         $this->version  = $info['redis_version'] ?? '0.0.0';
 
         $this->is_valkey = $this->detectValkey($info);

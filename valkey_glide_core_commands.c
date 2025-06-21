@@ -986,16 +986,18 @@ int execute_info_command(zval *object, int argc, zval *return_value, zend_class_
     size_t response_len = 0;
     int result = 0;
     zend_bool is_cluster = (ce == get_valkey_glide_cluster_ce());
-
+    printf("Executing INFO command with %d arguments\n", argc);
     /* Get ValkeyGlide object */
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
     if (!valkey_glide || !valkey_glide->glide_client)
     {
         return 0;
     }
-
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     if (is_cluster)
     {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
         /* Parse parameters for cluster - first parameter is route, rest are sections */
         if (zend_parse_method_parameters(argc, object, "Oz*",
                                          &object, ce, &args, &args_count) == FAILURE)
@@ -1124,6 +1126,8 @@ int execute_info_command(zval *object, int argc, zval *return_value, zend_class_
     }
     else
     {
+        printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
         /* Non-cluster case - parse parameters as before */
         if (zend_parse_method_parameters(argc, object, "O*",
                                          &object, ce, &args, &args_count) == FAILURE)

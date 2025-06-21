@@ -328,164 +328,54 @@ int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum R
  * LIST COMMAND MACROS
  * ==================================================================== */
 
-#define LPUSH_METHOD_IMPL(class_name)                                                                                                                                                     \
-    PHP_METHOD(class_name, lPush)                                                                                                                                                         \
-    {                                                                                                                                                                                     \
-        if (execute_list_push_command(getThis(), ZEND_NUM_ARGS(), return_value, LPush, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                                 \
-            return;                                                                                                                                                                       \
-        }                                                                                                                                                                                 \
-        zval_dtor(return_value);                                                                                                                                                          \
-        RETURN_FALSE;                                                                                                                                                                     \
+#define LPUSH_METHOD_IMPL(class_name)                                                                                                                                                           \
+    PHP_METHOD(class_name, lPush)                                                                                                                                                               \
+    {                                                                                                                                                                                           \
+        if (execute_list_push_command(getThis(), ZEND_NUM_ARGS(), return_value, LPush, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                       \
+            return;                                                                                                                                                                             \
+        }                                                                                                                                                                                       \
+        zval_dtor(return_value);                                                                                                                                                                \
+        RETURN_FALSE;                                                                                                                                                                           \
     }
 
-#define RPUSH_METHOD_IMPL(class_name)                                                                                                                                                     \
-    PHP_METHOD(class_name, rPush)                                                                                                                                                         \
-    {                                                                                                                                                                                     \
-        if (execute_list_push_command(getThis(), ZEND_NUM_ARGS(), return_value, RPush, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                                 \
-            return;                                                                                                                                                                       \
-        }                                                                                                                                                                                 \
-        zval_dtor(return_value);                                                                                                                                                          \
-        RETURN_FALSE;                                                                                                                                                                     \
+#define RPUSH_METHOD_IMPL(class_name)                                                                                                                                                           \
+    PHP_METHOD(class_name, rPush)                                                                                                                                                               \
+    {                                                                                                                                                                                           \
+        if (execute_list_push_command(getThis(), ZEND_NUM_ARGS(), return_value, RPush, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                       \
+            return;                                                                                                                                                                             \
+        }                                                                                                                                                                                       \
+        zval_dtor(return_value);                                                                                                                                                                \
+        RETURN_FALSE;                                                                                                                                                                           \
     }
 
-#define LPUSHX_METHOD_IMPL(class_name)                                                                                                                                                     \
-    PHP_METHOD(class_name, lPushx)                                                                                                                                                         \
-    {                                                                                                                                                                                      \
-        if (execute_list_push_command(getThis(), ZEND_NUM_ARGS(), return_value, LPushX, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                                  \
-            return;                                                                                                                                                                        \
-        }                                                                                                                                                                                  \
-        zval_dtor(return_value);                                                                                                                                                           \
-        RETURN_FALSE;                                                                                                                                                                      \
+#define LPUSHX_METHOD_IMPL(class_name)                                                                                                                                                           \
+    PHP_METHOD(class_name, lPushx)                                                                                                                                                               \
+    {                                                                                                                                                                                            \
+        if (execute_list_push_command(getThis(), ZEND_NUM_ARGS(), return_value, LPushX, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                        \
+            return;                                                                                                                                                                              \
+        }                                                                                                                                                                                        \
+        zval_dtor(return_value);                                                                                                                                                                 \
+        RETURN_FALSE;                                                                                                                                                                            \
     }
 
-#define RPUSHX_METHOD_IMPL(class_name)                                                                                                                                                     \
-    PHP_METHOD(class_name, rPushx)                                                                                                                                                         \
-    {                                                                                                                                                                                      \
-        if (execute_list_push_command(getThis(), ZEND_NUM_ARGS(), return_value, RPushX, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                                  \
-            return;                                                                                                                                                                        \
-        }                                                                                                                                                                                  \
-        zval_dtor(return_value);                                                                                                                                                           \
-        RETURN_FALSE;                                                                                                                                                                      \
+#define RPUSHX_METHOD_IMPL(class_name)                                                                                                                                                           \
+    PHP_METHOD(class_name, rPushx)                                                                                                                                                               \
+    {                                                                                                                                                                                            \
+        if (execute_list_push_command(getThis(), ZEND_NUM_ARGS(), return_value, RPushX, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                        \
+            return;                                                                                                                                                                              \
+        }                                                                                                                                                                                        \
+        zval_dtor(return_value);                                                                                                                                                                 \
+        RETURN_FALSE;                                                                                                                                                                            \
     }
 
-#define LPOP_METHOD_IMPL(class_name)                                                                                                                                                    \
-    PHP_METHOD(class_name, lPop)                                                                                                                                                        \
-    {                                                                                                                                                                                   \
-        if (execute_list_pop_command(getThis(), ZEND_NUM_ARGS(), return_value, LPop, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                               \
-            return;                                                                                                                                                                     \
-        }                                                                                                                                                                               \
-        zval_dtor(return_value);                                                                                                                                                        \
-        RETURN_FALSE;                                                                                                                                                                   \
-    }
-
-#define RPOP_METHOD_IMPL(class_name)                                                                                                                                                    \
-    PHP_METHOD(class_name, rPop)                                                                                                                                                        \
-    {                                                                                                                                                                                   \
-        if (execute_list_pop_command(getThis(), ZEND_NUM_ARGS(), return_value, RPop, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                               \
-            return;                                                                                                                                                                     \
-        }                                                                                                                                                                               \
-        zval_dtor(return_value);                                                                                                                                                        \
-        RETURN_FALSE;                                                                                                                                                                   \
-    }
-
-#define BLPOP_METHOD_IMPL(class_name)                                                                                                                                                             \
-    PHP_METHOD(class_name, blPop)                                                                                                                                                                 \
-    {                                                                                                                                                                                             \
-        if (execute_list_blocking_pop_command(getThis(), ZEND_NUM_ARGS(), return_value, BLPop, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                                         \
-            return;                                                                                                                                                                               \
-        }                                                                                                                                                                                         \
-        zval_dtor(return_value);                                                                                                                                                                  \
-        RETURN_FALSE;                                                                                                                                                                             \
-    }
-
-#define BRPOP_METHOD_IMPL(class_name)                                                                                                                                                             \
-    PHP_METHOD(class_name, brPop)                                                                                                                                                                 \
-    {                                                                                                                                                                                             \
-        if (execute_list_blocking_pop_command(getThis(), ZEND_NUM_ARGS(), return_value, BRPop, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                                         \
-            return;                                                                                                                                                                               \
-        }                                                                                                                                                                                         \
-        zval_dtor(return_value);                                                                                                                                                                  \
-        RETURN_FALSE;                                                                                                                                                                             \
-    }
-
-#define LSET_METHOD_IMPL(class_name)                                                                                                                                              \
-    PHP_METHOD(class_name, lSet)                                                                                                                                                  \
-    {                                                                                                                                                                             \
-        if (execute_list_set_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                         \
-            return;                                                                                                                                                               \
-        }                                                                                                                                                                         \
-        zval_dtor(return_value);                                                                                                                                                  \
-        RETURN_FALSE;                                                                                                                                                             \
-    }
-
-#define LINDEX_METHOD_IMPL(class_name)                                                                                                                                              \
-    PHP_METHOD(class_name, lindex)                                                                                                                                                  \
-    {                                                                                                                                                                               \
-        if (execute_list_index_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                           \
-            return;                                                                                                                                                                 \
-        }                                                                                                                                                                           \
-        zval_dtor(return_value);                                                                                                                                                    \
-        RETURN_FALSE;                                                                                                                                                               \
-    }
-
-#define LTRIM_METHOD_IMPL(class_name)                                                                                                                                              \
-    PHP_METHOD(class_name, ltrim)                                                                                                                                                  \
-    {                                                                                                                                                                              \
-        if (execute_list_trim_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                          \
-            return;                                                                                                                                                                \
-        }                                                                                                                                                                          \
-        zval_dtor(return_value);                                                                                                                                                   \
-        RETURN_FALSE;                                                                                                                                                              \
-    }
-
-#define LREM_METHOD_IMPL(class_name)                                                                                                                                              \
-    PHP_METHOD(class_name, lrem)                                                                                                                                                  \
-    {                                                                                                                                                                             \
-        if (execute_list_rem_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                         \
-            return;                                                                                                                                                               \
-        }                                                                                                                                                                         \
-        zval_dtor(return_value);                                                                                                                                                  \
-        RETURN_FALSE;                                                                                                                                                             \
-    }
-
-#define LMOVE_METHOD_IMPL(class_name)                                                                                                                                                     \
-    PHP_METHOD(class_name, lMove)                                                                                                                                                         \
-    {                                                                                                                                                                                     \
-        if (execute_list_move_command(getThis(), ZEND_NUM_ARGS(), return_value, LMove, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                                 \
-            return;                                                                                                                                                                       \
-        }                                                                                                                                                                                 \
-        zval_dtor(return_value);                                                                                                                                                          \
-        RETURN_FALSE;                                                                                                                                                                     \
-    }
-
-#define BLMOVE_METHOD_IMPL(class_name)                                                                                                                                                     \
-    PHP_METHOD(class_name, blmove)                                                                                                                                                         \
-    {                                                                                                                                                                                      \
-        if (execute_list_move_command(getThis(), ZEND_NUM_ARGS(), return_value, BLMove, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                                  \
-            return;                                                                                                                                                                        \
-        }                                                                                                                                                                                  \
-        zval_dtor(return_value);                                                                                                                                                           \
-        RETURN_FALSE;                                                                                                                                                                      \
-    }
-
-#define RPOPLPUSH_METHOD_IMPL(class_name)                                                                                                                                                     \
-    PHP_METHOD(class_name, rpoplpush)                                                                                                                                                         \
+#define LPOP_METHOD_IMPL(class_name)                                                                                                                                                          \
+    PHP_METHOD(class_name, lPop)                                                                                                                                                              \
     {                                                                                                                                                                                         \
-        if (execute_list_move_command(getThis(), ZEND_NUM_ARGS(), return_value, RPopLPush, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        if (execute_list_pop_command(getThis(), ZEND_NUM_ARGS(), return_value, LPop, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                                                                                                                                     \
             return;                                                                                                                                                                           \
         }                                                                                                                                                                                     \
@@ -493,54 +383,54 @@ int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum R
         RETURN_FALSE;                                                                                                                                                                         \
     }
 
-#define BRPOPLPUSH_METHOD_IMPL(class_name)                                                                                                                                                     \
-    PHP_METHOD(class_name, brpoplpush)                                                                                                                                                         \
-    {                                                                                                                                                                                          \
-        if (execute_list_move_command(getThis(), ZEND_NUM_ARGS(), return_value, BRPopLPush, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                                      \
-            return;                                                                                                                                                                            \
-        }                                                                                                                                                                                      \
-        zval_dtor(return_value);                                                                                                                                                               \
-        RETURN_FALSE;                                                                                                                                                                          \
+#define RPOP_METHOD_IMPL(class_name)                                                                                                                                                          \
+    PHP_METHOD(class_name, rPop)                                                                                                                                                              \
+    {                                                                                                                                                                                         \
+        if (execute_list_pop_command(getThis(), ZEND_NUM_ARGS(), return_value, RPop, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                     \
+            return;                                                                                                                                                                           \
+        }                                                                                                                                                                                     \
+        zval_dtor(return_value);                                                                                                                                                              \
+        RETURN_FALSE;                                                                                                                                                                         \
     }
 
-#define LLEN_METHOD_IMPL(class_name)                                                                                                                                              \
-    PHP_METHOD(class_name, lLen)                                                                                                                                                  \
-    {                                                                                                                                                                             \
-        if (execute_list_len_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                         \
-            return;                                                                                                                                                               \
-        }                                                                                                                                                                         \
-        zval_dtor(return_value);                                                                                                                                                  \
-        RETURN_FALSE;                                                                                                                                                             \
+#define BLPOP_METHOD_IMPL(class_name)                                                                                                                                                                   \
+    PHP_METHOD(class_name, blPop)                                                                                                                                                                       \
+    {                                                                                                                                                                                                   \
+        if (execute_list_blocking_pop_command(getThis(), ZEND_NUM_ARGS(), return_value, BLPop, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                               \
+            return;                                                                                                                                                                                     \
+        }                                                                                                                                                                                               \
+        zval_dtor(return_value);                                                                                                                                                                        \
+        RETURN_FALSE;                                                                                                                                                                                   \
     }
 
-#define LINSERT_METHOD_IMPL(class_name)                                                                                                                                              \
-    PHP_METHOD(class_name, lInsert)                                                                                                                                                  \
-    {                                                                                                                                                                                \
-        if (execute_list_insert_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                            \
-            return;                                                                                                                                                                  \
-        }                                                                                                                                                                            \
-        zval_dtor(return_value);                                                                                                                                                     \
-        RETURN_FALSE;                                                                                                                                                                \
+#define BRPOP_METHOD_IMPL(class_name)                                                                                                                                                                   \
+    PHP_METHOD(class_name, brPop)                                                                                                                                                                       \
+    {                                                                                                                                                                                                   \
+        if (execute_list_blocking_pop_command(getThis(), ZEND_NUM_ARGS(), return_value, BRPop, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                               \
+            return;                                                                                                                                                                                     \
+        }                                                                                                                                                                                               \
+        zval_dtor(return_value);                                                                                                                                                                        \
+        RETURN_FALSE;                                                                                                                                                                                   \
     }
 
-#define LPOS_METHOD_IMPL(class_name)                                                                                                                                                   \
-    PHP_METHOD(class_name, lPos)                                                                                                                                                       \
-    {                                                                                                                                                                                  \
-        if (execute_list_position_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                              \
-            return;                                                                                                                                                                    \
-        }                                                                                                                                                                              \
-        zval_dtor(return_value);                                                                                                                                                       \
-        RETURN_FALSE;                                                                                                                                                                  \
+#define LSET_METHOD_IMPL(class_name)                                                                                                                                                    \
+    PHP_METHOD(class_name, lSet)                                                                                                                                                        \
+    {                                                                                                                                                                                   \
+        if (execute_list_set_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                               \
+            return;                                                                                                                                                                     \
+        }                                                                                                                                                                               \
+        zval_dtor(return_value);                                                                                                                                                        \
+        RETURN_FALSE;                                                                                                                                                                   \
     }
 
-#define LMPOP_METHOD_IMPL(class_name)                                                                                                                                                     \
-    PHP_METHOD(class_name, lmpop)                                                                                                                                                         \
+#define LINDEX_METHOD_IMPL(class_name)                                                                                                                                                    \
+    PHP_METHOD(class_name, lindex)                                                                                                                                                        \
     {                                                                                                                                                                                     \
-        if (execute_list_mpop_command(getThis(), ZEND_NUM_ARGS(), return_value, LMPop, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        if (execute_list_index_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                                                                                                                                 \
             return;                                                                                                                                                                       \
         }                                                                                                                                                                                 \
@@ -548,10 +438,87 @@ int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum R
         RETURN_FALSE;                                                                                                                                                                     \
     }
 
-#define BLMPOP_METHOD_IMPL(class_name)                                                                                                                                                     \
-    PHP_METHOD(class_name, blmpop)                                                                                                                                                         \
+#define LTRIM_METHOD_IMPL(class_name)                                                                                                                                                    \
+    PHP_METHOD(class_name, ltrim)                                                                                                                                                        \
+    {                                                                                                                                                                                    \
+        if (execute_list_trim_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                \
+            return;                                                                                                                                                                      \
+        }                                                                                                                                                                                \
+        zval_dtor(return_value);                                                                                                                                                         \
+        RETURN_FALSE;                                                                                                                                                                    \
+    }
+
+#define LREM_METHOD_IMPL(class_name)                                                                                                                                                    \
+    PHP_METHOD(class_name, lrem)                                                                                                                                                        \
+    {                                                                                                                                                                                   \
+        if (execute_list_rem_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                               \
+            return;                                                                                                                                                                     \
+        }                                                                                                                                                                               \
+        zval_dtor(return_value);                                                                                                                                                        \
+        RETURN_FALSE;                                                                                                                                                                   \
+    }
+
+#define LMOVE_METHOD_IMPL(class_name)                                                                                                                                                           \
+    PHP_METHOD(class_name, lMove)                                                                                                                                                               \
+    {                                                                                                                                                                                           \
+        if (execute_list_move_command(getThis(), ZEND_NUM_ARGS(), return_value, LMove, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                       \
+            return;                                                                                                                                                                             \
+        }                                                                                                                                                                                       \
+        zval_dtor(return_value);                                                                                                                                                                \
+        RETURN_FALSE;                                                                                                                                                                           \
+    }
+
+#define BLMOVE_METHOD_IMPL(class_name)                                                                                                                                                           \
+    PHP_METHOD(class_name, blmove)                                                                                                                                                               \
+    {                                                                                                                                                                                            \
+        if (execute_list_move_command(getThis(), ZEND_NUM_ARGS(), return_value, BLMove, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                        \
+            return;                                                                                                                                                                              \
+        }                                                                                                                                                                                        \
+        zval_dtor(return_value);                                                                                                                                                                 \
+        RETURN_FALSE;                                                                                                                                                                            \
+    }
+
+#define RPOPLPUSH_METHOD_IMPL(class_name)                                                                                                                                                           \
+    PHP_METHOD(class_name, rpoplpush)                                                                                                                                                               \
+    {                                                                                                                                                                                               \
+        if (execute_list_move_command(getThis(), ZEND_NUM_ARGS(), return_value, RPopLPush, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                           \
+            return;                                                                                                                                                                                 \
+        }                                                                                                                                                                                           \
+        zval_dtor(return_value);                                                                                                                                                                    \
+        RETURN_FALSE;                                                                                                                                                                               \
+    }
+
+#define BRPOPLPUSH_METHOD_IMPL(class_name)                                                                                                                                                           \
+    PHP_METHOD(class_name, brpoplpush)                                                                                                                                                               \
+    {                                                                                                                                                                                                \
+        if (execute_list_move_command(getThis(), ZEND_NUM_ARGS(), return_value, BRPopLPush, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                            \
+            return;                                                                                                                                                                                  \
+        }                                                                                                                                                                                            \
+        zval_dtor(return_value);                                                                                                                                                                     \
+        RETURN_FALSE;                                                                                                                                                                                \
+    }
+
+#define LLEN_METHOD_IMPL(class_name)                                                                                                                                                    \
+    PHP_METHOD(class_name, lLen)                                                                                                                                                        \
+    {                                                                                                                                                                                   \
+        if (execute_list_len_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                               \
+            return;                                                                                                                                                                     \
+        }                                                                                                                                                                               \
+        zval_dtor(return_value);                                                                                                                                                        \
+        RETURN_FALSE;                                                                                                                                                                   \
+    }
+
+#define LINSERT_METHOD_IMPL(class_name)                                                                                                                                                    \
+    PHP_METHOD(class_name, lInsert)                                                                                                                                                        \
     {                                                                                                                                                                                      \
-        if (execute_list_mpop_command(getThis(), ZEND_NUM_ARGS(), return_value, BLMPop, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        if (execute_list_insert_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
         {                                                                                                                                                                                  \
             return;                                                                                                                                                                        \
         }                                                                                                                                                                                  \
@@ -559,15 +526,48 @@ int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum R
         RETURN_FALSE;                                                                                                                                                                      \
     }
 
-#define LRANGE_METHOD_IMPL(class_name)                                                                                                                                              \
-    PHP_METHOD(class_name, lrange)                                                                                                                                                  \
-    {                                                                                                                                                                               \
-        if (execute_list_range_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                                                                                                                           \
-            return;                                                                                                                                                                 \
-        }                                                                                                                                                                           \
-        zval_dtor(return_value);                                                                                                                                                    \
-        RETURN_FALSE;                                                                                                                                                               \
+#define LPOS_METHOD_IMPL(class_name)                                                                                                                                                         \
+    PHP_METHOD(class_name, lPos)                                                                                                                                                             \
+    {                                                                                                                                                                                        \
+        if (execute_list_position_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                    \
+            return;                                                                                                                                                                          \
+        }                                                                                                                                                                                    \
+        zval_dtor(return_value);                                                                                                                                                             \
+        RETURN_FALSE;                                                                                                                                                                        \
+    }
+
+#define LMPOP_METHOD_IMPL(class_name)                                                                                                                                                           \
+    PHP_METHOD(class_name, lmpop)                                                                                                                                                               \
+    {                                                                                                                                                                                           \
+        if (execute_list_mpop_command(getThis(), ZEND_NUM_ARGS(), return_value, LMPop, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                       \
+            return;                                                                                                                                                                             \
+        }                                                                                                                                                                                       \
+        zval_dtor(return_value);                                                                                                                                                                \
+        RETURN_FALSE;                                                                                                                                                                           \
+    }
+
+#define BLMPOP_METHOD_IMPL(class_name)                                                                                                                                                           \
+    PHP_METHOD(class_name, blmpop)                                                                                                                                                               \
+    {                                                                                                                                                                                            \
+        if (execute_list_mpop_command(getThis(), ZEND_NUM_ARGS(), return_value, BLMPop, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                        \
+            return;                                                                                                                                                                              \
+        }                                                                                                                                                                                        \
+        zval_dtor(return_value);                                                                                                                                                                 \
+        RETURN_FALSE;                                                                                                                                                                            \
+    }
+
+#define LRANGE_METHOD_IMPL(class_name)                                                                                                                                                    \
+    PHP_METHOD(class_name, lrange)                                                                                                                                                        \
+    {                                                                                                                                                                                     \
+        if (execute_list_range_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                 \
+            return;                                                                                                                                                                       \
+        }                                                                                                                                                                                 \
+        zval_dtor(return_value);                                                                                                                                                          \
+        RETURN_FALSE;                                                                                                                                                                     \
     }
 
 #endif /* VALKEY_GLIDE_LIST_COMMON_H */
