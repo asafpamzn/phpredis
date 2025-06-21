@@ -891,6 +891,91 @@ valkey_glide_parse_info_response(char *response, zval *z_ret)
     }
 }
 
+/* Parse a cluster route from a zval parameter */
+typedef struct
+{
+    enum
+    {
+        ROUTE_TYPE_KEY,      /* Route by key */
+        ROUTE_TYPE_HOST_PORT /* Route by host:port */
+    } type;
+
+    union
+    {
+        struct
+        {
+            char *key;
+            size_t key_len;
+        } key_route;
+
+        struct
+        {
+            char *host;
+            int port;
+        } host_port_route;
+    } data;
+} cluster_route_t;
+
+/* Parse a cluster route parameter from a zval */
+int parse_cluster_route(zval *route_zval, cluster_route_t *route)
+{
+    /* Default to route by key */
+    route->type = ROUTE_TYPE_KEY;
+
+    if (Z_TYPE_P(route_zval) == IS_STRING)
+    {
+        /* String parameter - use as key */
+        route->data.key_route.key = Z_STRVAL_P(route_zval);
+        route->data.key_route.key_len = Z_STRLEN_P(route_zval);
+        return 1;
+    }
+    else if (Z_TYPE_P(route_zval) == IS_ARRAY)
+    {
+        /* Array parameter - check for host and port */
+        HashTable *route_ht = Z_ARRVAL_P(route_zval);
+        zval *host_zv = NULL, *port_zv = NULL;
+
+        /* First check if 'host' and 'port' keys exist (associative array approach) */
+        host_zv = zend_hash_str_find(route_ht, "host", sizeof("host") - 1);
+        port_zv = zend_hash_str_find(route_ht, "port", sizeof("port") - 1);
+
+        if (!host_zv || !port_zv)
+        {
+            /* Try numeric keys (indexed array approach) */
+            host_zv = zend_hash_index_find(route_ht, 0);
+            port_zv = zend_hash_index_find(route_ht, 1);
+        }
+
+        if (host_zv && port_zv && Z_TYPE_P(host_zv) == IS_STRING)
+        {
+            /* Set route type to host:port */
+            route->type = ROUTE_TYPE_HOST_PORT;
+
+            /* Get host from array */
+            route->data.host_port_route.host = Z_STRVAL_P(host_zv);
+
+            /* Get port from array */
+            if (Z_TYPE_P(port_zv) == IS_LONG)
+            {
+                route->data.host_port_route.port = Z_LVAL_P(port_zv);
+            }
+            else
+            {
+                zval temp;
+                ZVAL_COPY(&temp, port_zv);
+                convert_to_long(&temp);
+                route->data.host_port_route.port = Z_LVAL(temp);
+                zval_dtor(&temp);
+            }
+
+            return 1;
+        }
+    }
+
+    /* Could not parse route properly */
+    return 0;
+}
+
 /* Execute an INFO command using the Valkey Glide client - UNIFIED IMPLEMENTATION */
 int execute_info_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
@@ -899,13 +984,8 @@ int execute_info_command(zval *object, int argc, zval *return_value, zend_class_
     int args_count = 0;
     char *response = NULL;
     size_t response_len = 0;
-
-    /* Parse parameters - accept variable number of string arguments */
-    if (zend_parse_method_parameters(argc, object, "O*",
-                                     &object, ce, &args, &args_count) == FAILURE)
-    {
-        return 0;
-    }
+    int result = 0;
+    zend_bool is_cluster = (ce == get_valkey_glide_cluster_ce());
 
     /* Get ValkeyGlide object */
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
@@ -914,83 +994,217 @@ int execute_info_command(zval *object, int argc, zval *return_value, zend_class_
         return 0;
     }
 
-    int result = 0;
-
-    /* Handle different cases based on number of arguments */
-    if (args_count == 0)
+    if (is_cluster)
     {
-        /* No sections specified, call with NULL section */
-        /* Prepare command arguments */
-        CommandResult *cmd_result = execute_command(
-            valkey_glide->glide_client,
-            Info, /* command type */
-            0,    /* number of arguments */
-            NULL, /* arguments */
-            NULL  /* argument lengths */
-        );
-
-        /* Use the generic handler to process the result */
-        result = handle_string_response(cmd_result, &response, &response_len);
-    }
-    else
-    {
-        /* One or more sections specified */
-        /* Prepare command arguments - each section is one argument */
-        unsigned long arg_count = args_count;
-        uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
-        unsigned long *cmd_args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
-
-        if (!cmd_args || !cmd_args_len)
+        /* Parse parameters for cluster - first parameter is route, rest are sections */
+        if (zend_parse_method_parameters(argc, object, "Oz*",
+                                         &object, ce, &args, &args_count) == FAILURE)
         {
-            if (cmd_args)
-                efree(cmd_args);
-            if (cmd_args_len)
-                efree(cmd_args_len);
             return 0;
         }
 
-        /* Process each section argument */
-        for (int i = 0; i < args_count; i++)
+        if (args_count == 0)
         {
-            zval *section = &args[i];
+            /* Need at least the route parameter */
+            return 0;
+        }
 
-            /* Check if the section is a string */
-            if (Z_TYPE_P(section) != IS_STRING)
+        /* Parse the route from the first parameter */
+        cluster_route_t route;
+        if (!parse_cluster_route(&args[0], &route))
+        {
+            /* Failed to parse the route */
+            return 0;
+        }
+
+        /* If no sections are specified, call with NULL section */
+        if (args_count == 1)
+        {
+            CommandResult *cmd_result;
+
+            /* Execute the command based on route type */
+            if (route.type == ROUTE_TYPE_KEY)
             {
-                /* Convert to string if needed */
-                zval temp;
-                ZVAL_COPY(&temp, section);
-                convert_to_string(&temp);
-
-                cmd_args[i] = (uintptr_t)Z_STRVAL(temp);
-                cmd_args_len[i] = Z_STRLEN(temp);
-
-                /* Free the temporary zval */
-                zval_dtor(&temp);
+                /* Route by key - for now, just send the command */
+                cmd_result = execute_command(
+                    valkey_glide->glide_client,
+                    Info,
+                    0,
+                    NULL,
+                    NULL);
             }
             else
             {
-                /* It's already a string */
-                cmd_args[i] = (uintptr_t)Z_STRVAL_P(section);
-                cmd_args_len[i] = Z_STRLEN_P(section);
+                /* Route by host:port - for now, just send the command */
+                cmd_result = execute_command(
+                    valkey_glide->glide_client,
+                    Info,
+                    0,
+                    NULL,
+                    NULL);
             }
+
+            /* Use the generic handler to process the result */
+            result = handle_string_response(cmd_result, &response, &response_len);
+        }
+        else
+        {
+            /* One or more sections specified */
+            unsigned long arg_count = args_count - 1; /* Subtract 1 for route parameter */
+            uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+            unsigned long *cmd_args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+            if (!cmd_args || !cmd_args_len)
+            {
+                if (cmd_args)
+                    efree(cmd_args);
+                if (cmd_args_len)
+                    efree(cmd_args_len);
+                return 0;
+            }
+
+            /* Process each section argument (start from index 1, after route) */
+            for (int i = 1; i < args_count; i++)
+            {
+                zval *section = &args[i];
+                int arg_idx = i - 1;
+
+                /* Check if the section is a string */
+                if (Z_TYPE_P(section) != IS_STRING)
+                {
+                    /* Convert to string if needed */
+                    zval temp;
+                    ZVAL_COPY(&temp, section);
+                    convert_to_string(&temp);
+
+                    cmd_args[arg_idx] = (uintptr_t)Z_STRVAL(temp);
+                    cmd_args_len[arg_idx] = Z_STRLEN(temp);
+
+                    /* Free the temporary zval */
+                    zval_dtor(&temp);
+                }
+                else
+                {
+                    /* It's already a string */
+                    cmd_args[arg_idx] = (uintptr_t)Z_STRVAL_P(section);
+                    cmd_args_len[arg_idx] = Z_STRLEN_P(section);
+                }
+            }
+
+            /* Execute the command based on route type */
+            CommandResult *cmd_result;
+            if (route.type == ROUTE_TYPE_KEY)
+            {
+                /* Route by key - for now, just send the command */
+                cmd_result = execute_command(
+                    valkey_glide->glide_client,
+                    Info,
+                    arg_count,
+                    cmd_args,
+                    cmd_args_len);
+            }
+            else
+            {
+                /* Route by host:port - for now, just send the command */
+                cmd_result = execute_command(
+                    valkey_glide->glide_client,
+                    Info,
+                    arg_count,
+                    cmd_args,
+                    cmd_args_len);
+            }
+
+            /* Free the argument arrays */
+            efree(cmd_args);
+            efree(cmd_args_len);
+
+            /* Use the generic handler to process the result */
+            result = handle_string_response(cmd_result, &response, &response_len);
+        }
+    }
+    else
+    {
+        /* Non-cluster case - parse parameters as before */
+        if (zend_parse_method_parameters(argc, object, "O*",
+                                         &object, ce, &args, &args_count) == FAILURE)
+        {
+            return 0;
         }
 
-        /* Execute the command */
-        CommandResult *cmd_result = execute_command(
-            valkey_glide->glide_client,
-            Info,        /* command type */
-            arg_count,   /* number of arguments */
-            cmd_args,    /* arguments */
-            cmd_args_len /* argument lengths */
-        );
+        /* Handle different cases based on number of arguments */
+        if (args_count == 0)
+        {
+            /* No sections specified, call with NULL section */
+            CommandResult *cmd_result = execute_command(
+                valkey_glide->glide_client,
+                Info, /* command type */
+                0,    /* number of arguments */
+                NULL, /* arguments */
+                NULL  /* argument lengths */
+            );
 
-        /* Free the argument arrays */
-        efree(cmd_args);
-        efree(cmd_args_len);
+            /* Use the generic handler to process the result */
+            result = handle_string_response(cmd_result, &response, &response_len);
+        }
+        else
+        {
+            /* One or more sections specified */
+            unsigned long arg_count = args_count;
+            uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+            unsigned long *cmd_args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
 
-        /* Use the generic handler to process the result */
-        result = handle_string_response(cmd_result, &response, &response_len);
+            if (!cmd_args || !cmd_args_len)
+            {
+                if (cmd_args)
+                    efree(cmd_args);
+                if (cmd_args_len)
+                    efree(cmd_args_len);
+                return 0;
+            }
+
+            /* Process each section argument */
+            for (int i = 0; i < args_count; i++)
+            {
+                zval *section = &args[i];
+
+                /* Check if the section is a string */
+                if (Z_TYPE_P(section) != IS_STRING)
+                {
+                    /* Convert to string if needed */
+                    zval temp;
+                    ZVAL_COPY(&temp, section);
+                    convert_to_string(&temp);
+
+                    cmd_args[i] = (uintptr_t)Z_STRVAL(temp);
+                    cmd_args_len[i] = Z_STRLEN(temp);
+
+                    /* Free the temporary zval */
+                    zval_dtor(&temp);
+                }
+                else
+                {
+                    /* It's already a string */
+                    cmd_args[i] = (uintptr_t)Z_STRVAL_P(section);
+                    cmd_args_len[i] = Z_STRLEN_P(section);
+                }
+            }
+
+            /* Execute the command */
+            CommandResult *cmd_result = execute_command(
+                valkey_glide->glide_client,
+                Info,        /* command type */
+                arg_count,   /* number of arguments */
+                cmd_args,    /* arguments */
+                cmd_args_len /* argument lengths */
+            );
+
+            /* Free the argument arrays */
+            efree(cmd_args);
+            efree(cmd_args_len);
+
+            /* Use the generic handler to process the result */
+            result = handle_string_response(cmd_result, &response, &response_len);
+        }
     }
 
     /* Process the result */

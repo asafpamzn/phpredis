@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 77a3ca4d98ee2dd566ed39b9d9992ca366349a3c */
+ * Stub hash: 1a73b7038735ae35292e7cb6da173e8c7ada0dab */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 1)
@@ -370,7 +370,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_inc
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_info, 0, 1, ValkeyGlideCluster, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_MASK(0, key_or_address, MAY_BE_STRING|MAY_BE_ARRAY, NULL)
+	ZEND_ARG_TYPE_INFO(0, route, IS_MIXED, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, sections, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 

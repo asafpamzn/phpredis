@@ -446,13 +446,20 @@ class ValkeyGlideCluster {
      *
      * @see https://redis.io/commands/info/
      *
-     * @param string|array $key_or_address Either a key name or array with host and port indicating
-     *                                     which cluster node we want to send the command to.
-     * @param string       $sections       Optional section(s) you wish ValkeyGlide server to return.
+     * @param mixed $route         The routing configuration that determines which node(s) to send the 
+     *                             command to. Can be:
+     *                             - string "randomNode" to route to a random node
+     *                             - string "allPrimaries" to route to all primary nodes
+     *                             - string "allNodes" to route to all nodes (primaries and replicas)
+     *                             - string containing a key name for slot-based routing
+     *                             - array ['type' => 'primarySlotKey', 'key' => 'keyName'] for slot key routing
+     *                             - array ['type' => 'routeByAddress', 'host' => 'hostname', 'port' => port] 
+     *                               for specific node routing
+     * @param string $sections     Optional section(s) you wish ValkeyGlide server to return.
      *
      * @return ValkeyGlideCluster|array|false
      */
-    public function info(string|array $key_or_address, string ...$sections): ValkeyGlideCluster|array|false;
+    public function info(mixed $route, string ...$sections): ValkeyGlideCluster|array|false;
 
     /**
      * @see ValkeyGlide::keys

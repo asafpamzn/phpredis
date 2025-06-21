@@ -15,7 +15,7 @@
 */
 #include "common.h"
 #include "valkey_glide_list_common.h"
-extern zend_class_entry *get_valkey_glide_ce();
+extern zend_class_entry *ce;
 extern zend_class_entry *get_valkey_glide_exception_ce();
 
 /* ====================================================================
@@ -784,7 +784,7 @@ int execute_list_move_command(zval *object, int argc, zval *return_value, enum R
     {
         /* BLMOVE: src, dst, wherefrom, whereto, timeout */
         if (zend_parse_method_parameters(argc, object, "Ossssd",
-                                         &object, get_valkey_glide_ce(),
+                                         &object, ce,
                                          &src, &src_len,
                                          &dst, &dst_len,
                                          &wherefrom, &wherefrom_len,
@@ -798,7 +798,7 @@ int execute_list_move_command(zval *object, int argc, zval *return_value, enum R
     {
         /* LMOVE: src, dst, wherefrom, whereto */
         if (zend_parse_method_parameters(argc, object, "Ossss",
-                                         &object, get_valkey_glide_ce(),
+                                         &object, ce,
                                          &src, &src_len,
                                          &dst, &dst_len,
                                          &wherefrom, &wherefrom_len,
@@ -881,7 +881,7 @@ int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum R
     {
         /* BLMPOP: timeout, keys, from, count */
         if (zend_parse_method_parameters(argc, object, "Odas|l",
-                                         &object, get_valkey_glide_ce(), &timeout, &keys, &from, &from_len,
+                                         &object, ce, &timeout, &keys, &from, &from_len,
                                          &count) == FAILURE)
         {
             return 0;
@@ -891,7 +891,7 @@ int execute_list_mpop_command(zval *object, int argc, zval *return_value, enum R
     {
         /* LMPOP: keys, from, count */
         if (zend_parse_method_parameters(argc, object, "Oas|l",
-                                         &object, get_valkey_glide_ce(), &keys, &from, &from_len,
+                                         &object, ce, &keys, &from, &from_len,
                                          &count) == FAILURE)
         {
             return 0;
@@ -1569,7 +1569,7 @@ int execute_list_push_command(zval *object, int argc, zval *return_value, enum R
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os+",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_args, &arg_count) == FAILURE)
     {
         return 0;
@@ -1627,7 +1627,7 @@ int execute_list_pop_command(zval *object, int argc, zval *return_value, enum Re
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|l",
-                                     &object, get_valkey_glide_ce(), &key, &key_len, &count) == FAILURE)
+                                     &object, ce, &key, &key_len, &count) == FAILURE)
     {
         return 0;
     }
@@ -1683,7 +1683,7 @@ int execute_list_blocking_pop_command(zval *object, int argc, zval *return_value
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Ozd",
-                                     &object, get_valkey_glide_ce(), &keys, &timeout) == FAILURE)
+                                     &object, ce, &keys, &timeout) == FAILURE)
     {
         return 0;
     }
@@ -1728,7 +1728,7 @@ int execute_list_len_command(zval *object, int argc, zval *return_value, zend_cl
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -1773,7 +1773,7 @@ int execute_list_range_command(zval *object, int argc, zval *return_value, zend_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osll",
-                                     &object, get_valkey_glide_ce(), &key, &key_len, &start, &end) == FAILURE)
+                                     &object, ce, &key, &key_len, &start, &end) == FAILURE)
     {
         return 0;
     }
@@ -1822,7 +1822,7 @@ int execute_list_index_command(zval *object, int argc, zval *return_value, zend_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl",
-                                     &object, get_valkey_glide_ce(),
+                                     &object, ce,
                                      &key, &key_len,
                                      &index) == FAILURE)
     {
@@ -1890,7 +1890,7 @@ int execute_list_set_command(zval *object, int argc, zval *return_value, zend_cl
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osls",
-                                     &object, get_valkey_glide_ce(),
+                                     &object, ce,
                                      &key, &key_len,
                                      &index,
                                      &val, &val_len) == FAILURE)
@@ -1945,7 +1945,7 @@ int execute_list_insert_command(zval *object, int argc, zval *return_value, zend
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Ossss",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &pos, &pos_len, &pivot, &pivot_len,
                                      &val, &val_len) == FAILURE)
     {
@@ -2026,7 +2026,7 @@ int execute_list_position_command(zval *object, int argc, zval *return_value, ze
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osz|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_value, &z_opts) == FAILURE)
     {
         return 0;
@@ -2101,7 +2101,7 @@ int execute_list_rem_command(zval *object, int argc, zval *return_value, zend_cl
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss|l",
-                                     &object, get_valkey_glide_ce(),
+                                     &object, ce,
                                      &key, &key_len,
                                      &value, &value_len,
                                      &count) == FAILURE)
@@ -2154,7 +2154,7 @@ int execute_list_trim_command(zval *object, int argc, zval *return_value, zend_c
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osll",
-                                     &object, get_valkey_glide_ce(),
+                                     &object, ce,
                                      &key, &key_len,
                                      &start, &end) == FAILURE)
     {

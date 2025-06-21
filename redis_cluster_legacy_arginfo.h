@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 77a3ca4d98ee2dd566ed39b9d9992ca366349a3c */
+ * Stub hash: 1a73b7038735ae35292e7cb6da173e8c7ada0dab */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
@@ -323,7 +323,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ValkeyGlideCluster_incrByFloat arginfo_class_ValkeyGlideCluster_append
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster_info, 0, 0, 1)
-	ZEND_ARG_INFO(0, key_or_address)
+	ZEND_ARG_INFO(0, route)
 	ZEND_ARG_VARIADIC_INFO(0, sections)
 ZEND_END_ARG_INFO()
 
