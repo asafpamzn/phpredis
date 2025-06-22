@@ -139,9 +139,9 @@ class ValkeyGlideCluster {
     public function decr(string $key, int $by = 1): ValkeyGlideCluster|int|false;
 
     /**
-     * @see ValkeyGlide::decrby()
+     * @see ValkeyGlide::decrBy()
      */
-    public function decrby(string $key, int $value): ValkeyGlideCluster|int|false;
+    public function decrBy(string $key, int $value): ValkeyGlideCluster|int|false;
 
 
     /**

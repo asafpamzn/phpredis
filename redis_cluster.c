@@ -238,9 +238,7 @@ SADD_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::saddarray(string key, array values) */
-PHP_METHOD(ValkeyGlideCluster, sAddArray)
-{
-}
+SADD_ARRAY_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::srem(string key, string val1 [, ...]) */
@@ -404,9 +402,7 @@ DECR_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::decrby(string key, long byval) */
-PHP_METHOD(ValkeyGlideCluster, decrby)
-{
-}
+DECRBY_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto double ValkeyGlideCluster::incrbyfloat(string key, double val) */
@@ -888,7 +884,7 @@ XTRIM_METHOD_IMPL(ValkeyGlideCluster)
 ECHO_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
-/* {{{ proto mixed ValkeyGlideCluster::rawcommand(string $key, string $cmd, [ $argv1 .. $argvN])
+/* {{{ proto mixed ValkeyGlideCluster:: command(string $key, string $cmd, [ $argv1 .. $argvN])
  *     proto mixed ValkeyGlideCluster::rawcommand(array $host_port, string $cmd, [ $argv1 .. $argvN]) */
 RAWCOMMAND_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */

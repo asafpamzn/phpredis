@@ -946,6 +946,7 @@ class ValkeyGlide_Test extends TestSuite {
         $this->redis->decr('key');
         $this->assertKeyEqualsWeak(4, 'key');
 
+
         $this->redis->decr('key');
         $this->assertKeyEqualsWeak(3, 'key');
 
