@@ -184,41 +184,41 @@ int parse_cluster_route(zval *route_zval, cluster_route_t *route)
 /* Create serialized route bytes from a cluster_route_t structure */
 uint8_t *create_route_bytes_from_route(cluster_route_t *route, size_t *route_bytes_len)
 {
-
     /* Initialize route structure */
     CommandRequest__Routes routes = COMMAND_REQUEST__ROUTES__INIT;
     uint8_t *route_bytes = NULL;
 
+    /* Declare protobuf structures outside switch to keep them in scope */
+    CommandRequest__SlotKeyRoute slot_key_route = COMMAND_REQUEST__SLOT_KEY_ROUTE__INIT;
+    CommandRequest__ByAddressRoute by_address_route = COMMAND_REQUEST__BY_ADDRESS_ROUTE__INIT;
+    CommandRequest__SimpleRoutes simple_route;
+
     switch (route->type)
     {
     case ROUTE_TYPE_KEY:
-    {
-        /* Create slot key route */
-        CommandRequest__SlotKeyRoute slot_key_route = COMMAND_REQUEST__SLOT_KEY_ROUTE__INIT;
+        // printf("Creating route by key: %s\n", route->data.key_route.key);
+        /* Configure slot key route */
         slot_key_route.slot_type = COMMAND_REQUEST__SLOT_TYPES__Primary;
         slot_key_route.slot_key = route->data.key_route.key;
 
         routes.value_case = COMMAND_REQUEST__ROUTES__VALUE_SLOT_KEY_ROUTE;
         routes.slot_key_route = &slot_key_route;
-    }
-    break;
+        break;
 
     case ROUTE_TYPE_HOST_PORT:
-    {
-        /* Create by address route */
-        CommandRequest__ByAddressRoute by_address_route = COMMAND_REQUEST__BY_ADDRESS_ROUTE__INIT;
+        // printf("Creating route by address: %s:%d\n",
+        //       route->data.host_port_route.host, route->data.host_port_route.port);
+        /* Configure by address route */
         by_address_route.host = route->data.host_port_route.host;
         by_address_route.port = route->data.host_port_route.port;
 
         routes.value_case = COMMAND_REQUEST__ROUTES__VALUE_BY_ADDRESS_ROUTE;
         routes.by_address_route = &by_address_route;
-    }
-    break;
+        break;
 
     case ROUTE_TYPE_SIMPLE:
-    {
-        /* Create simple route */
-        CommandRequest__SimpleRoutes simple_route;
+        // printf("Creating simple route type: %d\n", route->data.simple_route_type);
+        /* Configure simple route */
         switch (route->data.simple_route_type)
         {
         case 0: /* AllNodes */
@@ -237,8 +237,7 @@ uint8_t *create_route_bytes_from_route(cluster_route_t *route, size_t *route_byt
 
         routes.value_case = COMMAND_REQUEST__ROUTES__VALUE_SIMPLE_ROUTES;
         routes.simple_routes = simple_route;
-    }
-    break;
+        break;
 
     default:
         /* Unknown route type */
