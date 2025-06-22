@@ -233,7 +233,7 @@ SISMEMBER_METHOD_IMPL(ValkeyGlideCluster)
 SMISMEMBER_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
-/* {{{ proto long ValkeyGlideCluster::sadd(string key, string val1 [, ...]) */
+/* {{{ proto long ValkeyGlideCluster::sadd(string key, string val1, ...) */
 SADD_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 

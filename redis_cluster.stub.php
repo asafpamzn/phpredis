@@ -688,7 +688,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::sadd()
      */
-    public function sAdd(string $key, mixed $value, mixed ...$other_values): ValkeyGlideCluster|int|false;
+    public function sAdd(string $key, mixed $value, mixed ...$other_values): ValkeyGlideCluster|int|false;    
 
     /**
      * @see ValkeyGlide::saddarray()
