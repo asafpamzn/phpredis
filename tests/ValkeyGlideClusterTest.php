@@ -220,7 +220,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
         ];
 
         for ($i = 0; $i < 3; $i++) {
-            $info = $this->redis->info($i);
+            $info = $this->redis->info(['type' => 'primarySlotKey', 'key' => $i]);
             foreach ($fields as $field) {
                 $this->assertArrayKey($info, $field);
             }

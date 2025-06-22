@@ -35,6 +35,7 @@ typedef struct
         {
             char *key;
             size_t key_len;
+            int key_allocated; /* Flag to indicate if key was dynamically allocated */
         } key_route;
 
         struct
@@ -52,6 +53,7 @@ int parse_cluster_route(zval *route_zval, cluster_route_t *route)
 {
     /* Default to route by key */
     route->type = ROUTE_TYPE_KEY;
+    route->data.key_route.key_allocated = 0;
 
     if (Z_TYPE_P(route_zval) == IS_STRING)
     {
@@ -101,11 +103,27 @@ int parse_cluster_route(zval *route_zval, cluster_route_t *route)
             {
                 /* Slot key routing */
                 key_zv = zend_hash_str_find(route_ht, "key", sizeof("key") - 1);
-                if (key_zv && Z_TYPE_P(key_zv) == IS_STRING)
+                if (key_zv && (Z_TYPE_P(key_zv) == IS_STRING || Z_TYPE_P(key_zv) == IS_LONG))
                 {
                     route->type = ROUTE_TYPE_KEY;
-                    route->data.key_route.key = Z_STRVAL_P(key_zv);
-                    route->data.key_route.key_len = Z_STRLEN_P(key_zv);
+                    route->data.key_route.key_allocated = 0; /* Initialize flag */
+
+                    if (Z_TYPE_P(key_zv) == IS_STRING)
+                    {
+                        /* String key - use directly */
+                        route->data.key_route.key = Z_STRVAL_P(key_zv);
+                        route->data.key_route.key_len = Z_STRLEN_P(key_zv);
+                    }
+                    else if (Z_TYPE_P(key_zv) == IS_LONG)
+                    {
+                        /* Integer key - convert to string */
+                        route->data.key_route.key = long_to_string(Z_LVAL_P(key_zv), &route->data.key_route.key_len);
+                        if (!route->data.key_route.key)
+                        {
+                            return 0; /* Memory allocation failed */
+                        }
+                        route->data.key_route.key_allocated = 1; /* Mark as allocated */
+                    }
                     return 1;
                 }
             }
@@ -278,6 +296,7 @@ CommandResult *execute_command_with_route(
 
     /* Parse the route from the first parameter */
     cluster_route_t route;
+    memset(&route, 0, sizeof(cluster_route_t));
     if (!parse_cluster_route(arg_route, &route))
     {
         /* Failed to parse the route */
@@ -305,6 +324,12 @@ CommandResult *execute_command_with_route(
     if (route_bytes)
     {
         efree(route_bytes);
+    }
+
+    /* Free dynamically allocated key if needed */
+    if (route.type == ROUTE_TYPE_KEY && route.data.key_route.key_allocated)
+    {
+        efree(route.data.key_route.key);
     }
 
     return result;
