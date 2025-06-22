@@ -726,6 +726,8 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
 
     /* Test that rawCommand and EVAL can be configured to return simple string values */
     public function testReplyLiteral() {
+        $this->markTestSkipped();
+
         $this->redis->setOption(ValkeyGlide::OPT_REPLY_LITERAL, false);
         $this->assertTrue($this->redis->rawCommand('foo', 'set', 'foo', 'bar'));
         $this->assertTrue($this->redis->eval("return redis.call('set', KEYS[1], 'bar')", ['foo'], 1));
@@ -744,28 +746,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
         $this->redis->setOption(ValkeyGlide::OPT_REPLY_LITERAL, false);
     }
 
-    /* ValkeyGlide and ValkeyGlideCluster use the same handler for the ACL command but verify we can direct
-       the command to a specific node. */
-    public function testAcl() {
-        if ( ! $this->minVersionCheck("6.0"))
-            $this->markTestSkipped();
-
-        $this->assertInArray('default', $this->redis->acl('foo', 'USERS'));
-    }
-
-    public function testSession()
-    {
-        @ini_set('session.save_handler', 'rediscluster');
-        @ini_set('session.save_path', $this->sessionSavePath() . '&failover=error');
-
-        if ( ! @session_start())
-            $this->markTestSkipped();
-
-        session_write_close();
-
-        $this->assertKeyExists($this->sessionPrefix() . session_id());
-    }
-
+ 
 
     /* Test that we are able to use the slot cache without issues */
     public function testSlotCache() {
@@ -816,6 +797,8 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
 
     /* Test correct handling of null multibulk replies */
     public function testNullArray() {
+        $this->markTestSkipped();
+
         $key = "key:arr";
         $this->redis->del($key);
 

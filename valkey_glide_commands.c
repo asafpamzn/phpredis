@@ -329,13 +329,9 @@ int execute_time_command(zval *object, int argc, zval *return_value, zend_class_
 int execute_role_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, ce) == FAILURE)
-    {
-        return 0;
-    }
+    zval *args = NULL;
+    int args_count = 0;
+    zend_bool is_cluster = (ce == get_valkey_glide_cluster_ce());
 
     /* Get ValkeyGlide object */
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
@@ -344,12 +340,43 @@ int execute_role_command(zval *object, int argc, zval *return_value, zend_class_
         return 0;
     }
 
-    /* Execute using core framework */
-    core_command_args_t args = {0};
-    args.glide_client = valkey_glide->glide_client;
-    args.cmd_type = Role;
+    /* Setup core command arguments */
+    core_command_args_t core_args = {0};
+    core_args.glide_client = valkey_glide->glide_client;
+    core_args.cmd_type = Role;
+    core_args.is_cluster = is_cluster;
 
-    if (execute_core_command(&args, return_value, process_core_array_result))
+    if (is_cluster)
+    {
+        /* Parse parameters for cluster - route parameter is required */
+        if (zend_parse_method_parameters(argc, object, "O*",
+                                         &object, ce, &args, &args_count) == FAILURE)
+        {
+            return 0;
+        }
+
+        if (args_count == 0)
+        {
+            /* Need the route parameter */
+            return 0;
+        }
+
+        /* Set up routing */
+        core_args.has_route = 1;
+        core_args.route_param = &args[0];
+    }
+    else
+    {
+        /* Non-cluster case - parse no parameters */
+        if (zend_parse_method_parameters(argc, object, "O",
+                                         &object, ce) == FAILURE)
+        {
+            return 0;
+        }
+    }
+
+    /* Execute using unified core framework */
+    if (execute_core_command(&core_args, return_value, process_core_array_result))
     {
         return 1;
     }
