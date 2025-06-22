@@ -287,216 +287,216 @@ int execute_x_generic_command(const void *glide_client,
                               x_result_processor_t process_result);
 
 /* Command implementation functions */
-int execute_xlen_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_xlen_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
-int execute_xdel_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_xdel_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
-int execute_xack_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
-int execute_xadd_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_xack_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_xadd_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
-int execute_xtrim_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
-int execute_xrange_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
-int execute_xrevrange_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
-int execute_xpending_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_xtrim_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_xrange_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_xrevrange_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
+int execute_xpending_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
-int execute_xread_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_xread_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
-int execute_xreadgroup_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_xreadgroup_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
-int execute_xautoclaim_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_xautoclaim_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
-int execute_xclaim_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_xclaim_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
-int execute_xgroup_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_xgroup_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 
-int execute_xinfo_command(zval *object, int argc, zval *return_value, zend_class_entry* ce);
+int execute_xinfo_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);
 /* ====================================================================
  * X COMMAND MACROS
  * ==================================================================== */
 
-#define XREADGROUP_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xreadgroup)                                            \
-    {                                                                             \
-        if (execute_xreadgroup_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                         \
-            return;                                                               \
-        }                                                                         \
-        zval_dtor(return_value);                                                  \
-        RETURN_FALSE;                                                             \
+#define XREADGROUP_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xreadgroup)                                                                                                                                                    \
+    {                                                                                                                                                                                     \
+        if (execute_xreadgroup_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                 \
+            return;                                                                                                                                                                       \
+        }                                                                                                                                                                                 \
+        zval_dtor(return_value);                                                                                                                                                          \
+        RETURN_FALSE;                                                                                                                                                                     \
     }
-#define XACK_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xack)                                            \
-    {                                                                       \
-        if (execute_xack_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                   \
-            return;                                                         \
-        }                                                                   \
-        zval_dtor(return_value);                                            \
-        RETURN_FALSE;                                                       \
+#define XACK_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xack)                                                                                                                                                    \
+    {                                                                                                                                                                               \
+        if (execute_xack_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                           \
+            return;                                                                                                                                                                 \
+        }                                                                                                                                                                           \
+        zval_dtor(return_value);                                                                                                                                                    \
+        RETURN_FALSE;                                                                                                                                                               \
     }
-#define XADD_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xadd)                                            \
-    {                                                                       \
-        if (execute_xadd_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                   \
-            return;                                                         \
-        }                                                                   \
-        zval_dtor(return_value);                                            \
-        RETURN_FALSE;                                                       \
-    }
-
-#define XAUTOCLAIM_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xautoclaim)                                            \
-    {                                                                             \
-        if (execute_xautoclaim_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                         \
-            return;                                                               \
-        }                                                                         \
-        zval_dtor(return_value);                                                  \
-        RETURN_FALSE;                                                             \
+#define XADD_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xadd)                                                                                                                                                    \
+    {                                                                                                                                                                               \
+        if (execute_xadd_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                           \
+            return;                                                                                                                                                                 \
+        }                                                                                                                                                                           \
+        zval_dtor(return_value);                                                                                                                                                    \
+        RETURN_FALSE;                                                                                                                                                               \
     }
 
-#define XDEL_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xdel)                                            \
-    {                                                                       \
-        if (execute_xdel_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                   \
-            return;                                                         \
-        }                                                                   \
-        zval_dtor(return_value);                                            \
-        RETURN_FALSE;                                                       \
+#define XAUTOCLAIM_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xautoclaim)                                                                                                                                                    \
+    {                                                                                                                                                                                     \
+        if (execute_xautoclaim_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                 \
+            return;                                                                                                                                                                       \
+        }                                                                                                                                                                                 \
+        zval_dtor(return_value);                                                                                                                                                          \
+        RETURN_FALSE;                                                                                                                                                                     \
     }
 
-#define XACK_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xack)                                            \
-    {                                                                       \
-        if (execute_xack_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                   \
-            return;                                                         \
-        }                                                                   \
-        zval_dtor(return_value);                                            \
-        RETURN_FALSE;                                                       \
+#define XDEL_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xdel)                                                                                                                                                    \
+    {                                                                                                                                                                               \
+        if (execute_xdel_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                           \
+            return;                                                                                                                                                                 \
+        }                                                                                                                                                                           \
+        zval_dtor(return_value);                                                                                                                                                    \
+        RETURN_FALSE;                                                                                                                                                               \
     }
 
-#define XAUTOCLAIM_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xautoclaim)                                            \
-    {                                                                             \
-        if (execute_xautoclaim_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                         \
-            return;                                                               \
-        }                                                                         \
-        zval_dtor(return_value);                                                  \
-        RETURN_FALSE;                                                             \
+#define XACK_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xack)                                                                                                                                                    \
+    {                                                                                                                                                                               \
+        if (execute_xack_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                           \
+            return;                                                                                                                                                                 \
+        }                                                                                                                                                                           \
+        zval_dtor(return_value);                                                                                                                                                    \
+        RETURN_FALSE;                                                                                                                                                               \
     }
 
-#define XCLAIM_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xclaim)                                            \
-    {                                                                         \
-        if (execute_xclaim_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                     \
-            return;                                                           \
-        }                                                                     \
-        zval_dtor(return_value);                                              \
-        RETURN_FALSE;                                                         \
+#define XAUTOCLAIM_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xautoclaim)                                                                                                                                                    \
+    {                                                                                                                                                                                     \
+        if (execute_xautoclaim_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                 \
+            return;                                                                                                                                                                       \
+        }                                                                                                                                                                                 \
+        zval_dtor(return_value);                                                                                                                                                          \
+        RETURN_FALSE;                                                                                                                                                                     \
     }
 
-#define XDEL_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xdel)                                            \
-    {                                                                       \
-        if (execute_xdel_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                   \
-            return;                                                         \
-        }                                                                   \
-        zval_dtor(return_value);                                            \
-        RETURN_FALSE;                                                       \
+#define XCLAIM_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xclaim)                                                                                                                                                    \
+    {                                                                                                                                                                                 \
+        if (execute_xclaim_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                             \
+            return;                                                                                                                                                                   \
+        }                                                                                                                                                                             \
+        zval_dtor(return_value);                                                                                                                                                      \
+        RETURN_FALSE;                                                                                                                                                                 \
     }
 
-#define XGROUP_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xgroup)                                            \
-    {                                                                         \
-        if (execute_xgroup_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                     \
-            return;                                                           \
-        }                                                                     \
-        zval_dtor(return_value);                                              \
-        RETURN_FALSE;                                                         \
+#define XDEL_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xdel)                                                                                                                                                    \
+    {                                                                                                                                                                               \
+        if (execute_xdel_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                           \
+            return;                                                                                                                                                                 \
+        }                                                                                                                                                                           \
+        zval_dtor(return_value);                                                                                                                                                    \
+        RETURN_FALSE;                                                                                                                                                               \
     }
 
-#define XINFO_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xinfo)                                            \
-    {                                                                        \
-        if (execute_xinfo_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                    \
-            return;                                                          \
-        }                                                                    \
-        zval_dtor(return_value);                                             \
-        RETURN_FALSE;                                                        \
+#define XGROUP_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xgroup)                                                                                                                                                    \
+    {                                                                                                                                                                                 \
+        if (execute_xgroup_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                             \
+            return;                                                                                                                                                                   \
+        }                                                                                                                                                                             \
+        zval_dtor(return_value);                                                                                                                                                      \
+        RETURN_FALSE;                                                                                                                                                                 \
     }
 
-#define XLEN_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xlen)                                            \
-    {                                                                       \
-        if (execute_xlen_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                   \
-            return;                                                         \
-        }                                                                   \
-        zval_dtor(return_value);                                            \
-        RETURN_FALSE;                                                       \
+#define XINFO_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xinfo)                                                                                                                                                    \
+    {                                                                                                                                                                                \
+        if (execute_xinfo_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                            \
+            return;                                                                                                                                                                  \
+        }                                                                                                                                                                            \
+        zval_dtor(return_value);                                                                                                                                                     \
+        RETURN_FALSE;                                                                                                                                                                \
     }
 
-#define XPENDING_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xpending)                                            \
-    {                                                                           \
-        if (execute_xpending_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                       \
-            return;                                                             \
-        }                                                                       \
-        zval_dtor(return_value);                                                \
-        RETURN_FALSE;                                                           \
+#define XLEN_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xlen)                                                                                                                                                    \
+    {                                                                                                                                                                               \
+        if (execute_xlen_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                           \
+            return;                                                                                                                                                                 \
+        }                                                                                                                                                                           \
+        zval_dtor(return_value);                                                                                                                                                    \
+        RETURN_FALSE;                                                                                                                                                               \
     }
 
-#define XRANGE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xrange)                                            \
-    {                                                                         \
-        if (execute_xrange_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                     \
-            return;                                                           \
-        }                                                                     \
-        zval_dtor(return_value);                                              \
-        RETURN_FALSE;                                                         \
+#define XPENDING_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xpending)                                                                                                                                                    \
+    {                                                                                                                                                                                   \
+        if (execute_xpending_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                               \
+            return;                                                                                                                                                                     \
+        }                                                                                                                                                                               \
+        zval_dtor(return_value);                                                                                                                                                        \
+        RETURN_FALSE;                                                                                                                                                                   \
     }
 
-#define XREAD_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xread)                                            \
-    {                                                                        \
-        if (execute_xread_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                    \
-            return;                                                          \
-        }                                                                    \
-        zval_dtor(return_value);                                             \
-        RETURN_FALSE;                                                        \
+#define XRANGE_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xrange)                                                                                                                                                    \
+    {                                                                                                                                                                                 \
+        if (execute_xrange_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                             \
+            return;                                                                                                                                                                   \
+        }                                                                                                                                                                             \
+        zval_dtor(return_value);                                                                                                                                                      \
+        RETURN_FALSE;                                                                                                                                                                 \
     }
 
-#define XREVRANGE_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xrevrange)                                            \
-    {                                                                            \
-        if (execute_xrevrange_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                        \
-            return;                                                              \
-        }                                                                        \
-        zval_dtor(return_value);                                                 \
-        RETURN_FALSE;                                                            \
+#define XREAD_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xread)                                                                                                                                                    \
+    {                                                                                                                                                                                \
+        if (execute_xread_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                            \
+            return;                                                                                                                                                                  \
+        }                                                                                                                                                                            \
+        zval_dtor(return_value);                                                                                                                                                     \
+        RETURN_FALSE;                                                                                                                                                                \
     }
 
-#define XTRIM_METHOD_IMPL(class_name)                                        \
-    PHP_METHOD(class_name, xtrim)                                            \
-    {                                                                        \
-        if (execute_xtrim_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "RedisCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
-        {                                                                    \
-            return;                                                          \
-        }                                                                    \
-        zval_dtor(return_value);                                             \
-        RETURN_FALSE;                                                        \
+#define XREVRANGE_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xrevrange)                                                                                                                                                    \
+    {                                                                                                                                                                                    \
+        if (execute_xrevrange_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                                \
+            return;                                                                                                                                                                      \
+        }                                                                                                                                                                                \
+        zval_dtor(return_value);                                                                                                                                                         \
+        RETURN_FALSE;                                                                                                                                                                    \
+    }
+
+#define XTRIM_METHOD_IMPL(class_name)                                                                                                                                                \
+    PHP_METHOD(class_name, xtrim)                                                                                                                                                    \
+    {                                                                                                                                                                                \
+        if (execute_xtrim_command(getThis(), ZEND_NUM_ARGS(), return_value, strcmp(#class_name, "ValkeyGlideCluster") == 0 ? get_valkey_glide_cluster_ce() : get_valkey_glide_ce())) \
+        {                                                                                                                                                                            \
+            return;                                                                                                                                                                  \
+        }                                                                                                                                                                            \
+        zval_dtor(return_value);                                                                                                                                                     \
+        RETURN_FALSE;                                                                                                                                                                \
     }
 
 #endif /* VALKEY_GLIDE_X_COMMON_H */

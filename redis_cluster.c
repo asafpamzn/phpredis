@@ -242,9 +242,7 @@ SADD_ARRAY_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::srem(string key, string val1 [, ...]) */
-PHP_METHOD(ValkeyGlideCluster, srem)
-{
-}
+SREM_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::sunion(string key1, ... keyN) */
