@@ -110,7 +110,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::client
      */
-    //TODO public function client(mixed $route, string $subcommand, ?string $arg = null): array|string|bool;
+    public function client(mixed $route, string $subcommand, ?string $arg = null): array|string|bool;
 
     /**
      * @see ValkeyGlide::close

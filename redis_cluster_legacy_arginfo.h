@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: eda7d0f8e46b5b70e333886b536728e305566a77 */
+ * Stub hash: 537086885c6471d2e11325157dc9b44d274902d2 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
@@ -89,6 +89,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ValkeyGlideCluster_lmpop arginfo_class_ValkeyGlideCluster_zmpop
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster_clearlasterror, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster_client, 0, 0, 2)
+	ZEND_ARG_INFO(0, route)
+	ZEND_ARG_INFO(0, subcommand)
+	ZEND_ARG_INFO(0, arg)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ValkeyGlideCluster_close arginfo_class_ValkeyGlideCluster_clearlasterror
@@ -835,6 +841,7 @@ ZEND_METHOD(ValkeyGlideCluster, zmpop);
 ZEND_METHOD(ValkeyGlideCluster, blmpop);
 ZEND_METHOD(ValkeyGlideCluster, lmpop);
 ZEND_METHOD(ValkeyGlideCluster, clearlasterror);
+ZEND_METHOD(ValkeyGlideCluster, client);
 ZEND_METHOD(ValkeyGlideCluster, close);
 ZEND_METHOD(ValkeyGlideCluster, dbSize);
 ZEND_METHOD(ValkeyGlideCluster, copy);
@@ -1038,6 +1045,7 @@ static const zend_function_entry class_ValkeyGlideCluster_methods[] = {
 	ZEND_ME(ValkeyGlideCluster, blmpop, arginfo_class_ValkeyGlideCluster_blmpop, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, lmpop, arginfo_class_ValkeyGlideCluster_lmpop, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, clearlasterror, arginfo_class_ValkeyGlideCluster_clearlasterror, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, client, arginfo_class_ValkeyGlideCluster_client, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, close, arginfo_class_ValkeyGlideCluster_close, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, dbSize, arginfo_class_ValkeyGlideCluster_dbSize, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, copy, arginfo_class_ValkeyGlideCluster_copy, ZEND_ACC_PUBLIC)

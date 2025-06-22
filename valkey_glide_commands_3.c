@@ -1165,7 +1165,7 @@ int execute_get_persistent_id_command(const void *glide_client, char **result, s
 }
 
 /* Execute a CLIENT command using the Valkey Glide client */
-int execute_client_command_internal(const void *glide_client, zval *args, int args_count, zval *return_value)
+int execute_client_command_internal(const void *glide_client, zval *args, int args_count, zval *return_value, zval *route)
 {
     /* Check if client and args are valid */
     if (!glide_client || !args || args_count <= 0 || !return_value)
@@ -1299,14 +1299,31 @@ int execute_client_command_internal(const void *glide_client, zval *args, int ar
         }
     }
 
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        glide_client,
-        command_type,    /* command type */
-        final_arg_count, /* number of arguments */
-        final_args,      /* arguments */
-        final_args_len   /* argument lengths */
-    );
+    /* Execute the command with or without routing */
+    CommandResult *result;
+    if (route)
+    {
+        /* Use cluster routing */
+        result = execute_command_with_route(
+            glide_client,
+            command_type,    /* command type */
+            final_arg_count, /* number of arguments */
+            final_args,      /* arguments */
+            final_args_len,  /* argument lengths */
+            route            /* route parameter */
+        );
+    }
+    else
+    {
+        /* No routing (standalone mode) */
+        result = execute_command(
+            glide_client,
+            command_type,    /* command type */
+            final_arg_count, /* number of arguments */
+            final_args,      /* arguments */
+            final_args_len   /* argument lengths */
+        );
+    }
 
     /* Free allocated memory */
     for (i = 0; i < allocated_idx; i++)
@@ -1465,13 +1482,8 @@ int execute_client_command(zval *object, int argc, zval *return_value, zend_clas
     valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
     int arg_count = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(argc, object, "O+",
-                                     &object, ce, &z_args, &arg_count) == FAILURE)
-    {
-        return 0;
-    }
+    zend_bool is_cluster = (ce == get_valkey_glide_cluster_ce());
+    zval *route = NULL;
 
     /* Get ValkeyGlide object */
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
@@ -1480,8 +1492,44 @@ int execute_client_command(zval *object, int argc, zval *return_value, zend_clas
         return 0;
     }
 
+    if (is_cluster)
+    {
+        /* Parse parameters for cluster - route + command arguments */
+        if (zend_parse_method_parameters(argc, object, "O*",
+                                         &object, ce, &z_args, &arg_count) == FAILURE)
+        {
+            return 0;
+        }
+
+        if (arg_count == 0)
+        {
+            /* Need at least the route parameter */
+            return 0;
+        }
+
+        /* First argument is route, rest are command arguments */
+        route = &z_args[0];
+        z_args = &z_args[1];       /* Skip route parameter */
+        arg_count = arg_count - 1; /* Reduce count by 1 */
+
+        if (arg_count == 0)
+        {
+            /* Need at least one command argument after route */
+            return 0;
+        }
+    }
+    else
+    {
+        /* Parse parameters for non-cluster - just command arguments */
+        if (zend_parse_method_parameters(argc, object, "O+",
+                                         &object, ce, &z_args, &arg_count) == FAILURE)
+        {
+            return 0;
+        }
+    }
+
     /* Execute the client command using the Glide client */
-    if (execute_client_command_internal(valkey_glide->glide_client, z_args, arg_count, return_value))
+    if (execute_client_command_internal(valkey_glide->glide_client, z_args, arg_count, return_value, route))
     {
         /* Return value already set in execute_client_command */
         return 1;
