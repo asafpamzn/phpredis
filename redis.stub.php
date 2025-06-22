@@ -519,10 +519,8 @@ class ValkeyGlide {
      * @return ValkeyGlide|bool  True if we could discard the transaction.
      *
      * @example
-     * $redis->getMode();
      * $redis->set('foo', 'bar');
      * $redis->discard();
-     * $redis->getMode();
      */
     public function discard(): ValkeyGlide|bool;
 

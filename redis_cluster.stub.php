@@ -75,12 +75,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::bzpopmax
      */
-    public function bzpopmax(string|array $key, string|int $timeout_or_key, mixed ...$extra_args): array;
+    public function bzPopMax(string|array $key, string|int $timeout_or_key, mixed ...$extra_args): array;
 
     /**
      * @see ValkeyGlide::bzpopmin
      */
-    public function bzpopmin(string|array $key, string|int $timeout_or_key, mixed ...$extra_args): array;
+    public function bzPopMin(string|array $key, string|int $timeout_or_key, mixed ...$extra_args): array;
 
     /**
      * @see ValkeyGlide::bzmpop
@@ -101,11 +101,6 @@ class ValkeyGlideCluster {
      * @see ValkeyGlide::lmpop()
      */
     public function lmpop(array $keys, string $from, int $count = 1): ValkeyGlideCluster|array|null|false;
-
-    /**
-     * @see ValkeyGlide::clearlasterror()
-     */
-    public function clearlasterror(): bool;
 
     /**
      * @see ValkeyGlide::client
@@ -305,16 +300,6 @@ class ValkeyGlideCluster {
     public function getBit(string $key, int $idx): ValkeyGlideCluster|int|false;
 
     /**
-     * @see ValkeyGlide::getlasterror
-     */
-    public function getlasterror(): string|null;
-
-    /**
-     * @see ValkeyGlide::getmode
-     */
-    public function getmode(): int;
-
-    /**
      * @see ValkeyGlide::getrange
      */
     public function getRange(string $key, int $start, int $end): ValkeyGlideCluster|string|false;
@@ -466,11 +451,6 @@ class ValkeyGlideCluster {
      */
     public function keys(string $pattern): ValkeyGlideCluster|array|false;
 
-
-    /**
-     * @see ValkeyGlide::lget
-     */
-    public function lget(string $key, int $index): ValkeyGlideCluster|string|bool;
 
     /**
      * @see ValkeyGlide::lindex

@@ -455,12 +455,6 @@ BITCOUNT_METHOD_IMPL(ValkeyGlideCluster)
 BITPOS_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
-/* {{{ proto string ValkeyGlide::lget(string key, long index) */
-PHP_METHOD(ValkeyGlideCluster, lget)
-{
-}
-/* }}} */
-
 /* {{{ proto string ValkeyGlideCluster::getrange(string key, long start, long end) */
 GETRANGE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
@@ -612,22 +606,16 @@ ZPOPMIN_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::bzPopMin(Array keys [, timeout]) }}} */
-PHP_METHOD(ValkeyGlideCluster, bzpopmax)
-{
-}
+BZPOPMAX_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::bzPopMax(Array keys [, timeout]) }}} */
-PHP_METHOD(ValkeyGlideCluster, bzpopmin)
-{
-}
+BZPOPMIN_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto ValkeyGlideCluster::sort(string key, array options) */
 SORT_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto ValkeyGlideCluster::sort_ro(string key, array options) */
-PHP_METHOD(ValkeyGlideCluster, sort_ro)
-{
-}
+SORT_RO_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto ValkeyGlideCluster::object(string subcmd, string key) */
 OBJECT_METHOD_IMPL(ValkeyGlideCluster)
@@ -682,23 +670,6 @@ PHP_METHOD(ValkeyGlideCluster, evalsha_ro)
 /* }}} */
 /* Commands that do not interact with ValkeyGlide, but just report stuff about
  * various options, etc */
-
-/* {{{ proto string ValkeyGlideCluster::getmode() */
-PHP_METHOD(ValkeyGlideCluster, getmode)
-{
-}
-/* }}} */
-
-/* {{{ proto string ValkeyGlideCluster::getlasterror() */
-PHP_METHOD(ValkeyGlideCluster, getlasterror)
-{
-}
-/* }}} */
-
-/* {{{ proto bool ValkeyGlideCluster::clearlasterror() */
-PHP_METHOD(ValkeyGlideCluster, clearlasterror)
-{
-}
 
 /*
  * Transaction handling
