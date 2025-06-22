@@ -32,7 +32,7 @@ class ValkeyGlideCluster {
         ?int $request_timeout = null,
         ?array $reconnect_strategy = null,
         ?string $client_name = null,
-        int|array $periodic_checks = 0,
+        int|array $periodic_checks = ValkeyGlide::PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS,
         ?int $inflight_requests_limit = null,
         ?string $client_az = null,
         ?array $advanced_config = null,

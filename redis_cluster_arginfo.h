@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7239566d32d0ddb6e951f047f3b509aa1a1acc12 */
+ * Stub hash: e7e65a380b7a609a21243f5e9a21700fdceb4898 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, addresses, IS_ARRAY, 0)
@@ -9,7 +9,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, request_timeout, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, reconnect_strategy, IS_ARRAY, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, client_name, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_MASK(0, periodic_checks, MAY_BE_LONG|MAY_BE_ARRAY, "0")
+	ZEND_ARG_TYPE_MASK(0, periodic_checks, MAY_BE_LONG|MAY_BE_ARRAY, "ValkeyGlide::PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, inflight_requests_limit, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, client_az, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, advanced_config, IS_ARRAY, 1, "null")
