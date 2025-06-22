@@ -88,34 +88,22 @@ SET_METHOD_IMPL(ValkeyGlideCluster)
 /* Generic handler for MGET/MSET/MSETNX */
 
 /* {{{ proto array ValkeyGlideCluster::del(string key1, string key2, ... keyN) */
-PHP_METHOD(ValkeyGlideCluster, del)
-{
-}
+DEL_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::unlink(string key1, string key2, ... keyN) */
-PHP_METHOD(ValkeyGlideCluster, unlink)
-{
-}
+UNLINK_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::mget(array keys) */
-PHP_METHOD(ValkeyGlideCluster, mget)
-{
-}
+MGET_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto bool ValkeyGlideCluster::mset(array keyvalues) */
-PHP_METHOD(ValkeyGlideCluster, mset)
-{
-}
+MSET_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::msetnx(array keyvalues) */
-PHP_METHOD(ValkeyGlideCluster, msetnx)
-{
-}
+MSETNX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
-PHP_METHOD(ValkeyGlideCluster, getex)
-{
-}
+GETEX_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto bool ValkeyGlideCluster::setex(string key, string value, int expiry) */
 SETEX_METHOD_IMPL(ValkeyGlideCluster)
@@ -130,9 +118,7 @@ SETNX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::getSet(string key, string value) */
-PHP_METHOD(ValkeyGlideCluster, getset)
-{
-}
+GETSET_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto int ValkeyGlideCluster::exists(string $key, string ...$more_keys) */
@@ -144,9 +130,7 @@ TOUCH_METHOD_IMPL(ValkeyGlideCluster)
 
 /* }}} */
 /* {{{ proto array ValkeyGlide::keys(string pattern) */
-PHP_METHOD(ValkeyGlideCluster, keys)
-{
-}
+KEYS_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto int ValkeyGlideCluster::type(string key) */
@@ -154,51 +138,35 @@ TYPE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::pop(string key, [int count = 0]) */
-PHP_METHOD(ValkeyGlideCluster, lpop)
-{
-}
+LPOP_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
-PHP_METHOD(ValkeyGlideCluster, lpos)
-{
-}
+LPOS_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto string ValkeyGlideCluster::rpop(string key, [int count = 0]) */
-PHP_METHOD(ValkeyGlideCluster, rpop)
-{
-}
+RPOP_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::lset(string key, long index, string val) */
-PHP_METHOD(ValkeyGlideCluster, lset)
-{
-}
+LSET_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::spop(string key) */
-PHP_METHOD(ValkeyGlideCluster, spop)
-{
-}
+SPOP_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string|array ValkeyGlideCluster::srandmember(string key, [long count]) */
-PHP_METHOD(ValkeyGlideCluster, srandmember)
-{
-}
+SRANDMEMBER_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto string ValkeyGlideCluster::strlen(string key) */
 STRLEN_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto long ValkeyGlideCluster::lpush(string key, string val1, ... valN) */
-PHP_METHOD(ValkeyGlideCluster, lpush)
-{
-}
+LPUSH_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::rpush(string key, string val1, ... valN) */
-PHP_METHOD(ValkeyGlideCluster, rpush)
-{
-}
+RPUSH_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::blpop(string key1, ... keyN, long timeout) */
@@ -214,89 +182,59 @@ PHP_METHOD(ValkeyGlideCluster, brpop)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::rpushx(string key, mixed value) */
-PHP_METHOD(ValkeyGlideCluster, rpushx)
-{
-}
+RPUSHX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::lpushx(string key, mixed value) */
-PHP_METHOD(ValkeyGlideCluster, lpushx)
-{
-}
+LPUSHX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::linsert(string k,string pos,mix pvt,mix val) */
-PHP_METHOD(ValkeyGlideCluster, linsert)
-{
-}
+LINSERT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::lindex(string key, long index) */
-PHP_METHOD(ValkeyGlideCluster, lindex)
-{
-}
+LINDEX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::lrem(string key, long count, string val) */
-PHP_METHOD(ValkeyGlideCluster, lrem)
-{
-}
+LREM_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::rpoplpush(string key, string key) */
-PHP_METHOD(ValkeyGlideCluster, rpoplpush)
-{
-}
+RPOPLPUSH_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::brpoplpush(string key, string key, long tm) */
-PHP_METHOD(ValkeyGlideCluster, brpoplpush)
-{
-}
+BRPOPLPUSH_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
-PHP_METHOD(ValkeyGlideCluster, lmove)
-{
-}
+LMOVE_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, blmove)
-{
-}
+BLMOVE_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto long ValkeyGlideCluster::llen(string key)  */
-PHP_METHOD(ValkeyGlideCluster, llen)
-{
-}
+LLEN_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::scard(string key) */
-PHP_METHOD(ValkeyGlideCluster, scard)
-{
-}
+SCARD_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::smembers(string key) */
-PHP_METHOD(ValkeyGlideCluster, smembers)
-{
-}
+SMEMBERS_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::sismember(string key) */
-PHP_METHOD(ValkeyGlideCluster, sismember)
-{
-}
+SISMEMBER_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::smismember(string key, string member0, ...memberN) */
-PHP_METHOD(ValkeyGlideCluster, smismember)
-{
-}
+SMISMEMBER_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::sadd(string key, string val1 [, ...]) */
-PHP_METHOD(ValkeyGlideCluster, sadd)
-{
-}
+SADD_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::saddarray(string key, array values) */
@@ -312,58 +250,40 @@ PHP_METHOD(ValkeyGlideCluster, srem)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::sunion(string key1, ... keyN) */
-PHP_METHOD(ValkeyGlideCluster, sunion)
-{
-}
+SUNION_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::sunionstore(string dst, string k1, ... kN) */
-PHP_METHOD(ValkeyGlideCluster, sunionstore)
-{
-}
+SUNIONSTORE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ ptoto array ValkeyGlideCluster::sinter(string k1, ... kN) */
-PHP_METHOD(ValkeyGlideCluster, sinter)
-{
-}
+SINTER_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto ValkeyGlideCluster::sintercard(array $keys, int $count = -1) */
-PHP_METHOD(ValkeyGlideCluster, sintercard)
-{
-}
+SINTERCARD_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* }}} */
 
 /* {{{ ptoto long ValkeyGlideCluster::sinterstore(string dst, string k1, ... kN) */
-PHP_METHOD(ValkeyGlideCluster, sinterstore)
-{
-}
+SINTERSTORE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::sdiff(string k1, ... kN) */
-PHP_METHOD(ValkeyGlideCluster, sdiff)
-{
-}
+SDIFF_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::sdiffstore(string dst, string k1, ... kN) */
-PHP_METHOD(ValkeyGlideCluster, sdiffstore)
-{
-}
+SDIFFSTORE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::smove(string src, string dst, string mem) */
-PHP_METHOD(ValkeyGlideCluster, smove)
-{
-}
+SMOVE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::persist(string key) */
-PHP_METHOD(ValkeyGlideCluster, persist)
-{
-}
+PERSIST_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::ttl(string key) */
@@ -401,15 +321,11 @@ ZCOUNT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::zrank(string key, mixed member) */
-PHP_METHOD(ValkeyGlideCluster, zrank)
-{
-}
+ZRANK_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::zrevrank(string key, mixed member) */
-PHP_METHOD(ValkeyGlideCluster, zrevrank)
-{
-}
+ZREVRANK_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::hlen(string key) */
@@ -445,68 +361,46 @@ HEXISTS_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::hincr(string key, string mem, long val) */
-PHP_METHOD(ValkeyGlideCluster, hincrby)
-{
-}
+HINCRBY_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto double ValkeyGlideCluster::hincrbyfloat(string k, string m, double v) */
-PHP_METHOD(ValkeyGlideCluster, hincrbyfloat)
-{
-}
+HINCRBYFLOAT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::hmset(string key, array key_vals) */
-PHP_METHOD(ValkeyGlideCluster, hmset)
-{
-}
+HMSET_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::hrandfield(string key, [array $options]) */
-PHP_METHOD(ValkeyGlideCluster, hrandfield)
-{
-}
+HRANDFIELD_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::hdel(string key, string mem1, ... memN) */
-PHP_METHOD(ValkeyGlideCluster, hdel)
-{
-}
+HDEL_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::hmget(string key, array members) */
-PHP_METHOD(ValkeyGlideCluster, hmget)
-{
-}
+HMGET_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::hstrlen(string key, string field) */
-PHP_METHOD(ValkeyGlideCluster, hstrlen)
-{
-}
+HSTRLEN_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::dump(string key) */
-PHP_METHOD(ValkeyGlideCluster, dump)
-{
-}
+DUMP_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto long ValkeyGlideCluster::incr(string key) */
-PHP_METHOD(ValkeyGlideCluster, incr)
-{
-}
+INCR_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::incrby(string key, long byval) */
-PHP_METHOD(ValkeyGlideCluster, incrby)
-{
-}
+INCRBY_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::decr(string key) */
-PHP_METHOD(ValkeyGlideCluster, decr)
-{
-}
+DECR_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::decrby(string key, long byval) */
@@ -520,37 +414,25 @@ INCRBYFLOAT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::expire(string key, long sec) */
-PHP_METHOD(ValkeyGlideCluster, expire)
-{
-}
+EXPIRE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::expireat(string key, long ts) */
-PHP_METHOD(ValkeyGlideCluster, expireat)
-{
-}
+EXPIREAT_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto bool ValkeyGlideCluster::pexpire(string key, long ms) */
-PHP_METHOD(ValkeyGlideCluster, pexpire)
-{
-}
+PEXPIRE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::pexpireat(string key, long ts) */
-PHP_METHOD(ValkeyGlideCluster, pexpireat)
-{
-}
+PEXPIREAT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ ValkeyGlide::expiretime(string $key): int */
-PHP_METHOD(ValkeyGlideCluster, expiretime)
-{
-}
+EXPIRETIME_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ ValkeyGlide::pexpiretime(string $key): int */
-PHP_METHOD(ValkeyGlideCluster, pexpiretime)
-{
-}
+PEXPIRETIME_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto long ValkeyGlideCluster::append(string key, string val) */
 APPEND_METHOD_IMPL(ValkeyGlideCluster)
@@ -560,33 +442,23 @@ APPEND_METHOD_IMPL(ValkeyGlideCluster)
 GETBIT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
-PHP_METHOD(ValkeyGlideCluster, expiremember)
-{
-}
+EXPIREMEMBER_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, expirememberat)
-{
-}
+EXPIREMEMBERAT_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto long ValkeyGlideCluster::setbit(string key, long offset, bool onoff) */
 SETBIT_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto long ValkeyGlideCluster::bitop(string op,string key,[string key2,...]) */
-PHP_METHOD(ValkeyGlideCluster, bitop)
-{
-}
+BITOP_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::bitcount(string key, [int start, int end]) */
-PHP_METHOD(ValkeyGlideCluster, bitcount)
-{
-}
+BITCOUNT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::bitpos(string key, int bit, [int s, int end]) */
-PHP_METHOD(ValkeyGlideCluster, bitpos)
-{
-}
+BITPOS_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlide::lget(string key, long index) */
@@ -596,56 +468,38 @@ PHP_METHOD(ValkeyGlideCluster, lget)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::getrange(string key, long start, long end) */
-PHP_METHOD(ValkeyGlideCluster, getrange)
-{
-}
+GETRANGE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ prot ValkeyGlideCluster::lcs(string $key1, string $key2, ?array $options = NULL): mixed; */
-PHP_METHOD(ValkeyGlideCluster, lcs)
-{
-}
+LCS_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto ValkeyGlide|array|false ValkeyGlide::lmpop(array $keys, string $from, int $count = 1) */
-PHP_METHOD(ValkeyGlideCluster, lmpop)
-{
-}
+LMPOP_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlide|array|false ValkeyGlide::blmpop(double $timeout, array $keys, string $from, int $count = 1) */
-PHP_METHOD(ValkeyGlideCluster, blmpop)
-{
-}
+BLMPOP_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlide|array|false ValkeyGlide::zmpop(array $keys, string $from, int $count = 1) */
-PHP_METHOD(ValkeyGlideCluster, zmpop)
-{
-}
+ZMPOP_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlide|array|false ValkeyGlide::bzmpop(double $timeout, array $keys, string $from, int $count = 1) */
-PHP_METHOD(ValkeyGlideCluster, bzmpop)
-{
-}
+BZMPOP_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto string ValkeyGlideCluster::ltrim(string key, long start, long end) */
-PHP_METHOD(ValkeyGlideCluster, ltrim)
-{
-}
+LTRIM_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::lrange(string key, long start, long end) */
-PHP_METHOD(ValkeyGlideCluster, lrange)
-{
-}
+LRANGE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::zremrangebyrank(string k, long s, long e) */
-PHP_METHOD(ValkeyGlideCluster, zremrangebyrank)
-{
-}
+ZREMRANGEBYRANK_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::publish(string key, string msg) */
@@ -655,15 +509,11 @@ PHP_METHOD(ValkeyGlideCluster, publish)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::rename(string key1, string key2) */
-PHP_METHOD(ValkeyGlideCluster, rename)
-{
-}
+RENAME_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto bool ValkeyGlideCluster::renamenx(string key1, string key2) */
-PHP_METHOD(ValkeyGlideCluster, renamenx)
-{
-}
+RENAMENX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::pfcount(string key) */
@@ -679,136 +529,92 @@ PFMERGE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto boolean ValkeyGlideCluster::restore(string key, long ttl, string val) */
-PHP_METHOD(ValkeyGlideCluster, restore)
-{
-}
+RESTORE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::setrange(string key, long offset, string val) */
-PHP_METHOD(ValkeyGlideCluster, setrange)
-{
-}
+SETRANGE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto
  *     array ValkeyGlideCluster::zrange(string k, long s, long e, bool score = 0) */
-PHP_METHOD(ValkeyGlideCluster, zrange)
-{
-}
+ZRANGE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto
  *     array ValkeyGlideCluster::zrange(string $dstkey, string $srckey, long s, long e, array|bool $options = false) */
-PHP_METHOD(ValkeyGlideCluster, zrangestore)
-{
-}
+ZRANGESTORE_METHOD_IMPL(ValkeyGlideCluster)
 
 /* }}} */
 /* {{{ proto
  *     array ValkeyGlideCluster::zrevrange(string k,long s,long e,bool scores = 0) */
-PHP_METHOD(ValkeyGlideCluster, zrevrange)
-{
-}
+ZREVRANGE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array
  *     ValkeyGlideCluster::zrangebyscore(string k, long s, long e, array opts) */
-PHP_METHOD(ValkeyGlideCluster, zrangebyscore)
-{
-}
+ZRANGEBYSCORE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlideCluster::zunionstore(string dst, array keys, [array weights,
  *                                     string agg]) */
-PHP_METHOD(ValkeyGlideCluster, zunionstore)
-{
-}
+ZUNIONSTORE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
-PHP_METHOD(ValkeyGlideCluster, zdiff)
-{
-}
+ZDIFF_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, zdiffstore)
-{
-}
+ZDIFFSTORE_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, zinter)
-{
-}
+ZINTER_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, zunion)
-{
-}
+ZUNION_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::zrandmember(string key, array options) */
-PHP_METHOD(ValkeyGlideCluster, zrandmember)
-{
-}
+ZRANDMEMBER_METHOD_IMPL(ValkeyGlideCluster)
 
 /* }}} */
 /* {{{ proto ValkeyGlideCluster::zinterstore(string dst, array keys, [array weights,
  *                                     string agg]) */
-PHP_METHOD(ValkeyGlideCluster, zinterstore)
-{
-}
+ZINTERSTORE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlideCluster::zintercard(array $keys, int $count = -1) */
-PHP_METHOD(ValkeyGlideCluster, zintercard)
-{
-}
+ZINTERCARD_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlideCluster::zrem(string key, string val1, ... valN) */
-PHP_METHOD(ValkeyGlideCluster, zrem)
-{
-}
+ZREM_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array
  *     ValkeyGlideCluster::zrevrangebyscore(string k, long s, long e, array opts) */
-PHP_METHOD(ValkeyGlideCluster, zrevrangebyscore)
-{
-}
+ZREVRANGEBYSCORE_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::zrangebylex(string key, string min, string max,
  *                                           [offset, count]) */
-PHP_METHOD(ValkeyGlideCluster, zrangebylex)
-{
-}
+ZRANGEBYLEX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::zrevrangebylex(string key, string min,
  *                                              string min, [long off, long limit) */
-PHP_METHOD(ValkeyGlideCluster, zrevrangebylex)
-{
-}
+ZREVRANGEBYLEX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::zlexcount(string key, string min, string max) */
-PHP_METHOD(ValkeyGlideCluster, zlexcount)
-{
-}
+ZLEXCOUNT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::zremrangebylex(string key, string min, string max) */
-PHP_METHOD(ValkeyGlideCluster, zremrangebylex)
-{
-}
+ZREMRANGEBYLEX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::zpopmax(string key) */
-PHP_METHOD(ValkeyGlideCluster, zpopmax)
-{
-}
+ZPOPMAX_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::zpopmin(string key) */
-PHP_METHOD(ValkeyGlideCluster, zpopmin)
-{
-}
+ZPOPMIN_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::bzPopMin(Array keys [, timeout]) }}} */
@@ -822,9 +628,7 @@ PHP_METHOD(ValkeyGlideCluster, bzpopmin)
 }
 
 /* {{{ proto ValkeyGlideCluster::sort(string key, array options) */
-PHP_METHOD(ValkeyGlideCluster, sort)
-{
-}
+SORT_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto ValkeyGlideCluster::sort_ro(string key, array options) */
 PHP_METHOD(ValkeyGlideCluster, sort_ro)
@@ -832,9 +636,7 @@ PHP_METHOD(ValkeyGlideCluster, sort_ro)
 }
 
 /* {{{ proto ValkeyGlideCluster::object(string subcmd, string key) */
-PHP_METHOD(ValkeyGlideCluster, object)
-{
-}
+OBJECT_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto null ValkeyGlideCluster::subscribe(array chans, callable cb) */
 PHP_METHOD(ValkeyGlideCluster, subscribe)
@@ -909,34 +711,22 @@ PHP_METHOD(ValkeyGlideCluster, clearlasterror)
  */
 
 /* {{{ proto bool ValkeyGlideCluster::multi() */
-PHP_METHOD(ValkeyGlideCluster, multi)
-{
-}
+MULTI_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto bool ValkeyGlideCluster::watch() */
-PHP_METHOD(ValkeyGlideCluster, watch)
-{
-}
+WATCH_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto bool ValkeyGlideCluster::unwatch() */
-PHP_METHOD(ValkeyGlideCluster, unwatch)
-{
-}
+UNWATCH_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::exec() */
-PHP_METHOD(ValkeyGlideCluster, exec)
-{
-}
+EXEC_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto bool ValkeyGlideCluster::discard() */
-PHP_METHOD(ValkeyGlideCluster, discard)
-{
-}
+DISCARD_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto ValkeyGlideCluster::scan(string master, long it [, string pat, long cnt]) */
-PHP_METHOD(ValkeyGlideCluster, scan)
-{
-}
+SCAN_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto ValkeyGlideCluster::sscan(string key, long it [string pat, long cnt]) */
@@ -976,16 +766,12 @@ INFO_METHOD_IMPL(ValkeyGlideCluster)
  *     proto bool ValkeyGlideCluster::client('setname', $name)
  *     proto string ValkeyGlideCluster::client('getname')
  */
-PHP_METHOD(ValkeyGlideCluster, client)
-{
-}
+CLIENT_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto mixed ValkeyGlideCluster::config(string key, ...)
  *     proto mixed ValkeyGlideCluster::config(array host_port, ...) */
-PHP_METHOD(ValkeyGlideCluster, config)
-{
-}
+CONFIG_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto mixed ValkeyGlideCluster::pubsub(string key, ...)
@@ -1010,29 +796,19 @@ PHP_METHOD(ValkeyGlideCluster, slowlog)
 /* }}} */
 
 /* {{{ proto int ValkeyGlideCluster::geoadd(string key, float long float lat string mem, ...) */
-PHP_METHOD(ValkeyGlideCluster, geoadd)
-{
-}
+GEOADD_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::geohash(string key, string mem1, [string mem2...]) */
-PHP_METHOD(ValkeyGlideCluster, geohash)
-{
-}
+GEOHASH_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::geopos(string key, string mem1, [string mem2...]) */
-PHP_METHOD(ValkeyGlideCluster, geopos)
-{
-}
+GEOPOS_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::geodist(string key, string mem1, string mem2 [string unit]) */
-PHP_METHOD(ValkeyGlideCluster, geodist)
-{
-}
+GEODIST_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::georadius() }}} */
-PHP_METHOD(ValkeyGlideCluster, georadius)
-{
-}
+GEORADIUS_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::georadius() }}} */
 PHP_METHOD(ValkeyGlideCluster, georadius_ro)
@@ -1049,13 +825,9 @@ PHP_METHOD(ValkeyGlideCluster, georadiusbymember_ro)
 {
 }
 
-PHP_METHOD(ValkeyGlideCluster, geosearch)
-{
-}
+GEOSEARCH_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, geosearchstore)
-{
-}
+GEOSEARCHSTORE_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::role(string key)
  *     proto array ValkeyGlideCluster::role(array host_port) */
@@ -1077,80 +849,48 @@ PING_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::xack(string key, string group, array ids) }}} */
-PHP_METHOD(ValkeyGlideCluster, xack)
-{
-}
+XACK_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto string ValkeyGlideCluster::xadd(string key, string id, array field_values) }}} */
-PHP_METHOD(ValkeyGlideCluster, xadd)
-{
-}
+XADD_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::xclaim(string key, string group, string consumer,
  *                                      long min_idle_time, array ids, array options) */
-PHP_METHOD(ValkeyGlideCluster, xclaim)
-{
-}
+XCLAIM_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, xautoclaim)
-{
-}
+XAUTOCLAIM_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, xdel)
-{
-}
+XDEL_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto variant ValkeyGlideCluster::xgroup(string op, [string key, string arg1, string arg2]) }}} */
-PHP_METHOD(ValkeyGlideCluster, xgroup)
-{
-}
+XGROUP_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto variant ValkeyGlideCluster::xinfo(string op, [string arg1, string arg2]); */
-PHP_METHOD(ValkeyGlideCluster, xinfo)
-{
-}
+XINFO_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto string ValkeyGlideCluster::xlen(string key) }}} */
-PHP_METHOD(ValkeyGlideCluster, xlen)
-{
-}
+XLEN_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, xpending)
-{
-}
+XPENDING_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, xrange)
-{
-}
+XRANGE_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, xrevrange)
-{
-}
+XREVRANGE_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, xread)
-{
-}
+XREAD_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, xreadgroup)
-{
-}
+XREADGROUP_METHOD_IMPL(ValkeyGlideCluster)
 
-PHP_METHOD(ValkeyGlideCluster, xtrim)
-{
-}
+XTRIM_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto string ValkeyGlideCluster::echo(string key, string msg)
  *     proto string ValkeyGlideCluster::echo(array host_port, string msg) */
-PHP_METHOD(ValkeyGlideCluster, echo)
-{
-}
+ECHO_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto mixed ValkeyGlideCluster::rawcommand(string $key, string $cmd, [ $argv1 .. $argvN])
  *     proto mixed ValkeyGlideCluster::rawcommand(array $host_port, string $cmd, [ $argv1 .. $argvN]) */
-PHP_METHOD(ValkeyGlideCluster, rawcommand)
-{
-}
+RAWCOMMAND_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::command()
@@ -1160,8 +900,6 @@ PHP_METHOD(ValkeyGlideCluster, command)
 {
 }
 
-PHP_METHOD(ValkeyGlideCluster, copy)
-{
-}
+COPY_METHOD_IMPL(ValkeyGlideCluster)
 #endif /* PHP_REDIS_CLUSTER_C */
 /* vim: set tabstop=4 softtabstop=4 expandtab shiftwidth=4: */

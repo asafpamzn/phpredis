@@ -106,7 +106,6 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
         return prepare_zero_args(args, cmd_args, cmd_args_len);
 
     /* Single key operations */
-    case Ping:
     case GetDel:
     case Get:
     case Strlen:
@@ -220,6 +219,7 @@ int prepare_core_args(core_command_args_t *args, uintptr_t **cmd_args,
                                   allocated_strings, allocated_count);
 
     /* Message operations (no key, just arguments) */
+    case Ping:
     case Echo:
     case Wait:
     case FlushDB:

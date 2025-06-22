@@ -135,14 +135,11 @@ class ValkeyGlide_Test extends TestSuite {
 
     public function testPing() {
         /* Reply literal off */
-        print_r("1111\n");
-        return;
-        echo "222\n";
         $this->assertTrue($this->redis->ping());
-        echo "222\n";
-      //TODO  $this->assertTrue($this->redis->ping(NULL));
+        
+        $this->assertTrue($this->redis->ping(NULL));
         $this->assertEquals('BEEP', $this->redis->ping('BEEP'));
-
+        return;
         /* Make sure we're good in MULTI mode */
         if ($this->haveMulti()) {
             $this->assertEquals(

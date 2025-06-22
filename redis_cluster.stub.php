@@ -62,7 +62,7 @@ class ValkeyGlideCluster {
      *
      * @see ValkeyGlide::lmove
      */
-    public function lmove(string $src, string $dst, string $wherefrom, string $whereto): ValkeyGlide|string|false;
+    public function lMove(string $src, string $dst, string $wherefrom, string $whereto): ValkeyGlide|string|false;
 
     /**
      * Move an element from one list to another, blocking up to a timeout until an element is available.
@@ -207,7 +207,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::expireat
      */
-    public function expireat(string $key, int $timestamp, ?string $mode = null): ValkeyGlideCluster|bool;
+    public function expireAt(string $key, int $timestamp, ?string $mode = null): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::expiretime()
@@ -297,7 +297,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::getEx
      */
-    public function getex(string $key, array $options = []): ValkeyGlideCluster|string|false;
+    public function getEx(string $key, array $options = []): ValkeyGlideCluster|string|false;
 
     /**
      * @see ValkeyGlide::getbit
@@ -317,7 +317,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::getrange
      */
-    public function getrange(string $key, int $start, int $end): ValkeyGlideCluster|string|false;
+    public function getRange(string $key, int $start, int $end): ValkeyGlideCluster|string|false;
 
     /**
      * @see ValkeyGlide::lcs
@@ -334,7 +334,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::hdel
      */
-    public function hdel(string $key, string $member, string ...$other_members): ValkeyGlideCluster|int|false;
+    public function hDel(string $key, string $member, string ...$other_members): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::hexists
@@ -354,12 +354,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::hincrby
      */
-    public function hincrby(string $key, string $member, int $value): ValkeyGlideCluster|int|false;
+    public function hIncrBy(string $key, string $member, int $value): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::hincrbyfloat
      */
-    public function hincrbyfloat(string $key, string $member, float $value): ValkeyGlideCluster|float|false;
+    public function hIncrByFloat(string $key, string $member, float $value): ValkeyGlideCluster|float|false;
 
     /**
      * @see ValkeyGlide::hkeys
@@ -374,12 +374,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::hmget
      */
-    public function hmget(string $key, array $keys): ValkeyGlideCluster|array|false;
+    public function hMget(string $key, array $keys): ValkeyGlideCluster|array|false;
 
     /**
      * @see ValkeyGlide::hmset
      */
-    public function hmset(string $key, array $key_values): ValkeyGlideCluster|bool;
+    public function hMset(string $key, array $key_values): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::hscan
@@ -399,7 +399,7 @@ class ValkeyGlideCluster {
     /**
      * @see https://redis.io/commands/hrandfield
      */
-    public function hrandfield(string $key, ?array $options = null): ValkeyGlideCluster|string|array;
+    public function hRandField(string $key, ?array $options = null): ValkeyGlideCluster|string|array;
 
     /**
      * @see ValkeyGlide::hset
@@ -414,7 +414,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::hstrlen
      */
-    public function hstrlen(string $key, string $field): ValkeyGlideCluster|int|false;
+    public function hStrLen(string $key, string $field): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::hvals
@@ -429,7 +429,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::incrby
      */
-    public function incrby(string $key, int $value): ValkeyGlideCluster|int|false;
+    public function incrBy(string $key, int $value): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::incrbyfloat
@@ -480,32 +480,32 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::linsert
      */
-    public function linsert(string $key, string $pos, mixed $pivot, mixed $value): ValkeyGlideCluster|int|false;
+    public function lInsert(string $key, string $pos, mixed $pivot, mixed $value): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::llen
      */
-    public function llen(string $key): ValkeyGlideCluster|int|bool;
+    public function lLen(string $key): ValkeyGlideCluster|int|bool;
 
     /**
      * @see ValkeyGlide::lpop
      */
-    public function lpop(string $key, int $count = 0): ValkeyGlideCluster|bool|string|array;
+    public function lPop(string $key, int $count = 0): ValkeyGlideCluster|bool|string|array;
 
     /**
      * @see ValkeyGlide::lpos
      */
-    public function lpos(string $key, mixed $value, ?array $options = null): ValkeyGlide|null|bool|int|array;
+    public function lPos(string $key, mixed $value, ?array $options = null): ValkeyGlide|null|bool|int|array;
 
     /**
      * @see ValkeyGlide::lpush
      */
-    public function lpush(string $key, mixed $value, mixed ...$other_values): ValkeyGlideCluster|int|bool;
+    public function lPush(string $key, mixed $value, mixed ...$other_values): ValkeyGlideCluster|int|bool;
 
     /**
      * @see ValkeyGlide::lpushx
      */
-    public function lpushx(string $key, mixed $value): ValkeyGlideCluster|int|bool;
+    public function lPushx(string $key, mixed $value): ValkeyGlideCluster|int|bool;
 
     /**
      * @see ValkeyGlide::lrange
@@ -520,7 +520,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::lset
      */
-    public function lset(string $key, int $index, mixed $value): ValkeyGlideCluster|bool;
+    public function lSet(string $key, int $index, mixed $value): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::ltrim
@@ -565,7 +565,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::pexpireat
      */
-    public function pexpireat(string $key, int $timestamp, ?string $mode = null): ValkeyGlideCluster|bool;
+    public function pexpireAt(string $key, int $timestamp, ?string $mode = null): ValkeyGlideCluster|bool;
 
 
     /**
@@ -653,7 +653,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::renamenx
      */
-    public function renamenx(string $key, string $newkey): ValkeyGlideCluster|bool;
+    public function renameNx(string $key, string $newkey): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::restore
@@ -668,7 +668,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::rpop()
      */
-    public function rpop(string $key, int $count = 0): ValkeyGlideCluster|bool|string|array;
+    public function rPop(string $key, int $count = 0): ValkeyGlideCluster|bool|string|array;
 
     /**
      * @see ValkeyGlide::rpoplpush()
@@ -678,22 +678,22 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::rpush
      */
-    public function rpush(string $key, mixed ...$elements): ValkeyGlideCluster|int|false;
+    public function rPush(string $key, mixed ...$elements): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::rpushx
      */
-    public function rpushx(string $key, string $value): ValkeyGlideCluster|bool|int;
+    public function rPushx(string $key, string $value): ValkeyGlideCluster|bool|int;
 
     /**
      * @see ValkeyGlide::sadd()
      */
-    public function sadd(string $key, mixed $value, mixed ...$other_values): ValkeyGlideCluster|int|false;
+    public function sAdd(string $key, mixed $value, mixed ...$other_values): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::saddarray()
      */
-    public function saddarray(string $key, array $values): ValkeyGlideCluster|bool|int;
+    public function sAddArray(string $key, array $values): ValkeyGlideCluster|bool|int;
 
     /**
      * @see ValkeyGlide::scan
@@ -713,12 +713,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::sdiff()
      */
-    public function sdiff(string $key, string ...$other_keys): ValkeyGlideCluster|array|false;
+    public function sDiff(string $key, string ...$other_keys): ValkeyGlideCluster|array|false;
 
     /**
      * @see ValkeyGlide::sdiffstore()
      */
-    public function sdiffstore(string $dst, string $key, string ...$other_keys): ValkeyGlideCluster|int|false;
+    public function sDiffStore(string $dst, string $key, string ...$other_keys): ValkeyGlideCluster|int|false;
 
     /**
      * @see https://redis.io/commands/set

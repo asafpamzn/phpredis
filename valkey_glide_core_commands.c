@@ -191,7 +191,7 @@ static int process_ping_result(CommandResult *result, void *output)
     {
         return 0;
     }
-
+    printf("Processing PING result... response_type = %d\n", result->response->response_type);
     if (result->response->response_type == Ok)
     {
         /* PONG response with no message */
@@ -201,6 +201,9 @@ static int process_ping_result(CommandResult *result, void *output)
     }
     else if (result->response->response_type == String)
     {
+        printf("PING response with message: %.*s\n",
+               (int)result->response->string_value_len,
+               result->response->string_value);
         /* PING with message - echo the message back */
         if (result->response->string_value_len == 0)
         {
@@ -222,6 +225,7 @@ static int process_ping_result(CommandResult *result, void *output)
             }
             *string_output->result_len = result->response->string_value_len;
         }
+        printf("PING response with message: %s\n", *string_output->result);
         return *string_output->result ? 1 : 0;
     }
     else if (result->response->response_type == Null)
@@ -905,6 +909,7 @@ int execute_ping_command(zval *object, int argc, zval *return_value, zend_class_
         /* Add optional message argument */
         if (msg)
         {
+            printf("send ping with message\n");
             core_args.args[0].type = CORE_ARG_TYPE_STRING;
             core_args.args[0].data.string_arg.value = msg;
             core_args.args[0].data.string_arg.len = msg_len;
@@ -925,14 +930,31 @@ int execute_ping_command(zval *object, int argc, zval *return_value, zend_class_
     }
 
     /* Process the result */
+    printf("PING command executed, result: %d\n", result);
     if (result == 1 && response != NULL)
     {
-        if (strncmp(response, "PONG", 4) == 0)
+        printf("Response: %.*s\n", (int)response_len, response);
+        /* For non-cluster case, check if message was provided */
+        int has_message = 0;
+        if (!is_cluster)
+        {
+            has_message = (msg != NULL && msg_len > 0);
+        }
+        else
+        {
+            /* For cluster case, check if args_count > 1 (route + message) */
+            has_message = (args_count > 1);
+        }
+        printf("Has message: %d\n", has_message);
+        /* If no message was provided and response is "PONG", return true */
+        if (!has_message && response_len == 4 && strncmp(response, "PONG", 4) == 0)
         {
             efree(response);
             ZVAL_TRUE(return_value);
             return 1;
         }
+        printf("Returning response string\n");
+        /* Otherwise, return the actual response string */
         ZVAL_STRINGL(return_value, response, response_len);
         efree(response);
         return 1;
