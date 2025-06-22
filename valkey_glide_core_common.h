@@ -131,6 +131,11 @@ typedef struct
     core_arg_t args[8]; /* Support up to 8 flexible arguments */
     int arg_count;
 
+    /* Routing support for cluster commands */
+    zval *route_param;    /* Route parameter for cluster commands */
+    zend_bool is_cluster; /* Flag to indicate cluster mode */
+    zend_bool has_route;  /* Flag to indicate route is provided */
+
     /* Options */
     core_options_t options;
     zval *raw_options; /* Raw PHP options array for complex parsing */

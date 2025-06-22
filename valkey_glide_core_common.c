@@ -41,6 +41,7 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
     int allocated_count = 0;
     int arg_count = 0;
     int res = 0;
+    CommandResult *result = NULL;
 
     debug_print_core_args(args);
 
@@ -53,28 +54,45 @@ int execute_core_command(core_command_args_t *args, void *result_ptr,
         return 0;
     }
 
-    /* Execute the command */
-    CommandResult *result = execute_command(
-        args->glide_client,
-        args->cmd_type,
-        arg_count,
-        cmd_args,
-        cmd_args_len);
+    /* Execute the command - use routing if cluster mode and route provided */
+    if (args->has_route && args->route_param)
+    {
+        /* Cluster mode with routing */
+        result = execute_command_with_route(
+            args->glide_client,
+            args->cmd_type,
+            arg_count,
+            cmd_args,
+            cmd_args_len,
+            args->route_param);
+    }
+    else
+    {
+        /* Non-cluster mode or no routing */
+        result = execute_command(
+            args->glide_client,
+            args->cmd_type,
+            arg_count,
+            cmd_args,
+            cmd_args_len);
+    }
 
     debug_print_command_result(result);
 
-    /* Process result */
-
+    /* Process result using appropriate handler */
     if (result)
     {
-
         if (!result->command_error && result->response)
         {
+            /* Non-routed commands use standard processor */
             res = processor(result, result_ptr);
-
-            free_command_result(result);
         }
+
+        /* Free the result - handle_string_response doesn't free it */
+
+        free_command_result(result);
     }
+
     /* Cleanup */
     free_core_args(cmd_args, cmd_args_len, allocated_strings, allocated_count);
 
