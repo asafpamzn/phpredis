@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1a73b7038735ae35292e7cb6da173e8c7ada0dab */
+ * Stub hash: 65d9d63188773533db0fd3e481bd68de0bbf2776 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 1)
@@ -486,6 +486,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_pfm
 	ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlideCluster_ping, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, route, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, message, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_psetex, 0, 3, ValkeyGlideCluster, MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, timeout, IS_LONG, 0)
@@ -505,7 +510,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_pub
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlideCluster_pubsub, 0, 1, IS_MIXED, 0)
-	ZEND_ARG_TYPE_MASK(0, key_or_address, MAY_BE_STRING|MAY_BE_ARRAY, NULL)
+	ZEND_ARG_TYPE_INFO(0, route, IS_MIXED, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, values, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -561,7 +566,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_scan, 0, 2, MAY_BE_BOOL|MAY_BE_ARRAY)
 	ZEND_ARG_TYPE_MASK(1, iterator, MAY_BE_NULL|MAY_BE_LONG|MAY_BE_STRING, NULL)
-	ZEND_ARG_TYPE_MASK(0, key_or_address, MAY_BE_STRING|MAY_BE_ARRAY, NULL)
+	ZEND_ARG_TYPE_INFO(0, route, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
@@ -569,7 +574,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ValkeyGlideCluster_scard arginfo_class_ValkeyGlideCluster_expiretime
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlideCluster_script, 0, 1, IS_MIXED, 0)
-	ZEND_ARG_TYPE_MASK(0, key_or_address, MAY_BE_STRING|MAY_BE_ARRAY, NULL)
+	ZEND_ARG_TYPE_INFO(0, route, IS_MIXED, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
@@ -1031,6 +1036,7 @@ ZEND_METHOD(ValkeyGlideCluster, pexpireat);
 ZEND_METHOD(ValkeyGlideCluster, pfadd);
 ZEND_METHOD(ValkeyGlideCluster, pfcount);
 ZEND_METHOD(ValkeyGlideCluster, pfmerge);
+ZEND_METHOD(ValkeyGlideCluster, ping);
 ZEND_METHOD(ValkeyGlideCluster, psetex);
 ZEND_METHOD(ValkeyGlideCluster, psubscribe);
 ZEND_METHOD(ValkeyGlideCluster, pttl);
@@ -1228,6 +1234,7 @@ static const zend_function_entry class_ValkeyGlideCluster_methods[] = {
 	ZEND_ME(ValkeyGlideCluster, pfadd, arginfo_class_ValkeyGlideCluster_pfadd, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, pfcount, arginfo_class_ValkeyGlideCluster_pfcount, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, pfmerge, arginfo_class_ValkeyGlideCluster_pfmerge, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, ping, arginfo_class_ValkeyGlideCluster_ping, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, psetex, arginfo_class_ValkeyGlideCluster_psetex, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, psubscribe, arginfo_class_ValkeyGlideCluster_psubscribe, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, pttl, arginfo_class_ValkeyGlideCluster_pttl, ZEND_ACC_PUBLIC)

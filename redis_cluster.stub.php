@@ -110,7 +110,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::client
      */
-    //TODO public function client(string|array $key_or_address, string $subcommand, ?string $arg = null): array|string|bool;
+    //TODO public function client(mixed $route, string $subcommand, ?string $arg = null): array|string|bool;
 
     /**
      * @see ValkeyGlide::close
@@ -121,12 +121,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::config()
      */
-   //TODO public function config(string|array $key_or_address, string $subcommand, mixed ...$extra_args): mixed;
+   //TODO public function config(mixed $route, string $subcommand, mixed ...$extra_args): mixed;
 
     /**
      * @see ValkeyGlide::dbsize()
      */
-  //TODO  public function dbsize(string|array $key_or_address): ValkeyGlideCluster|int;
+  //TODO  public function dbsize(mixed $route): ValkeyGlideCluster|int;
 
     /**
      * @see https://redis.io/commands/copy
@@ -162,7 +162,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::echo()
      */
-  //TODO  public function echo(string|array $key_or_address, string $msg): ValkeyGlideCluster|string|false;
+  //TODO  public function echo(mixed $route, string $msg): ValkeyGlideCluster|string|false;
 
     /**
      * @see ValkeyGlide::eval
@@ -222,12 +222,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::flushall
      */
-    //TODO public function flushall(string|array $key_or_address, bool $async = false): ValkeyGlideCluster|bool;
+    //TODO public function flushall(mixed $route, bool $async = false): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::flushdb
      */
-    //TODO public function flushdb(string|array $key_or_address, bool $async = false): ValkeyGlideCluster|bool;
+    //TODO public function flushdb(mixed $route, bool $async = false): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::geoadd
@@ -588,15 +588,22 @@ class ValkeyGlideCluster {
      *
      * @see ValkeyGlide::ping()
      *
-     * @param string|array $key_or_address Either a key name or a two element array with host and
-     *                                     address, informing ValkeyGlideCluster which node to ping.
+     * @param mixed $route         The routing configuration that determines which node(s) to send the 
+     *                             command to. Can be:
+     *                             - string "randomNode" to route to a random node
+     *                             - string "allPrimaries" to route to all primary nodes
+     *                             - string "allNodes" to route to all nodes (primaries and replicas)
+     *                             - string containing a key name for slot-based routing
+     *                             - array ['type' => 'primarySlotKey', 'key' => 'keyName'] for slot key routing
+     *                             - array ['type' => 'routeByAddress', 'host' => 'hostname', 'port' => port] 
+     *                               for specific node routing
      *
      * @param string       $message        An optional message to send.
      *
      * @return mixed This method always returns `true` if no message was sent, and the message itself
      *               if one was.
      */
-  //TODO  public function ping(string|array $key_or_address, ?string $message = null): mixed;
+    public function ping(mixed $route, ?string $message = null): mixed;
 
     /**
      * @see ValkeyGlide::psetex
@@ -621,7 +628,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::pubsub
      */
-    public function pubsub(string|array $key_or_address, string ...$values): mixed;
+    public function pubsub(mixed $route, string ...$values): mixed;
 
     /**
      * @see ValkeyGlide::punsubscribe
@@ -631,12 +638,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::randomkey
      */
-   //TODO public function randomkey(string|array $key_or_address): ValkeyGlideCluster|bool|string;
+   //TODO public function randomkey(mixed $route): ValkeyGlideCluster|bool|string;
 
     /**
      * @see ValkeyGlide::rawcommand
      */
- //TODO   public function rawcommand(string|array $key_or_address, string $command, mixed ...$args): mixed;
+ //TODO   public function rawcommand(mixed $route, string $command, mixed ...$args): mixed;
 
     /**
      * @see ValkeyGlide::rename
@@ -656,7 +663,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::role
      */
-    //TODO public function role(string|array $key_or_address): mixed;
+    //TODO public function role(mixed $route): mixed;
 
     /**
      * @see ValkeyGlide::rpop()
@@ -691,7 +698,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::scan
      */
-    public function scan(null|int|string &$iterator, string|array $key_or_address, ?string $pattern = null, int $count = 0): bool|array;
+    public function scan(null|int|string &$iterator, mixed $route, ?string $pattern = null, int $count = 0): bool|array;
 
     /**
      * @see ValkeyGlide::scard
@@ -701,7 +708,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::script
      */
-    public function script(string|array $key_or_address, mixed ...$args): mixed;
+    public function script(mixed $route, mixed ...$args): mixed;
 
     /**
      * @see ValkeyGlide::sdiff()
@@ -827,7 +834,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::time
      */
-   //TODO public function time(string|array $key_or_address): ValkeyGlideCluster|bool|array;
+   //TODO public function time(mixed $route): ValkeyGlideCluster|bool|array;
 
     /**
      * @see ValkeyGlide::ttl
