@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5eb1b0f0aa13c1e3747ff98bd010d1f4b4ded502 */
+ * Stub hash: 574d682de85c9b9f577985975e71f3edca8cb8a2 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
@@ -484,9 +484,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ValkeyGlideCluster_rPushx arginfo_class_ValkeyGlideCluster_append
 
-#define arginfo_class_ValkeyGlideCluster_sadd arginfo_class_ValkeyGlideCluster_lPush
+#define arginfo_class_ValkeyGlideCluster_sAdd arginfo_class_ValkeyGlideCluster_lPush
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster_saddarray, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster_sAddArray, 0, 0, 2)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_INFO(0, values)
 ZEND_END_ARG_INFO()
@@ -505,9 +505,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster_script, 0, 0, 1)
 	ZEND_ARG_VARIADIC_INFO(0, args)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ValkeyGlideCluster_sdiff arginfo_class_ValkeyGlideCluster_del
+#define arginfo_class_ValkeyGlideCluster_sDiff arginfo_class_ValkeyGlideCluster_del
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster_sdiffstore, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster_sDiffStore, 0, 0, 2)
 	ZEND_ARG_INFO(0, dst)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_VARIADIC_INFO(0, other_keys)
@@ -577,7 +577,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ValkeyGlideCluster_sunion arginfo_class_ValkeyGlideCluster_del
 
-#define arginfo_class_ValkeyGlideCluster_sunionstore arginfo_class_ValkeyGlideCluster_sdiffstore
+#define arginfo_class_ValkeyGlideCluster_sunionstore arginfo_class_ValkeyGlideCluster_sDiffStore
 
 #define arginfo_class_ValkeyGlideCluster_ttl arginfo_class_ValkeyGlideCluster_dump
 
@@ -920,13 +920,13 @@ ZEND_METHOD(ValkeyGlideCluster, rPop);
 ZEND_METHOD(ValkeyGlideCluster, rpoplpush);
 ZEND_METHOD(ValkeyGlideCluster, rPush);
 ZEND_METHOD(ValkeyGlideCluster, rPushx);
-ZEND_METHOD(ValkeyGlideCluster, sadd);
-ZEND_METHOD(ValkeyGlideCluster, saddarray);
+ZEND_METHOD(ValkeyGlideCluster, sAdd);
+ZEND_METHOD(ValkeyGlideCluster, sAddArray);
 ZEND_METHOD(ValkeyGlideCluster, scan);
 ZEND_METHOD(ValkeyGlideCluster, scard);
 ZEND_METHOD(ValkeyGlideCluster, script);
-ZEND_METHOD(ValkeyGlideCluster, sdiff);
-ZEND_METHOD(ValkeyGlideCluster, sdiffstore);
+ZEND_METHOD(ValkeyGlideCluster, sDiff);
+ZEND_METHOD(ValkeyGlideCluster, sDiffStore);
 ZEND_METHOD(ValkeyGlideCluster, set);
 ZEND_METHOD(ValkeyGlideCluster, setBit);
 ZEND_METHOD(ValkeyGlideCluster, setex);
@@ -1119,13 +1119,13 @@ static const zend_function_entry class_ValkeyGlideCluster_methods[] = {
 	ZEND_ME(ValkeyGlideCluster, rpoplpush, arginfo_class_ValkeyGlideCluster_rpoplpush, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, rPush, arginfo_class_ValkeyGlideCluster_rPush, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, rPushx, arginfo_class_ValkeyGlideCluster_rPushx, ZEND_ACC_PUBLIC)
-	ZEND_ME(ValkeyGlideCluster, sadd, arginfo_class_ValkeyGlideCluster_sadd, ZEND_ACC_PUBLIC)
-	ZEND_ME(ValkeyGlideCluster, saddarray, arginfo_class_ValkeyGlideCluster_saddarray, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, sAdd, arginfo_class_ValkeyGlideCluster_sAdd, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, sAddArray, arginfo_class_ValkeyGlideCluster_sAddArray, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, scan, arginfo_class_ValkeyGlideCluster_scan, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, scard, arginfo_class_ValkeyGlideCluster_scard, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, script, arginfo_class_ValkeyGlideCluster_script, ZEND_ACC_PUBLIC)
-	ZEND_ME(ValkeyGlideCluster, sdiff, arginfo_class_ValkeyGlideCluster_sdiff, ZEND_ACC_PUBLIC)
-	ZEND_ME(ValkeyGlideCluster, sdiffstore, arginfo_class_ValkeyGlideCluster_sdiffstore, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, sDiff, arginfo_class_ValkeyGlideCluster_sDiff, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, sDiffStore, arginfo_class_ValkeyGlideCluster_sDiffStore, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, set, arginfo_class_ValkeyGlideCluster_set, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, setBit, arginfo_class_ValkeyGlideCluster_setBit, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, setex, arginfo_class_ValkeyGlideCluster_setex, ZEND_ACC_PUBLIC)

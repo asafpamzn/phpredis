@@ -238,7 +238,7 @@ SADD_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::saddarray(string key, array values) */
-PHP_METHOD(ValkeyGlideCluster, saddarray)
+PHP_METHOD(ValkeyGlideCluster, sAddArray)
 {
 }
 /* }}} */
