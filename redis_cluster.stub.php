@@ -126,7 +126,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::dbsize()
      */
-  //TODO  public function dbsize(mixed $route): ValkeyGlideCluster|int;
+    public function dbSize(mixed $route): ValkeyGlideCluster|int;
 
     /**
      * @see https://redis.io/commands/copy
@@ -222,12 +222,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::flushall
      */
-    public function flushall(mixed $route, bool $async = false): ValkeyGlideCluster|bool;
+    public function flushAll(mixed $route, bool $async = false): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::flushdb
      */
-    public function flushdb(mixed $route, bool $async = false): ValkeyGlideCluster|bool;
+    public function flushDB(mixed $route, bool $async = false): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::geoadd

@@ -103,14 +103,10 @@ int execute_msetnx_command(zval *object, int argc, zval *return_value, zend_clas
 int execute_flushdb_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
+    zval *args = NULL;
+    int args_count = 0;
     zend_bool async = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(argc, object, "O|b",
-                                     &object, ce, &async) == FAILURE)
-    {
-        return 0;
-    }
+    zend_bool is_cluster = (ce == get_valkey_glide_cluster_ce());
 
     /* Get ValkeyGlide object */
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
@@ -119,21 +115,61 @@ int execute_flushdb_command(zval *object, int argc, zval *return_value, zend_cla
         return 0;
     }
 
-    /* Execute using core framework */
-    core_command_args_t args = {0};
-    args.glide_client = valkey_glide->glide_client;
-    args.cmd_type = FlushDB;
+    /* Setup core command arguments */
+    core_command_args_t core_args = {0};
+    core_args.glide_client = valkey_glide->glide_client;
+    core_args.cmd_type = FlushDB;
+    core_args.is_cluster = is_cluster;
+
+    if (is_cluster)
+    {
+        /* Parse parameters for cluster - first parameter is route, optional second is async */
+        if (zend_parse_method_parameters(argc, object, "O*",
+                                         &object, ce, &args, &args_count) == FAILURE)
+        {
+            return 0;
+        }
+
+        if (args_count == 0)
+        {
+            /* Need at least the route parameter */
+            return 0;
+        }
+
+        /* Set up routing */
+        core_args.has_route = 1;
+        core_args.route_param = &args[0];
+
+        /* Get optional async parameter */
+        if (args_count > 1)
+        {
+            if (Z_TYPE(args[1]) == IS_TRUE)
+            {
+                async = 1;
+            }
+        }
+    }
+    else
+    {
+        /* Non-cluster case - parse optional async parameter only */
+        if (zend_parse_method_parameters(argc, object, "O|b",
+                                         &object, ce, &async) == FAILURE)
+        {
+            return 0;
+        }
+    }
 
     /* Add ASYNC option if requested */
     if (async)
     {
-        args.args[0].type = CORE_ARG_TYPE_STRING;
-        args.args[0].data.string_arg.value = "ASYNC";
-        args.args[0].data.string_arg.len = 5;
-        args.arg_count = 1;
+        core_args.args[0].type = CORE_ARG_TYPE_STRING;
+        core_args.args[0].data.string_arg.value = "ASYNC";
+        core_args.args[0].data.string_arg.len = 5;
+        core_args.arg_count = 1;
     }
 
-    if (execute_core_command(&args, NULL, process_core_bool_result))
+    /* Execute using unified core framework */
+    if (execute_core_command(&core_args, NULL, process_core_bool_result))
     {
         ZVAL_TRUE(return_value);
         return 1;
@@ -149,14 +185,10 @@ int execute_flushdb_command(zval *object, int argc, zval *return_value, zend_cla
 int execute_flushall_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
+    zval *args = NULL;
+    int args_count = 0;
     zend_bool async = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(argc, object, "O|b",
-                                     &object, ce, &async) == FAILURE)
-    {
-        return 0;
-    }
+    zend_bool is_cluster = (ce == get_valkey_glide_cluster_ce());
 
     /* Get ValkeyGlide object */
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
@@ -165,21 +197,61 @@ int execute_flushall_command(zval *object, int argc, zval *return_value, zend_cl
         return 0;
     }
 
-    /* Execute using core framework */
-    core_command_args_t args = {0};
-    args.glide_client = valkey_glide->glide_client;
-    args.cmd_type = FlushAll;
+    /* Setup core command arguments */
+    core_command_args_t core_args = {0};
+    core_args.glide_client = valkey_glide->glide_client;
+    core_args.cmd_type = FlushAll;
+    core_args.is_cluster = is_cluster;
+
+    if (is_cluster)
+    {
+        /* Parse parameters for cluster - first parameter is route, optional second is async */
+        if (zend_parse_method_parameters(argc, object, "O*",
+                                         &object, ce, &args, &args_count) == FAILURE)
+        {
+            return 0;
+        }
+
+        if (args_count == 0)
+        {
+            /* Need at least the route parameter */
+            return 0;
+        }
+
+        /* Set up routing */
+        core_args.has_route = 1;
+        core_args.route_param = &args[0];
+
+        /* Get optional async parameter */
+        if (args_count > 1)
+        {
+            if (Z_TYPE(args[1]) == IS_TRUE)
+            {
+                async = 1;
+            }
+        }
+    }
+    else
+    {
+        /* Non-cluster case - parse optional async parameter only */
+        if (zend_parse_method_parameters(argc, object, "O|b",
+                                         &object, ce, &async) == FAILURE)
+        {
+            return 0;
+        }
+    }
 
     /* Add ASYNC option if requested */
     if (async)
     {
-        args.args[0].type = CORE_ARG_TYPE_STRING;
-        args.args[0].data.string_arg.value = "ASYNC";
-        args.args[0].data.string_arg.len = 5;
-        args.arg_count = 1;
+        core_args.args[0].type = CORE_ARG_TYPE_STRING;
+        core_args.args[0].data.string_arg.value = "ASYNC";
+        core_args.args[0].data.string_arg.len = 5;
+        core_args.arg_count = 1;
     }
 
-    if (execute_core_command(&args, NULL, process_core_bool_result))
+    /* Execute using unified core framework */
+    if (execute_core_command(&core_args, NULL, process_core_bool_result))
     {
         ZVAL_TRUE(return_value);
         return 1;

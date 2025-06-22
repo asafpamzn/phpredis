@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fd404f3ccd2b201f54fddec1d6323395f28fc063 */
+ * Stub hash: eda7d0f8e46b5b70e333886b536728e305566a77 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 1)
@@ -97,6 +97,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ValkeyGlideCluster_close arginfo_class_ValkeyGlideCluster_clearlasterror
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_dbSize, 0, 1, ValkeyGlideCluster, MAY_BE_LONG)
+	ZEND_ARG_TYPE_INFO(0, route, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_copy, 0, 2, ValkeyGlideCluster, MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, src, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, dst, IS_STRING, 0)
@@ -172,6 +176,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_exp
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ValkeyGlideCluster_pexpiretime arginfo_class_ValkeyGlideCluster_expiretime
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_flushAll, 0, 1, ValkeyGlideCluster, MAY_BE_BOOL)
+	ZEND_ARG_TYPE_INFO(0, route, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, async, _IS_BOOL, 0, "false")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ValkeyGlideCluster_flushDB arginfo_class_ValkeyGlideCluster_flushAll
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_geoadd, 0, 4, ValkeyGlideCluster, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
@@ -962,6 +973,7 @@ ZEND_METHOD(ValkeyGlideCluster, blmpop);
 ZEND_METHOD(ValkeyGlideCluster, lmpop);
 ZEND_METHOD(ValkeyGlideCluster, clearlasterror);
 ZEND_METHOD(ValkeyGlideCluster, close);
+ZEND_METHOD(ValkeyGlideCluster, dbSize);
 ZEND_METHOD(ValkeyGlideCluster, copy);
 ZEND_METHOD(ValkeyGlideCluster, decr);
 ZEND_METHOD(ValkeyGlideCluster, decrby);
@@ -980,6 +992,8 @@ ZEND_METHOD(ValkeyGlideCluster, expire);
 ZEND_METHOD(ValkeyGlideCluster, expireAt);
 ZEND_METHOD(ValkeyGlideCluster, expiretime);
 ZEND_METHOD(ValkeyGlideCluster, pexpiretime);
+ZEND_METHOD(ValkeyGlideCluster, flushAll);
+ZEND_METHOD(ValkeyGlideCluster, flushDB);
 ZEND_METHOD(ValkeyGlideCluster, geoadd);
 ZEND_METHOD(ValkeyGlideCluster, geodist);
 ZEND_METHOD(ValkeyGlideCluster, geohash);
@@ -1162,6 +1176,7 @@ static const zend_function_entry class_ValkeyGlideCluster_methods[] = {
 	ZEND_ME(ValkeyGlideCluster, lmpop, arginfo_class_ValkeyGlideCluster_lmpop, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, clearlasterror, arginfo_class_ValkeyGlideCluster_clearlasterror, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, close, arginfo_class_ValkeyGlideCluster_close, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, dbSize, arginfo_class_ValkeyGlideCluster_dbSize, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, copy, arginfo_class_ValkeyGlideCluster_copy, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, decr, arginfo_class_ValkeyGlideCluster_decr, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, decrby, arginfo_class_ValkeyGlideCluster_decrby, ZEND_ACC_PUBLIC)
@@ -1180,6 +1195,8 @@ static const zend_function_entry class_ValkeyGlideCluster_methods[] = {
 	ZEND_ME(ValkeyGlideCluster, expireAt, arginfo_class_ValkeyGlideCluster_expireAt, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, expiretime, arginfo_class_ValkeyGlideCluster_expiretime, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, pexpiretime, arginfo_class_ValkeyGlideCluster_pexpiretime, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, flushAll, arginfo_class_ValkeyGlideCluster_flushAll, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, flushDB, arginfo_class_ValkeyGlideCluster_flushDB, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, geoadd, arginfo_class_ValkeyGlideCluster_geoadd, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, geodist, arginfo_class_ValkeyGlideCluster_geodist, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, geohash, arginfo_class_ValkeyGlideCluster_geohash, ZEND_ACC_PUBLIC)

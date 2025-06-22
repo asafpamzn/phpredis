@@ -1525,14 +1525,10 @@ int execute_rawcommand_command(zval *object, int argc, zval *return_value, zend_
 int execute_dbsize_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
+    zval *args = NULL;
+    int args_count = 0;
     long dbsize;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, ce) == FAILURE)
-    {
-        return 0;
-    }
+    zend_bool is_cluster = (ce == get_valkey_glide_cluster_ce());
 
     /* Get ValkeyGlide object */
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
@@ -1541,8 +1537,43 @@ int execute_dbsize_command(zval *object, int argc, zval *return_value, zend_clas
         return 0;
     }
 
-    /* Execute the DBSIZE command using the Glide client */
-    if (execute_dbsize_command_internal(valkey_glide->glide_client, &dbsize))
+    /* Setup core command arguments */
+    core_command_args_t core_args = {0};
+    core_args.glide_client = valkey_glide->glide_client;
+    core_args.cmd_type = DBSize;
+    core_args.is_cluster = is_cluster;
+
+    if (is_cluster)
+    {
+        /* Parse parameters for cluster - route parameter is required */
+        if (zend_parse_method_parameters(argc, object, "O*",
+                                         &object, ce, &args, &args_count) == FAILURE)
+        {
+            return 0;
+        }
+
+        if (args_count == 0)
+        {
+            /* Need the route parameter */
+            return 0;
+        }
+
+        /* Set up routing */
+        core_args.has_route = 1;
+        core_args.route_param = &args[0];
+    }
+    else
+    {
+        /* Non-cluster case - parse no parameters */
+        if (zend_parse_method_parameters(argc, object, "O",
+                                         &object, ce) == FAILURE)
+        {
+            return 0;
+        }
+    }
+
+    /* Execute using unified core framework */
+    if (execute_core_command(&core_args, &dbsize, process_core_int_result))
     {
         ZVAL_LONG(return_value, dbsize);
         return 1;
