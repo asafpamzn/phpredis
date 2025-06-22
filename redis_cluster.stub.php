@@ -1001,7 +1001,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::zrangebylex
      */
-    public function zrangebylex(string $key, string $min, string $max, int $offset = -1, int $count = -1): ValkeyGlideCluster|array|false;
+    public function zRangeByLex(string $key, string $min, string $max, int $offset = -1, int $count = -1): ValkeyGlideCluster|array|false;
 
     /**
      * @see ValkeyGlide::zrangebyscore

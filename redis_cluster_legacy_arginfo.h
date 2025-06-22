@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2faa07bd8a7767a70a90cc502fdd85076549dbba */
+ * Stub hash: f7bc728ed588f3da06532f80b94fde134a1c2fbe */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
@@ -744,7 +744,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ValkeyGlideCluster_zRandMember arginfo_class_ValkeyGlideCluster_getEx
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster_zrangebylex, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster_zRangeByLex, 0, 0, 3)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_INFO(0, min)
 	ZEND_ARG_INFO(0, max)
@@ -981,7 +981,7 @@ ZEND_METHOD(ValkeyGlideCluster, zPopMin);
 ZEND_METHOD(ValkeyGlideCluster, zRange);
 ZEND_METHOD(ValkeyGlideCluster, zrangestore);
 ZEND_METHOD(ValkeyGlideCluster, zRandMember);
-ZEND_METHOD(ValkeyGlideCluster, zrangebylex);
+ZEND_METHOD(ValkeyGlideCluster, zRangeByLex);
 ZEND_METHOD(ValkeyGlideCluster, zRangeByScore);
 ZEND_METHOD(ValkeyGlideCluster, zRank);
 ZEND_METHOD(ValkeyGlideCluster, zRem);
@@ -1180,7 +1180,7 @@ static const zend_function_entry class_ValkeyGlideCluster_methods[] = {
 	ZEND_ME(ValkeyGlideCluster, zRange, arginfo_class_ValkeyGlideCluster_zRange, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, zrangestore, arginfo_class_ValkeyGlideCluster_zrangestore, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, zRandMember, arginfo_class_ValkeyGlideCluster_zRandMember, ZEND_ACC_PUBLIC)
-	ZEND_ME(ValkeyGlideCluster, zrangebylex, arginfo_class_ValkeyGlideCluster_zrangebylex, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, zRangeByLex, arginfo_class_ValkeyGlideCluster_zRangeByLex, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, zRangeByScore, arginfo_class_ValkeyGlideCluster_zRangeByScore, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, zRank, arginfo_class_ValkeyGlideCluster_zRank, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, zRem, arginfo_class_ValkeyGlideCluster_zRem, ZEND_ACC_PUBLIC)
