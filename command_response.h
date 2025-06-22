@@ -38,6 +38,14 @@ CommandResult *execute_command(
     const uintptr_t *args,
     const unsigned long *args_len);
 
+CommandResult *execute_command_with_route(
+    const void *glide_client,
+    enum RequestType command_type,
+    unsigned long arg_count,
+    const uintptr_t *args,
+    const unsigned long *args_len,
+    zval *arg_route);
+
 /*
  * Handle an integer response
  * Returns 0 on error, 1 on success

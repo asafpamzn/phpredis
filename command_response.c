@@ -14,7 +14,273 @@
 */
 
 #include "valkey_glide_commands_common.h"
+#include "include/glide/command_request_wrapper.h"
 #include "command_response.h"
+
+/* Parse a cluster route from a zval parameter */
+typedef struct
+{
+    enum
+    {
+        ROUTE_TYPE_KEY,       /* Route by key */
+        ROUTE_TYPE_HOST_PORT, /* Route by host:port */
+        ROUTE_TYPE_SIMPLE     /* Simple route: "randomNode", "allPrimaries", "allNodes" */
+    } type;
+
+    union
+    {
+        struct
+        {
+            char *key;
+            size_t key_len;
+        } key_route;
+
+        struct
+        {
+            char *host;
+            int port;
+        } host_port_route;
+
+        int simple_route_type; /* Using SimpleRoutes_C enum values */
+    } data;
+} cluster_route_t;
+
+/* Parse a cluster route parameter from a zval */
+int parse_cluster_route(zval *route_zval, cluster_route_t *route)
+{
+    /* Default to route by key */
+    route->type = ROUTE_TYPE_KEY;
+
+    if (Z_TYPE_P(route_zval) == IS_STRING)
+    {
+        char *route_str = Z_STRVAL_P(route_zval);
+        size_t route_len = Z_STRLEN_P(route_zval);
+
+        /* Check for special routing keywords */
+        if (route_len == 10 && strncasecmp(route_str, "randomNode", 10) == 0)
+        {
+            route->type = ROUTE_TYPE_SIMPLE;
+            route->data.simple_route_type = 2; /* SimpleRoutes_Random */
+            return 1;
+        }
+        else if (route_len == 12 && strncasecmp(route_str, "allPrimaries", 12) == 0)
+        {
+            route->type = ROUTE_TYPE_SIMPLE;
+            route->data.simple_route_type = 1; /* SimpleRoutes_AllPrimaries */
+            return 1;
+        }
+        else if (route_len == 8 && strncasecmp(route_str, "allNodes", 8) == 0)
+        {
+            route->type = ROUTE_TYPE_SIMPLE;
+            route->data.simple_route_type = 0; /* SimpleRoutes_AllNodes */
+            return 1;
+        }
+
+        /* String parameter - use as key */
+        route->type = ROUTE_TYPE_KEY;
+        route->data.key_route.key = route_str;
+        route->data.key_route.key_len = route_len;
+        return 1;
+    }
+    else if (Z_TYPE_P(route_zval) == IS_ARRAY)
+    {
+        HashTable *route_ht = Z_ARRVAL_P(route_zval);
+        zval *type_zv = NULL, *key_zv = NULL, *host_zv = NULL, *port_zv = NULL;
+
+        /* Check if we have a type-based routing config */
+        type_zv = zend_hash_str_find(route_ht, "type", sizeof("type") - 1);
+        if (type_zv && Z_TYPE_P(type_zv) == IS_STRING)
+        {
+            /* Type-based routing */
+            char *type_str = Z_STRVAL_P(type_zv);
+
+            if (strcasecmp(type_str, "primarySlotKey") == 0 ||
+                strcasecmp(type_str, "slotKey") == 0)
+            {
+                /* Slot key routing */
+                key_zv = zend_hash_str_find(route_ht, "key", sizeof("key") - 1);
+                if (key_zv && Z_TYPE_P(key_zv) == IS_STRING)
+                {
+                    route->type = ROUTE_TYPE_KEY;
+                    route->data.key_route.key = Z_STRVAL_P(key_zv);
+                    route->data.key_route.key_len = Z_STRLEN_P(key_zv);
+                    return 1;
+                }
+            }
+            else if (strcasecmp(type_str, "routeByAddress") == 0)
+            {
+                /* Route by address */
+                host_zv = zend_hash_str_find(route_ht, "host", sizeof("host") - 1);
+                port_zv = zend_hash_str_find(route_ht, "port", sizeof("port") - 1);
+
+                if (host_zv && port_zv && Z_TYPE_P(host_zv) == IS_STRING)
+                {
+                    route->type = ROUTE_TYPE_HOST_PORT;
+                    route->data.host_port_route.host = Z_STRVAL_P(host_zv);
+
+                    /* Get port from array */
+                    if (Z_TYPE_P(port_zv) == IS_LONG)
+                    {
+                        route->data.host_port_route.port = Z_LVAL_P(port_zv);
+                    }
+                    else
+                    {
+                        zval temp;
+                        ZVAL_COPY(&temp, port_zv);
+                        convert_to_long(&temp);
+                        route->data.host_port_route.port = Z_LVAL(temp);
+                        zval_dtor(&temp);
+                    }
+                    return 1;
+                }
+            }
+
+            return 0; /* Invalid type-based routing */
+        }
+
+        /* Try direct host/port keys */
+        host_zv = zend_hash_str_find(route_ht, "host", sizeof("host") - 1);
+        port_zv = zend_hash_str_find(route_ht, "port", sizeof("port") - 1);
+
+        if (!host_zv || !port_zv)
+        {
+            /* Try numeric keys (indexed array approach) */
+            host_zv = zend_hash_index_find(route_ht, 0);
+            port_zv = zend_hash_index_find(route_ht, 1);
+        }
+
+        if (host_zv && port_zv && Z_TYPE_P(host_zv) == IS_STRING)
+        {
+            /* Set route type to host:port */
+            route->type = ROUTE_TYPE_HOST_PORT;
+
+            /* Get host from array */
+            route->data.host_port_route.host = Z_STRVAL_P(host_zv);
+
+            /* Get port from array */
+            if (Z_TYPE_P(port_zv) == IS_LONG)
+            {
+                route->data.host_port_route.port = Z_LVAL_P(port_zv);
+            }
+            else
+            {
+                zval temp;
+                ZVAL_COPY(&temp, port_zv);
+                convert_to_long(&temp);
+                route->data.host_port_route.port = Z_LVAL(temp);
+                zval_dtor(&temp);
+            }
+
+            return 1;
+        }
+    }
+
+    /* Could not parse route properly */
+    return 0;
+}
+
+/* Create serialized route bytes from a cluster_route_t structure */
+uint8_t *create_route_bytes_from_route(cluster_route_t *route, size_t *route_bytes_len)
+{
+    Routes_C *routes = routes_create();
+    uint8_t *route_bytes = NULL;
+
+    if (!routes)
+    {
+        *route_bytes_len = 0;
+        return NULL;
+    }
+
+    switch (route->type)
+    {
+    case ROUTE_TYPE_KEY:
+        routes_set_slot_key_route(routes, SlotTypes_Primary, route->data.key_route.key);
+        break;
+
+    case ROUTE_TYPE_HOST_PORT:
+        routes_set_by_address_route(routes, route->data.host_port_route.host,
+                                    route->data.host_port_route.port);
+        break;
+
+    case ROUTE_TYPE_SIMPLE:
+        routes_set_simple_route(routes, route->data.simple_route_type);
+        break;
+
+    default:
+        /* Unknown route type */
+        routes_destroy(routes);
+        *route_bytes_len = 0;
+        return NULL;
+    }
+
+    /* Serialize the route structure */
+    CommandRequest_C *cmd_req = command_request_create();
+    if (!cmd_req)
+    {
+        routes_destroy(routes);
+        *route_bytes_len = 0;
+        return NULL;
+    }
+
+    command_request_set_route(cmd_req, routes);
+
+    /* Get serialized bytes */
+    route_bytes = command_request_serialize(cmd_req, route_bytes_len);
+
+    /* Clean up */
+    command_request_destroy(cmd_req);
+    routes_destroy(routes);
+
+    return route_bytes;
+}
+
+/* Execute a command and handle common error checking */
+CommandResult *execute_command_with_route(
+    const void *glide_client,
+    enum RequestType command_type,
+    unsigned long arg_count,
+    const uintptr_t *args,
+    const unsigned long *args_len,
+    zval *arg_route)
+{
+    /* Check if client is valid */
+    if (!glide_client)
+    {
+        return NULL;
+    }
+
+    /* Parse the route from the first parameter */
+    cluster_route_t route;
+    if (!parse_cluster_route(arg_route, &route))
+    {
+        /* Failed to parse the route */
+        return 0;
+    }
+
+    /* Create serialized route bytes */
+    size_t route_bytes_len = 0;
+    uint8_t *route_bytes = create_route_bytes_from_route(&route, &route_bytes_len);
+
+    /* Execute the command */
+    CommandResult *result = command(
+        glide_client,
+        0,              /* channel */
+        command_type,   /* command type */
+        arg_count,      /* number of arguments */
+        args,           /* arguments */
+        args_len,       /* argument lengths */
+        route_bytes,    /* route bytes */
+        route_bytes_len /* route bytes length */
+    );
+
+    /* Free route bytes */
+    if (route_bytes)
+    {
+        efree(route_bytes);
+    }
+
+    return result;
+}
 
 /* Execute a command and handle common error checking */
 CommandResult *execute_command(
