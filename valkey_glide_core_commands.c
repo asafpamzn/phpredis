@@ -99,9 +99,7 @@ const void *create_glide_client(ClientConfig *config)
         NULL,          /* No password by default */
         &len,
         config);
-    printf("Creating Glide client with request size: %zu bytes\n", len);
-    printf("Host: %s, Port: %d, TLS Mode: %d, Cluster Mode: %d\n",
-           "localhost", config->port_, config->tls_mode_, config->is_cluster);
+
     if (!request_bytes)
     {
         return NULL;
@@ -908,31 +906,30 @@ int execute_info_command(zval *object, int argc, zval *return_value, zend_class_
     {
         return 0;
     }
-    printf("Executing INFO command on Valkey Glide client argc=%d\n", argc);
+
     if (is_cluster)
     {
-        printf("file = %s,line = %d\n", __FILE__, __LINE__);
+
         /* Parse parameters for cluster - first parameter is route, rest are sections */
         if (zend_parse_method_parameters(argc, object, "O*",
                                          &object, ce, &args, &args_count) == FAILURE)
         {
-            printf("file = %s,line = %d\n", __FILE__, __LINE__);
+
             return 0;
         }
 
         if (args_count == 0)
         {
-            printf("file = %s,line = %d\n", __FILE__, __LINE__);
 
             /* Need at least the route parameter */
             return 0;
         }
-        printf("file = %s,line = %d\n", __FILE__, __LINE__);
+
         /* If no sections are specified, call with NULL section */
         if (args_count == 1)
         {
             CommandResult *cmd_result;
-            printf("file = %s,line = %d\n", __FILE__, __LINE__);
+
             /* Execute the command with the route bytes */
             cmd_result = execute_command_with_route(
                 valkey_glide->glide_client,
@@ -944,7 +941,6 @@ int execute_info_command(zval *object, int argc, zval *return_value, zend_class_
 
             /* Use the generic handler to process the result */
             result = handle_string_response(cmd_result, &response, &response_len);
-            printf("file = %s,line = %d\n", __FILE__, __LINE__);
         }
         else
         {

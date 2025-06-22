@@ -50,13 +50,13 @@
 /* Create a ValkeyGlideCluster Object */
 PHP_METHOD(ValkeyGlideCluster, __construct)
 {
-    printf("ValkeyGlideCluster::__construct() is not implemented yet.\n");
-    zval *object, *z_seeds = NULL, *z_auth = NULL, *context = NULL;
-    zend_string *user = NULL, *pass = NULL;
-    double timeout = 0.0, read_timeout = 0.0;
-    zend_bool persistent = 0;
 
-    valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_GET_OBJECT(valkey_glide_object, object);
+  zval *object, *z_seeds = NULL, *z_auth = NULL, *context = NULL;
+  zend_string *user = NULL, *pass = NULL;
+  double timeout = 0.0, read_timeout = 0.0;
+  zend_bool persistent = 0;
+
+  valkey_glide_object *valkey_glide = VALKEY_GLIDE_PHP_GET_OBJECT(valkey_glide_object, object);
 }
 
 /*
@@ -66,7 +66,7 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
 /* {{{ proto bool ValkeyGlideCluster::close() */
 PHP_METHOD(ValkeyGlideCluster, close)
 {
-    RETURN_TRUE;
+  RETURN_TRUE;
 }
 
 /* {{{ proto string ValkeyGlideCluster::get(string key) */

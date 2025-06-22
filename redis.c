@@ -117,7 +117,6 @@ zend_object *create_valkey_glide_object(zend_class_entry *ce)
     config.read_from_ = Primary;
     config.is_cluster = false;
     config.port_ = 6379; // Default port for Valkey Glide
-    printf("Creating Glide client with default settings...\n");
     valkey_glide->glide_client = create_glide_client(&config);
 
     zend_object_std_init(&valkey_glide->std, ce);
@@ -144,7 +143,7 @@ zend_object *create_valkey_glide_cluster_object(zend_class_entry *ce)
     config.read_from_ = Primary;
     config.is_cluster = true;
     config.port_ = 7001;
-    printf("Creating Glide Cluster client for cluster with default settings...\n");
+
     valkey_glide->glide_client = create_glide_client(&config);
 
     zend_object_std_init(&valkey_glide->std, ce);
@@ -163,7 +162,6 @@ zend_object *create_valkey_glide_cluster_object(zend_class_entry *ce)
  */
 PHP_MINIT_FUNCTION(redis)
 {
-    printf("Initializing Valkey Glide...                PHP_MINIT_FUNCTION\n");
     /* ValkeyGlide class */
     valkey_glide_ce = register_class_ValkeyGlide();
     valkey_glide_ce->create_object = create_valkey_glide_object;
@@ -171,7 +169,6 @@ PHP_MINIT_FUNCTION(redis)
     /* ValkeyGlideException class */
     valkey_glide_exception_ce = register_class_ValkeyGlideException(spl_ce_RuntimeException);
 
-    printf("Initializing Valkey Glide Cluster...\n");
     valkey_glide_cluster_ce = register_class_ValkeyGlideCluster();
 
     valkey_glide_cluster_exception_ce = register_class_ValkeyGlideClusterException(spl_ce_RuntimeException);
@@ -196,7 +193,6 @@ PHP_MINFO_FUNCTION(redis)
     Public constructor */
 PHP_METHOD(ValkeyGlide, __construct)
 {
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     HashTable *opts = NULL;
     valkey_glide_object *valkey_glide;
 

@@ -122,7 +122,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
 
     /* Load our seeds on construction */
     public function __construct($host, $port, $auth) {
-        echo "Using ValkeyGlideCluster with seed source:\n";
+        
         parent::__construct($host, $port, $auth);
 
         //self::$seeds = $this->loadSeeds($host, $port);TODO
@@ -132,7 +132,6 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
     public function setUp() {
         $this->redis    = $this->newInstance();        
         $info           = $this->redis->info("randomNode");
-        var_dump($info);
         $this->version  = $info['redis_version'] ?? '0.0.0';
 
         $this->is_valkey = $this->detectValkey($info);
@@ -141,7 +140,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
     /* Override newInstance as we want a ValkeyGlideCluster object */
     protected function newInstance() {
         try {
-            echo "Using ValkeyGlideCluster with seed source:\n";
+            
             return new ValkeyGlideCluster(NULL, ["127.0.0.1:7001"], 30, 30, true, $this->getAuth());
         } catch (Exception $ex) {
             TestSuite::errorMessage("Fatal error: %s\n", $ex->getMessage());

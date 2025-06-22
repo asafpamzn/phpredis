@@ -184,14 +184,10 @@ int parse_cluster_route(zval *route_zval, cluster_route_t *route)
 /* Create serialized route bytes from a cluster_route_t structure */
 uint8_t *create_route_bytes_from_route(cluster_route_t *route, size_t *route_bytes_len)
 {
-    printf("file = %s,line = %d\n", __FILE__, __LINE__);
 
     /* Initialize route structure */
     CommandRequest__Routes routes = COMMAND_REQUEST__ROUTES__INIT;
-    CommandRequest__CommandRequest cmd_req = COMMAND_REQUEST__COMMAND_REQUEST__INIT;
     uint8_t *route_bytes = NULL;
-
-    printf("file = %s,line = %d\n", __FILE__, __LINE__);
 
     switch (route->type)
     {
@@ -250,15 +246,8 @@ uint8_t *create_route_bytes_from_route(cluster_route_t *route, size_t *route_byt
         return NULL;
     }
 
-    printf("file = %s,line = %d\n", __FILE__, __LINE__);
-
-    /* Set up command request with route */
-    cmd_req.route = &routes;
-
-    printf("file = %s,line = %d\n", __FILE__, __LINE__);
-
     /* Get serialized size and allocate buffer */
-    *route_bytes_len = command_request__command_request__get_packed_size(&cmd_req);
+    *route_bytes_len = command_request__routes__get_packed_size(&routes);
     route_bytes = (uint8_t *)emalloc(*route_bytes_len);
 
     if (!route_bytes)
@@ -267,12 +256,8 @@ uint8_t *create_route_bytes_from_route(cluster_route_t *route, size_t *route_byt
         return NULL;
     }
 
-    printf("file = %s,line = %d\n", __FILE__, __LINE__);
-
-    /* Serialize the command request */
-    command_request__command_request__pack(&cmd_req, route_bytes);
-
-    printf("file = %s,line = %d\n", __FILE__, __LINE__);
+    /* Serialize the routes */
+    command_request__routes__pack(&routes, route_bytes);
 
     return route_bytes;
 }
@@ -299,11 +284,11 @@ CommandResult *execute_command_with_route(
         /* Failed to parse the route */
         return 0;
     }
-    printf("Parsed route type: %d\n", route.type);
+
     /* Create serialized route bytes */
     size_t route_bytes_len = 0;
     uint8_t *route_bytes = create_route_bytes_from_route(&route, &route_bytes_len);
-    printf("Created route bytes of length: %zu\n", route_bytes_len);
+
     /* Execute the command */
     CommandResult *result = command(
         glide_client,
