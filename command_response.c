@@ -14,7 +14,9 @@
 */
 
 #include "valkey_glide_commands_common.h"
-#include "include/glide/command_request_wrapper.h"
+#include "include/glide_bindings.h"
+#include "include/glide/command_request.pb-c.h"
+#include "include/glide/response.pb-c.h"
 #include "command_response.h"
 
 /* Parse a cluster route from a zval parameter */
@@ -182,54 +184,95 @@ int parse_cluster_route(zval *route_zval, cluster_route_t *route)
 /* Create serialized route bytes from a cluster_route_t structure */
 uint8_t *create_route_bytes_from_route(cluster_route_t *route, size_t *route_bytes_len)
 {
-    Routes_C *routes = routes_create();
+    printf("file = %s,line = %d\n", __FILE__, __LINE__);
+
+    /* Initialize route structure */
+    CommandRequest__Routes routes = COMMAND_REQUEST__ROUTES__INIT;
+    CommandRequest__CommandRequest cmd_req = COMMAND_REQUEST__COMMAND_REQUEST__INIT;
     uint8_t *route_bytes = NULL;
 
-    if (!routes)
-    {
-        *route_bytes_len = 0;
-        return NULL;
-    }
+    printf("file = %s,line = %d\n", __FILE__, __LINE__);
 
     switch (route->type)
     {
     case ROUTE_TYPE_KEY:
-        routes_set_slot_key_route(routes, SlotTypes_Primary, route->data.key_route.key);
-        break;
+    {
+        /* Create slot key route */
+        CommandRequest__SlotKeyRoute slot_key_route = COMMAND_REQUEST__SLOT_KEY_ROUTE__INIT;
+        slot_key_route.slot_type = COMMAND_REQUEST__SLOT_TYPES__Primary;
+        slot_key_route.slot_key = route->data.key_route.key;
+
+        routes.value_case = COMMAND_REQUEST__ROUTES__VALUE_SLOT_KEY_ROUTE;
+        routes.slot_key_route = &slot_key_route;
+    }
+    break;
 
     case ROUTE_TYPE_HOST_PORT:
-        routes_set_by_address_route(routes, route->data.host_port_route.host,
-                                    route->data.host_port_route.port);
-        break;
+    {
+        /* Create by address route */
+        CommandRequest__ByAddressRoute by_address_route = COMMAND_REQUEST__BY_ADDRESS_ROUTE__INIT;
+        by_address_route.host = route->data.host_port_route.host;
+        by_address_route.port = route->data.host_port_route.port;
+
+        routes.value_case = COMMAND_REQUEST__ROUTES__VALUE_BY_ADDRESS_ROUTE;
+        routes.by_address_route = &by_address_route;
+    }
+    break;
 
     case ROUTE_TYPE_SIMPLE:
-        routes_set_simple_route(routes, route->data.simple_route_type);
-        break;
+    {
+        /* Create simple route */
+        CommandRequest__SimpleRoutes simple_route;
+        switch (route->data.simple_route_type)
+        {
+        case 0: /* AllNodes */
+            simple_route = COMMAND_REQUEST__SIMPLE_ROUTES__AllNodes;
+            break;
+        case 1: /* AllPrimaries */
+            simple_route = COMMAND_REQUEST__SIMPLE_ROUTES__AllPrimaries;
+            break;
+        case 2: /* Random */
+            simple_route = COMMAND_REQUEST__SIMPLE_ROUTES__Random;
+            break;
+        default:
+            *route_bytes_len = 0;
+            return NULL;
+        }
+
+        routes.value_case = COMMAND_REQUEST__ROUTES__VALUE_SIMPLE_ROUTES;
+        routes.simple_routes = simple_route;
+    }
+    break;
 
     default:
         /* Unknown route type */
-        routes_destroy(routes);
         *route_bytes_len = 0;
         return NULL;
     }
 
-    /* Serialize the route structure */
-    CommandRequest_C *cmd_req = command_request_create();
-    if (!cmd_req)
+    printf("file = %s,line = %d\n", __FILE__, __LINE__);
+
+    /* Set up command request with route */
+    cmd_req.route = &routes;
+
+    printf("file = %s,line = %d\n", __FILE__, __LINE__);
+
+    /* Get serialized size and allocate buffer */
+    *route_bytes_len = command_request__command_request__get_packed_size(&cmd_req);
+    route_bytes = (uint8_t *)emalloc(*route_bytes_len);
+
+    if (!route_bytes)
     {
-        routes_destroy(routes);
         *route_bytes_len = 0;
         return NULL;
     }
 
-    command_request_set_route(cmd_req, routes);
+    printf("file = %s,line = %d\n", __FILE__, __LINE__);
 
-    /* Get serialized bytes */
-    route_bytes = command_request_serialize(cmd_req, route_bytes_len);
+    /* Serialize the command request */
+    command_request__command_request__pack(&cmd_req, route_bytes);
 
-    /* Clean up */
-    command_request_destroy(cmd_req);
-    routes_destroy(routes);
+    printf("file = %s,line = %d\n", __FILE__, __LINE__);
 
     return route_bytes;
 }
@@ -256,21 +299,22 @@ CommandResult *execute_command_with_route(
         /* Failed to parse the route */
         return 0;
     }
-
+    printf("Parsed route type: %d\n", route.type);
     /* Create serialized route bytes */
     size_t route_bytes_len = 0;
     uint8_t *route_bytes = create_route_bytes_from_route(&route, &route_bytes_len);
-
+    printf("Created route bytes of length: %zu\n", route_bytes_len);
     /* Execute the command */
     CommandResult *result = command(
         glide_client,
-        0,              /* channel */
-        command_type,   /* command type */
-        arg_count,      /* number of arguments */
-        args,           /* arguments */
-        args_len,       /* argument lengths */
-        route_bytes,    /* route bytes */
-        route_bytes_len /* route bytes length */
+        0,               /* channel */
+        command_type,    /* command type */
+        arg_count,       /* number of arguments */
+        args,            /* arguments */
+        args_len,        /* argument lengths */
+        route_bytes,     /* route bytes */
+        route_bytes_len, /* route bytes length */
+        0                /* span pointer */
     );
 
     /* Free route bytes */
@@ -305,7 +349,8 @@ CommandResult *execute_command(
         args,         /* arguments */
         args_len,     /* argument lengths */
         NULL,         /* route bytes */
-        0             /* route bytes length */
+        0,            /* route bytes length */
+        0             /* span pointer */
     );
 
     return result;

@@ -30,32 +30,6 @@ typedef struct CommandResult CommandResult;
 typedef struct CommandError CommandError;
 typedef struct ConnectionResponse ConnectionResponse;
 
-enum ReadFrom
-{
-    /**
-     * Primary: Read data from the primary node in the cluster.
-     */
-    Primary = 0,
-
-    /**
-     * PreferReplica: Prefer reading data from a replica node in the cluster, if
-     * available.
-     */
-    PreferReplica = 1,
-
-    /**
-     * LowestLatency: Read data from the node with the lowest latency in the
-     * cluster.
-     */
-    LowestLatency = 2,
-
-    /**
-     * AZAffinity: Read data from a node in the same availability zone as the
-     * client, if possible.
-     */
-    AZAffinity = 3,
-};
-
 enum TLSMode
 {
     /**
@@ -82,7 +56,7 @@ typedef struct
     uint32_t database_;
     uint32_t request_timeout_;
     char *client_name_;
-    enum ReadFrom read_from_;
+    enum _ConnectionRequest__ReadFrom read_from_;
     bool is_cluster;
 } ClientConfig;
 /* Forward declaration for ClientAdapter */

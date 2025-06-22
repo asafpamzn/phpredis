@@ -2085,7 +2085,8 @@ int execute_zmpop_command1(const void *glide_client, const char *cmd, double tim
         args,      /* arguments */
         args_len,  /* argument lengths */
         NULL,      /* route bytes */
-        0          /* route bytes length */
+        0,         /* route bytes length */
+        0          /* span_ptr */
     );
 
     /* Free the argument strings */

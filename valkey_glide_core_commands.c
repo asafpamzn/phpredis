@@ -908,12 +908,12 @@ int execute_info_command(zval *object, int argc, zval *return_value, zend_class_
     {
         return 0;
     }
-    printf("Executing INFO command on Valkey Glide client\n");
+    printf("Executing INFO command on Valkey Glide client argc=%d\n", argc);
     if (is_cluster)
     {
         printf("file = %s,line = %d\n", __FILE__, __LINE__);
         /* Parse parameters for cluster - first parameter is route, rest are sections */
-        if (zend_parse_method_parameters(argc, object, "Oz*",
+        if (zend_parse_method_parameters(argc, object, "O*",
                                          &object, ce, &args, &args_count) == FAILURE)
         {
             printf("file = %s,line = %d\n", __FILE__, __LINE__);
