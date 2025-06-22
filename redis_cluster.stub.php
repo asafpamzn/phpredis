@@ -743,12 +743,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::setrange
      */
-    public function setrange(string $key, int $offset, string $value): ValkeyGlideCluster|int|false;
+    public function setRange(string $key, int $offset, string $value): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::sinter()
      */
-    public function sinter(array|string $key, string ...$other_keys): ValkeyGlideCluster|array|false;
+    public function sInter(array|string $key, string ...$other_keys): ValkeyGlideCluster|array|false;
 
     /**
      * @see ValkeyGlide::sintercard
@@ -758,7 +758,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::sinterstore()
      */
-    public function sinterstore(array|string $key, string ...$other_keys): ValkeyGlideCluster|int|false;
+    public function sInterStore(array|string $key, string ...$other_keys): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::sismember
@@ -768,18 +768,18 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::smismember
      */
-    public function smismember(string $key, string $member, string ...$other_members): ValkeyGlideCluster|array|false;
+    public function sMisMember(string $key, string $member, string ...$other_members): ValkeyGlideCluster|array|false;
 
 
     /**
      * @see ValkeyGlide::smembers()
      */
-    public function smembers(string $key): ValkeyGlideCluster|array|false;
+    public function sMembers(string $key): ValkeyGlideCluster|array|false;
 
     /**
      * @see ValkeyGlide::smove()
      */
-    public function smove(string $src, string $dst, string $member): ValkeyGlideCluster|bool;
+    public function sMove(string $src, string $dst, string $member): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::sort()
@@ -794,12 +794,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::spop
      */
-    public function spop(string $key, int $count = 0): ValkeyGlideCluster|string|array|false;
+    public function sPop(string $key, int $count = 0): ValkeyGlideCluster|string|array|false;
 
     /**
      * @see ValkeyGlide::srandmember
      */
-    public function srandmember(string $key, int $count = 0): ValkeyGlideCluster|string|array|false;
+    public function sRandMember(string $key, int $count = 0): ValkeyGlideCluster|string|array|false;
 
     /**
      * @see ValkeyGlide::srem
@@ -824,12 +824,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::sunion()
      */
-    public function sunion(string $key, string ...$other_keys): ValkeyGlideCluster|bool|array;
+    public function sUnion(string $key, string ...$other_keys): ValkeyGlideCluster|bool|array;
 
     /**
      * @see ValkeyGlide::sunionstore()
      */
-    public function sunionstore(string $dst, string $key, string ...$other_keys): ValkeyGlideCluster|int|false;
+    public function sUnionStore(string $dst, string $key, string ...$other_keys): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::time
@@ -970,22 +970,22 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::zlexcount
      */
-    public function zlexcount(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
+    public function zLexCount(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::zpopmax
      */
-    public function zpopmax(string $key, ?int $value = null): ValkeyGlideCluster|bool|array;
+    public function zPopMax(string $key, ?int $value = null): ValkeyGlideCluster|bool|array;
 
     /**
      * @see ValkeyGlide::zpopmin
      */
-    public function zpopmin(string $key, ?int $value = null): ValkeyGlideCluster|bool|array;
+    public function zPopMin(string $key, ?int $value = null): ValkeyGlideCluster|bool|array;
 
     /**
      * @see ValkeyGlide::zrange
      */
-    public function zrange(string $key, mixed $start, mixed $end, array|bool|null $options = null): ValkeyGlideCluster|array|bool;
+    public function zRange(string $key, mixed $start, mixed $end, array|bool|null $options = null): ValkeyGlideCluster|array|bool;
 
     /**
      * @see ValkeyGlide::zrangestore
@@ -996,7 +996,7 @@ class ValkeyGlideCluster {
     /**
      * @see https://redis.io/commands/zrandmember
      */
-    public function zrandmember(string $key, ?array $options = null): ValkeyGlideCluster|string|array;
+    public function zRandMember(string $key, ?array $options = null): ValkeyGlideCluster|string|array;
 
     /**
      * @see ValkeyGlide::zrangebylex
@@ -1006,27 +1006,27 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::zrangebyscore
      */
-    public function zrangebyscore(string $key, string $start, string $end, array $options = []): ValkeyGlideCluster|array|false;
+    public function zRangeByScore(string $key, string $start, string $end, array $options = []): ValkeyGlideCluster|array|false;
 
     /**
      * @see ValkeyGlide::zrank
      */
-    public function zrank(string $key, mixed $member): ValkeyGlideCluster|int|false;
+    public function zRank(string $key, mixed $member): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::zrem
      */
-    public function zrem(string $key, string $value, string ...$other_values): ValkeyGlideCluster|int|false;
+    public function zRem(string $key, string $value, string ...$other_values): ValkeyGlideCluster|int|false;
 
     /**
-     * @see ValkeyGlide::zremrangebylex
+     * @see ValkeyGlide::zRemRangeByLex
      */
-    public function zremrangebylex(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
+    public function zRemRangeByLex(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::zremrangebyrank
      */
-    public function zremrangebyrank(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
+    public function zRemRangeByRank(string $key, string $min, string $max): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::zRemRangeByScore
@@ -1036,17 +1036,17 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::zrevrange
      */
-    public function zrevrange(string $key, string $min, string $max, ?array $options = null): ValkeyGlideCluster|bool|array;
+    public function zRevRange(string $key, string $min, string $max, ?array $options = null): ValkeyGlideCluster|bool|array;
 
     /**
      * @see ValkeyGlide::zrevrangebylex
      */
-    public function zrevrangebylex(string $key, string $min, string $max, ?array $options = null): ValkeyGlideCluster|bool|array;
+    public function zRevRangeByLex(string $key, string $min, string $max, ?array $options = null): ValkeyGlideCluster|bool|array;
 
     /**
      * @see ValkeyGlide::zrevrangebyscore
      */
-    public function zrevrangebyscore(string $key, string $min, string $max, ?array $options = null): ValkeyGlideCluster|bool|array;
+    public function zRevRangeByScore(string $key, string $min, string $max, ?array $options = null): ValkeyGlideCluster|bool|array;
 
     /**
      * @see ValkeyGlide::zrevrank
