@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: db002b6823f6c08f354667e21a48ef1e3e045675 */
+ * Stub hash: 4f6e97e58f00abe7017fe00ce71af5e7e77998a3 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 1)
@@ -545,6 +545,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_ran
 	ZEND_ARG_TYPE_INFO(0, route, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlideCluster_rawcommand, 0, 2, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, route, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, command, IS_STRING, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_rename, 0, 2, ValkeyGlideCluster, MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, key_src, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key_dst, IS_STRING, 0)
@@ -560,6 +566,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_res
 	ZEND_ARG_TYPE_INFO(0, timeout, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ValkeyGlideCluster_role, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, route, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ValkeyGlideCluster_rPop arginfo_class_ValkeyGlideCluster_lPop
@@ -1079,9 +1089,11 @@ ZEND_METHOD(ValkeyGlideCluster, publish);
 ZEND_METHOD(ValkeyGlideCluster, pubsub);
 ZEND_METHOD(ValkeyGlideCluster, punsubscribe);
 ZEND_METHOD(ValkeyGlideCluster, randomKey);
+ZEND_METHOD(ValkeyGlideCluster, rawcommand);
 ZEND_METHOD(ValkeyGlideCluster, rename);
 ZEND_METHOD(ValkeyGlideCluster, renameNx);
 ZEND_METHOD(ValkeyGlideCluster, restore);
+ZEND_METHOD(ValkeyGlideCluster, role);
 ZEND_METHOD(ValkeyGlideCluster, rPop);
 ZEND_METHOD(ValkeyGlideCluster, rpoplpush);
 ZEND_METHOD(ValkeyGlideCluster, rPush);
@@ -1284,9 +1296,11 @@ static const zend_function_entry class_ValkeyGlideCluster_methods[] = {
 	ZEND_ME(ValkeyGlideCluster, pubsub, arginfo_class_ValkeyGlideCluster_pubsub, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, punsubscribe, arginfo_class_ValkeyGlideCluster_punsubscribe, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, randomKey, arginfo_class_ValkeyGlideCluster_randomKey, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, rawcommand, arginfo_class_ValkeyGlideCluster_rawcommand, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, rename, arginfo_class_ValkeyGlideCluster_rename, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, renameNx, arginfo_class_ValkeyGlideCluster_renameNx, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, restore, arginfo_class_ValkeyGlideCluster_restore, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, role, arginfo_class_ValkeyGlideCluster_role, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, rPop, arginfo_class_ValkeyGlideCluster_rPop, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, rpoplpush, arginfo_class_ValkeyGlideCluster_rpoplpush, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, rPush, arginfo_class_ValkeyGlideCluster_rPush, ZEND_ACC_PUBLIC)

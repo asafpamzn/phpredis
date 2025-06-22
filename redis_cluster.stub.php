@@ -643,7 +643,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::rawcommand
      */
- //TODO   public function rawcommand(mixed $route, string $command, mixed ...$args): mixed;
+    public function rawcommand(mixed $route, string $command, mixed ...$args): mixed;
 
     /**
      * @see ValkeyGlide::rename
@@ -663,7 +663,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::role
      */
-    //TODO public function role(mixed $route): mixed;
+    public function role(mixed $route): mixed;
 
     /**
      * @see ValkeyGlide::rpop()
