@@ -21,10 +21,10 @@
 #include <stdio.h>
 
 #include "valkey_glide_geo_common.h"
-extern zend_class_entry *get_valkey_glide_ce();
+extern zend_class_entry *ce;
 
 /* Execute a GEOADD command using the Valkey Glide client */
-int execute_geoadd_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_geoadd_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     char *key = NULL;
     size_t key_len;
@@ -35,7 +35,7 @@ int execute_geoadd_command(zval *object, int argc, zval *return_value, zend_clas
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os*",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_args, &variadic_argc) == FAILURE)
     {
         return 0;
@@ -83,7 +83,7 @@ int execute_geoadd_command(zval *object, int argc, zval *return_value, zend_clas
 }
 
 /* Execute a GEODIST command using the Valkey Glide client */
-int execute_geodist_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_geodist_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     char *key = NULL, *src = NULL, *dst = NULL, *unit = NULL;
     size_t key_len, src_len, dst_len, unit_len = 0;
@@ -92,7 +92,7 @@ int execute_geodist_command(zval *object, int argc, zval *return_value, zend_cla
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osss|s",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &src, &src_len, &dst, &dst_len,
                                      &unit, &unit_len) == FAILURE)
     {
@@ -143,7 +143,7 @@ int execute_geodist_command(zval *object, int argc, zval *return_value, zend_cla
 }
 
 /* Execute a GEOHASH command using the Valkey Glide client */
-int execute_geohash_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_geohash_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     char *key = NULL;
     size_t key_len;
@@ -153,7 +153,7 @@ int execute_geohash_command(zval *object, int argc, zval *return_value, zend_cla
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os*",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_args, &variadic_argc) == FAILURE)
     {
         return 0;
@@ -196,7 +196,7 @@ int execute_geohash_command(zval *object, int argc, zval *return_value, zend_cla
 }
 
 /* Execute a GEOPOS command using the Valkey Glide client */
-int execute_geopos_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_geopos_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     char *key = NULL;
     size_t key_len;
@@ -206,7 +206,7 @@ int execute_geopos_command(zval *object, int argc, zval *return_value, zend_clas
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os*",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_args, &variadic_argc) == FAILURE)
     {
         return 0;
@@ -249,7 +249,7 @@ int execute_geopos_command(zval *object, int argc, zval *return_value, zend_clas
 }
 
 /* Execute a GEORADIUS command using the Valkey Glide client */
-int execute_georadius_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_georadius_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     char *key = NULL, *unit = NULL;
     size_t key_len, unit_len;
@@ -259,7 +259,7 @@ int execute_georadius_command(zval *object, int argc, zval *return_value, zend_c
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osddds|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &lng, &lat, &radius,
                                      &unit, &unit_len, &z_opts) == FAILURE)
     {
@@ -357,7 +357,7 @@ int execute_georadius_command(zval *object, int argc, zval *return_value, zend_c
 }
 
 /* Execute a GEORADIUS_RO command using the Valkey Glide client */
-int execute_georadius_ro_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_georadius_ro_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     char *key = NULL, *unit = NULL;
     size_t key_len, unit_len;
@@ -367,7 +367,7 @@ int execute_georadius_ro_command(zval *object, int argc, zval *return_value, zen
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osddds|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &lng, &lat, &radius,
                                      &unit, &unit_len, &z_opts) == FAILURE)
     {
@@ -465,7 +465,7 @@ int execute_georadius_ro_command(zval *object, int argc, zval *return_value, zen
 }
 
 /* GEOSEARCH implementation */
-int execute_geosearch_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_geosearch_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     char *key = NULL, *unit = NULL;
     size_t key_len, unit_len;
@@ -476,7 +476,7 @@ int execute_geosearch_command(zval *object, int argc, zval *return_value, zend_c
 
     /* Parse parameters for simple case: geosearch(key, member, radius, unit [, options]) */
     if (zend_parse_method_parameters(argc, object, "Oszds|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &from, &radius, &unit, &unit_len, &options) == FAILURE)
     {
         return 0;
@@ -555,7 +555,7 @@ int execute_geosearch_command(zval *object, int argc, zval *return_value, zend_c
 }
 
 /* GEOSEARCHSTORE implementation */
-int execute_geosearchstore_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_geosearchstore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     char *dest = NULL, *src = NULL, *unit = NULL;
     size_t dest_len, src_len, unit_len;
@@ -567,7 +567,7 @@ int execute_geosearchstore_command(zval *object, int argc, zval *return_value, z
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osszds|a",
-                                     &object, get_valkey_glide_ce(), &dest, &dest_len,
+                                     &object, ce, &dest, &dest_len,
                                      &src, &src_len, &from, &radius,
                                      &unit, &unit_len, &options) == FAILURE)
     {

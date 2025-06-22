@@ -21,18 +21,15 @@
 #include <string.h>
 #include <stdio.h>
 
-extern zend_class_entry *get_valkey_glide_ce();
-extern zend_class_entry *get_valkey_glide_exception_ce();
-
 /* Execute a WAIT command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_wait_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_wait_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     long numreplicas, timeout;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oll",
-                                     &object, get_valkey_glide_ce(), &numreplicas, &timeout) == FAILURE)
+                                     &object, ce, &numreplicas, &timeout) == FAILURE)
     {
         return 0;
     }
@@ -67,7 +64,7 @@ int execute_wait_command(zval *object, int argc, zval *return_value, zend_class_
 }
 
 /* Execute a FUNCTION command using the Valkey Glide client */
-int execute_function_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_function_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args;
@@ -75,7 +72,7 @@ int execute_function_command(zval *object, int argc, zval *return_value, zend_cl
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O*",
-                                     &object, get_valkey_glide_ce(), &z_args, &args_count) == FAILURE)
+                                     &object, ce, &z_args, &args_count) == FAILURE)
     {
         return 0;
     }
@@ -198,13 +195,13 @@ int execute_function_command(zval *object, int argc, zval *return_value, zend_cl
 }
 
 /* Execute a MULTI command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_multi_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_multi_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, get_valkey_glide_ce()) == FAILURE)
+                                     &object, ce) == FAILURE)
     {
         return 0;
     }
@@ -231,13 +228,13 @@ int execute_multi_command(zval *object, int argc, zval *return_value, zend_class
 }
 
 /* Execute a DISCARD command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_discard_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_discard_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, get_valkey_glide_ce()) == FAILURE)
+                                     &object, ce) == FAILURE)
     {
         return 0;
     }
@@ -263,13 +260,13 @@ int execute_discard_command(zval *object, int argc, zval *return_value, zend_cla
 }
 
 /* Execute an EXEC command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_exec_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_exec_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, get_valkey_glide_ce()) == FAILURE)
+                                     &object, ce) == FAILURE)
     {
         return 0;
     }
@@ -294,7 +291,7 @@ int execute_exec_command(zval *object, int argc, zval *return_value, zend_class_
 }
 
 /* Execute an FCALL command using the Valkey Glide client */
-int execute_fcall_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_fcall_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *name = NULL;
@@ -305,7 +302,7 @@ int execute_fcall_command(zval *object, int argc, zval *return_value, zend_class
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl*",
-                                     &object, get_valkey_glide_ce(), &name, &name_len,
+                                     &object, ce, &name, &name_len,
                                      &numkeys, &z_args, &args_count) == FAILURE)
     {
         return 0;
@@ -409,7 +406,7 @@ int execute_fcall_command(zval *object, int argc, zval *return_value, zend_class
 }
 
 /* Execute an FCALL_RO command using the Valkey Glide client */
-int execute_fcall_ro_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_fcall_ro_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *name = NULL;
@@ -420,7 +417,7 @@ int execute_fcall_ro_command(zval *object, int argc, zval *return_value, zend_cl
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl*",
-                                     &object, get_valkey_glide_ce(), &name, &name_len,
+                                     &object, ce, &name, &name_len,
                                      &numkeys, &z_args, &args_count) == FAILURE)
     {
         return 0;
@@ -524,7 +521,7 @@ int execute_fcall_ro_command(zval *object, int argc, zval *return_value, zend_cl
 }
 
 /* Execute a DUMP command using the Valkey Glide client */
-int execute_dump_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_dump_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -532,7 +529,7 @@ int execute_dump_command(zval *object, int argc, zval *return_value, zend_class_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -579,7 +576,7 @@ int execute_dump_command(zval *object, int argc, zval *return_value, zend_class_
 }
 
 /* Execute a RESTORE command using the Valkey Glide client */
-int execute_restore_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_restore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *serialized = NULL;
@@ -589,7 +586,7 @@ int execute_restore_command(zval *object, int argc, zval *return_value, zend_cla
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osls|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len, &ttl,
+                                     &object, ce, &key, &key_len, &ttl,
                                      &serialized, &serialized_len, &options) == FAILURE)
     {
         return 0;
@@ -800,7 +797,7 @@ int execute_restore_command(zval *object, int argc, zval *return_value, zend_cla
 }
 
 /* Execute a CONFIG command using the Valkey Glide client */
-int execute_config_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_config_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *operation = NULL;
@@ -809,7 +806,7 @@ int execute_config_command(zval *object, int argc, zval *return_value, zend_clas
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|z!z!",
-                                     &object, get_valkey_glide_ce(), &operation, &operation_len,
+                                     &object, ce, &operation, &operation_len,
                                      &key, &value) == FAILURE)
     {
         return 0;
@@ -1121,14 +1118,14 @@ int execute_get_read_timeout_command(const void *glide_client, double *output_va
 }
 
 /* Unified getReadTimeout command implementation */
-int execute_getreadtimeout_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_getreadtimeout_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     double timeout;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, get_valkey_glide_ce()) == FAILURE)
+                                     &object, ce) == FAILURE)
     {
         return 0;
     }
@@ -1463,7 +1460,7 @@ int execute_dbsize_command_internal(const void *glide_client, long *output_value
 }
 
 /* Execute client command - UNIFIED IMPLEMENTATION */
-int execute_client_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_client_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
@@ -1471,7 +1468,7 @@ int execute_client_command(zval *object, int argc, zval *return_value, zend_clas
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O+",
-                                     &object, get_valkey_glide_ce(), &z_args, &arg_count) == FAILURE)
+                                     &object, ce, &z_args, &arg_count) == FAILURE)
     {
         return 0;
     }
@@ -1494,7 +1491,7 @@ int execute_client_command(zval *object, int argc, zval *return_value, zend_clas
 }
 
 /* Execute rawcommand command - UNIFIED IMPLEMENTATION */
-int execute_rawcommand_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_rawcommand_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
@@ -1502,7 +1499,7 @@ int execute_rawcommand_command(zval *object, int argc, zval *return_value, zend_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O+",
-                                     &object, get_valkey_glide_ce(), &z_args, &arg_count) == FAILURE)
+                                     &object, ce, &z_args, &arg_count) == FAILURE)
     {
         return 0;
     }
@@ -1525,14 +1522,14 @@ int execute_rawcommand_command(zval *object, int argc, zval *return_value, zend_
 }
 
 /* Execute dbSize command - UNIFIED IMPLEMENTATION */
-int execute_dbsize_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_dbsize_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     long dbsize;
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, get_valkey_glide_ce()) == FAILURE)
+                                     &object, ce) == FAILURE)
     {
         return 0;
     }

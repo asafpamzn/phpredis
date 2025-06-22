@@ -638,7 +638,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::randomkey
      */
-   //TODO public function randomkey(mixed $route): ValkeyGlideCluster|bool|string;
+   public function randomKey(mixed $route): ValkeyGlideCluster|bool|string;
 
     /**
      * @see ValkeyGlide::rawcommand

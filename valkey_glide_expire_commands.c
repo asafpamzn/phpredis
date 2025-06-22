@@ -21,7 +21,7 @@
  * ==================================================================== */
 
 /* Execute an EXPIRE command using the Valkey Glide client */
-int execute_expire_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_expire_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *mode = NULL;
@@ -30,7 +30,7 @@ int execute_expire_command(zval *object, int argc, zval *return_value, zend_clas
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl|s",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &seconds, &mode, &mode_len) == FAILURE)
     {
         return 0;
@@ -85,7 +85,7 @@ int execute_expire_command(zval *object, int argc, zval *return_value, zend_clas
 }
 
 /* Execute an EXPIREAT command using the Valkey Glide client */
-int execute_expireat_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_expireat_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *mode = NULL;
@@ -94,7 +94,7 @@ int execute_expireat_command(zval *object, int argc, zval *return_value, zend_cl
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl|s",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &timestamp, &mode, &mode_len) == FAILURE)
     {
         return 0;
@@ -149,7 +149,7 @@ int execute_expireat_command(zval *object, int argc, zval *return_value, zend_cl
 }
 
 /* Execute a PEXPIRE command using the Valkey Glide client */
-int execute_pexpire_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_pexpire_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *mode = NULL;
@@ -158,7 +158,7 @@ int execute_pexpire_command(zval *object, int argc, zval *return_value, zend_cla
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl|s",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &milliseconds, &mode, &mode_len) == FAILURE)
     {
         return 0;
@@ -213,7 +213,7 @@ int execute_pexpire_command(zval *object, int argc, zval *return_value, zend_cla
 }
 
 /* Execute a PEXPIREAT command using the Valkey Glide client */
-int execute_pexpireat_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_pexpireat_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *mode = NULL;
@@ -222,7 +222,7 @@ int execute_pexpireat_command(zval *object, int argc, zval *return_value, zend_c
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osl|s",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &timestamp_ms, &mode, &mode_len) == FAILURE)
     {
         return 0;
@@ -277,7 +277,7 @@ int execute_pexpireat_command(zval *object, int argc, zval *return_value, zend_c
 }
 
 /* Execute a PERSIST command using the Valkey Glide client */
-int execute_persist_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_persist_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -285,7 +285,7 @@ int execute_persist_command(zval *object, int argc, zval *return_value, zend_cla
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -315,7 +315,7 @@ int execute_persist_command(zval *object, int argc, zval *return_value, zend_cla
 }
 
 /* Execute an EXPIRETIME command using the Valkey Glide client */
-int execute_expiretime_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_expiretime_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -323,7 +323,7 @@ int execute_expiretime_command(zval *object, int argc, zval *return_value, zend_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -354,7 +354,7 @@ int execute_expiretime_command(zval *object, int argc, zval *return_value, zend_
 }
 
 /* Execute a PEXPIRETIME command using the Valkey Glide client */
-int execute_pexpiretime_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_pexpiretime_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -362,7 +362,7 @@ int execute_pexpiretime_command(zval *object, int argc, zval *return_value, zend
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }

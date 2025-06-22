@@ -16,9 +16,6 @@
 #include "common.h"
 #include "valkey_glide_s_common.h"
 
-extern zend_class_entry *get_valkey_glide_ce();
-extern zend_class_entry *get_valkey_glide_exception_ce();
-
 /* ====================================================================
  * UTILITY FUNCTIONS
  * ==================================================================== */
@@ -795,7 +792,7 @@ cleanup:
 /**
  * Execute SADD command using the new signature pattern
  */
-int execute_sadd_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sadd_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -805,7 +802,7 @@ int execute_sadd_command(zval *object, int argc, zval *return_value, zend_class_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os+",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_args, &members_count) == FAILURE)
     {
         return 0;
@@ -838,7 +835,7 @@ int execute_sadd_command(zval *object, int argc, zval *return_value, zend_class_
 /**
  * Execute SADD array command using the new signature pattern
  */
-int execute_sadd_array_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sadd_array_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -848,7 +845,7 @@ int execute_sadd_array_command(zval *object, int argc, zval *return_value, zend_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osa",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_arr) == FAILURE)
     {
         return 0;
@@ -911,7 +908,7 @@ int execute_sadd_array_command(zval *object, int argc, zval *return_value, zend_
 /**
  * Execute SCARD command using the new signature pattern
  */
-int execute_scard_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_scard_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -919,7 +916,7 @@ int execute_scard_command(zval *object, int argc, zval *return_value, zend_class
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -949,7 +946,7 @@ int execute_scard_command(zval *object, int argc, zval *return_value, zend_class
 /**
  * Execute SRANDMEMBER command using the new signature pattern
  */
-int execute_srandmember_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_srandmember_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -959,7 +956,7 @@ int execute_srandmember_command(zval *object, int argc, zval *return_value, zend
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|l",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &count) == FAILURE)
     {
         return 0;
@@ -995,7 +992,7 @@ int execute_srandmember_command(zval *object, int argc, zval *return_value, zend
 /**
  * Execute SISMEMBER command using the new signature pattern
  */
-int execute_sismember_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sismember_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *member = NULL;
@@ -1003,7 +1000,7 @@ int execute_sismember_command(zval *object, int argc, zval *return_value, zend_c
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &member, &member_len) == FAILURE)
     {
         return 0;
@@ -1036,7 +1033,7 @@ int execute_sismember_command(zval *object, int argc, zval *return_value, zend_c
 /**
  * Execute SMEMBERS command using the new signature pattern
  */
-int execute_smembers_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_smembers_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1044,7 +1041,7 @@ int execute_smembers_command(zval *object, int argc, zval *return_value, zend_cl
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -1074,7 +1071,7 @@ int execute_smembers_command(zval *object, int argc, zval *return_value, zend_cl
 /**
  * Execute SREM command using the new signature pattern
  */
-int execute_srem_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_srem_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1084,7 +1081,7 @@ int execute_srem_command(zval *object, int argc, zval *return_value, zend_class_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os+",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_args, &members_count) == FAILURE)
     {
         return 0;
@@ -1117,7 +1114,7 @@ int execute_srem_command(zval *object, int argc, zval *return_value, zend_class_
 /**
  * Execute SMOVE command using the new signature pattern
  */
-int execute_smove_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_smove_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *src = NULL, *dst = NULL, *member = NULL;
@@ -1125,7 +1122,7 @@ int execute_smove_command(zval *object, int argc, zval *return_value, zend_class
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osss",
-                                     &object, get_valkey_glide_ce(), &src, &src_len,
+                                     &object, ce, &src, &src_len,
                                      &dst, &dst_len, &member, &member_len) == FAILURE)
     {
         return 0;
@@ -1160,7 +1157,7 @@ int execute_smove_command(zval *object, int argc, zval *return_value, zend_class
 /**
  * Execute SPOP command using the new signature pattern
  */
-int execute_spop_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_spop_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1170,7 +1167,7 @@ int execute_spop_command(zval *object, int argc, zval *return_value, zend_class_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|l",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &count) == FAILURE)
     {
         return 0;
@@ -1206,7 +1203,7 @@ int execute_spop_command(zval *object, int argc, zval *return_value, zend_class_
 /**
  * Execute SMISMEMBER command using the new signature pattern
  */
-int execute_smismember_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_smismember_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -1216,7 +1213,7 @@ int execute_smismember_command(zval *object, int argc, zval *return_value, zend_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os+",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_args, &members_count) == FAILURE)
     {
         return 0;
@@ -1249,7 +1246,7 @@ int execute_smismember_command(zval *object, int argc, zval *return_value, zend_
 /**
  * Execute SINTER command using the new signature pattern
  */
-int execute_sinter_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sinter_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
@@ -1263,7 +1260,7 @@ int execute_sinter_command(zval *object, int argc, zval *return_value, zend_clas
     {
         /* Try to parse as a single array argument */
         if (zend_parse_method_parameters(argc, object, "Oa",
-                                         &object, get_valkey_glide_ce(), &z_keys_arr) == SUCCESS)
+                                         &object, ce, &z_keys_arr) == SUCCESS)
         {
             /* We have an array of keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
@@ -1297,7 +1294,7 @@ int execute_sinter_command(zval *object, int argc, zval *return_value, zend_clas
     if (!z_args)
     {
         if (zend_parse_method_parameters(argc, object, "O+",
-                                         &object, get_valkey_glide_ce(), &z_args, &keys_count) == FAILURE)
+                                         &object, ce, &z_args, &keys_count) == FAILURE)
         {
             return 0;
         }
@@ -1347,7 +1344,7 @@ int execute_sinter_command(zval *object, int argc, zval *return_value, zend_clas
 /**
  * Execute SINTERCARD command using the new signature pattern
  */
-int execute_sintercard_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sintercard_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_keys;
@@ -1359,7 +1356,7 @@ int execute_sintercard_command(zval *object, int argc, zval *return_value, zend_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oa|l",
-                                     &object, get_valkey_glide_ce(), &z_keys, &limit) == FAILURE)
+                                     &object, ce, &z_keys, &limit) == FAILURE)
     {
         return 0;
     }
@@ -1434,7 +1431,7 @@ int execute_sintercard_command(zval *object, int argc, zval *return_value, zend_
 /**
  * Execute SINTERSTORE command using the new signature pattern
  */
-int execute_sinterstore_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sinterstore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *dst = NULL;
@@ -1453,7 +1450,7 @@ int execute_sinterstore_command(zval *object, int argc, zval *return_value, zend
     {
         /* Try to parse it as an array */
         if (zend_parse_method_parameters(argc, object, "Oa",
-                                         &object, get_valkey_glide_ce(), &z_keys_arr) == SUCCESS)
+                                         &object, ce, &z_keys_arr) == SUCCESS)
         {
             /* We have an array which will contain both destination and source keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
@@ -1511,7 +1508,7 @@ int execute_sinterstore_command(zval *object, int argc, zval *return_value, zend
     {
         /* First argument is always the destination key */
         if (zend_parse_method_parameters(1, object, "Os",
-                                         &object, get_valkey_glide_ce(), &dst, &dst_len) == FAILURE)
+                                         &object, ce, &dst, &dst_len) == FAILURE)
         {
             return 0;
         }
@@ -1555,7 +1552,7 @@ int execute_sinterstore_command(zval *object, int argc, zval *return_value, zend
         {
             /* Parse all parameters including destination key */
             if (zend_parse_method_parameters(argc, object, "Os+",
-                                             &object, get_valkey_glide_ce(), &dst, &dst_len,
+                                             &object, ce, &dst, &dst_len,
                                              &z_args, &keys_count) == FAILURE)
             {
                 return 0;
@@ -1609,7 +1606,7 @@ int execute_sinterstore_command(zval *object, int argc, zval *return_value, zend
 /**
  * Execute SUNION command using the new signature pattern
  */
-int execute_sunion_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sunion_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
@@ -1623,7 +1620,7 @@ int execute_sunion_command(zval *object, int argc, zval *return_value, zend_clas
     {
         /* Try to parse as a single array argument */
         if (zend_parse_method_parameters(argc, object, "Oa",
-                                         &object, get_valkey_glide_ce(), &z_keys_arr) == SUCCESS)
+                                         &object, ce, &z_keys_arr) == SUCCESS)
         {
             /* We have an array of keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
@@ -1657,7 +1654,7 @@ int execute_sunion_command(zval *object, int argc, zval *return_value, zend_clas
     if (!z_args)
     {
         if (zend_parse_method_parameters(argc, object, "O+",
-                                         &object, get_valkey_glide_ce(), &z_args, &keys_count) == FAILURE)
+                                         &object, ce, &z_args, &keys_count) == FAILURE)
         {
             return 0;
         }
@@ -1707,7 +1704,7 @@ int execute_sunion_command(zval *object, int argc, zval *return_value, zend_clas
 /**
  * Execute SUNIONSTORE command using the new signature pattern
  */
-int execute_sunionstore_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sunionstore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *dst = NULL;
@@ -1726,7 +1723,7 @@ int execute_sunionstore_command(zval *object, int argc, zval *return_value, zend
     {
         /* Try to parse it as an array */
         if (zend_parse_method_parameters(argc, object, "Oa",
-                                         &object, get_valkey_glide_ce(), &z_keys_arr) == SUCCESS)
+                                         &object, ce, &z_keys_arr) == SUCCESS)
         {
             /* We have an array which will contain both destination and source keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
@@ -1784,7 +1781,7 @@ int execute_sunionstore_command(zval *object, int argc, zval *return_value, zend
     {
         /* First argument is always the destination key */
         if (zend_parse_method_parameters(1, object, "Os",
-                                         &object, get_valkey_glide_ce(), &dst, &dst_len) == FAILURE)
+                                         &object, ce, &dst, &dst_len) == FAILURE)
         {
             return 0;
         }
@@ -1828,7 +1825,7 @@ int execute_sunionstore_command(zval *object, int argc, zval *return_value, zend
         {
             /* Parse all parameters including destination key */
             if (zend_parse_method_parameters(argc, object, "Os+",
-                                             &object, get_valkey_glide_ce(), &dst, &dst_len,
+                                             &object, ce, &dst, &dst_len,
                                              &z_args, &keys_count) == FAILURE)
             {
                 return 0;
@@ -1882,7 +1879,7 @@ int execute_sunionstore_command(zval *object, int argc, zval *return_value, zend
 /**
  * Execute SDIFF command using the new signature pattern
  */
-int execute_sdiff_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sdiff_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_args = NULL;
@@ -1896,7 +1893,7 @@ int execute_sdiff_command(zval *object, int argc, zval *return_value, zend_class
     {
         /* Try to parse as a single array argument */
         if (zend_parse_method_parameters(argc, object, "Oa",
-                                         &object, get_valkey_glide_ce(), &z_keys_arr) == SUCCESS)
+                                         &object, ce, &z_keys_arr) == SUCCESS)
         {
             /* We have an array of keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
@@ -1930,7 +1927,7 @@ int execute_sdiff_command(zval *object, int argc, zval *return_value, zend_class
     if (!z_args)
     {
         if (zend_parse_method_parameters(argc, object, "O+",
-                                         &object, get_valkey_glide_ce(), &z_args, &keys_count) == FAILURE)
+                                         &object, ce, &z_args, &keys_count) == FAILURE)
         {
             return 0;
         }
@@ -1980,7 +1977,7 @@ int execute_sdiff_command(zval *object, int argc, zval *return_value, zend_class
 /**
  * Execute SDIFFSTORE command using the new signature pattern
  */
-int execute_sdiffstore_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sdiffstore_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *dst = NULL;
@@ -1999,7 +1996,7 @@ int execute_sdiffstore_command(zval *object, int argc, zval *return_value, zend_
     {
         /* Try to parse it as an array */
         if (zend_parse_method_parameters(argc, object, "Oa",
-                                         &object, get_valkey_glide_ce(), &z_keys_arr) == SUCCESS)
+                                         &object, ce, &z_keys_arr) == SUCCESS)
         {
             /* We have an array which will contain both destination and source keys */
             ht_keys = Z_ARRVAL_P(z_keys_arr);
@@ -2057,7 +2054,7 @@ int execute_sdiffstore_command(zval *object, int argc, zval *return_value, zend_
     {
         /* First argument is always the destination key */
         if (zend_parse_method_parameters(1, object, "Os",
-                                         &object, get_valkey_glide_ce(), &dst, &dst_len) == FAILURE)
+                                         &object, ce, &dst, &dst_len) == FAILURE)
         {
             return 0;
         }
@@ -2101,7 +2098,7 @@ int execute_sdiffstore_command(zval *object, int argc, zval *return_value, zend_
         {
             /* Parse all parameters including destination key */
             if (zend_parse_method_parameters(argc, object, "Os+",
-                                             &object, get_valkey_glide_ce(), &dst, &dst_len,
+                                             &object, ce, &dst, &dst_len,
                                              &z_args, &keys_count) == FAILURE)
             {
                 return 0;
@@ -2174,7 +2171,7 @@ int execute_scan_command_internal(const void *glide_client, long *it, const char
 /**
  * Execute SCAN command with unified signature
  */
-int execute_scan_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_scan_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_iter;
@@ -2186,7 +2183,7 @@ int execute_scan_command(zval *object, int argc, zval *return_value, zend_class_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oz|sl",
-                                     &object, get_valkey_glide_ce(), &z_iter, &pattern, &pattern_len,
+                                     &object, ce, &z_iter, &pattern, &pattern_len,
                                      &count) == FAILURE)
     {
         return 0;
@@ -2256,7 +2253,7 @@ int execute_sscan_command_internal(const void *glide_client, const char *key, si
 /**
  * Execute SSCAN command with unified signature
  */
-int execute_sscan_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sscan_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -2270,7 +2267,7 @@ int execute_sscan_command(zval *object, int argc, zval *return_value, zend_class
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osz|sl",
-                                     &object, get_valkey_glide_ce(), &key, &key_len, &z_iter,
+                                     &object, ce, &key, &key_len, &z_iter,
                                      &pattern, &pattern_len, &count) == FAILURE)
     {
         return 0;
@@ -2379,7 +2376,7 @@ int execute_servername_command_internal(const void *glide_client, char **output,
 /**
  * Execute server name command with unified signature
  */
-int execute_servername_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_servername_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *result = NULL;
@@ -2387,7 +2384,7 @@ int execute_servername_command(zval *object, int argc, zval *return_value, zend_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, get_valkey_glide_ce()) == FAILURE)
+                                     &object, ce) == FAILURE)
     {
         return 0;
     }
@@ -2483,7 +2480,7 @@ int execute_serverversion_command_internal(const void *glide_client, char **outp
 /**
  * Execute server version command with unified signature
  */
-int execute_serverversion_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_serverversion_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *result = NULL;
@@ -2491,7 +2488,7 @@ int execute_serverversion_command(zval *object, int argc, zval *return_value, ze
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, get_valkey_glide_ce()) == FAILURE)
+                                     &object, ce) == FAILURE)
     {
         return 0;
     }
@@ -2527,7 +2524,7 @@ int execute_serverversion_command(zval *object, int argc, zval *return_value, ze
 /**
  * Execute HSCAN command with unified signature
  */
-int execute_hscan_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_hscan_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *pattern = NULL;
@@ -2537,7 +2534,7 @@ int execute_hscan_command(zval *object, int argc, zval *return_value, zend_class
 
     /* Parse arguments */
     if (zend_parse_method_parameters(argc, object, "Osz|sl",
-                                     &object, get_valkey_glide_ce(), &key, &key_len, &z_iter,
+                                     &object, ce, &key, &key_len, &z_iter,
                                      &pattern, &pattern_len, &count) == FAILURE)
     {
         return 0;

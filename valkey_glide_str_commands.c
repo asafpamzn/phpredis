@@ -21,14 +21,12 @@
 #include <string.h>
 #include <stdio.h>
 
-extern zend_class_entry *get_valkey_glide_ce();
-
 /* Import the string conversion functions from command_response.c */
 extern char *long_to_string(long value, size_t *len);
 extern char *double_to_string(double value, size_t *len);
 
 /* Execute a TYPE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_type_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_type_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -37,7 +35,7 @@ int execute_type_command(zval *object, int argc, zval *return_value, zend_class_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -65,7 +63,7 @@ int execute_type_command(zval *object, int argc, zval *return_value, zend_class_
 }
 
 /* Execute an APPEND command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_append_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_append_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *value = NULL;
@@ -74,7 +72,7 @@ int execute_append_command(zval *object, int argc, zval *return_value, zend_clas
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &value, &value_len) == FAILURE)
     {
         return 0;
@@ -109,7 +107,7 @@ int execute_append_command(zval *object, int argc, zval *return_value, zend_clas
 }
 
 /* Execute a GETRANGE command using the Valkey Glide client - MIGRATED TO CORE FRAMEWORK */
-int execute_getrange_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_getrange_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *result = NULL;
@@ -118,7 +116,7 @@ int execute_getrange_command(zval *object, int argc, zval *return_value, zend_cl
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osll",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &start, &end) == FAILURE)
     {
         return 0;
@@ -360,7 +358,7 @@ static void free_sort_args(uintptr_t *args, unsigned long *args_len, unsigned lo
 }
 
 /* Execute a SORT command using the Valkey Glide client */
-int execute_sort_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sort_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -370,7 +368,7 @@ int execute_sort_command(zval *object, int argc, zval *return_value, zend_class_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;
@@ -460,7 +458,7 @@ int execute_sort_command(zval *object, int argc, zval *return_value, zend_class_
 }
 
 /* Execute an EXPIREMEMBER command using the Valkey Glide client */
-int execute_expiremember_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_expiremember_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *member = NULL;
@@ -469,7 +467,7 @@ int execute_expiremember_command(zval *object, int argc, zval *return_value, zen
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Ossl",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &member, &member_len, &seconds) == FAILURE)
     {
         return 0;
@@ -528,7 +526,7 @@ int execute_expiremember_command(zval *object, int argc, zval *return_value, zen
 }
 
 /* Execute an EXPIREMEMBERAT command using the Valkey Glide client */
-int execute_expirememberat_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_expirememberat_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *member = NULL;
@@ -537,7 +535,7 @@ int execute_expirememberat_command(zval *object, int argc, zval *return_value, z
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Ossl",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &member, &member_len, &timestamp) == FAILURE)
     {
         return 0;
@@ -596,7 +594,7 @@ int execute_expirememberat_command(zval *object, int argc, zval *return_value, z
 }
 
 /* Execute a SORT_RO command using the Valkey Glide client */
-int execute_sort_ro_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sort_ro_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -606,7 +604,7 @@ int execute_sort_ro_command(zval *object, int argc, zval *return_value, zend_cla
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;
@@ -677,7 +675,7 @@ int execute_sort_ro_command(zval *object, int argc, zval *return_value, zend_cla
 }
 
 /* Execute a SORT command in ascending order */
-int execute_sortasc_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sortasc_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -687,7 +685,7 @@ int execute_sortasc_command(zval *object, int argc, zval *return_value, zend_cla
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;
@@ -758,7 +756,7 @@ int execute_sortasc_command(zval *object, int argc, zval *return_value, zend_cla
 }
 
 /* Execute a SORT command in ascending order with alpha flag */
-int execute_sortascalpha_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sortascalpha_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -768,7 +766,7 @@ int execute_sortascalpha_command(zval *object, int argc, zval *return_value, zen
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;
@@ -839,7 +837,7 @@ int execute_sortascalpha_command(zval *object, int argc, zval *return_value, zen
 }
 
 /* Execute a SORT command in descending order */
-int execute_sortdesc_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sortdesc_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -849,7 +847,7 @@ int execute_sortdesc_command(zval *object, int argc, zval *return_value, zend_cl
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;
@@ -920,7 +918,7 @@ int execute_sortdesc_command(zval *object, int argc, zval *return_value, zend_cl
 }
 
 /* Execute a SORT command in descending order with alpha flag */
-int execute_sortdescalpha_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_sortdescalpha_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
 
     valkey_glide_object *valkey_glide;
@@ -931,7 +929,7 @@ int execute_sortdescalpha_command(zval *object, int argc, zval *return_value, ze
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &z_opts) == FAILURE)
     {
         return 0;

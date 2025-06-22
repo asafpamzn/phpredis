@@ -22,9 +22,6 @@
 #include <string.h>
 #include <stdio.h>
 
-extern zend_class_entry *get_valkey_glide_ce();
-extern zend_class_entry *get_valkey_glide_exception_ce();
-
 /* ====================================================================
  * COMMAND IMPLEMENTATION FUNCTIONS
  * ==================================================================== */
@@ -32,7 +29,7 @@ extern zend_class_entry *get_valkey_glide_exception_ce();
 /**
  * Execute an XLEN command
  */
-int execute_xlen_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xlen_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -41,7 +38,7 @@ int execute_xlen_command(zval *object, int argc, zval *return_value, zend_class_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, get_valkey_glide_ce(), &key, &key_len) == FAILURE)
+                                     &object, ce, &key, &key_len) == FAILURE)
     {
         return 0;
     }
@@ -75,7 +72,7 @@ int execute_xlen_command(zval *object, int argc, zval *return_value, zend_class_
 /**
  * Execute an XDEL command
  */
-int execute_xdel_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xdel_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL;
@@ -85,7 +82,7 @@ int execute_xdel_command(zval *object, int argc, zval *return_value, zend_class_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osa",
-                                     &object, get_valkey_glide_ce(), &key, &key_len, &z_ids) == FAILURE)
+                                     &object, ce, &key, &key_len, &z_ids) == FAILURE)
     {
         return 0;
     }
@@ -121,7 +118,7 @@ int execute_xdel_command(zval *object, int argc, zval *return_value, zend_class_
 /**
  * Execute an XACK command
  */
-int execute_xack_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xack_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *group = NULL;
@@ -131,7 +128,7 @@ int execute_xack_command(zval *object, int argc, zval *return_value, zend_class_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Ossa",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &group, &group_len, &z_ids) == FAILURE)
     {
         return 0;
@@ -173,7 +170,7 @@ int execute_xack_command(zval *object, int argc, zval *return_value, zend_class_
 /**
  * Execute an XADD command
  */
-int execute_xadd_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xadd_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *id = NULL;
@@ -191,7 +188,7 @@ int execute_xadd_command(zval *object, int argc, zval *return_value, zend_class_
         if (argc == 4)
         {
             if (zend_parse_method_parameters(argc, object, "Ossal",
-                                             &object, get_valkey_glide_ce(), &key, &key_len,
+                                             &object, ce, &key, &key_len,
                                              &id, &id_len, &z_field_values, &maxlen) == SUCCESS)
             {
                 parse_success = 1;
@@ -200,7 +197,7 @@ int execute_xadd_command(zval *object, int argc, zval *return_value, zend_class_
         else if (argc == 5)
         {
             if (zend_parse_method_parameters(argc, object, "Ossalb",
-                                             &object, get_valkey_glide_ce(), &key, &key_len,
+                                             &object, ce, &key, &key_len,
                                              &id, &id_len, &z_field_values, &maxlen, &approximate) == SUCCESS)
             {
                 parse_success = 1;
@@ -231,7 +228,7 @@ int execute_xadd_command(zval *object, int argc, zval *return_value, zend_class_
     if (!z_options)
     {
         if (zend_parse_method_parameters(argc, object, "Ossa|a",
-                                         &object, get_valkey_glide_ce(), &key, &key_len,
+                                         &object, ce, &key, &key_len,
                                          &id, &id_len, &z_field_values, &z_options) == FAILURE)
         {
             return 0;
@@ -277,7 +274,7 @@ int execute_xadd_command(zval *object, int argc, zval *return_value, zend_class_
 /**
  * Execute an XTRIM command
  */
-int execute_xtrim_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xtrim_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *threshold = NULL;
@@ -289,7 +286,7 @@ int execute_xtrim_command(zval *object, int argc, zval *return_value, zend_class
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oss|bbl",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &threshold, &threshold_len, &approx, &minid, &limit) == FAILURE)
     {
         return 0;
@@ -360,7 +357,7 @@ int execute_xtrim_command(zval *object, int argc, zval *return_value, zend_class
 /**
  * Execute an XRANGE command
  */
-int execute_xrange_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xrange_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *start = NULL, *end = NULL;
@@ -374,7 +371,7 @@ int execute_xrange_command(zval *object, int argc, zval *return_value, zend_clas
     {
         /* xrange(key, start, end, count) */
         if (zend_parse_method_parameters(argc, object, "Osssl",
-                                         &object, get_valkey_glide_ce(), &key, &key_len,
+                                         &object, ce, &key, &key_len,
                                          &start, &start_len, &end, &end_len, &count) == FAILURE)
         {
             return 0;
@@ -390,7 +387,7 @@ int execute_xrange_command(zval *object, int argc, zval *return_value, zend_clas
     {
         /* xrange(key, start, end, count, options) */
         if (zend_parse_method_parameters(argc, object, "Ossla",
-                                         &object, get_valkey_glide_ce(), &key, &key_len,
+                                         &object, ce, &key, &key_len,
                                          &start, &start_len, &end, &end_len, &count, &z_options) == FAILURE)
         {
             return 0;
@@ -413,7 +410,7 @@ int execute_xrange_command(zval *object, int argc, zval *return_value, zend_clas
     {
         /* xrange(key, start, end [, options]) - original format for backward compatibility */
         if (zend_parse_method_parameters(argc, object, "Osss|a",
-                                         &object, get_valkey_glide_ce(), &key, &key_len,
+                                         &object, ce, &key, &key_len,
                                          &start, &start_len, &end, &end_len, &z_options) == FAILURE)
         {
             return 0;
@@ -459,7 +456,7 @@ int execute_xrange_command(zval *object, int argc, zval *return_value, zend_clas
 /**
  * Execute an XREVRANGE command
  */
-int execute_xrevrange_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xrevrange_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *start = NULL, *end = NULL;
@@ -473,7 +470,7 @@ int execute_xrevrange_command(zval *object, int argc, zval *return_value, zend_c
     {
         /* xrevrange(key, end, start, count) */
         if (zend_parse_method_parameters(argc, object, "Osssl",
-                                         &object, get_valkey_glide_ce(), &key, &key_len,
+                                         &object, ce, &key, &key_len,
                                          &end, &end_len, &start, &start_len, &count) == FAILURE)
         {
             return 0;
@@ -489,7 +486,7 @@ int execute_xrevrange_command(zval *object, int argc, zval *return_value, zend_c
     {
         /* xrevrange(key, end, start, count, options) */
         if (zend_parse_method_parameters(argc, object, "Ossla",
-                                         &object, get_valkey_glide_ce(), &key, &key_len,
+                                         &object, ce, &key, &key_len,
                                          &end, &end_len, &start, &start_len, &count, &z_options) == FAILURE)
         {
             return 0;
@@ -512,7 +509,7 @@ int execute_xrevrange_command(zval *object, int argc, zval *return_value, zend_c
     {
         /* xrevrange(key, end, start [, options]) - original format for backward compatibility */
         if (zend_parse_method_parameters(argc, object, "Osss|a",
-                                         &object, get_valkey_glide_ce(), &key, &key_len,
+                                         &object, ce, &key, &key_len,
                                          &end, &end_len, &start, &start_len, &z_options) == FAILURE)
         {
             return 0;
@@ -558,7 +555,7 @@ int execute_xrevrange_command(zval *object, int argc, zval *return_value, zend_c
     return 0;
 }
 /* Execute an XPENDING command using the Valkey Glide client */
-int execute_xpending_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xpending_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_options = NULL;
@@ -574,7 +571,7 @@ int execute_xpending_command(zval *object, int argc, zval *return_value, zend_cl
     {
         /* Format: xpending(key, group, options_array) */
         if (zend_parse_method_parameters(argc, object, "Oss|a",
-                                         &object, get_valkey_glide_ce(), &key, &key_len,
+                                         &object, ce, &key, &key_len,
                                          &group, &group_len, &z_options) == FAILURE)
         {
             return 0;
@@ -584,7 +581,7 @@ int execute_xpending_command(zval *object, int argc, zval *return_value, zend_cl
     {
         /* Format: xpending(key, group, start, end, count) */
         if (zend_parse_method_parameters(argc, object, "Osssl",
-                                         &object, get_valkey_glide_ce(), &key, &key_len,
+                                         &object, ce, &key, &key_len,
                                          &group, &group_len, &start, &start_len,
                                          &end, &end_len, &count) == FAILURE)
         {
@@ -595,7 +592,7 @@ int execute_xpending_command(zval *object, int argc, zval *return_value, zend_cl
     {
         /* Format: xpending(key, group, start, end, count, consumer) */
         if (zend_parse_method_parameters(argc, object, "Ossssls",
-                                         &object, get_valkey_glide_ce(), &key, &key_len,
+                                         &object, ce, &key, &key_len,
                                          &group, &group_len, &start, &start_len,
                                          &end, &end_len, &count, &consumer, &consumer_len) == FAILURE)
         {
@@ -662,7 +659,7 @@ int execute_xpending_command(zval *object, int argc, zval *return_value, zend_cl
 }
 
 /* Execute an XREAD command using the Valkey Glide client */
-int execute_xread_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xread_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     zval *z_streams_and_ids, *z_options = NULL;
@@ -670,7 +667,7 @@ int execute_xread_command(zval *object, int argc, zval *return_value, zend_class
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Oa|ll",
-                                     &object, get_valkey_glide_ce(), &z_streams_and_ids, &count, &block) == FAILURE)
+                                     &object, ce, &z_streams_and_ids, &count, &block) == FAILURE)
     {
         return 0;
     }
@@ -747,7 +744,7 @@ int execute_xread_command(zval *object, int argc, zval *return_value, zend_class
 }
 
 /* Execute an XREADGROUP command using the Valkey Glide client */
-int execute_xreadgroup_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xreadgroup_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *group = NULL, *consumer = NULL;
@@ -761,7 +758,7 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value, zend_
     {
         /* Try parsing as (group, consumer, streams, count) first */
         if (zend_parse_method_parameters(argc, object, "Ossal",
-                                         &object, get_valkey_glide_ce(), &group, &group_len,
+                                         &object, ce, &group, &group_len,
                                          &consumer, &consumer_len, &z_streams_and_ids, &count) == SUCCESS)
         {
             /* Create options array with COUNT */
@@ -774,7 +771,7 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value, zend_
         {
             /* Try parsing as (group, consumer, streams, options) */
             if (zend_parse_method_parameters(argc, object, "Ossa",
-                                             &object, get_valkey_glide_ce(), &group, &group_len,
+                                             &object, ce, &group, &group_len,
                                              &consumer, &consumer_len, &z_streams_and_ids, &z_options) == FAILURE)
             {
                 return 0;
@@ -787,7 +784,7 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value, zend_
 
         /* First try parsing as (group, consumer, streams, count, block) */
         if (zend_parse_method_parameters(argc, object, "Ossall",
-                                         &object, get_valkey_glide_ce(), &group, &group_len,
+                                         &object, ce, &group, &group_len,
                                          &consumer, &consumer_len, &z_streams_and_ids, &count, &block) == SUCCESS)
         {
             /* Create options array with both COUNT and BLOCK */
@@ -801,7 +798,7 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value, zend_
         {
             /* Fallback to parsing as (group, consumer, streams, count, options) */
             if (zend_parse_method_parameters(argc, object, "Ossala",
-                                             &object, get_valkey_glide_ce(), &group, &group_len,
+                                             &object, ce, &group, &group_len,
                                              &consumer, &consumer_len, &z_streams_and_ids, &count, &z_options) == FAILURE)
             {
                 return 0;
@@ -825,7 +822,7 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value, zend_
     {
         /* Parse as (group, consumer, streams [, options]) - original format for backward compatibility */
         if (zend_parse_method_parameters(argc, object, "Ossa|a",
-                                         &object, get_valkey_glide_ce(), &group, &group_len,
+                                         &object, ce, &group, &group_len,
                                          &consumer, &consumer_len, &z_streams_and_ids, &z_options) == FAILURE)
         {
             return 0;
@@ -900,7 +897,7 @@ int execute_xreadgroup_command(zval *object, int argc, zval *return_value, zend_
 }
 
 /* Execute an XCLAIM command using the Valkey Glide client */
-int execute_xclaim_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xclaim_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *group = NULL, *consumer = NULL;
@@ -910,7 +907,7 @@ int execute_xclaim_command(zval *object, int argc, zval *return_value, zend_clas
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osssla|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &group, &group_len, &consumer, &consumer_len,
                                      &min_idle_time, &z_ids, &z_options) == FAILURE)
     {
@@ -952,7 +949,7 @@ int execute_xclaim_command(zval *object, int argc, zval *return_value, zend_clas
 }
 
 /* Execute an XAUTOCLAIM command using the Valkey Glide client */
-int execute_xautoclaim_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xautoclaim_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *key = NULL, *group = NULL, *consumer = NULL, *start = NULL;
@@ -962,7 +959,7 @@ int execute_xautoclaim_command(zval *object, int argc, zval *return_value, zend_
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Osssls|a",
-                                     &object, get_valkey_glide_ce(), &key, &key_len,
+                                     &object, ce, &key, &key_len,
                                      &group, &group_len, &consumer, &consumer_len,
                                      &min_idle_time, &start, &start_len, &z_options) == FAILURE)
     {
@@ -1019,7 +1016,7 @@ int execute_xautoclaim_command(zval *object, int argc, zval *return_value, zend_
 /**
  * Execute an XINFO command
  */
-int execute_xinfo_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xinfo_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *op = NULL;
@@ -1029,7 +1026,7 @@ int execute_xinfo_command(zval *object, int argc, zval *return_value, zend_class
 
     /* Parse parameters */
     if (zend_parse_method_parameters(argc, object, "Os*",
-                                     &object, get_valkey_glide_ce(), &op, &op_len, &z_args, &args_count) == FAILURE)
+                                     &object, ce, &op, &op_len, &z_args, &args_count) == FAILURE)
     {
         return 0;
     }
@@ -1078,7 +1075,7 @@ int execute_xinfo_command(zval *object, int argc, zval *return_value, zend_class
 /**
  * Execute an XGROUP command
  */
-int execute_xgroup_command(zval *object, int argc, zval *return_value, zend_class_entry* ce)
+int execute_xgroup_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
     char *op = NULL;
@@ -1095,7 +1092,7 @@ int execute_xgroup_command(zval *object, int argc, zval *return_value, zend_clas
 
     /* Parse method parameters with defaults matching PHP signature */
     if (zend_parse_method_parameters(argc, object, "Os|s!s!s!bl",
-                                     &object, get_valkey_glide_ce(), &op, &op_len,
+                                     &object, ce, &op, &op_len,
                                      &key, &key_len, &group, &group_len,
                                      &id_or_consumer, &id_or_consumer_len,
                                      &mkstream, &entries_read) == FAILURE)

@@ -1340,15 +1340,12 @@ int execute_get_command(zval *object, int argc, zval *return_value, zend_class_e
 int execute_randomkey_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
+    zval *args = NULL;
+    int args_count = 0;
     char *response = NULL;
     size_t response_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(argc, object, "O",
-                                     &object, ce) == FAILURE)
-    {
-        return 0;
-    }
+    int result = 0;
+    zend_bool is_cluster = (ce == get_valkey_glide_cluster_ce());
 
     /* Get ValkeyGlide object */
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
@@ -1357,19 +1354,62 @@ int execute_randomkey_command(zval *object, int argc, zval *return_value, zend_c
         return 0;
     }
 
-    /* Execute using core framework */
-    core_command_args_t args = {0};
-    args.glide_client = valkey_glide->glide_client;
-    args.cmd_type = RandomKey;
-
-    /* Use string result processor */
-    struct
+    if (is_cluster)
     {
-        char **result;
-        size_t *result_len;
-    } output = {&response, &response_len};
+        /* Parse parameters for cluster - route parameter required */
+        if (zend_parse_method_parameters(argc, object, "O*",
+                                         &object, ce, &args, &args_count) == FAILURE)
+        {
+            return 0;
+        }
 
-    if (execute_core_command(&args, &output, process_core_string_result))
+        if (args_count == 0)
+        {
+            /* Need the route parameter */
+            return 0;
+        }
+
+        /* Execute the command with the route bytes */
+        CommandResult *cmd_result = execute_command_with_route(
+            valkey_glide->glide_client,
+            RandomKey,
+            0,
+            NULL,
+            NULL,
+            &args[0]);
+
+        /* Use the generic handler to process the result */
+        result = handle_string_response(cmd_result, &response, &response_len);
+    }
+    else
+    {
+        /* Non-cluster case - parse parameters as before */
+        if (zend_parse_method_parameters(argc, object, "O",
+                                         &object, ce) == FAILURE)
+        {
+            return 0;
+        }
+
+        /* Execute using core framework */
+        core_command_args_t core_args = {0};
+        core_args.glide_client = valkey_glide->glide_client;
+        core_args.cmd_type = RandomKey;
+
+        /* Use string result processor */
+        struct
+        {
+            char **result;
+            size_t *result_len;
+        } output = {&response, &response_len};
+
+        if (execute_core_command(&core_args, &output, process_core_string_result))
+        {
+            result = 1;
+        }
+    }
+
+    /* Process the result */
+    if (result == 1)
     {
         if (response != NULL)
         {
@@ -1384,6 +1424,7 @@ int execute_randomkey_command(zval *object, int argc, zval *return_value, zend_c
         }
     }
 
+    /* Error */
     return 0;
 }
 
