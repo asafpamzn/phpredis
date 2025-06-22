@@ -170,15 +170,10 @@ RPUSH_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto array ValkeyGlideCluster::blpop(string key1, ... keyN, long timeout) */
-PHP_METHOD(ValkeyGlideCluster, blpop)
-{
-}
-/* }}} */
+BLPOP_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::brpop(string key1, ... keyN, long timeout */
-PHP_METHOD(ValkeyGlideCluster, brpop)
-{
-}
+BRPOP_METHOD_IMPL(ValkeyGlideCluster)
 /* }}} */
 
 /* {{{ proto long ValkeyGlideCluster::rpushx(string key, mixed value) */
@@ -753,13 +748,6 @@ PHP_METHOD(ValkeyGlideCluster, script)
 }
 /* }}} */
 
-/* {{{ proto mixed ValkeyGlideCluster::slowlog(string key, ...)
- *     proto mixed ValkeyGlideCluster::slowlog(array host_port, ...) */
-PHP_METHOD(ValkeyGlideCluster, slowlog)
-{
-}
-/* }}} */
-
 /* {{{ proto int ValkeyGlideCluster::geoadd(string key, float long float lat string mem, ...) */
 GEOADD_METHOD_IMPL(ValkeyGlideCluster)
 
@@ -776,9 +764,7 @@ GEODIST_METHOD_IMPL(ValkeyGlideCluster)
 GEORADIUS_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::georadius() }}} */
-PHP_METHOD(ValkeyGlideCluster, georadius_ro)
-{
-}
+GEORADIUS_RO_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::georadiusbymember() }}} */
 PHP_METHOD(ValkeyGlideCluster, georadiusbymember)

@@ -45,12 +45,12 @@ class ValkeyGlideCluster {
     /**
      * See ValkeyGlide::blpop()
      */
-    public function blpop(string|array $key, string|float|int $timeout_or_key, mixed ...$extra_args): ValkeyGlideCluster|array|null|false;
+    public function blPop(string|array $key, string|float|int $timeout_or_key, mixed ...$extra_args): ValkeyGlideCluster|array|null|false;
 
     /**
      * See ValkeyGlide::brpop()
      */
-    public function brpop(string|array $key, string|float|int $timeout_or_key, mixed ...$extra_args): ValkeyGlideCluster|array|null|false;
+    public function brPop(string|array $key, string|float|int $timeout_or_key, mixed ...$extra_args): ValkeyGlideCluster|array|null|false;
 
     /**
      * See ValkeyGlide::brpoplpush()
