@@ -834,7 +834,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::time
      */
-   //TODO public function time(mixed $route): ValkeyGlideCluster|bool|array;
+    public function time(mixed $route): ValkeyGlideCluster|bool|array;
 
     /**
      * @see ValkeyGlide::ttl
