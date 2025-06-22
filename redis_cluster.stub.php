@@ -162,7 +162,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::echo()
      */
-  //TODO  public function echo(mixed $route, string $msg): ValkeyGlideCluster|string|false;
+    public function echo(mixed $route, string $msg): ValkeyGlideCluster|string|false;
 
     /**
      * @see ValkeyGlide::eval

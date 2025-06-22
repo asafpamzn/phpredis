@@ -729,17 +729,14 @@ void close_glide_client(const void *glide_client)
 int execute_echo_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
+    zval *args = NULL;
+    int args_count = 0;
     char *msg = NULL;
-    size_t msg_len;
+    size_t msg_len = 0;
     char *response = NULL;
     size_t response_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(argc, object, "Os",
-                                     &object, ce, &msg, &msg_len) == FAILURE)
-    {
-        return 0;
-    }
+    int result = 0;
+    zend_bool is_cluster = (ce == get_valkey_glide_cluster_ce());
 
     /* Get ValkeyGlide object */
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
@@ -748,34 +745,154 @@ int execute_echo_command(zval *object, int argc, zval *return_value, zend_class_
         return 0;
     }
 
-    /* Execute using core framework */
-    core_command_args_t args = {0};
-    args.glide_client = valkey_glide->glide_client;
-    args.cmd_type = Echo;
-
-    /* Add message argument */
-    args.args[0].type = CORE_ARG_TYPE_STRING;
-    args.args[0].data.string_arg.value = msg;
-    args.args[0].data.string_arg.len = msg_len;
-    args.arg_count = 1;
-
-    /* Use string result processor */
-    struct
+    if (is_cluster)
     {
-        char **result;
-        size_t *result_len;
-    } output = {&response, &response_len};
-
-    if (execute_core_command(&args, &output, process_core_string_result))
-    {
-        if (response != NULL)
+        /* Parse parameters for cluster - first parameter is route, second is message */
+        if (zend_parse_method_parameters(argc, object, "O*",
+                                         &object, ce, &args, &args_count) == FAILURE)
         {
-            ZVAL_STRINGL(return_value, response, response_len);
-            efree(response);
-            return 1;
+            return 0;
+        }
+
+        if (args_count < 2)
+        {
+            /* Need both route and message parameters */
+            return 0;
+        }
+
+        /* Second argument is the message (index 1, after route) */
+        zval *message = &args[1];
+
+        /* Check if the message is a string */
+        if (Z_TYPE_P(message) != IS_STRING)
+        {
+            /* Convert to string if needed */
+            zval temp;
+            ZVAL_COPY(&temp, message);
+            convert_to_string(&temp);
+
+            msg = Z_STRVAL(temp);
+            msg_len = Z_STRLEN(temp);
+
+            /* Execute the command with the route information */
+            unsigned long arg_count = 1; /* Just the message */
+            uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+            unsigned long *cmd_args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+            if (!cmd_args || !cmd_args_len)
+            {
+                if (cmd_args)
+                    efree(cmd_args);
+                if (cmd_args_len)
+                    efree(cmd_args_len);
+                zval_dtor(&temp);
+                return 0;
+            }
+
+            cmd_args[0] = (uintptr_t)msg;
+            cmd_args_len[0] = msg_len;
+
+            /* Execute the command with the route information */
+            CommandResult *cmd_result = execute_command_with_route(
+                valkey_glide->glide_client,
+                Echo,
+                arg_count,
+                cmd_args,
+                cmd_args_len,
+                &args[0]); /* Route parameter */
+
+            /* Free the argument arrays */
+            efree(cmd_args);
+            efree(cmd_args_len);
+
+            /* Free the temporary zval */
+            zval_dtor(&temp);
+
+            /* Use the generic handler to process the result */
+            result = handle_string_response(cmd_result, &response, &response_len);
+        }
+        else
+        {
+            /* It's already a string */
+            msg = Z_STRVAL_P(message);
+            msg_len = Z_STRLEN_P(message);
+
+            /* Execute the command with the route information */
+            unsigned long arg_count = 1; /* Just the message */
+            uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+            unsigned long *cmd_args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+            if (!cmd_args || !cmd_args_len)
+            {
+                if (cmd_args)
+                    efree(cmd_args);
+                if (cmd_args_len)
+                    efree(cmd_args_len);
+                return 0;
+            }
+
+            cmd_args[0] = (uintptr_t)msg;
+            cmd_args_len[0] = msg_len;
+
+            /* Execute the command with the route information */
+            CommandResult *cmd_result = execute_command_with_route(
+                valkey_glide->glide_client,
+                Echo,
+                arg_count,
+                cmd_args,
+                cmd_args_len,
+                &args[0]); /* Route parameter */
+
+            /* Free the argument arrays */
+            efree(cmd_args);
+            efree(cmd_args_len);
+
+            /* Use the generic handler to process the result */
+            result = handle_string_response(cmd_result, &response, &response_len);
+        }
+    }
+    else
+    {
+        /* Non-cluster case - parse parameters as before */
+        if (zend_parse_method_parameters(argc, object, "Os",
+                                         &object, ce, &msg, &msg_len) == FAILURE)
+        {
+            return 0;
+        }
+
+        /* Execute using core framework */
+        core_command_args_t core_args = {0};
+        core_args.glide_client = valkey_glide->glide_client;
+        core_args.cmd_type = Echo;
+
+        /* Add message argument */
+        core_args.args[0].type = CORE_ARG_TYPE_STRING;
+        core_args.args[0].data.string_arg.value = msg;
+        core_args.args[0].data.string_arg.len = msg_len;
+        core_args.arg_count = 1;
+
+        /* Use string result processor */
+        struct
+        {
+            char **result;
+            size_t *result_len;
+        } output = {&response, &response_len};
+
+        if (execute_core_command(&core_args, &output, process_core_string_result))
+        {
+            result = 1;
         }
     }
 
+    /* Process the result */
+    if (result == 1 && response != NULL)
+    {
+        ZVAL_STRINGL(return_value, response, response_len);
+        efree(response);
+        return 1;
+    }
+
+    /* Error or empty response */
     return 0;
 }
 
