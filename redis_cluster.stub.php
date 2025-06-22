@@ -222,12 +222,12 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::flushall
      */
-    //TODO public function flushall(mixed $route, bool $async = false): ValkeyGlideCluster|bool;
+    public function flushall(mixed $route, bool $async = false): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::flushdb
      */
-    //TODO public function flushdb(mixed $route, bool $async = false): ValkeyGlideCluster|bool;
+    public function flushdb(mixed $route, bool $async = false): ValkeyGlideCluster|bool;
 
     /**
      * @see ValkeyGlide::geoadd
