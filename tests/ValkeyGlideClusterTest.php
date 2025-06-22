@@ -140,8 +140,14 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
     /* Override newInstance as we want a ValkeyGlideCluster object */
     protected function newInstance() {
         try {
-            
-            return new ValkeyGlideCluster(NULL, ["127.0.0.1:7001"], 30, 30, true, $this->getAuth());
+          
+            return new ValkeyGlideCluster(
+                [['host' => '127.0.0.1', 'port' => 7001]], // addresses array format
+                false, // use_tls
+                $this->getAuth(), // credentials
+                ValkeyGlide::READ_FROM_PRIMARY, // read_from
+                30 // request_timeout - assuming one of your 30s was this
+            );
         } catch (Exception $ex) {
             TestSuite::errorMessage("Fatal error: %s\n", $ex->getMessage());
             //TestSuite::errorMessage("Seeds: %s\n", implode(' ', self::$seeds));

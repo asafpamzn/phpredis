@@ -8,7 +8,36 @@
 
 class ValkeyGlideCluster {
     
-    public function __construct(string|null $name, ?array $seeds = null, int|float $timeout = 0, int|float $read_timeout = 0, bool $persistent = false, #[\SensitiveParameter] mixed $auth = null, ?array $context = null);
+    /**
+     * Create a new ValkeyGlideCluster instance with the provided configuration.
+     *
+     * @param array $addresses                        Array of server addresses [['host' => '127.0.0.1', 'port' => 7001], ...]
+     * @param bool $use_tls                           Whether to use TLS encryption
+     * @param array|null $credentials                 Authentication credentials ['password' => 'xxx', 'username' => 'yyy']
+     * @param int $read_from                          Read strategy for the client
+     * @param int|null $request_timeout               Request timeout in milliseconds
+     * @param array|null $reconnect_strategy          Reconnection strategy ['num_of_retries' => 3, 'factor' => 2, ...]
+     * @param string|null $client_name                Client name identifier
+     * @param int|array $periodic_checks Periodic checks configuration
+     * @param int|null $inflight_requests_limit       Maximum number of concurrent requests
+     * @param string|null $client_az                  Client availability zone
+     * @param array|null $advanced_config             Advanced configuration ['connection_timeout' => 5000, 'tls_config' => [...]]
+     * @param bool|null $lazy_connect                 Whether to use lazy connection
+     */
+    public function __construct(
+        array $addresses,
+        bool $use_tls = false,
+        ?array $credentials = null,
+        $read_from = READ_FROM_PRIMARY,
+        ?int $request_timeout = null,
+        ?array $reconnect_strategy = null,
+        ?string $client_name = null,
+        ValkeyGlidePeriodicChecksStatus|array $periodic_checks = ValkeyGlidePeriodicChecksStatus::ENABLED_DEFAULT_CONFIGS,
+        ?int $inflight_requests_limit = null,
+        ?string $client_az = null,
+        ?array $advanced_config = null,
+        ?bool $lazy_connect = null
+    );
 
     
 

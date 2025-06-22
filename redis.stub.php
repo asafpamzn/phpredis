@@ -6,6 +6,8 @@
  * @generate-class-entries
  */
 
+
+
 class ValkeyGlide {
     /**
      *
@@ -63,6 +65,45 @@ class ValkeyGlide {
      */
     public const VALKEY_GLIDE_STREAM = UNKNOWN;
 
+          /**
+           *  @var int
+           * Always get from primary, in order to get the freshest data.
+           */
+          public const  READ_FROM_PRIMARY = 0;
+          
+          /**
+           *  @var int
+           * Spread the requests between all replicas in a round robin manner.
+           * If no replica is available, route the requests to the primary.
+           */
+          public const  READ_FROM_PREFER_REPLICA = 1;
+          
+          /**
+           *  @var int
+           * Spread the read requests between replicas in the same client's AZ (Availability zone) 
+           * in a round robin manner, falling back to other replicas or the primary if needed.
+           */
+          public const  READ_FROM_AZ_AFFINITY = 2;
+          
+          /**
+           *  @var int
+           * Spread the read requests among nodes within the client's Availability Zone (AZ) 
+           * in a round robin manner, prioritizing local replicas, then the local primary, 
+           * and falling back to any replica or the primary if needed.
+           */
+          public const  READ_FROM_AZ_AFFINITY_REPLICAS_AND_PRIMARY = 3;
+
+                  /**
+                   *  @var int
+         * Enables the periodic checks with the default configurations.
+         */
+        public const   PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS = 0;
+        
+        /**
+         *   @var int
+         * Disables the periodic checks.
+         */
+        public const    PERIODIC_CHECK_DISABLED = 1;
 
     /**
      *
@@ -96,61 +137,35 @@ class ValkeyGlide {
 
    
     /**
-     * Create a new ValkeyGlide instance.  If passed sufficient information in the
-     * options array it is also possible to connect to an instance at the same
-     * time.
+     * Create a new ValkeyGlide instance with the provided configuration.
      *
-     * **NOTE**:  Below is an example options array with various setting
-     *
-     *     $options = [
-     *         'host'           => 'localhost',
-     *         'port'           => 6379,
-     *         'readTimeout'    => 2.5,
-     *         'connectTimeout' => 2.5,
-     *         'persistent'     => true,
-     *
-     *         // Valid formats: NULL, ['user', 'pass'], 'pass', or ['pass']
-     *         'auth' => ['phpredis', 'phpredis'],
-     *
-     *         // See PHP stream options for valid SSL configuration settings.
-     *         'ssl' => ['verify_peer' => false],
-     *
-     *         // How quickly to retry a connection after we time out or it  closes.
-     *         // Note that this setting is overridden by 'backoff' strategies.
-     *         'retryInterval'  => 100,
-     *
-     *          // Which backoff algorithm to use.  'decorrelated jitter' is
-     *          // likely the best one for most solution, but there are many
-     *          // to choose from:
-     *          //     REDIS_BACKOFF_ALGORITHM_DEFAULT
-     *          //     REDIS_BACKOFF_ALGORITHM_CONSTANT
-     *          //     REDIS_BACKOFF_ALGORITHM_UNIFORM
-     *          //     REDIS_BACKOFF_ALGORITHM_EXPONENTIAL
-     *          //     REDIS_BACKOFF_ALGORITHM_FULL_JITTER
-     *          //     REDIS_BACKOFF_ALGORITHM_EQUAL_JITTER
-     *          //     REDIS_BACKOFF_ALGORITHM_DECORRELATED_JITTER
-     *          // 'base', and 'cap' are in milliseconds and represent the first
-     *          // delay redis will use when reconnecting, and the maximum delay
-     *          // we will reach while retrying.
-     *         'backoff' => [
-     *             'algorithm' => ValkeyGlide::BACKOFF_ALGORITHM_DECORRELATED_JITTER,
-     *             'base'      => 500,
-     *             'cap'       => 750,
-     *         ]
-     *     ];
-     *
-     * Note: If you do wish to connect via the constructor, only 'host' is
-     *       strictly required, which will cause PhpValkeyGlide to connect to that
-     *       host on ValkeyGlide' default port (6379).
-     *
-     *
-     * @see ValkeyGlide::connect()
-     * @see https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
-     * @param array $options
-     *
-     * @return ValkeyGlide
+     * @param array $addresses                   Array of server addresses [['host' => 'localhost', 'port' => 6379], ...]
+     * @param bool $use_tls                      Whether to use TLS encryption
+     * @param array|null $credentials            Authentication credentials ['password' => 'xxx', 'username' => 'yyy']
+     * @param int $read_from                     Read strategy for the client
+     * @param int|null $request_timeout          Request timeout in milliseconds
+     * @param array|null $reconnect_strategy     Reconnection strategy ['num_of_retries' => 3, 'factor' => 2, ...]
+     * @param int|null $database_id              Database ID to select (0-15)
+     * @param string|null $client_name           Client name identifier
+     * @param int|null $inflight_requests_limit  Maximum number of concurrent requests
+     * @param string|null $client_az             Client availability zone
+     * @param array|null $advanced_config        Advanced configuration ['connection_timeout' => 5000, 'tls_config' => [...]]
+     * @param bool|null $lazy_connect            Whether to use lazy connection
      */
-    public function __construct(?array $options = null);
+    public function __construct(
+        array $addresses,
+        bool $use_tls = false,
+        ?array $credentials = null,
+        $read_from = READ_FROM_PRIMARY,
+        ?int $request_timeout = null,
+        ?array $reconnect_strategy = null,
+        ?int $database_id = null,
+        ?string $client_name = null,
+        ?int $inflight_requests_limit = null,
+        ?string $client_az = null,
+        ?array $advanced_config = null,
+        ?bool $lazy_connect = null
+    );
 
     public function __destruct();
 

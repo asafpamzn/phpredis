@@ -1,14 +1,19 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d22946c37e299f99a86424d2169f0b6f1bca9476 */
+ * Stub hash: 053de096bc0d4a87a68f27df10451abb22082f33 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, seeds)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, read_timeout)
-	ZEND_ARG_INFO(0, persistent)
-	ZEND_ARG_INFO(0, auth)
-	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_INFO(0, addresses)
+	ZEND_ARG_INFO(0, use_tls)
+	ZEND_ARG_INFO(0, credentials)
+	ZEND_ARG_INFO(0, read_from)
+	ZEND_ARG_INFO(0, request_timeout)
+	ZEND_ARG_INFO(0, reconnect_strategy)
+	ZEND_ARG_INFO(0, client_name)
+	ZEND_ARG_INFO(0, periodic_checks)
+	ZEND_ARG_INFO(0, inflight_requests_limit)
+	ZEND_ARG_INFO(0, client_az)
+	ZEND_ARG_INFO(0, advanced_config)
+	ZEND_ARG_INFO(0, lazy_connect)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster_append, 0, 0, 2)

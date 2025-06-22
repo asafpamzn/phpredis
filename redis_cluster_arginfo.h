@@ -1,14 +1,19 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d22946c37e299f99a86424d2169f0b6f1bca9476 */
+ * Stub hash: 053de096bc0d4a87a68f27df10451abb22082f33 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, seeds, IS_ARRAY, 1, "null")
-	ZEND_ARG_TYPE_MASK(0, timeout, MAY_BE_LONG|MAY_BE_DOUBLE, "0")
-	ZEND_ARG_TYPE_MASK(0, read_timeout, MAY_BE_LONG|MAY_BE_DOUBLE, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, persistent, _IS_BOOL, 0, "false")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, auth, IS_MIXED, 0, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, context, IS_ARRAY, 1, "null")
+	ZEND_ARG_TYPE_INFO(0, addresses, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_tls, _IS_BOOL, 0, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, credentials, IS_ARRAY, 1, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, read_from, "READ_FROM_PRIMARY")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, request_timeout, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, reconnect_strategy, IS_ARRAY, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, client_name, IS_STRING, 1, "null")
+	ZEND_ARG_OBJ_TYPE_MASK(0, periodic_checks, ValkeyGlidePeriodicChecksStatus, MAY_BE_ARRAY, "ValkeyGlidePeriodicChecksStatus::ENABLED_DEFAULT_CONFIGS")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, inflight_requests_limit, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, client_az, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, advanced_config, IS_ARRAY, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, lazy_connect, _IS_BOOL, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ValkeyGlideCluster_append, 0, 2, ValkeyGlideCluster, MAY_BE_BOOL|MAY_BE_LONG)
@@ -1379,11 +1384,6 @@ static zend_class_entry *register_class_ValkeyGlideCluster(void)
 
 	INIT_CLASS_ENTRY(ce, "ValkeyGlideCluster", class_ValkeyGlideCluster_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-#if (PHP_VERSION_ID >= 80200)
-
-
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 5, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
-#endif
 
 	return class_entry;
 }
