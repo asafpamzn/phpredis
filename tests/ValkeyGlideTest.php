@@ -95,8 +95,7 @@ class ValkeyGlide_Test extends TestSuite {
         }
     }
 
-    protected function newInstance() {
-        echo "Creating new ValkeyGlide instance\n";
+    protected function newInstance() {        
         $r = new ValkeyGlide([
             'host' => $this->getHost(),
             'port' => $this->getPort(),

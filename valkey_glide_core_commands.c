@@ -783,17 +783,14 @@ int execute_echo_command(zval *object, int argc, zval *return_value, zend_class_
 int execute_ping_command(zval *object, int argc, zval *return_value, zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide;
+    zval *args = NULL;
+    int args_count = 0;
     char *msg = NULL;
     size_t msg_len = 0;
     char *response = NULL;
     size_t response_len = 0;
-
-    /* Parse parameters */
-    if (zend_parse_method_parameters(argc, object, "O|s",
-                                     &object, ce, &msg, &msg_len) == FAILURE)
-    {
-        return 0;
-    }
+    int result = 0;
+    zend_bool is_cluster = (ce == get_valkey_glide_cluster_ce());
 
     /* Get ValkeyGlide object */
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
@@ -802,48 +799,152 @@ int execute_ping_command(zval *object, int argc, zval *return_value, zend_class_
         return 0;
     }
 
-    /* Execute using core framework */
-    core_command_args_t args = {0};
-    args.glide_client = valkey_glide->glide_client;
-    args.cmd_type = Ping;
-
-    /* Add optional message argument */
-    if (msg)
+    if (is_cluster)
     {
-        args.args[0].type = CORE_ARG_TYPE_STRING;
-        args.args[0].data.string_arg.value = msg;
-        args.args[0].data.string_arg.len = msg_len;
-        args.arg_count = 1;
-    }
-
-    /* Custom result processor to handle PONG response */
-    struct
-    {
-        char **result;
-        size_t *result_len;
-    } output = {&response, &response_len};
-
-    if (execute_core_command(&args, &output, process_ping_result))
-    {
-        if (response != NULL)
+        /* Parse parameters for cluster - first parameter is route, optional second is message */
+        if (zend_parse_method_parameters(argc, object, "O*",
+                                         &object, ce, &args, &args_count) == FAILURE)
         {
-            if (strncmp(response, "PONG", 4) == 0)
-            {
-                efree(response);
-                ZVAL_TRUE(return_value);
-                return 1;
-            }
-            ZVAL_STRINGL(return_value, response, response_len);
-            efree(response);
-            return 1;
+            return 0;
+        }
+
+        if (args_count == 0)
+        {
+            /* Need at least the route parameter */
+            return 0;
+        }
+
+        /* If no message is specified, call with NULL message */
+        if (args_count == 1)
+        {
+            CommandResult *cmd_result;
+
+            /* Execute the command with the route bytes */
+            cmd_result = execute_command_with_route(
+                valkey_glide->glide_client,
+                Ping,
+                0,
+                NULL,
+                NULL,
+                &args[0]);
+
+            /* Use the generic handler to process the result */
+            result = handle_string_response(cmd_result, &response, &response_len);
         }
         else
         {
-            ZVAL_TRUE(return_value);
-            return 1;
+            /* Message specified */
+            unsigned long arg_count = 1; /* Just the message */
+            uintptr_t *cmd_args = (uintptr_t *)emalloc(arg_count * sizeof(uintptr_t));
+            unsigned long *cmd_args_len = (unsigned long *)emalloc(arg_count * sizeof(unsigned long));
+
+            if (!cmd_args || !cmd_args_len)
+            {
+                if (cmd_args)
+                    efree(cmd_args);
+                if (cmd_args_len)
+                    efree(cmd_args_len);
+                return 0;
+            }
+
+            /* Process message argument (index 1, after route) */
+            zval *message = &args[1];
+
+            /* Check if the message is a string */
+            if (Z_TYPE_P(message) != IS_STRING)
+            {
+                /* Convert to string if needed */
+                zval temp;
+                ZVAL_COPY(&temp, message);
+                convert_to_string(&temp);
+
+                cmd_args[0] = (uintptr_t)Z_STRVAL(temp);
+                cmd_args_len[0] = Z_STRLEN(temp);
+
+                /* Free the temporary zval */
+                zval_dtor(&temp);
+            }
+            else
+            {
+                /* It's already a string */
+                cmd_args[0] = (uintptr_t)Z_STRVAL_P(message);
+                cmd_args_len[0] = Z_STRLEN_P(message);
+            }
+
+            /* Execute the command with the route information */
+            CommandResult *cmd_result = execute_command_with_route(
+                valkey_glide->glide_client,
+                Ping,
+                arg_count,
+                cmd_args,
+                cmd_args_len,
+                &args[0]); /* Route parameter */
+
+            /* Free the argument arrays */
+            efree(cmd_args);
+            efree(cmd_args_len);
+
+            /* Use the generic handler to process the result */
+            result = handle_string_response(cmd_result, &response, &response_len);
+        }
+    }
+    else
+    {
+        /* Non-cluster case - parse parameters as before */
+        if (zend_parse_method_parameters(argc, object, "O|s",
+                                         &object, ce, &msg, &msg_len) == FAILURE)
+        {
+            return 0;
+        }
+
+        /* Execute using core framework */
+        core_command_args_t core_args = {0};
+        core_args.glide_client = valkey_glide->glide_client;
+        core_args.cmd_type = Ping;
+
+        /* Add optional message argument */
+        if (msg)
+        {
+            core_args.args[0].type = CORE_ARG_TYPE_STRING;
+            core_args.args[0].data.string_arg.value = msg;
+            core_args.args[0].data.string_arg.len = msg_len;
+            core_args.arg_count = 1;
+        }
+
+        /* Custom result processor to handle PONG response */
+        struct
+        {
+            char **result;
+            size_t *result_len;
+        } output = {&response, &response_len};
+
+        if (execute_core_command(&core_args, &output, process_ping_result))
+        {
+            result = 1;
         }
     }
 
+    /* Process the result */
+    if (result == 1 && response != NULL)
+    {
+        if (strncmp(response, "PONG", 4) == 0)
+        {
+            efree(response);
+            ZVAL_TRUE(return_value);
+            return 1;
+        }
+        ZVAL_STRINGL(return_value, response, response_len);
+        efree(response);
+        return 1;
+    }
+    else if (result == 1)
+    {
+        /* Success but no response (should return TRUE for PONG) */
+        ZVAL_TRUE(return_value);
+        return 1;
+    }
+
+    /* Error or empty response */
     return 0;
 }
 
