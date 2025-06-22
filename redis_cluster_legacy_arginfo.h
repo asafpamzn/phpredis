@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e7e65a380b7a609a21243f5e9a21700fdceb4898 */
+ * Stub hash: e27707802263a1201aaa666a1308da821846d64d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, addresses)

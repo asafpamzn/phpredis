@@ -145,7 +145,8 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
                 [['host' => '127.0.0.1', 'port' => 7001]], // addresses array format
                 false, // use_tls
                 $this->getAuth(), // credentials
-                ValkeyGlide::READ_FROM_PRIMARY // read_from                               
+                ValkeyGlide::READ_FROM_PRIMARY, // read_from                               
+       
                 
             );
         } catch (Exception $ex) {
