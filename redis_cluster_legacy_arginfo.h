@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f7bc728ed588f3da06532f80b94fde134a1c2fbe */
+ * Stub hash: c270ed132832de3fbbee76d6eb6e41c7d4e49696 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
@@ -775,7 +775,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ValkeyGlideCluster_zRevRangeByScore arginfo_class_ValkeyGlideCluster_zRevRange
 
-#define arginfo_class_ValkeyGlideCluster_zrevrank arginfo_class_ValkeyGlideCluster_hExists
+#define arginfo_class_ValkeyGlideCluster_zRevRank arginfo_class_ValkeyGlideCluster_hExists
 
 #define arginfo_class_ValkeyGlideCluster_zscan arginfo_class_ValkeyGlideCluster_hscan
 
@@ -991,7 +991,7 @@ ZEND_METHOD(ValkeyGlideCluster, zRemRangeByScore);
 ZEND_METHOD(ValkeyGlideCluster, zRevRange);
 ZEND_METHOD(ValkeyGlideCluster, zRevRangeByLex);
 ZEND_METHOD(ValkeyGlideCluster, zRevRangeByScore);
-ZEND_METHOD(ValkeyGlideCluster, zrevrank);
+ZEND_METHOD(ValkeyGlideCluster, zRevRank);
 ZEND_METHOD(ValkeyGlideCluster, zscan);
 ZEND_METHOD(ValkeyGlideCluster, zScore);
 ZEND_METHOD(ValkeyGlideCluster, zMscore);
@@ -1190,7 +1190,7 @@ static const zend_function_entry class_ValkeyGlideCluster_methods[] = {
 	ZEND_ME(ValkeyGlideCluster, zRevRange, arginfo_class_ValkeyGlideCluster_zRevRange, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, zRevRangeByLex, arginfo_class_ValkeyGlideCluster_zRevRangeByLex, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, zRevRangeByScore, arginfo_class_ValkeyGlideCluster_zRevRangeByScore, ZEND_ACC_PUBLIC)
-	ZEND_ME(ValkeyGlideCluster, zrevrank, arginfo_class_ValkeyGlideCluster_zrevrank, ZEND_ACC_PUBLIC)
+	ZEND_ME(ValkeyGlideCluster, zRevRank, arginfo_class_ValkeyGlideCluster_zRevRank, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, zscan, arginfo_class_ValkeyGlideCluster_zscan, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, zScore, arginfo_class_ValkeyGlideCluster_zScore, ZEND_ACC_PUBLIC)
 	ZEND_ME(ValkeyGlideCluster, zMscore, arginfo_class_ValkeyGlideCluster_zMscore, ZEND_ACC_PUBLIC)

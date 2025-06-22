@@ -1051,7 +1051,7 @@ class ValkeyGlideCluster {
     /**
      * @see ValkeyGlide::zrevrank
      */
-    public function zrevrank(string $key, mixed $member): ValkeyGlideCluster|int|false;
+    public function zRevRank(string $key, mixed $member): ValkeyGlideCluster|int|false;
 
     /**
      * @see ValkeyGlide::zscan
