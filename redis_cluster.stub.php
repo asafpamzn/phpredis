@@ -228,7 +228,7 @@ class ValkeyGlideCluster {
      * @see ValkeyGlide::geoadd
      */
     public function geoadd(string $key, float $lng, float $lat, string $member, mixed ...$other_triples_and_options): ValkeyGlideCluster|int|false;
-
+        
     /**
      * @see ValkeyGlide::geodist
      */

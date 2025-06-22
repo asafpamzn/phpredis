@@ -748,11 +748,11 @@ PHP_METHOD(ValkeyGlideCluster, script)
 }
 /* }}} */
 
-/* {{{ proto int ValkeyGlideCluster::geoadd(string key, float long float lat string mem, ...) */
-GEOADD_METHOD_IMPL(ValkeyGlideCluster)
-
 /* {{{ proto array ValkeyGlideCluster::geohash(string key, string mem1, [string mem2...]) */
 GEOHASH_METHOD_IMPL(ValkeyGlideCluster)
+
+/* {{{ proto int ValkeyGlideCluster::geoadd(string key, float long float lat string mem, ...) */
+GEOADD_METHOD_IMPL(ValkeyGlideCluster)
 
 /* {{{ proto array ValkeyGlideCluster::geopos(string key, string mem1, [string mem2...]) */
 GEOPOS_METHOD_IMPL(ValkeyGlideCluster)
