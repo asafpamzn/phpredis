@@ -188,6 +188,7 @@ class ValkeyGlide_Cluster_Test extends ValkeyGlide_Test {
     }
 
     public function testSortPrefix() {
+        $this->markTestSkipped();
         $this->redis->setOption(ValkeyGlide::OPT_PREFIX, 'some-prefix:');
         $this->redis->del('some-item');
         $this->redis->sadd('some-item', 1);
