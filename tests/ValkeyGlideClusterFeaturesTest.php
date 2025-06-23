@@ -270,7 +270,7 @@ class ValkeyGlide_Cluster_Features_Test extends ValkeyGlideClusterBaseTest {
             null,
             null,
             null,
-            ValkeyGlide::PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS
+            ValkeyGlideCluster::PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS
         );
         
         $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
@@ -287,7 +287,7 @@ class ValkeyGlide_Cluster_Features_Test extends ValkeyGlideClusterBaseTest {
             null,
             null,
             null,
-            ValkeyGlide::PERIODIC_CHECK_DISABLED
+            ValkeyGlideCluster::PERIODIC_CHECK_DISABLED
         );
         
         $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
@@ -474,7 +474,7 @@ class ValkeyGlide_Cluster_Features_Test extends ValkeyGlideClusterBaseTest {
             3000,                                           // request_timeout
             $reconnectStrategy,                             // reconnect_strategy
             $clientName,                                    // client_name
-            ValkeyGlide::PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS, // periodic_checks
+            ValkeyGlideCluster::PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS, // periodic_checks
             250,                                            // inflight_requests_limit
             'us-west-2a',                                   // client_az
             $advancedConfig,                                // advanced_config

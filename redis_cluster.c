@@ -61,11 +61,13 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
   size_t client_name_len = 0;
   zend_long periodic_checks = 0;
   zend_bool periodic_checks_is_null = 1;
-  zval *inflight_requests_limit = NULL;
+  zend_long inflight_requests_limit = 1000;
+  zend_bool inflight_requests_limit_is_null = 1;
   char *client_az = NULL;
   size_t client_az_len = 0;
   zval *advanced_config = NULL;
-  zval *lazy_connect = NULL;
+  zend_bool lazy_connect = 0;
+  zend_bool lazy_connect_is_null = 1;
   valkey_glide_object *valkey_glide;
 
   ZEND_PARSE_PARAMETERS_START(1, 12)
@@ -78,10 +80,10 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
   Z_PARAM_ARRAY_OR_NULL(reconnect_strategy)
   Z_PARAM_STRING_OR_NULL(client_name, client_name_len)
   Z_PARAM_LONG_OR_NULL(periodic_checks, periodic_checks_is_null)
-  Z_PARAM_ARRAY_OR_NULL(inflight_requests_limit)
+  Z_PARAM_LONG_OR_NULL(inflight_requests_limit, inflight_requests_limit_is_null)
   Z_PARAM_STRING_OR_NULL(client_az, client_az_len)
   Z_PARAM_ARRAY_OR_NULL(advanced_config)
-  Z_PARAM_ARRAY_OR_NULL(lazy_connect)
+  Z_PARAM_BOOL_OR_NULL(lazy_connect, lazy_connect_is_null)
   ZEND_PARSE_PARAMETERS_END_EX(RETURN_THROWS());
 
   valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, getThis());
@@ -93,10 +95,12 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
   /* Basic configuration */
   client_config.base.use_tls = use_tls;
   client_config.base.request_timeout = request_timeout_is_null ? -1 : request_timeout;
+  client_config.base.inflight_requests_limit = inflight_requests_limit_is_null ? -1 : inflight_requests_limit; /* -1 means not set */
   client_config.base.client_name = client_name ? client_name : "valkey-glide-cluster-php";
 
   /* Set periodic checks */
   client_config.periodic_checks_status = periodic_checks_is_null ? VALKEY_GLIDE_PERIODIC_CHECKS_ENABLED_DEFAULT : periodic_checks;
+  client_config.base.lazy_connect = lazy_connect_is_null ? false : lazy_connect;
   client_config.periodic_checks_manual = NULL;
 
   /* Map read_from enum value to client's ReadFrom enum */
