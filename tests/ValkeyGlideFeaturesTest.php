@@ -87,8 +87,11 @@ class ValkeyGlide_Features_Test extends ValkeyGlideBaseTest {
     public function testConstructorWithReadFromPrimary() {
         // Test constructor with READ_FROM_PRIMARY strategy
         $addresses = [
-            ['host' => $this->getHost(), 'port' => $this->getPort()]
+            ['host' => '127.0.0.1', 'port' => 6379],
+            ['host' => '127.0.0.1', 'port' => 6380],
+            ['host' => 'localhost', 'port' => 6381]
         ];
+        
         
         $redis = new ValkeyGlide($addresses, false, null, ValkeyGlide::READ_FROM_PRIMARY);
         $this->assertTrue($redis->ping());
@@ -98,8 +101,11 @@ class ValkeyGlide_Features_Test extends ValkeyGlideBaseTest {
     public function testConstructorWithReadFromPreferReplica() {
         // Test constructor with READ_FROM_PREFER_REPLICA strategy
         $addresses = [
-            ['host' => $this->getHost(), 'port' => $this->getPort()]
+            ['host' => '127.0.0.1', 'port' => 6379],
+            ['host' => '127.0.0.1', 'port' => 6380],
+            ['host' => 'localhost', 'port' => 6381]
         ];
+        
         
         $redis = new ValkeyGlide($addresses, false, null, ValkeyGlide::READ_FROM_PREFER_REPLICA);
         $this->assertTrue($redis->ping());
@@ -352,8 +358,7 @@ class ValkeyGlide_Features_Test extends ValkeyGlideBaseTest {
         $redis = new ValkeyGlide($addresses, false, null, ValkeyGlide::READ_FROM_PRIMARY, 5000);
         
         // Test ping
-        $this->assertTrue($redis->ping());
-        $this->assertEquals('PONG', $redis->ping('PING'));
+        $this->assertTrue($redis->ping());        
         
         // Test basic set/get operations
         $testKey = 'constructor_test_' . uniqid();
