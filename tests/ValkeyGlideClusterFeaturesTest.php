@@ -30,7 +30,7 @@ class ValkeyGlide_Cluster_Features_Test extends ValkeyGlideClusterBaseTest {
             [['host' => '127.0.0.1', 'port' => 7001]], // addresses array format
             false, // use_tls
             $this->getAuth(), // credentials
-            ValkeyGlide::READ_FROM_REPLICA // read_from replica
+            ValkeyGlide::READ_FROM_PREFER_REPLICA // read_from replica
         );
 
         // Verify the connection works with a simple ping
