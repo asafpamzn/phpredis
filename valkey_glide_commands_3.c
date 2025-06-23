@@ -33,6 +33,10 @@ int execute_wait_command(zval *object, int argc, zval *return_value, zend_class_
     {
         return 0;
     }
+    if (numreplicas < 0)
+    {
+        return 0;
+    }
 
     /* Get ValkeyGlide object */
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, object);
@@ -47,6 +51,7 @@ int execute_wait_command(zval *object, int argc, zval *return_value, zend_class_
         /* WAIT is a server-level command (not key-based) with 2 arguments: numreplicas, timeout */
         args.args[0].type = CORE_ARG_TYPE_LONG;
         args.args[0].data.long_arg.value = numreplicas;
+
         args.args[1].type = CORE_ARG_TYPE_LONG;
         args.args[1].data.long_arg.value = timeout;
         args.arg_count = 2;
