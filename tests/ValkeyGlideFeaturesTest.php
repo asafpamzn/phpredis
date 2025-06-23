@@ -1,12 +1,12 @@
 <?php defined('VALKEY_GLIDE_PHP_TESTRUN') or die("Use TestValkeyGlide.php to run tests!\n");
 
-require_once __DIR__ . "/ValkeyGlideTest.php";
+require_once __DIR__ . "/ValkeyGlideBaseTest.php";
 
 /**
  * ValkeyGlide Features Test
  * Tests various constructor options and features for standalone ValkeyGlide client
  */
-class ValkeyGlide_Features_Test extends ValkeyGlide_Test {
+class ValkeyGlide_Features_Test extends ValkeyGlideBaseTest {
 
     public function testBasicConstructor() {
         // Test creating ValkeyGlide with basic configuration

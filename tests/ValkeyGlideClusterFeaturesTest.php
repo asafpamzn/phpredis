@@ -1,12 +1,12 @@
 <?php defined('VALKEY_GLIDE_PHP_TESTRUN') or die("Use TestValkeyGlide.php to run tests!\n");
 
-require_once __DIR__ . "/ValkeyGlideClusterTest.php";
+require_once __DIR__ . "/ValkeyGlideClusterBaseTest.php";
 
 /**
  * ValkeyGlide Cluster Features Test
  * Tests various constructor options and features for ValkeyGlideCluster client
  */  
-class ValkeyGlide_Cluster_Features_Test extends ValkeyGlide_Cluster_Test {
+class ValkeyGlide_Cluster_Features_Test extends ValkeyGlideClusterBaseTest {
 
     public function testBasicClusterConstructor() {
         // Test creating ValkeyGlideCluster with basic configuration

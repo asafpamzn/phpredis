@@ -1,6 +1,8 @@
 <?php define('VALKEY_GLIDE_PHP_TESTRUN', true);
 
 require_once __DIR__ . "/TestSuite.php";
+require_once __DIR__ . "/ValkeyGlideBaseTest.php";
+require_once __DIR__ . "/ValkeyGlideClusterBaseTest.php";
 require_once __DIR__ . "/ValkeyGlideTest.php";
 require_once __DIR__ . "/ValkeyGlideClusterTest.php";
 require_once __DIR__ . "/ValkeyGlideFeaturesTest.php";
