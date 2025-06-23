@@ -119,6 +119,7 @@ void free_valkey_glide_object(zend_object *object)
 
 zend_object *create_valkey_glide_object(zend_class_entry *ce)
 {
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     valkey_glide_object *valkey_glide = ecalloc(1, sizeof(valkey_glide_object) + zend_object_properties_size(ce));
 
     /* Initialize Valkey Glide client */
@@ -176,6 +177,7 @@ zend_object *create_valkey_glide_cluster_object(zend_class_entry *ce)
 PHP_MINIT_FUNCTION(redis)
 {
     /* ValkeyGlide class */
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     valkey_glide_ce = register_class_ValkeyGlide();
     valkey_glide_ce->create_object = create_valkey_glide_object;
 
@@ -206,6 +208,7 @@ PHP_MINFO_FUNCTION(redis)
     Public constructor */
 PHP_METHOD(ValkeyGlide, __construct)
 {
+    printf("file = %s, line = %d\n", __FILE__, __LINE__);
     zval *addresses = NULL;
     zend_bool use_tls = 0;
     zval *credentials = NULL;
@@ -228,71 +231,257 @@ PHP_METHOD(ValkeyGlide, __construct)
     Z_PARAM_BOOL(use_tls)
     Z_PARAM_ARRAY_OR_NULL(credentials)
     Z_PARAM_LONG(read_from)
-    Z_PARAM_ARRAY_OR_NULL(request_timeout)
+    Z_PARAM_LONG_OR_NULL(request_timeout)
     Z_PARAM_ARRAY_OR_NULL(reconnect_strategy)
-    Z_PARAM_ARRAY_OR_NULL(database_id)
+    Z_PARAM_LONG_OR_NULL(database_id)
     Z_PARAM_STRING_OR_NULL(client_name, client_name_len)
-    Z_PARAM_ARRAY_OR_NULL(inflight_requests_limit)
+    Z_PARAM_LONG_OR_NULL(inflight_requests_limit)
     Z_PARAM_STRING_OR_NULL(client_az, client_az_len)
     Z_PARAM_ARRAY_OR_NULL(advanced_config)
-    Z_PARAM_ARRAY_OR_NULL(lazy_connect)
+    Z_PARAM_BOOL_OR_NULL(lazy_connect)
     ZEND_PARSE_PARAMETERS_END_EX(RETURN_THROWS());
 
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, getThis());
 
+    /* Validate addresses array */
+    if (!addresses || zend_hash_num_elements(Z_ARRVAL_P(addresses)) == 0)
+    {
+        zend_throw_exception(valkey_glide_exception_ce, "Addresses array cannot be empty", 0);
+        return;
+    }
+
     /* Build client configuration from individual parameters */
-    ClientConfig client_config;
-    client_config.tls_mode_ = use_tls;
-    client_config.database_ = database_id ? Z_LVAL_P(database_id) : 0;
-    client_config.request_timeout_ = request_timeout ? Z_LVAL_P(request_timeout) : 250;
-    client_config.client_name_ = client_name ? client_name : "valkey-glide-php";
+    valkey_glide_client_configuration_t client_config;
+    memset(&client_config, 0, sizeof(client_config));
+
+    /* Basic configuration */
+    client_config.base.use_tls = use_tls;
+    client_config.database_id = database_id ? Z_LVAL_P(database_id) : -1;                  /* -1 means not set */
+    client_config.base.request_timeout = request_timeout ? Z_LVAL_P(request_timeout) : -1; /* -1 means not set */
+    client_config.base.client_name = client_name ? client_name : NULL;
+
+    /* Set inflight requests limit */
+    client_config.base.inflight_requests_limit = inflight_requests_limit ? Z_LVAL_P(inflight_requests_limit) : -1; /* -1 means not set */
+
+    /* Set client availability zone */
+    client_config.base.client_az = (client_az && client_az_len > 0) ? client_az : NULL;
+
+    /* Set lazy connect option */
+    client_config.base.lazy_connect = lazy_connect ? (Z_TYPE_P(lazy_connect) == IS_TRUE) : false;
 
     /* Map read_from enum value to client's ReadFrom enum */
     switch (read_from)
     {
     case 1: /* PREFER_REPLICA */
-        client_config.read_from_ = CONNECTION_REQUEST__READ_FROM__PreferReplica;
+        client_config.base.read_from = VALKEY_GLIDE_READ_FROM_PREFER_REPLICA;
         break;
     case 2: /* AZ_AFFINITY */
-        client_config.read_from_ = CONNECTION_REQUEST__READ_FROM__AZAffinity;
+        client_config.base.read_from = VALKEY_GLIDE_READ_FROM_AZ_AFFINITY;
         break;
     case 3: /* AZ_AFFINITY_REPLICAS_AND_PRIMARY */
-        client_config.read_from_ = CONNECTION_REQUEST__READ_FROM__AZAffinityReplicasAndPrimary;
+        client_config.base.read_from = VALKEY_GLIDE_READ_FROM_AZ_AFFINITY_REPLICAS_AND_PRIMARY;
         break;
     case 0: /* PRIMARY */
     default:
-        client_config.read_from_ = CONNECTION_REQUEST__READ_FROM__Primary;
+        client_config.base.read_from = VALKEY_GLIDE_READ_FROM_PRIMARY;
         break;
     }
-    client_config.is_cluster = false;
 
-    /* Extract port from addresses array - use first address or default */
-    if (addresses && zend_hash_num_elements(Z_ARRVAL_P(addresses)) > 0)
+    /* Process addresses array - handle multiple addresses */
+    HashTable *addresses_ht = Z_ARRVAL_P(addresses);
+    zend_ulong num_addresses = zend_hash_num_elements(addresses_ht);
+
+    if (num_addresses > 0)
     {
-        zval *first_addr = zend_hash_index_find(Z_ARRVAL_P(addresses), 0);
-        if (first_addr && Z_TYPE_P(first_addr) == IS_ARRAY)
+        /* Allocate addresses array */
+        client_config.base.addresses = ecalloc(num_addresses, sizeof(valkey_glide_node_address_t));
+        client_config.base.addresses_count = num_addresses;
+
+        /* Process each address */
+        zend_ulong i = 0;
+        zval *addr_val;
+        ZEND_HASH_FOREACH_VAL(addresses_ht, addr_val)
         {
-            zval *port_val = zend_hash_str_find(Z_ARRVAL_P(first_addr), "port", 4);
-            if (port_val && Z_TYPE_P(port_val) == IS_LONG)
+            if (Z_TYPE_P(addr_val) == IS_ARRAY)
             {
-                client_config.port_ = Z_LVAL_P(port_val);
+                HashTable *addr_ht = Z_ARRVAL_P(addr_val);
+
+                /* Extract host */
+                zval *host_val = zend_hash_str_find(addr_ht, "host", 4);
+                if (host_val && Z_TYPE_P(host_val) == IS_STRING)
+                {
+                    client_config.base.addresses[i].host = Z_STRVAL_P(host_val);
+                }
+                else
+                {
+                    client_config.base.addresses[i].host = "localhost";
+                }
+
+                /* Extract port */
+                zval *port_val = zend_hash_str_find(addr_ht, "port", 4);
+                if (port_val && Z_TYPE_P(port_val) == IS_LONG)
+                {
+                    client_config.base.addresses[i].port = Z_LVAL_P(port_val);
+                }
+                else
+                {
+                    client_config.base.addresses[i].port = 6379;
+                }
+
+                i++;
             }
             else
             {
-                client_config.port_ = 6379; /* Default port */
+                /* Invalid address format */
+                efree(client_config.base.addresses);
+                zend_throw_exception(valkey_glide_exception_ce, "Invalid address format. Expected array with 'host' and 'port' keys", 0);
+                return;
             }
+        }
+        ZEND_HASH_FOREACH_END();
+    }
+    else
+    {
+        /* No addresses provided - set default */
+        client_config.base.addresses = ecalloc(1, sizeof(valkey_glide_node_address_t));
+        client_config.base.addresses_count = 1;
+        client_config.base.addresses[0].host = "localhost";
+        client_config.base.addresses[0].port = 6379;
+    }
+
+    /* Process credentials if provided */
+    if (credentials && Z_TYPE_P(credentials) == IS_ARRAY)
+    {
+        HashTable *cred_ht = Z_ARRVAL_P(credentials);
+
+        /* Allocate credentials structure */
+        client_config.base.credentials = ecalloc(1, sizeof(valkey_glide_server_credentials_t));
+
+        /* Check for username */
+        zval *username_val = zend_hash_str_find(cred_ht, "username", 8);
+        if (username_val && Z_TYPE_P(username_val) == IS_STRING)
+        {
+            client_config.base.credentials->username = Z_STRVAL_P(username_val);
         }
         else
         {
-            client_config.port_ = 6379; /* Default port */
+            client_config.base.credentials->username = NULL;
+        }
+
+        /* Check for password */
+        zval *password_val = zend_hash_str_find(cred_ht, "password", 8);
+        if (password_val && Z_TYPE_P(password_val) == IS_STRING)
+        {
+            client_config.base.credentials->password = Z_STRVAL_P(password_val);
+        }
+        else
+        {
+            client_config.base.credentials->password = NULL;
         }
     }
     else
     {
-        client_config.port_ = 6379; /* Default port */
+        client_config.base.credentials = NULL;
+    }
+
+    /* Process reconnect strategy if provided */
+    if (reconnect_strategy && Z_TYPE_P(reconnect_strategy) == IS_ARRAY)
+    {
+        HashTable *reconnect_ht = Z_ARRVAL_P(reconnect_strategy);
+
+        /* Allocate reconnect strategy structure */
+        client_config.base.reconnect_strategy = ecalloc(1, sizeof(valkey_glide_backoff_strategy_t));
+
+        /* Check for num_of_retries */
+        zval *retries_val = zend_hash_str_find(reconnect_ht, "num_of_retries", 14);
+        if (retries_val && Z_TYPE_P(retries_val) == IS_LONG)
+        {
+            client_config.base.reconnect_strategy->num_of_retries = Z_LVAL_P(retries_val);
+        }
+        else
+        {
+            client_config.base.reconnect_strategy->num_of_retries = 3; /* Default */
+        }
+
+        /* Check for factor */
+        zval *factor_val = zend_hash_str_find(reconnect_ht, "factor", 6);
+        if (factor_val && (Z_TYPE_P(factor_val) == IS_DOUBLE || Z_TYPE_P(factor_val) == IS_LONG))
+        {
+            client_config.base.reconnect_strategy->factor = Z_TYPE_P(factor_val) == IS_DOUBLE ? Z_DVAL_P(factor_val) : (double)Z_LVAL_P(factor_val);
+        }
+        else
+        {
+            client_config.base.reconnect_strategy->factor = 2.0; /* Default */
+        }
+
+        /* Check for exponent_base */
+        zval *exponent_val = zend_hash_str_find(reconnect_ht, "exponent_base", 13);
+        if (exponent_val && (Z_TYPE_P(exponent_val) == IS_DOUBLE || Z_TYPE_P(exponent_val) == IS_LONG))
+        {
+            client_config.base.reconnect_strategy->exponent_base = Z_TYPE_P(exponent_val) == IS_DOUBLE ? Z_DVAL_P(exponent_val) : (double)Z_LVAL_P(exponent_val);
+        }
+        else
+        {
+            client_config.base.reconnect_strategy->exponent_base = 2; /* Default */
+        }
+
+        /* Check for jitter_percent - optional */
+        zval *jitter_val = zend_hash_str_find(reconnect_ht, "jitter_percent", 14);
+        if (jitter_val && Z_TYPE_P(jitter_val) == IS_LONG)
+        {
+            client_config.base.reconnect_strategy->jitter_percent = Z_LVAL_P(jitter_val);
+        }
+        else
+        {
+            client_config.base.reconnect_strategy->jitter_percent = -1; /* Not set */
+        }
+    }
+    else
+    {
+        client_config.base.reconnect_strategy = NULL;
+    }
+
+    /* Process advanced config if provided */
+    if (advanced_config && Z_TYPE_P(advanced_config) == IS_ARRAY)
+    {
+        HashTable *advanced_ht = Z_ARRVAL_P(advanced_config);
+
+        /* Allocate advanced config structure */
+        client_config.base.advanced_config = ecalloc(1, sizeof(valkey_glide_advanced_base_client_configuration_t));
+
+        /* Check for connection_timeout */
+        zval *conn_timeout_val = zend_hash_str_find(advanced_ht, "connection_timeout", 18);
+        if (conn_timeout_val && Z_TYPE_P(conn_timeout_val) == IS_LONG)
+        {
+            client_config.base.advanced_config->connection_timeout = Z_LVAL_P(conn_timeout_val);
+        }
+        else
+        {
+            client_config.base.advanced_config->connection_timeout = -1; /* Not set */
+        }
+
+        /* Check for TLS config - for now just set to NULL */
+        client_config.base.advanced_config->tls_config = NULL;
+    }
+    else
+    {
+        client_config.base.advanced_config = NULL;
+    }
+
+    /* Validate database_id range */
+    if (client_config.database_id != -1 && (client_config.database_id < 0 || client_config.database_id > 15))
+    {
+        zend_throw_exception(valkey_glide_exception_ce, "Database ID must be between 0 and 15", 0);
+        return;
     }
 
     valkey_glide->glide_client = create_glide_client(&client_config);
+
+    if (!valkey_glide->glide_client)
+    {
+        zend_throw_exception(valkey_glide_exception_ce, "Failed to create Valkey Glide client", 0);
+        return;
+    }
 }
 /* }}} */
 
