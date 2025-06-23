@@ -3,6 +3,8 @@
 require_once __DIR__ . "/TestSuite.php";
 require_once __DIR__ . "/ValkeyGlideTest.php";
 require_once __DIR__ . "/ValkeyGlideClusterTest.php";
+require_once __DIR__ . "/ValkeyGlideFeaturesTest.php";
+require_once __DIR__ . "/ValkeyGlideClusterFeaturesTest.php";
 echo "Loading ValkeyGlide tests...\n";
 function getClassArray($classes) {
     $result = [];
@@ -24,7 +26,9 @@ function getClassArray($classes) {
 function getTestClass($class) {
     $valid_classes = [
         'valkeyglide'         => 'ValkeyGlide_Test',                
-        'valkeyglidecluster'  => 'ValkeyGlide_Cluster_Test'
+        'valkeyglidecluster'  => 'ValkeyGlide_Cluster_Test',
+        'valkeyglideclientfeatures' => 'ValkeyGlide_Features_Test',
+        'valkeyglideclusterfeatures' => 'ValkeyGlide_Cluster_Features_Test'
     ];
 
     /* Return early if the class is one of our built-in ones */
