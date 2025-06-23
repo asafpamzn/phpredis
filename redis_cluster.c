@@ -54,7 +54,8 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
   zend_bool use_tls = 0;
   zval *credentials = NULL;
   zend_long read_from = 0; /* PRIMARY by default */
-  zval *request_timeout = NULL;
+  zend_long request_timeout = 0;
+  zend_bool request_timeout_is_null = 1;
   zval *reconnect_strategy = NULL;
   char *client_name = NULL;
   size_t client_name_len = 0;
@@ -72,7 +73,7 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
   Z_PARAM_BOOL(use_tls)
   Z_PARAM_ARRAY_OR_NULL(credentials)
   Z_PARAM_LONG(read_from)
-  Z_PARAM_ARRAY_OR_NULL(request_timeout)
+  Z_PARAM_LONG_OR_NULL(request_timeout, request_timeout_is_null)
   Z_PARAM_ARRAY_OR_NULL(reconnect_strategy)
   Z_PARAM_STRING_OR_NULL(client_name, client_name_len)
   Z_PARAM_ARRAY_OR_NULL(periodic_checks)
@@ -90,7 +91,7 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
 
   /* Basic configuration */
   client_config.base.use_tls = use_tls;
-  client_config.base.request_timeout = request_timeout ? Z_LVAL_P(request_timeout) : 250;
+  client_config.base.request_timeout = request_timeout_is_null ? -1 : request_timeout;
   client_config.base.client_name = client_name ? client_name : "valkey-glide-cluster-php";
 
   /* Map read_from enum value to client's ReadFrom enum */
