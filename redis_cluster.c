@@ -168,7 +168,7 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
 
   /* Note: This should use a cluster-specific create function */
   /* For now, we'll cast to regular client config */
-  valkey_glide->glide_client = create_glide_client((valkey_glide_client_configuration_t *)&client_config);
+  valkey_glide->glide_client = create_glide_client((valkey_glide_client_configuration_t *)&client_config, true);
 }
 
 /*

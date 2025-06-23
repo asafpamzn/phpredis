@@ -35,7 +35,7 @@ extern char *long_to_string(long value, size_t *len);
 extern char *double_to_string(double value, size_t *len);
 
 /* Create a connection request in protobuf format */
-static uint8_t *create_connection_request(const char *host, int port, const char *user, const char *pass, size_t *len, ClientConfig *config)
+static uint8_t *create_connection_request(const char *host, int port, const char *user, const char *pass, size_t *len, valkey_glide_client_configuration_t *config, bool is_cluster)
 {
     /* Create a connection request */
     ConnectionRequest__ConnectionRequest conn_req = CONNECTION_REQUEST__CONNECTION_REQUEST__INIT;
@@ -59,16 +59,43 @@ static uint8_t *create_connection_request(const char *host, int port, const char
         conn_req.authentication_info = &auth_info;
     }
 
-    /* Set default values */
-    conn_req.tls_mode = CONNECTION_REQUEST__TLS_MODE__NoTls;
-    conn_req.cluster_mode_enabled = config->is_cluster;
-    conn_req.request_timeout = 5000; /* 5 seconds */
-    conn_req.read_from = CONNECTION_REQUEST__READ_FROM__Primary;
-    conn_req.database_id = 0;
+    /* Set values from configuration */
+    conn_req.tls_mode = config->base.use_tls ? CONNECTION_REQUEST__TLS_MODE__SecureTls : CONNECTION_REQUEST__TLS_MODE__NoTls;
+    conn_req.cluster_mode_enabled = is_cluster;
+    conn_req.request_timeout = config->base.request_timeout > 0 ? config->base.request_timeout : 5000; /* Default 5 seconds */
+
+    /* Map read_from configuration */
+    if (config->base.read_from == VALKEY_GLIDE_READ_FROM_PREFER_REPLICA)
+    {
+        conn_req.read_from = CONNECTION_REQUEST__READ_FROM__PreferReplica;
+    }
+    else if (config->base.read_from == VALKEY_GLIDE_READ_FROM_AZ_AFFINITY)
+    {
+        conn_req.read_from = CONNECTION_REQUEST__READ_FROM__AZAffinity;
+    }
+    else if (config->base.read_from == VALKEY_GLIDE_READ_FROM_AZ_AFFINITY_REPLICAS_AND_PRIMARY)
+    {
+        conn_req.read_from = CONNECTION_REQUEST__READ_FROM__AZAffinityReplicasAndPrimary;
+    }
+    else
+    {
+        conn_req.read_from = CONNECTION_REQUEST__READ_FROM__Primary;
+    }
+
+    /* Set database ID for standalone clients */
+    if (!is_cluster && config->database_id >= 0)
+    {
+        conn_req.database_id = config->database_id;
+    }
+    else
+    {
+        conn_req.database_id = 0;
+    }
+
     conn_req.protocol = CONNECTION_REQUEST__PROTOCOL_VERSION__RESP3;
 
-    /* Set client name if needed */
-    conn_req.client_name = "valkey-glide-php";
+    /* Set client name */
+    conn_req.client_name = config->base.client_name ? config->base.client_name : "valkey-glide-php";
 
     /* Calculate the size of the serialized message */
     *len = connection_request__connection_request__get_packed_size(&conn_req);
@@ -88,17 +115,37 @@ static uint8_t *create_connection_request(const char *host, int port, const char
 }
 
 /* Create a Valkey Glide client */
-const void *create_glide_client(ClientConfig *config)
+const void *create_glide_client(valkey_glide_client_configuration_t *config, bool is_cluster)
 {
-    /* Create a connection request */
+    /* Create a connection request using first address or default */
     size_t len;
+    const char *host = "localhost";
+    int port = 6379;
+    const char *username = NULL;
+    const char *password = NULL;
+
+    /* Use first address if available */
+    if (config->base.addresses && config->base.addresses_count > 0)
+    {
+        host = config->base.addresses[0].host;
+        port = config->base.addresses[0].port;
+    }
+
+    /* Use credentials if available */
+    if (config->base.credentials)
+    {
+        username = config->base.credentials->username;
+        password = config->base.credentials->password;
+    }
+
     uint8_t *request_bytes = create_connection_request(
-        "localhost",   /* Default host */
-        config->port_, /* Default port */
-        NULL,          /* No username by default */
-        NULL,          /* No password by default */
+        host,
+        port,
+        username,
+        password,
         &len,
-        config);
+        config,
+        is_cluster);
 
     if (!request_bytes)
     {

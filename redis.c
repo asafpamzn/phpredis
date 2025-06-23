@@ -139,7 +139,7 @@ zend_object *create_valkey_glide_object(zend_class_entry *ce)
     config.base.addresses[0].host = "localhost";
     config.base.addresses[0].port = 6379;
 
-    valkey_glide->glide_client = create_glide_client(&config);
+    valkey_glide->glide_client = create_glide_client(&config, false);
 
     zend_object_std_init(&valkey_glide->std, ce);
     object_properties_init(&valkey_glide->std, ce);
@@ -174,7 +174,7 @@ zend_object *create_valkey_glide_cluster_object(zend_class_entry *ce)
 
     /* Note: This should use a cluster-specific create function */
     /* For now, we'll cast to regular client config */
-    valkey_glide->glide_client = create_glide_client((valkey_glide_client_configuration_t *)&config);
+    valkey_glide->glide_client = create_glide_client((valkey_glide_client_configuration_t *)&config, true);
 
     zend_object_std_init(&valkey_glide->std, ce);
     object_properties_init(&valkey_glide->std, ce);
@@ -495,7 +495,7 @@ PHP_METHOD(ValkeyGlide, __construct)
         return;
     }
 
-    valkey_glide->glide_client = create_glide_client(&client_config);
+    valkey_glide->glide_client = create_glide_client(&client_config, false);
 
     if (!valkey_glide->glide_client)
     {
