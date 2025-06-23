@@ -119,27 +119,8 @@ void free_valkey_glide_object(zend_object *object)
 
 zend_object *create_valkey_glide_object(zend_class_entry *ce)
 {
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
     valkey_glide_object *valkey_glide = ecalloc(1, sizeof(valkey_glide_object) + zend_object_properties_size(ce));
-
-    /* Initialize Valkey Glide client with default config */
-    valkey_glide_client_configuration_t config;
-    memset(&config, 0, sizeof(config));
-
-    /* Set basic defaults */
-    config.base.use_tls = false;
-    config.database_id = 0;
-    config.base.request_timeout = 250;
-    config.base.client_name = "valkey-glide-php";
-    config.base.read_from = VALKEY_GLIDE_READ_FROM_PRIMARY;
-
-    /* Set default address */
-    config.base.addresses = ecalloc(1, sizeof(valkey_glide_node_address_t));
-    config.base.addresses_count = 1;
-    config.base.addresses[0].host = "localhost";
-    config.base.addresses[0].port = 6379;
-
-    valkey_glide->glide_client = create_glide_client(&config, false);
 
     zend_object_std_init(&valkey_glide->std, ce);
     object_properties_init(&valkey_glide->std, ce);
@@ -155,26 +136,6 @@ zend_object *create_valkey_glide_object(zend_class_entry *ce)
 zend_object *create_valkey_glide_cluster_object(zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide = ecalloc(1, sizeof(valkey_glide_object) + zend_object_properties_size(ce));
-
-    /* Initialize Valkey Glide cluster client with default config */
-    valkey_glide_cluster_client_configuration_t config;
-    memset(&config, 0, sizeof(config));
-
-    /* Set basic defaults */
-    config.base.use_tls = false;
-    config.base.request_timeout = 250;
-    config.base.client_name = "valkey-glide-cluster-php";
-    config.base.read_from = VALKEY_GLIDE_READ_FROM_PRIMARY;
-
-    /* Set default address for cluster */
-    config.base.addresses = ecalloc(1, sizeof(valkey_glide_node_address_t));
-    config.base.addresses_count = 1;
-    config.base.addresses[0].host = "localhost";
-    config.base.addresses[0].port = 7001;
-
-    /* Note: This should use a cluster-specific create function */
-    /* For now, we'll cast to regular client config */
-    valkey_glide->glide_client = create_glide_client((valkey_glide_client_configuration_t *)&config, true);
 
     zend_object_std_init(&valkey_glide->std, ce);
     object_properties_init(&valkey_glide->std, ce);
@@ -193,7 +154,7 @@ zend_object *create_valkey_glide_cluster_object(zend_class_entry *ce)
 PHP_MINIT_FUNCTION(redis)
 {
     /* ValkeyGlide class */
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
     valkey_glide_ce = register_class_ValkeyGlide();
     valkey_glide_ce->create_object = create_valkey_glide_object;
 
@@ -224,7 +185,7 @@ PHP_MINFO_FUNCTION(redis)
     Public constructor */
 PHP_METHOD(ValkeyGlide, __construct)
 {
-    printf("file = %s, line = %d\n", __FILE__, __LINE__);
+
     zval *addresses = NULL;
     zend_bool use_tls = 0;
     zval *credentials = NULL;
@@ -499,6 +460,7 @@ PHP_METHOD(ValkeyGlide, __construct)
 
     if (!valkey_glide->glide_client)
     {
+
         zend_throw_exception(valkey_glide_exception_ce, "Failed to create Valkey Glide client", 0);
         return;
     }

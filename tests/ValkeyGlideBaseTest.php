@@ -85,10 +85,10 @@ abstract class ValkeyGlideBaseTest extends TestSuite {
     }
 
     protected function newInstance() {        
-        $r = new ValkeyGlide([
+        $r = new ValkeyGlide([[
             'host' => $this->getHost(),
             'port' => $this->getPort(),
-        ]);
+        ]]);
 
         if ($this->getAuth()) {
             $this->assertTrue($r->auth($this->getAuth()));
