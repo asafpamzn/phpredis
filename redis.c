@@ -122,15 +122,23 @@ zend_object *create_valkey_glide_object(zend_class_entry *ce)
     printf("file = %s, line = %d\n", __FILE__, __LINE__);
     valkey_glide_object *valkey_glide = ecalloc(1, sizeof(valkey_glide_object) + zend_object_properties_size(ce));
 
-    /* Initialize Valkey Glide client */
-    ClientConfig config;
-    config.tls_mode_ = false;
-    config.database_ = 0;
-    config.request_timeout_ = 250;
-    config.client_name_ = "valkey-glide-php";
-    config.read_from_ = CONNECTION_REQUEST__READ_FROM__Primary;
-    config.is_cluster = false;
-    config.port_ = 6379; // Default port for Valkey Glide
+    /* Initialize Valkey Glide client with default config */
+    valkey_glide_client_configuration_t config;
+    memset(&config, 0, sizeof(config));
+
+    /* Set basic defaults */
+    config.base.use_tls = false;
+    config.database_id = 0;
+    config.base.request_timeout = 250;
+    config.base.client_name = "valkey-glide-php";
+    config.base.read_from = VALKEY_GLIDE_READ_FROM_PRIMARY;
+
+    /* Set default address */
+    config.base.addresses = ecalloc(1, sizeof(valkey_glide_node_address_t));
+    config.base.addresses_count = 1;
+    config.base.addresses[0].host = "localhost";
+    config.base.addresses[0].port = 6379;
+
     valkey_glide->glide_client = create_glide_client(&config);
 
     zend_object_std_init(&valkey_glide->std, ce);
@@ -148,17 +156,25 @@ zend_object *create_valkey_glide_cluster_object(zend_class_entry *ce)
 {
     valkey_glide_object *valkey_glide = ecalloc(1, sizeof(valkey_glide_object) + zend_object_properties_size(ce));
 
-    /* Initialize Valkey Glide client */
-    ClientConfig config;
-    config.tls_mode_ = false;
-    config.database_ = 0;
-    config.request_timeout_ = 250;
-    config.client_name_ = "valkey-glide-php";
-    config.read_from_ = CONNECTION_REQUEST__READ_FROM__Primary;
-    config.is_cluster = true;
-    config.port_ = 7001;
+    /* Initialize Valkey Glide cluster client with default config */
+    valkey_glide_cluster_client_configuration_t config;
+    memset(&config, 0, sizeof(config));
 
-    valkey_glide->glide_client = create_glide_client(&config);
+    /* Set basic defaults */
+    config.base.use_tls = false;
+    config.base.request_timeout = 250;
+    config.base.client_name = "valkey-glide-cluster-php";
+    config.base.read_from = VALKEY_GLIDE_READ_FROM_PRIMARY;
+
+    /* Set default address for cluster */
+    config.base.addresses = ecalloc(1, sizeof(valkey_glide_node_address_t));
+    config.base.addresses_count = 1;
+    config.base.addresses[0].host = "localhost";
+    config.base.addresses[0].port = 7001;
+
+    /* Note: This should use a cluster-specific create function */
+    /* For now, we'll cast to regular client config */
+    valkey_glide->glide_client = create_glide_client((valkey_glide_client_configuration_t *)&config);
 
     zend_object_std_init(&valkey_glide->std, ce);
     object_properties_init(&valkey_glide->std, ce);
@@ -213,16 +229,20 @@ PHP_METHOD(ValkeyGlide, __construct)
     zend_bool use_tls = 0;
     zval *credentials = NULL;
     zend_long read_from = 0; /* PRIMARY by default */
-    zval *request_timeout = NULL;
+    zend_long request_timeout = 0;
+    zend_bool request_timeout_is_null = 1;
     zval *reconnect_strategy = NULL;
-    zval *database_id = NULL;
+    zend_long database_id = 0;
+    zend_bool database_id_is_null = 1;
     char *client_name = NULL;
     size_t client_name_len = 0;
-    zval *inflight_requests_limit = NULL;
+    zend_long inflight_requests_limit = 0;
+    zend_bool inflight_requests_limit_is_null = 1;
     char *client_az = NULL;
     size_t client_az_len = 0;
     zval *advanced_config = NULL;
-    zval *lazy_connect = NULL;
+    zend_bool lazy_connect = 0;
+    zend_bool lazy_connect_is_null = 1;
     valkey_glide_object *valkey_glide;
 
     ZEND_PARSE_PARAMETERS_START(1, 12)
@@ -231,14 +251,14 @@ PHP_METHOD(ValkeyGlide, __construct)
     Z_PARAM_BOOL(use_tls)
     Z_PARAM_ARRAY_OR_NULL(credentials)
     Z_PARAM_LONG(read_from)
-    Z_PARAM_LONG_OR_NULL(request_timeout)
+    Z_PARAM_LONG_OR_NULL(request_timeout, request_timeout_is_null)
     Z_PARAM_ARRAY_OR_NULL(reconnect_strategy)
-    Z_PARAM_LONG_OR_NULL(database_id)
+    Z_PARAM_LONG_OR_NULL(database_id, database_id_is_null)
     Z_PARAM_STRING_OR_NULL(client_name, client_name_len)
-    Z_PARAM_LONG_OR_NULL(inflight_requests_limit)
+    Z_PARAM_LONG_OR_NULL(inflight_requests_limit, inflight_requests_limit_is_null)
     Z_PARAM_STRING_OR_NULL(client_az, client_az_len)
     Z_PARAM_ARRAY_OR_NULL(advanced_config)
-    Z_PARAM_BOOL_OR_NULL(lazy_connect)
+    Z_PARAM_BOOL_OR_NULL(lazy_connect, lazy_connect_is_null)
     ZEND_PARSE_PARAMETERS_END_EX(RETURN_THROWS());
 
     valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, getThis());
@@ -256,18 +276,18 @@ PHP_METHOD(ValkeyGlide, __construct)
 
     /* Basic configuration */
     client_config.base.use_tls = use_tls;
-    client_config.database_id = database_id ? Z_LVAL_P(database_id) : -1;                  /* -1 means not set */
-    client_config.base.request_timeout = request_timeout ? Z_LVAL_P(request_timeout) : -1; /* -1 means not set */
+    client_config.database_id = database_id_is_null ? -1 : database_id;                  /* -1 means not set */
+    client_config.base.request_timeout = request_timeout_is_null ? -1 : request_timeout; /* -1 means not set */
     client_config.base.client_name = client_name ? client_name : NULL;
 
     /* Set inflight requests limit */
-    client_config.base.inflight_requests_limit = inflight_requests_limit ? Z_LVAL_P(inflight_requests_limit) : -1; /* -1 means not set */
+    client_config.base.inflight_requests_limit = inflight_requests_limit_is_null ? -1 : inflight_requests_limit; /* -1 means not set */
 
     /* Set client availability zone */
     client_config.base.client_az = (client_az && client_az_len > 0) ? client_az : NULL;
 
     /* Set lazy connect option */
-    client_config.base.lazy_connect = lazy_connect ? (Z_TYPE_P(lazy_connect) == IS_TRUE) : false;
+    client_config.base.lazy_connect = lazy_connect_is_null ? false : lazy_connect;
 
     /* Map read_from enum value to client's ReadFrom enum */
     switch (read_from)

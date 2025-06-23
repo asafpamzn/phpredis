@@ -48,17 +48,7 @@ enum TLSMode
     InsecureTLS = 2,
 };
 
-typedef struct
-{
-    // Credential credential_;
-    enum TLSMode tls_mode_;
-    int port_;
-    uint32_t database_;
-    uint32_t request_timeout_;
-    char *client_name_;
-    enum _ConnectionRequest__ReadFrom read_from_;
-    bool is_cluster;
-} ClientConfig;
+/* ClientConfig removed - using valkey_glide_client_configuration_t instead */
 /* Forward declaration for ClientAdapter */
 typedef struct ClientAdapter ClientAdapter;
 
@@ -68,7 +58,7 @@ void free_command_response(CommandResponse *command_response_ptr);
 void free_command_result(CommandResult *command_result_ptr);
 
 /* Helper functions for Valkey Glide integration */
-const void *create_glide_client(ClientConfig *config);
+const void *create_glide_client(valkey_glide_client_configuration_t *config);
 
 /* Bit operations - UNIFIED SIGNATURES */
 int execute_bitcount_command(zval *object, int argc, zval *return_value, zend_class_entry *ce);

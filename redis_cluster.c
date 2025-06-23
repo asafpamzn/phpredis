@@ -84,59 +84,91 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
 
   valkey_glide = VALKEY_GLIDE_PHP_ZVAL_GET_OBJECT(valkey_glide_object, getThis());
 
-  /* Build client configuration from individual parameters */
-  ClientConfig client_config;
-  client_config.tls_mode_ = use_tls;
-  client_config.database_ = 0; /* Clusters don't support database selection */
-  client_config.request_timeout_ = request_timeout ? Z_LVAL_P(request_timeout) : 250;
-  client_config.client_name_ = client_name ? client_name : "valkey-glide-php";
+  /* Build cluster client configuration from individual parameters */
+  valkey_glide_cluster_client_configuration_t client_config;
+  memset(&client_config, 0, sizeof(client_config));
+
+  /* Basic configuration */
+  client_config.base.use_tls = use_tls;
+  client_config.base.request_timeout = request_timeout ? Z_LVAL_P(request_timeout) : 250;
+  client_config.base.client_name = client_name ? client_name : "valkey-glide-cluster-php";
 
   /* Map read_from enum value to client's ReadFrom enum */
   switch (read_from)
   {
   case 1: /* PREFER_REPLICA */
-    client_config.read_from_ = CONNECTION_REQUEST__READ_FROM__PreferReplica;
+    client_config.base.read_from = VALKEY_GLIDE_READ_FROM_PREFER_REPLICA;
     break;
   case 2: /* AZ_AFFINITY */
-    client_config.read_from_ = CONNECTION_REQUEST__READ_FROM__AZAffinity;
+    client_config.base.read_from = VALKEY_GLIDE_READ_FROM_AZ_AFFINITY;
     break;
   case 3: /* AZ_AFFINITY_REPLICAS_AND_PRIMARY */
-    client_config.read_from_ = CONNECTION_REQUEST__READ_FROM__AZAffinityReplicasAndPrimary;
+    client_config.base.read_from = VALKEY_GLIDE_READ_FROM_AZ_AFFINITY_REPLICAS_AND_PRIMARY;
     break;
   case 0: /* PRIMARY */
   default:
-    client_config.read_from_ = CONNECTION_REQUEST__READ_FROM__Primary;
+    client_config.base.read_from = VALKEY_GLIDE_READ_FROM_PRIMARY;
     break;
   }
-  client_config.is_cluster = true;
 
-  /* Extract port from addresses array - use first address or default cluster port */
+  /* Process addresses array - handle multiple addresses */
   if (addresses && zend_hash_num_elements(Z_ARRVAL_P(addresses)) > 0)
   {
-    zval *first_addr = zend_hash_index_find(Z_ARRVAL_P(addresses), 0);
-    if (first_addr && Z_TYPE_P(first_addr) == IS_ARRAY)
+    HashTable *addresses_ht = Z_ARRVAL_P(addresses);
+    zend_ulong num_addresses = zend_hash_num_elements(addresses_ht);
+
+    /* Allocate addresses array */
+    client_config.base.addresses = ecalloc(num_addresses, sizeof(valkey_glide_node_address_t));
+    client_config.base.addresses_count = num_addresses;
+
+    /* Process each address */
+    zend_ulong i = 0;
+    zval *addr_val;
+    ZEND_HASH_FOREACH_VAL(addresses_ht, addr_val)
     {
-      zval *port_val = zend_hash_str_find(Z_ARRVAL_P(first_addr), "port", 4);
-      if (port_val && Z_TYPE_P(port_val) == IS_LONG)
+      if (Z_TYPE_P(addr_val) == IS_ARRAY)
       {
-        client_config.port_ = Z_LVAL_P(port_val);
-      }
-      else
-      {
-        client_config.port_ = 7001; /* Default cluster port */
+        HashTable *addr_ht = Z_ARRVAL_P(addr_val);
+
+        /* Extract host */
+        zval *host_val = zend_hash_str_find(addr_ht, "host", 4);
+        if (host_val && Z_TYPE_P(host_val) == IS_STRING)
+        {
+          client_config.base.addresses[i].host = Z_STRVAL_P(host_val);
+        }
+        else
+        {
+          client_config.base.addresses[i].host = "localhost";
+        }
+
+        /* Extract port */
+        zval *port_val = zend_hash_str_find(addr_ht, "port", 4);
+        if (port_val && Z_TYPE_P(port_val) == IS_LONG)
+        {
+          client_config.base.addresses[i].port = Z_LVAL_P(port_val);
+        }
+        else
+        {
+          client_config.base.addresses[i].port = 7001; /* Default cluster port */
+        }
+
+        i++;
       }
     }
-    else
-    {
-      client_config.port_ = 7001; /* Default cluster port */
-    }
+    ZEND_HASH_FOREACH_END();
   }
   else
   {
-    client_config.port_ = 7001; /* Default cluster port */
+    /* No addresses provided - set default */
+    client_config.base.addresses = ecalloc(1, sizeof(valkey_glide_node_address_t));
+    client_config.base.addresses_count = 1;
+    client_config.base.addresses[0].host = "localhost";
+    client_config.base.addresses[0].port = 7001;
   }
 
-  valkey_glide->glide_client = create_glide_client(&client_config);
+  /* Note: This should use a cluster-specific create function */
+  /* For now, we'll cast to regular client config */
+  valkey_glide->glide_client = create_glide_client((valkey_glide_client_configuration_t *)&client_config);
 }
 
 /*
