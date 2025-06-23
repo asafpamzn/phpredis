@@ -96,7 +96,8 @@ PHP_METHOD(ValkeyGlideCluster, __construct)
   client_config.base.client_name = client_name ? client_name : "valkey-glide-cluster-php";
 
   /* Set periodic checks */
-  client_config.base.periodic_checks = periodic_checks_is_null ? -1 : periodic_checks;
+  client_config.periodic_checks_status = periodic_checks_is_null ? VALKEY_GLIDE_PERIODIC_CHECKS_ENABLED_DEFAULT : periodic_checks;
+  client_config.periodic_checks_manual = NULL;
 
   /* Map read_from enum value to client's ReadFrom enum */
   switch (read_from)
