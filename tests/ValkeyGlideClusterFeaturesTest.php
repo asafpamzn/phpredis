@@ -24,19 +24,487 @@ class ValkeyGlide_Cluster_Features_Test extends ValkeyGlideClusterBaseTest {
         $redis->close();
     }
 
-    public function testReadFromReplica() {
-        // Test creating ValkeyGlideCluster with read-from-replica configuration
-        $redis = new ValkeyGlideCluster(
-            [['host' => '127.0.0.1', 'port' => 7001]], // addresses array format
-            false, // use_tls
-            $this->getAuth(), // credentials
-            ValkeyGlide::READ_FROM_PREFER_REPLICA // read_from replica
-        );
+    // ==============================================
+    // ADDRESSES PARAMETER TESTS
+    // ==============================================
 
-        // Verify the connection works with a simple ping
+    public function testConstructorWithMultipleAddresses() {
+        // Test with multiple cluster addresses
+        $addresses = [
+            ['host' => '127.0.0.1', 'port' => 7001],
+            ['host' => '127.0.0.1', 'port' => 7002],
+            ['host' => '127.0.0.1', 'port' => 7003]
+        ];
+        
+        $redis = new ValkeyGlideCluster($addresses, false, $this->getAuth());
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    // ==============================================
+    // TLS PARAMETER TESTS
+    // ==============================================
+
+    public function testConstructorWithTlsDisabled() {
+        // Test with TLS explicitly disabled
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false, // use_tls disabled
+            $this->getAuth()
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    // ==============================================
+    // CREDENTIALS PARAMETER TESTS
+    // ==============================================
+
+    public function testConstructorWithNullCredentials() {
+        // Test with no credentials (null)
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            null // no credentials
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    public function testConstructorWithPasswordCredentials() {
+        // Test with password-only credentials
+        if ($this->getAuth()) {
+            $redis = new ValkeyGlideCluster(
+                [['host' => '127.0.0.1', 'port' => 7001]],
+                false,
+                $this->getAuth() // password credentials
+            );
+            
+            $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+            $redis->close();
+        } else {
+            $this->markTestSkipped('No authentication configured');
+        }
+    }
+
+    // ==============================================
+    // READ STRATEGY PARAMETER TESTS
+    // ==============================================
+
+    public function testConstructorWithReadFromPrimary() {
+        // Test with READ_FROM_PRIMARY strategy
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    public function testConstructorWithReadFromPreferReplica() {
+        // Test with READ_FROM_PREFER_REPLICA strategy
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PREFER_REPLICA
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    public function testConstructorWithReadFromAzAffinity() {
+        // Test with READ_FROM_AZ_AFFINITY strategy
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_AZ_AFFINITY
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    public function testConstructorWithReadFromAzAffinityReplicasAndPrimary() {
+        // Test with READ_FROM_AZ_AFFINITY_REPLICAS_AND_PRIMARY strategy
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_AZ_AFFINITY_REPLICAS_AND_PRIMARY
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    // ==============================================
+    // REQUEST TIMEOUT PARAMETER TESTS
+    // ==============================================
+
+    public function testConstructorWithRequestTimeout() {
+        // Test with 5 second timeout
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            5000 // 5 second timeout
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    public function testConstructorWithShortTimeout() {
+        // Test with 1 second timeout
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            1000 // 1 second timeout
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    public function testConstructorWithLongTimeout() {
+        // Test with 10 second timeout
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            10000 // 10 second timeout
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    // ==============================================
+    // RECONNECTION STRATEGY PARAMETER TESTS
+    // ==============================================
+
+    public function testConstructorWithSimpleReconnectStrategy() {
+        // Test with simple reconnection strategy
+        $reconnectStrategy = ['num_of_retries' => 5];
+        
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            null,
+            $reconnectStrategy
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    public function testConstructorWithComplexReconnectStrategy() {
+        // Test with complex reconnection strategy
+        $reconnectStrategy = [
+            'num_of_retries' => 3,
+            'factor' => 2,
+            'exponent_base' => 1.5,
+            'max_delay' => 5000
+        ];
+        
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            null,
+            $reconnectStrategy
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    // ==============================================
+    // CLIENT NAME PARAMETER TESTS
+    // ==============================================
+
+    public function testConstructorWithClientName() {
+        // Test with custom client name
+        $clientName = 'test-cluster-client-' . uniqid();
+        
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            null,
+            null,
+            $clientName
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    // ==============================================
+    // PERIODIC CHECKS PARAMETER TESTS
+    // ==============================================
+
+    public function testConstructorWithPeriodicChecksEnabled() {
+        // Test with periodic checks enabled (default)
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            null,
+            null,
+            null,
+            ValkeyGlide::PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    public function testConstructorWithPeriodicChecksDisabled() {
+        // Test with periodic checks disabled
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            null,
+            null,
+            null,
+            ValkeyGlide::PERIODIC_CHECK_DISABLED
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    // ==============================================
+    // INFLIGHT REQUESTS LIMIT PARAMETER TESTS
+    // ==============================================
+
+    public function testConstructorWithInflightRequestsLimit() {
+        // Test with inflight requests limit
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            null,
+            null,
+            null,
+            null,
+            100 // inflight requests limit
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    public function testConstructorWithHighInflightRequestsLimit() {
+        // Test with high inflight requests limit
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            null,
+            null,
+            null,
+            null,
+            1000 // high inflight requests limit
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    // ==============================================
+    // CLIENT AVAILABILITY ZONE PARAMETER TESTS
+    // ==============================================
+
+    public function testConstructorWithClientAz() {
+        // Test with client availability zone
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'us-east-1a' // client availability zone
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    public function testConstructorWithDifferentClientAz() {
+        // Test with different client availability zone
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'eu-west-1b' // different client availability zone
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    // ==============================================
+    // ADVANCED CONFIGURATION PARAMETER TESTS
+    // ==============================================
+
+    public function testConstructorWithAdvancedConfig() {
+        // Test with advanced configuration
+        $advancedConfig = [
+            'connection_timeout' => 5000,
+            'socket_timeout' => 3000
+        ];
+        
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            $advancedConfig
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    // ==============================================
+    // LAZY CONNECT PARAMETER TESTS
+    // ==============================================
+
+    public function testConstructorWithLazyConnectEnabled() {
+        // Test with lazy connection enabled
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            true // lazy connect enabled
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    public function testConstructorWithLazyConnectDisabled() {
+        // Test with lazy connection disabled
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,
+            $this->getAuth(),
+            ValkeyGlide::READ_FROM_PRIMARY,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false // lazy connect disabled
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
+        $redis->close();
+    }
+
+    // ==============================================
+    // COMBINED PARAMETER TESTS
+    // ==============================================
+
+    public function testConstructorWithAllParameters() {
+        // Test with all parameters specified
+        $addresses = [
+            ['host' => '127.0.0.1', 'port' => 7001],
+            ['host' => '127.0.0.1', 'port' => 7002]
+        ];
+        $credentials = $this->getAuth();
+        $reconnectStrategy = ['num_of_retries' => 3, 'factor' => 2];
+        $clientName = 'comprehensive-test-client';
+        $advancedConfig = ['connection_timeout' => 5000];
+        
+        $redis = new ValkeyGlideCluster(
+            $addresses,                                     // addresses
+            false,                                          // use_tls
+            $credentials,                                   // credentials
+            ValkeyGlide::READ_FROM_PRIMARY,                // read_from
+            3000,                                           // request_timeout
+            $reconnectStrategy,                             // reconnect_strategy
+            $clientName,                                    // client_name
+            ValkeyGlide::PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS, // periodic_checks
+            250,                                            // inflight_requests_limit
+            'us-west-2a',                                   // client_az
+            $advancedConfig,                                // advanced_config
+            false                                           // lazy_connect
+        );
+        
         $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
         
-        // Clean up
+        // Perform a basic operation to ensure everything works
+        $key = 'test:comprehensive:' . uniqid();
+        $this->assertTrue($redis->set($key, 'test-value'));
+        $this->assertEquals('test-value', $redis->get($key));
+        $redis->del($key);
+        
+        $redis->close();
+    }
+
+    public function testConstructorWithCommonConfiguration() {
+        // Test with commonly used parameter combination
+        $redis = new ValkeyGlideCluster(
+            [['host' => '127.0.0.1', 'port' => 7001]],
+            false,                                      // use_tls
+            $this->getAuth(),                          // credentials
+            ValkeyGlide::READ_FROM_PREFER_REPLICA,     // read_from
+            5000,                                       // request_timeout
+            ['num_of_retries' => 5],                   // reconnect_strategy
+            'common-config-client'                      // client_name
+        );
+        
+        $this->assertTrue($redis->ping(['type' => 'primarySlotKey', 'key' => 'test']));
         $redis->close();
     }
 }
