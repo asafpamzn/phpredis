@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e27707802263a1201aaa666a1308da821846d64d */
+ * Stub hash: 96d6104b783798d33eb22ef6e9ff83aaee8e236f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, addresses, IS_ARRAY, 0)
@@ -9,7 +9,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ValkeyGlideCluster___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, request_timeout, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, reconnect_strategy, IS_ARRAY, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, client_name, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, periodic_checks, IS_LONG, 1, "ValkeyGlide::PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, periodic_checks, IS_LONG, 1, "ValkeyGlideCluster::PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, inflight_requests_limit, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, client_az, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, advanced_config, IS_ARRAY, 1, "null")
@@ -1384,6 +1384,18 @@ static zend_class_entry *register_class_ValkeyGlideCluster(void)
 
 	INIT_CLASS_ENTRY(ce, "ValkeyGlideCluster", class_ValkeyGlideCluster_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval const_PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS_value;
+	ZVAL_LONG(&const_PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS_value, 0);
+	zend_string *const_PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS_name = zend_string_init_interned("PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS", sizeof("PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS_name, &const_PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS_name);
+
+	zval const_PERIODIC_CHECK_DISABLED_value;
+	ZVAL_LONG(&const_PERIODIC_CHECK_DISABLED_value, 1);
+	zend_string *const_PERIODIC_CHECK_DISABLED_name = zend_string_init_interned("PERIODIC_CHECK_DISABLED", sizeof("PERIODIC_CHECK_DISABLED") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_PERIODIC_CHECK_DISABLED_name, &const_PERIODIC_CHECK_DISABLED_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_PERIODIC_CHECK_DISABLED_name);
 
 	return class_entry;
 }

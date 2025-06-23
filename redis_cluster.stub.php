@@ -7,6 +7,18 @@
  */
 
 class ValkeyGlideCluster {
+
+                    /**
+                   *  @var int
+         * Enables the periodic checks with the default configurations.
+         */
+        public const   PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS = 0;
+        
+        /**
+         *   @var int
+         * Disables the periodic checks.
+         */
+        public const    PERIODIC_CHECK_DISABLED = 1;
     
     /**
      * Create a new ValkeyGlideCluster instance with the provided configuration.
@@ -18,7 +30,7 @@ class ValkeyGlideCluster {
      * @param int|null $request_timeout               Request timeout in milliseconds
      * @param array|null $reconnect_strategy          Reconnection strategy ['num_of_retries' => 3, 'factor' => 2, ...]
      * @param string|null $client_name                Client name identifier
-     * @param int|array $periodic_checks Periodic checks configuration
+     * @param int|null $periodic_checks               Periodic checks configuration
      * @param int|null $inflight_requests_limit       Maximum number of concurrent requests
      * @param string|null $client_az                  Client availability zone
      * @param array|null $advanced_config             Advanced configuration ['connection_timeout' => 5000, 'tls_config' => [...]]
@@ -32,7 +44,7 @@ class ValkeyGlideCluster {
         ?int $request_timeout = null,
         ?array $reconnect_strategy = null,
         ?string $client_name = null,
-        ?int $periodic_checks = ValkeyGlide::PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS,
+        ?int $periodic_checks = ValkeyGlideCluster::PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS,
         ?int $inflight_requests_limit = null,
         ?string $client_az = null,
         ?array $advanced_config = null,

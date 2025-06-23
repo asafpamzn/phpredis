@@ -93,17 +93,6 @@ class ValkeyGlide {
            */
           public const  READ_FROM_AZ_AFFINITY_REPLICAS_AND_PRIMARY = 3;
 
-                  /**
-                   *  @var int
-         * Enables the periodic checks with the default configurations.
-         */
-        public const   PERIODIC_CHECK_ENABLED_DEFAULT_CONFIGS = 0;
-        
-        /**
-         *   @var int
-         * Disables the periodic checks.
-         */
-        public const    PERIODIC_CHECK_DISABLED = 1;
 
     /**
      *
